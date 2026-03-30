@@ -1,0 +1,39 @@
+name: Update Data
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests pandas pybaseball
+
+      - name: Run baseball pipeline
+        run: python3 baseball_pipeline.py ./public 2026
+
+      - name: Run race2k pipeline
+        run: python3 race2k_pipeline.py ./public 2026
+
+      - name: Run evla pipeline
+        run: python3 evla_pipeline.py ./public 2026
+
+      - name: Run league avgs pipeline
+        run: python3 league_avgs_pipeline.py ./public 2026
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/*.json
+          git diff --staged --quiet || git commit -m "Auto-update data $(date -u +%Y-%m-%d)"
+          git push
