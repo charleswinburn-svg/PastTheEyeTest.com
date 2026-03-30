@@ -1,0 +1,12 @@
+{
+  "season": 2026,
+  "league": "MLB",
+  "starters": [],
+  "relievers": [],
+  "meta": {
+    "min_ip": 20,
+    "gs_threshold": 10,
+    "total_pitches_analyzed": 14252,
+    "generated_at": "2026-03-30 17:01:49 UTC"
+  }
+}
