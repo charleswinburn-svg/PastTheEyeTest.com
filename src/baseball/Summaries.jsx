@@ -414,7 +414,7 @@ export default function Summaries({ season }) {
       if (!seasonPbps.length || !selectedPlayer) return null;
       if (isPitcher) {
         const allPitches = [];
-        let totalOuts = 0, totalH = 0, totalR = 0, totalER = 0, totalK = 0, totalBB = 0, totalHR = 0, totalBF = 0;
+        let totalOuts = 0, totalH = 0, totalR = 0, totalER = 0, totalK = 0, totalBB = 0, totalHBP = 0, totalHR = 0, totalBF = 0;
         for (const { pbp, box } of seasonPbps) {
           // Pitches from PBP (for charts, pitch table)
           const d = extractPitcherData(pbp, selectedPlayer.id);
@@ -434,6 +434,7 @@ export default function Summaries({ season }) {
                 totalER += parseInt(ps.earnedRuns) || 0;
                 totalK += parseInt(ps.strikeOuts) || 0;
                 totalBB += parseInt(ps.baseOnBalls) || 0;
+                totalHBP += parseInt(ps.hitBatsmen) || parseInt(ps.hitByPitch) || 0;
                 totalHR += parseInt(ps.homeRuns) || 0;
                 totalBF += parseInt(ps.battersFaced) || 0;
                 usedBox = true;
@@ -445,13 +446,13 @@ export default function Summaries({ season }) {
           if (!usedBox) {
             totalOuts += Math.floor(d.ip) * 3 + Math.round((d.ip % 1) * 10);
             totalH += d.hits; totalR += d.runs; totalER += d.ers;
-            totalK += d.ks; totalBB += d.bbs; totalHR += (d.hrs || 0);
-            totalBF += Math.floor(d.ip) * 3 + Math.round((d.ip % 1) * 10) + d.hits + d.bbs;
+            totalK += d.ks; totalBB += d.bbs; totalHBP += (d.hbps || 0); totalHR += (d.hrs || 0);
+            totalBF += (d.bf || Math.floor(d.ip) * 3 + Math.round((d.ip % 1) * 10) + d.hits + d.bbs + (d.hbps || 0));
           }
         }
         const totalIP = Math.floor(totalOuts / 3) + (totalOuts % 3) / 10;
-        if (totalBF === 0) totalBF = totalOuts + totalH + totalBB; // safety fallback
-        return { pitches: allPitches, ip: totalIP, hits: totalH, runs: totalR, ers: totalER, ks: totalK, bbs: totalBB, hrs: totalHR, bf: totalBF, totalPitches: allPitches.length };
+        if (totalBF === 0) totalBF = totalOuts + totalH + totalBB + totalHBP;
+        return { pitches: allPitches, ip: totalIP, hits: totalH, runs: totalR, ers: totalER, ks: totalK, bbs: totalBB, hbps: totalHBP, hrs: totalHR, bf: totalBF, totalPitches: allPitches.length };
       } else {
         const allPitches = [], allAtBats = [], allBB = [];
         let totalPA = 0, boxH = 0, boxAB = 0, boxBB = 0, boxHBP = 0, boxSF = 0, boxTB = 0, usedBoxCount = 0;
@@ -748,20 +749,21 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
     { label: "IP", value: data.ip, format: ".1f" },
     { label: "H", value: data.hits }, { label: "R", value: data.runs },
     { label: "ER", value: data.ers }, { label: "K", value: data.ks },
-    { label: "BB", value: data.bbs },
+    { label: "BB/HBP", value: (data.bbs || 0) + (data.hbps || 0) },
     { label: "Strike%", value: strikePct, format: ".1f" },
     { label: "Whiff%", value: whiffPct, format: ".1f" },
   ] : (() => {
     // Season: show ERA + FIP instead of H/R
-    // FIP constants from FanGraphs Guts! (cFIP = lgERA - lgFIP_raw)
+    // FIP = (13×HR + 3×(BB+HBP) - 2×K) / IP + constant
     const FIP_CONSTANTS = {
       2023: 3.107, 2024: 3.102, 2025: 3.150, 2026: 3.150,
     };
     const cFIP = FIP_CONSTANTS[season] || FIP_CONSTANTS[2025] || 3.15;
     const ipActual = Math.floor(data.ip) + (((data.ip % 1) * 10) / 3);
-    const fip = ipActual > 0 ? ((13 * (data.hrs || 0) + 3 * data.bbs - 2 * data.ks) / ipActual) + cFIP : null;
+    const bbHbp = (data.bbs || 0) + (data.hbps || 0);
+    const fip = ipActual > 0 ? ((13 * (data.hrs || 0) + 3 * bbHbp - 2 * data.ks) / ipActual) + cFIP : null;
     const era = ipActual > 0 ? (data.ers * 9) / ipActual : null;
-    const bf = data.bf || (outs + data.hits + data.bbs);
+    const bf = data.bf || 0;
     return [
       { label: "IP", value: data.ip, format: ".1f" },
       { label: "ERA", value: era, format: ".2f", good: "low", thresholds: isAAA ? [3.6, 4.5, 5.5] : [3.0, 3.7, 4.4] },

@@ -432,7 +432,7 @@ export async function fetchWbcPlayers(season) {
 // ── Extract pitches from play-by-play for a specific pitcher ──
 export function extractPitcherData(pbp, pitcherId) {
   const pitches = [];
-  let ip = 0, hits = 0, runs = 0, ers = 0, ks = 0, bbs = 0, outs = 0;
+  let ip = 0, hits = 0, runs = 0, ers = 0, ks = 0, bbs = 0, hbps = 0, outs = 0;
   const atBats = [];
 
   for (const play of (pbp.allPlays || [])) {
@@ -444,7 +444,7 @@ export function extractPitcherData(pbp, pitcherId) {
       atBats.push(play);
       if (result.event === "Strikeout" || result.event === "Strikeout Double Play") ks++;
       if (result.event === "Walk" || result.event === "Intent Walk") bbs++;
-      if (result.event === "Hit By Pitch") bbs++;
+      if (result.event === "Hit By Pitch") hbps++;
       if (["Single","Double","Triple","Home Run"].includes(result.event)) hits++;
     }
 
@@ -529,8 +529,9 @@ export function extractPitcherData(pbp, pitcherId) {
   // IP from outs counted via runners
   ip = Math.floor(outs / 3) + (outs % 3) / 10;
   const hrs = atBats.filter(ab => ab.result?.event === "Home Run").length;
+  const bf = atBats.length;
 
-  return { pitches, ip, hits, runs, ers, ks, bbs, hrs, totalPitches: pitches.length };
+  return { pitches, ip, hits, runs, ers, ks, bbs, hbps, hrs, bf, totalPitches: pitches.length };
 }
 
 // ── Extract batter data from play-by-play ──
