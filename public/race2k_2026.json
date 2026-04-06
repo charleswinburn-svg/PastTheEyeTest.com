@@ -2,11 +2,25 @@
   "season": 2026,
   "league": "MLB",
   "starters": [],
-  "relievers": [],
+  "relievers": [
+    {
+      "player_id": 608331,
+      "name": "Max Fried",
+      "team": "NYY",
+      "ip": 20.0,
+      "gs": 3,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.107,
+      "qualifying_pas": 28,
+      "total_pas": 52,
+      "reach_pct": 53.8,
+      "pctile": 100.0
+    }
+  ],
   "meta": {
     "min_ip": 20,
     "gs_threshold": 10,
     "total_pitches_analyzed": 25000,
-    "generated_at": "2026-04-05 10:36:53 UTC"
+    "generated_at": "2026-04-06 10:59:53 UTC"
   }
 }
