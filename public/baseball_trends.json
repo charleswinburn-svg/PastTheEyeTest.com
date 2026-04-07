@@ -1,19 +1,39 @@
 {
   "hitter_trends": {},
   "pitcher_trends": {
+    "Jose Soriano": [
+      {
+        "season": 2026,
+        "Stuff+ (FG)": 109.0,
+        "Location+ (FG)": 105.0,
+        "FIP": 2.63,
+        "Avg Exit Velo": 88.3,
+        "Barrel%": 3.6,
+        "xBA": 0.204,
+        "xSLG": 0.354,
+        "xwOBA": 0.272,
+        "Avg FB Velo": 97.6,
+        "Whiff%": 35.4,
+        "K%": 0.296,
+        "Chase%": 0.412,
+        "BB%": 0.085,
+        "K-BB%": 0.211,
+        "GB%": 0.651
+      }
+    ],
     "Max Fried": [
       {
         "season": 2026,
-        "Stuff+ (FG)": 105.0,
-        "Location+ (FG)": 108.0,
-        "FIP": 2.85,
-        "Avg Exit Velo": 88.1,
+        "Stuff+ (FG)": 107.0,
+        "Location+ (FG)": 102.0,
+        "FIP": 2.83,
+        "Avg Exit Velo": 87.0,
         "Barrel%": 0.0,
         "xBA": 0.215,
         "xSLG": 0.264,
-        "xwOBA": 0.254,
+        "xwOBA": 0.255,
         "Avg FB Velo": 93.6,
-        "Whiff%": 19.2,
+        "Whiff%": 19.4,
         "K%": 0.187,
         "Chase%": 0.329,
         "BB%": 0.067,

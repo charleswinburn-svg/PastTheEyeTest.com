@@ -3,6 +3,90 @@
   "hitters": [],
   "pitchers": [
     {
+      "name": "Jose Soriano",
+      "player_id": 667755,
+      "team": "LAA",
+      "ip": 20.0,
+      "vaa_pitch_type": "FF",
+      "categories": {
+        "Stuff+ (FG)": {
+          "pctile": 50.0,
+          "value": 109.0,
+          "display": "109"
+        },
+        "Location+ (FG)": {
+          "pctile": 50.0,
+          "value": 105.0,
+          "display": "105"
+        },
+        "FIP": {
+          "pctile": 100.0,
+          "value": 2.63,
+          "display": "2.63"
+        },
+        "Avg Exit Velo": {
+          "pctile": 50.0,
+          "value": 88.3,
+          "display": "88.3"
+        },
+        "Barrel%": {
+          "pctile": 50.0,
+          "value": 3.6,
+          "display": "3.6"
+        },
+        "xBA": {
+          "pctile": 100.0,
+          "value": 0.204,
+          "display": "0.204"
+        },
+        "xSLG": {
+          "pctile": 50.0,
+          "value": 0.354,
+          "display": "0.354"
+        },
+        "xwOBA": {
+          "pctile": 50.0,
+          "value": 0.272,
+          "display": "0.272"
+        },
+        "Avg FB Velo": {
+          "pctile": 50.0,
+          "value": 97.6,
+          "display": "97.6"
+        },
+        "Whiff%": {
+          "pctile": 50.0,
+          "value": 35.4,
+          "display": "35.4"
+        },
+        "K%": {
+          "pctile": 50.0,
+          "value": 0.296,
+          "display": "29.6"
+        },
+        "Chase%": {
+          "pctile": 50.0,
+          "value": 0.412,
+          "display": "41.2"
+        },
+        "BB%": {
+          "pctile": 50.0,
+          "value": 0.085,
+          "display": "8.5"
+        },
+        "K-BB%": {
+          "pctile": 50.0,
+          "value": 0.211,
+          "display": "21.1"
+        },
+        "GB%": {
+          "pctile": 50.0,
+          "value": 0.651,
+          "display": "65.1"
+        }
+      }
+    },
+    {
       "name": "Max Fried",
       "player_id": 608331,
       "team": "NYY",
@@ -11,23 +95,23 @@
       "categories": {
         "Stuff+ (FG)": {
           "pctile": 0.0,
-          "value": 105.0,
-          "display": "105"
+          "value": 107.0,
+          "display": "107"
         },
         "Location+ (FG)": {
           "pctile": 0.0,
-          "value": 108.0,
-          "display": "108"
+          "value": 102.0,
+          "display": "102"
         },
         "FIP": {
-          "pctile": 100.0,
-          "value": 2.85,
-          "display": "2.85"
+          "pctile": 50.0,
+          "value": 2.83,
+          "display": "2.83"
         },
         "Avg Exit Velo": {
           "pctile": 100.0,
-          "value": 88.1,
-          "display": "88.1"
+          "value": 87.0,
+          "display": "87.0"
         },
         "Barrel%": {
           "pctile": 100.0,
@@ -35,7 +119,7 @@
           "display": "0.0"
         },
         "xBA": {
-          "pctile": 100.0,
+          "pctile": 50.0,
           "value": 0.215,
           "display": "0.215"
         },
@@ -46,8 +130,8 @@
         },
         "xwOBA": {
           "pctile": 100.0,
-          "value": 0.254,
-          "display": "0.254"
+          "value": 0.255,
+          "display": "0.255"
         },
         "Avg FB Velo": {
           "pctile": 0.0,
@@ -56,8 +140,8 @@
         },
         "Whiff%": {
           "pctile": 0.0,
-          "value": 19.2,
-          "display": "19.2"
+          "value": 19.4,
+          "display": "19.4"
         },
         "K%": {
           "pctile": 0.0,
@@ -244,6 +328,6 @@
   "meta": {
     "min_pa": 100,
     "min_ip": 20,
-    "generated_at": "2026-04-06 10:57:32 UTC"
+    "generated_at": "2026-04-07 10:56:26 UTC"
   }
 }
