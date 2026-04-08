@@ -2,38 +2,11 @@
   "season": 2026,
   "league": "MLB",
   "starters": [],
-  "relievers": [
-    {
-      "player_id": 667755,
-      "name": "Jos\u00e9 Soriano",
-      "team": "LAA",
-      "ip": 20.0,
-      "gs": 3,
-      "is_sp": false,
-      "avg_pitches_to_2k": 2.923,
-      "qualifying_pas": 26,
-      "total_pas": 43,
-      "reach_pct": 60.5,
-      "pctile": 100.0
-    },
-    {
-      "player_id": 608331,
-      "name": "Max Fried",
-      "team": "NYY",
-      "ip": 20.0,
-      "gs": 3,
-      "is_sp": false,
-      "avg_pitches_to_2k": 3.08,
-      "qualifying_pas": 25,
-      "total_pas": 47,
-      "reach_pct": 53.2,
-      "pctile": 50.0
-    }
-  ],
+  "relievers": [],
   "meta": {
     "min_ip": 20,
     "gs_threshold": 10,
     "total_pitches_analyzed": 25000,
-    "generated_at": "2026-04-07 10:58:45 UTC"
+    "generated_at": "2026-04-08 10:59:45 UTC"
   }
 }
