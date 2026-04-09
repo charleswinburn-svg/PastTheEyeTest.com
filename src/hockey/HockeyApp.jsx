@@ -133,7 +133,7 @@ function Card({player,type,trends,mode,headshots,logos}){
     const originals=[];
     const toDataUrl=(src,w,h)=>new Promise(resolve=>{
       const c=document.createElement("canvas");
-      c.width=w*2;c.height=h*2;
+      const s=2;c.width=w*s;c.height=h*s;
       const ctx=c.getContext("2d");
       const i=new Image();
       i.crossOrigin="anonymous";
@@ -144,8 +144,9 @@ function Card({player,type,trends,mode,headshots,logos}){
     await Promise.allSettled(imgs.map(async img=>{
       if(!img.src||img.src.startsWith("data:"))return;
       try{
-        const w=img.naturalWidth||img.width||64;
-        const h=img.naturalHeight||img.height||64;
+        const rect=img.getBoundingClientRect();
+        const w=rect.width||64;
+        const h=rect.height||64;
         const dataUrl=await toDataUrl(img.src,w,h);
         if(dataUrl){originals.push({img,orig:img.src});img.src=dataUrl;}
       }catch(e){}
