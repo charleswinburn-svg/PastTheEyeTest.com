@@ -131,24 +131,28 @@ function Card({player,type,trends,mode,headshots,logos}){
     if(!cardRef.current)return;
     const imgs=[...cardRef.current.querySelectorAll("img")];
     const originals=[];
+    const toDataUrl=(src,w,h)=>new Promise(resolve=>{
+      const c=document.createElement("canvas");
+      c.width=w*2;c.height=h*2;
+      const ctx=c.getContext("2d");
+      const i=new Image();
+      i.crossOrigin="anonymous";
+      i.onload=()=>{ctx.drawImage(i,0,0,c.width,c.height);resolve(c.toDataURL("image/png"));};
+      i.onerror=()=>resolve(null);
+      i.src=src;
+    });
     await Promise.allSettled(imgs.map(async img=>{
       if(!img.src||img.src.startsWith("data:"))return;
       try{
-        const resp=await fetch(img.src);
-        const blob=await resp.blob();
-        const dataUrl=await new Promise((resolve,reject)=>{
-          const reader=new FileReader();
-          reader.onload=()=>resolve(reader.result);
-          reader.onerror=reject;
-          reader.readAsDataURL(blob);
-        });
-        originals.push({img,orig:img.src});
-        img.src=dataUrl;
+        const w=img.naturalWidth||img.width||64;
+        const h=img.naturalHeight||img.height||64;
+        const dataUrl=await toDataUrl(img.src,w,h);
+        if(dataUrl){originals.push({img,orig:img.src});img.src=dataUrl;}
       }catch(e){}
     }));
     await new Promise(r=>setTimeout(r,100));
     const html2canvas=(await import("html2canvas")).default;
-    const canvas=await html2canvas(cardRef.current,{backgroundColor:"#0d0d0d",scale:2,logging:false,useCORS:true});
+    const canvas=await html2canvas(cardRef.current,{backgroundColor:"#0d0d0d",scale:2,logging:false});
     const link=document.createElement("a");
     link.download=`${pname.replace(/\s+/g,"_")}_card.png`;
     link.href=canvas.toDataURL("image/png");
