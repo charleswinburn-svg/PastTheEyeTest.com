@@ -87,16 +87,16 @@ function PercentileBar({label,pctile,isOverall,weight}){
 function PlayerHeader({name,team,subtitle,olympicCountry,headshotUrl,logoSrc}){
   return(
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 20px 8px",gap:16}}>
-      <img src={logoSrc||LOGO_FALLBACK(team)} alt={team} style={{width:64,height:64,objectFit:"contain",filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.5))"}} onError={e=>{e.target.style.display="none"}}/>
+      <img crossOrigin="anonymous" src={logoSrc||LOGO_FALLBACK(team)} alt={team} style={{width:64,height:64,objectFit:"contain",filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.5))"}} onError={e=>{e.target.style.display="none"}}/>
       <div style={{flex:1,textAlign:"center"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
           <span style={{fontSize:22,fontWeight:800,color:"#fff",letterSpacing:"-0.02em"}}>{name}</span>
-          {FLAG(olympicCountry)&&<img src={FLAG(olympicCountry)} alt="" style={{height:16,border:"1px solid #555",borderRadius:2}}/>}
+          {FLAG(olympicCountry)&&<img crossOrigin="anonymous" src={FLAG(olympicCountry)} alt="" style={{height:16,border:"1px solid #555",borderRadius:2}}/>}
         </div>
         <div style={{fontSize:11,color:"#888",marginTop:2,letterSpacing:"0.04em"}}>{subtitle}</div>
       </div>
       <div style={{width:64,height:64,borderRadius:"50%",background:"#222",overflow:"hidden",border:"2px solid #333",flexShrink:0,position:"relative"}}>
-        {headshotUrl&&<img src={headshotUrl} alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none"}}/>}
+        {headshotUrl&&<img crossOrigin="anonymous" src={headshotUrl} alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none"}}/>}
       </div>
     </div>
   );
@@ -132,7 +132,7 @@ function Card({player,type,trends,mode,headshots,logos}){
     const imgs=[...cardRef.current.querySelectorAll("img")];
     const originals=[];
     await Promise.allSettled(imgs.map(async img=>{
-      if(!img.src||img.src.startsWith("data:")||!img.naturalWidth)return;
+      if(!img.src||img.src.startsWith("data:"))return;
       try{
         const resp=await fetch(img.src);
         const blob=await resp.blob();
@@ -148,7 +148,7 @@ function Card({player,type,trends,mode,headshots,logos}){
     }));
     await new Promise(r=>setTimeout(r,100));
     const html2canvas=(await import("html2canvas")).default;
-    const canvas=await html2canvas(cardRef.current,{backgroundColor:"#0d0d0d",scale:2,logging:false});
+    const canvas=await html2canvas(cardRef.current,{backgroundColor:"#0d0d0d",scale:2,logging:false,useCORS:true});
     const link=document.createElement("a");
     link.download=`${pname.replace(/\s+/g,"_")}_card.png`;
     link.href=canvas.toDataURL("image/png");
