@@ -137,7 +137,15 @@ function Card({player,type,trends,mode,headshots,logos}){
       const ctx=c.getContext("2d");
       const i=new Image();
       i.crossOrigin="anonymous";
-      i.onload=()=>{ctx.drawImage(i,0,0,c.width,c.height);resolve(c.toDataURL("image/png"));};
+      i.onload=()=>{
+        const iw=i.naturalWidth||i.width;
+        const ih=i.naturalHeight||i.height;
+        const scale=Math.min(c.width/iw,c.height/ih);
+        const dw=iw*scale,dh=ih*scale;
+        const dx=(c.width-dw)/2,dy=(c.height-dh)/2;
+        ctx.drawImage(i,dx,dy,dw,dh);
+        resolve(c.toDataURL("image/png"));
+      };
       i.onerror=()=>resolve(null);
       i.src=src;
     });
