@@ -126,6 +126,8 @@ def apply_aliases(name):
 
 def normalize_pos_group(pos):
     pos = str(pos).upper().strip()
+    if "," in pos:
+        pos = pos.split(",")[0].strip()
     if pos in ("D","LD","RD","DEFENSE","DEFENCE","DEFENSEMAN","DEFENCEMAN"): return "D"
     if pos in ("F","C","LW","RW","L","R","W","FORWARD"): return "F"
     return None
