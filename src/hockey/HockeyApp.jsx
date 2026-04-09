@@ -182,7 +182,7 @@ function Card({player,type,trends,mode,headshots,logos}){
       <div ref={cardRef} style={{background:"#151515",borderRadius:12,border:"1px solid #2a2a2a",overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.4)",maxWidth:600,margin:"0 auto"}}>
         <PlayerHeader name={pname} team={player.team} subtitle={subtitle} olympicCountry={player.olympic_country} headshotUrl={headshotUrl} logoSrc={logos?.[player.team]}/>
         <div style={{padding:"8px 16px 4px"}}>
-          <PercentileBar label={"Impact\u00a0Score"} pctile={player.overall_pctile} isOverall={true}/>
+          <PercentileBar label={<span>Impact <span style={{display:"inline-block",width:4}}></span>Score</span>} pctile={player.overall_pctile} isOverall={true}/>
           <div style={{height:4}}/>
           {cats.map(([name,cat])=><PercentileBar key={name} label={name} pctile={cat.pctile} weight={cat.weight} isOverall={false}/>)}
         </div>
