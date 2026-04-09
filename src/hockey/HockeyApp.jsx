@@ -75,7 +75,7 @@ function PercentileBar({label,pctile,isOverall,weight}){
   const w=pctile!=null?Math.max(2,pctile):0;
   return(
     <div style={{display:"flex",alignItems:"center",marginBottom:isOverall?12:5,gap:8}}>
-      <div style={{width:135,textAlign:"right",fontSize:isOverall?13:12,fontWeight:isOverall?800:500,color:isOverall?"#fff":"#bbb",flexShrink:0}}>{label}{weight===0&&pctile==null?" (N/A)":""}</div>
+      <div style={{width:135,textAlign:"right",fontSize:isOverall?13:12,fontWeight:isOverall?800:500,color:isOverall?"#fff":"#bbb",flexShrink:0,whiteSpace:"nowrap"}}>{label}{weight===0&&pctile==null?" (N/A)":""}</div>
       <div style={{flex:1,position:"relative",height:isOverall?28:22,background:"#1e1e1e",borderRadius:4,border:isOverall?"2px solid #fff":"1px solid #2a2a2a",overflow:"hidden"}}>
         <div style={{width:`${w}%`,height:"100%",background:binColor(pctile),borderRadius:3,transition:"width 0.6s cubic-bezier(0.25,0.46,0.45,0.94)"}}/>
       </div>
