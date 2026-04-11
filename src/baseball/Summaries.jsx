@@ -52,6 +52,7 @@ export default function Summaries({ season }) {
   const [prospectXwoba, setProspectXwoba] = useState(null);
   const [leagueAvgs, setLeagueAvgs] = useState(null);
   const [baselineAvgs, setBaselineAvgs] = useState(null);
+  const [pitchPlus, setPitchPlus] = useState(null);
 
   // Load pre-computed league avgs (from league_avgs_pipeline.py) as baseline
   useEffect(() => {
@@ -317,7 +318,7 @@ export default function Summaries({ season }) {
     ];
     const GROUPS = { Fastball: ["FF","SI","FC","FA"], Breaking: ["SL","CU","KC","CS","SV","ST","KN"], Offspeed: ["CH","FS","SC","FO"] };
     const getGroup = c => { for (const [g, codes] of Object.entries(GROUPS)) if (codes.includes(c)) return g; return "Other"; };
-    const inZone = (pX, pZ, szT, szB) => Math.abs(pX) <= 0.83 && pZ >= (szB||1.5) && pZ <= (szT||3.5);
+    const inZone = (pX, pZ, szT, szB) => Math.abs(pX) <= 0.88 && pZ >= (szB||1.5) && pZ <= (szT||3.5);
 
     // Extract ALL pitches from ALL plays in ALL loaded games
     const allPitches = [];
@@ -495,7 +496,7 @@ export default function Summaries({ season }) {
         const maxEV = evs.length ? Math.max(...evs) : null;
         const totalSwings = allPitches.filter(p => p.isSwing).length;
         const whiffs = allPitches.filter(p => p.isWhiff).length;
-        const outside = allPitches.filter(p => p.pX != null && p.pZ != null && (Math.abs(p.pX) > 0.83 || p.pZ > (p.szTop || 3.5) || p.pZ < (p.szBot || 1.5)));
+        const outside = allPitches.filter(p => p.pX != null && p.pZ != null && (Math.abs(p.pX) > 0.88 || p.pZ > (p.szTop || 3.5) || p.pZ < (p.szBot || 1.5)));
         const chased = outside.filter(p => p.isSwing).length;
 
         let obp, slg, kPct, bbPct;
@@ -612,6 +613,64 @@ export default function Summaries({ season }) {
 
   const hasData = enrichedData && (isPitcher ? enrichedData.totalPitches > 0 : enrichedData.pas > 0);
 
+  // Live Pitch+ scoring: send loaded pitches to API, get back per-pitch grades
+  useEffect(() => {
+    if (!isPitcher || !enrichedData?.pitches?.length || !selectedPlayer) {
+      setPitchPlus(null);
+      return;
+    }
+    let cancelled = false;
+    const payload = enrichedData.pitches
+      .filter(p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN")
+      .map(p => ({
+        pitcher_id: selectedPlayer.id,
+        _stand: p.batSide || "R",
+        _p_throws: selectedPlayer.pitchHand?.code || "R",
+        details: { type: { code: p.pitchType } },
+        pitchData: {
+          startSpeed: p.velo,
+          extension: p.extension,
+          strikeZoneTop: p.szTop,
+          strikeZoneBottom: p.szBot,
+          coordinates: {
+            pfxX: p.hBreak != null ? p.hBreak / 12 : null,
+            pfxZ: p.vBreak != null ? p.vBreak / 12 : null,
+            pX: p.pX, pZ: p.pZ,
+            x0: null, z0: p.relHeight,
+            vX0: null, vY0: p.vY0, vZ0: p.vZ0,
+            aX: null, aY: p.aY, aZ: p.aZ,
+          },
+          breaks: { spinRate: p.spin, spinDirection: null },
+        },
+      }));
+    if (!payload.length) { setPitchPlus(null); return; }
+
+    fetch("https://pitch-plus-api.onrender.com/score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pitches: payload }),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (cancelled || !data?.scores) return;
+        const byType = {};
+        for (const s of data.scores) {
+          if (s.pitch_plus == null) continue;
+          if (!byType[s.pitch_type]) byType[s.pitch_type] = { sum: 0, n: 0 };
+          byType[s.pitch_type].sum += s.pitch_plus;
+          byType[s.pitch_type].n++;
+        }
+        const out = {};
+        for (const [pt, v] of Object.entries(byType)) {
+          out[pt] = Math.round((v.sum / v.n) * 10) / 10;
+        }
+        console.log(`[Pitch+] Scored ${data.scores.length} pitches:`, out);
+        setPitchPlus(out);
+      })
+      .catch(err => { console.warn("[Pitch+] API failed:", err); setPitchPlus(null); });
+    return () => { cancelled = true; };
+  }, [enrichedData, selectedPlayer, isPitcher]);
+
   return (
     <div style={{ padding: "16px 20px" }}>
       <div style={{ display: "flex", gap: 2, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
@@ -697,7 +756,7 @@ export default function Summaries({ season }) {
 
       {enrichedData && !hasData && <div style={{ color: t.textMuted, textAlign: "center", padding: 40 }}>{selectedPlayer?.name} did not {isPitcher ? "pitch" : "bat"} in this {isGame ? "game" : "period"}</div>}
 
-      {hasData && isPitcher && !isCounts && <PitcherView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isAAA} leagueAvgs={effectiveLeagueAvgs} />}
+      {hasData && isPitcher && !isCounts && <PitcherView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isAAA} leagueAvgs={effectiveLeagueAvgs} pitchPlus={pitchPlus} />}
       {hasData && !isPitcher && !isCounts && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isAAA} leagueAvgs={effectiveLeagueAvgs} />}
       {hasData && isPitcher && isCounts && (
         <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={true}>
@@ -737,7 +796,7 @@ function CountsCard({ player, season, seasonType, isAAA, isPitcher, children }) 
   );
 }
 
-function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs }) {
+function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const pitchRows = useMemo(() => aggregateByPitchType(data.pitches), [data.pitches]);
@@ -788,7 +847,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
           <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} />
         </div>
         <PitchTypeLegend types={[...new Set(data.pitches.map(p => p.pitchType))].filter(t => t !== "UN")} />
-        <PitchTable rows={pitchRows} leagueAvgs={leagueAvgs} isAAA={isAAA} />
+        <PitchTable rows={pitchRows} leagueAvgs={leagueAvgs} isAAA={isAAA} pitchPlus={pitchPlus} />
         <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
           <span>Created by: @PastTheEyeTest on X</span>
           <span style={{ fontStyle: "italic" }}>Data: Baseball Savant / MLB Stats API{isAAA ? " / Prospect Savant" : ""}</span>
