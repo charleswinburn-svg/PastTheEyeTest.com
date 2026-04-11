@@ -75,7 +75,7 @@ function PercentileBar({label,pctile,isOverall,weight}){
   const w=pctile!=null?Math.max(2,pctile):0;
   return(
     <div style={{display:"flex",alignItems:"center",marginBottom:isOverall?12:5,gap:8}}>
-      <div style={{width:135,textAlign:"right",fontSize:isOverall?13:12,fontWeight:isOverall?800:500,color:isOverall?"#fff":"#bbb",flexShrink:0}}>{label}{weight===0&&pctile==null?" (N/A)":""}</div>
+      <div style={{width:135,textAlign:"right",fontSize:isOverall?13:12,fontWeight:isOverall?800:500,color:isOverall?"#fff":"#bbb",flexShrink:0,whiteSpace:"nowrap"}}>{label}{weight===0&&pctile==null?" (N/A)":""}</div>
       <div style={{flex:1,position:"relative",height:isOverall?28:22,background:"#1e1e1e",borderRadius:4,border:isOverall?"2px solid #fff":"1px solid #2a2a2a",overflow:"hidden"}}>
         <div style={{width:`${w}%`,height:"100%",background:binColor(pctile),borderRadius:3,transition:"width 0.6s cubic-bezier(0.25,0.46,0.45,0.94)"}}/>
       </div>
@@ -87,16 +87,16 @@ function PercentileBar({label,pctile,isOverall,weight}){
 function PlayerHeader({name,team,subtitle,olympicCountry,headshotUrl,logoSrc}){
   return(
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 20px 8px",gap:16}}>
-      <img src={logoSrc||LOGO_FALLBACK(team)} alt={team} style={{width:64,height:64,objectFit:"contain",filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.5))"}} onError={e=>{e.target.style.display="none"}}/>
+      <img crossOrigin="anonymous" src={logoSrc||LOGO_FALLBACK(team)} alt={team} style={{width:64,height:64,objectFit:"contain",filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.5))"}} onError={e=>{e.target.style.display="none"}}/>
       <div style={{flex:1,textAlign:"center"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
           <span style={{fontSize:22,fontWeight:800,color:"#fff",letterSpacing:"-0.02em"}}>{name}</span>
-          {FLAG(olympicCountry)&&<img src={FLAG(olympicCountry)} alt="" style={{height:16,border:"1px solid #555",borderRadius:2}}/>}
+          {FLAG(olympicCountry)&&<img crossOrigin="anonymous" src={FLAG(olympicCountry)} alt="" style={{height:16,border:"1px solid #555",borderRadius:2}}/>}
         </div>
         <div style={{fontSize:11,color:"#888",marginTop:2,letterSpacing:"0.04em"}}>{subtitle}</div>
       </div>
       <div style={{width:64,height:64,borderRadius:"50%",background:"#222",overflow:"hidden",border:"2px solid #333",flexShrink:0,position:"relative"}}>
-        {headshotUrl&&<img src={headshotUrl} alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none"}}/>}
+        {headshotUrl&&<img crossOrigin="anonymous" src={headshotUrl} alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none"}}/>}
       </div>
     </div>
   );
@@ -131,19 +131,32 @@ function Card({player,type,trends,mode,headshots,logos}){
     if(!cardRef.current)return;
     const imgs=[...cardRef.current.querySelectorAll("img")];
     const originals=[];
+    const toDataUrl=(src,w,h)=>new Promise(resolve=>{
+      const c=document.createElement("canvas");
+      const s=2;c.width=w*s;c.height=h*s;
+      const ctx=c.getContext("2d");
+      const i=new Image();
+      i.crossOrigin="anonymous";
+      i.onload=()=>{
+        const iw=i.naturalWidth||i.width;
+        const ih=i.naturalHeight||i.height;
+        const scale=Math.min(c.width/iw,c.height/ih);
+        const dw=iw*scale,dh=ih*scale;
+        const dx=(c.width-dw)/2,dy=(c.height-dh)/2;
+        ctx.drawImage(i,dx,dy,dw,dh);
+        resolve(c.toDataURL("image/png"));
+      };
+      i.onerror=()=>resolve(null);
+      i.src=src;
+    });
     await Promise.allSettled(imgs.map(async img=>{
-      if(!img.src||img.src.startsWith("data:")||!img.naturalWidth)return;
+      if(!img.src||img.src.startsWith("data:"))return;
       try{
-        const resp=await fetch(img.src);
-        const blob=await resp.blob();
-        const dataUrl=await new Promise((resolve,reject)=>{
-          const reader=new FileReader();
-          reader.onload=()=>resolve(reader.result);
-          reader.onerror=reject;
-          reader.readAsDataURL(blob);
-        });
-        originals.push({img,orig:img.src});
-        img.src=dataUrl;
+        const rect=img.getBoundingClientRect();
+        const w=rect.width||64;
+        const h=rect.height||64;
+        const dataUrl=await toDataUrl(img.src,w,h);
+        if(dataUrl){originals.push({img,orig:img.src});img.src=dataUrl;}
       }catch(e){}
     }));
     await new Promise(r=>setTimeout(r,100));
@@ -169,7 +182,7 @@ function Card({player,type,trends,mode,headshots,logos}){
       <div ref={cardRef} style={{background:"#151515",borderRadius:12,border:"1px solid #2a2a2a",overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.4)",maxWidth:600,margin:"0 auto"}}>
         <PlayerHeader name={pname} team={player.team} subtitle={subtitle} olympicCountry={player.olympic_country} headshotUrl={headshotUrl} logoSrc={logos?.[player.team]}/>
         <div style={{padding:"8px 16px 4px"}}>
-          <PercentileBar label="Overall Impact" pctile={player.overall_pctile} isOverall={true}/>
+          <PercentileBar label="Impact" pctile={player.overall_pctile} isOverall={true}/>
           <div style={{height:4}}/>
           {cats.map(([name,cat])=><PercentileBar key={name} label={name} pctile={cat.pctile} weight={cat.weight} isOverall={false}/>)}
         </div>
@@ -209,7 +222,7 @@ function WeightTable({player,type}){
         </tr></thead>
         <tbody>
           <tr style={{background:"#1a1a1a"}}>
-            <td style={{...tdS,fontWeight:700,color:"#fff"}}>OVERALL IMPACT</td>
+            <td style={{...tdS,fontWeight:700,color:"#fff"}}>IMPACT SCORE</td>
             <td style={{...tdS,textAlign:"center",fontWeight:700,color:"#fff"}}>{player.overall_pctile?.toFixed(1)}</td>
             {type==="goalie"&&<td style={{...tdS,textAlign:"center",color:"#666"}}>—</td>}
             <td style={{...tdS,textAlign:"right",color:"#888"}}>100%</td>

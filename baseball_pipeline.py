@@ -229,20 +229,59 @@ def fetch_savant_pitch_movement(year, pitch_type="FF"):
 
 def fetch_fangraphs_pitching(year):
     """
-    Fetch FanGraphs pitching leaders via pybaseball.
+    Fetch FanGraphs pitching leaders via pybaseball, with a direct API fallback.
     Returns DataFrame with Stuff+, Location+, FIP, K%, BB%, GB%, etc.
     """
+    # Try direct FanGraphs API first (more reliable than pybaseball's legacy scraping)
+    print(f"  Fetching FanGraphs pitching stats ({year}) via API...")
+    try:
+        url = (
+            f"https://www.fangraphs.com/api/leaders?"
+            f"pos=all&stats=pit&lg=all&qual=20&type=8"
+            f"&season={year}&month=0&season1={year}&ind=0"
+            f"&team=0&rost=0&age=0&filter=&players=0"
+            f"&startdate=&enddate=&page=1_10000"
+        )
+        resp = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        data = resp.json()
+        if isinstance(data, dict) and "data" in data:
+            rows = data["data"]
+        elif isinstance(data, list):
+            rows = data
+        else:
+            rows = []
+        if rows:
+            df = pd.DataFrame(rows)
+            # Map FG API column names to pybaseball-style names
+            col_map = {
+                "PlayerName": "Name", "playerid": "IDfg", "xMLBAMID": "xMLBAMID",
+                "TeamName": "Team", "IP": "IP", "FIP": "FIP",
+                "K%": "K%", "BB%": "BB%", "K-BB%": "K-BB%", "GB%": "GB%",
+                "Stuff+": "Stuff+", "Location+": "Location+",
+                "O-Swing%": "O-Swing%", "SwStr%": "SwStr%",
+                "Pitching+": "Pitching+",
+            }
+            for old, new in col_map.items():
+                if old in df.columns and new != old:
+                    df[new] = df[old]
+            print(f"    ✓ {len(df)} rows (via API)")
+            return df
+    except Exception as e:
+        print(f"    ✗ FanGraphs API failed: {e}")
+
+    # Fallback to pybaseball
     if not HAS_PYBASEBALL:
         print(f"  Skipping FanGraphs ({year}) — pybaseball not installed")
         return None
 
-    print(f"  Fetching FanGraphs pitching stats ({year}) via pybaseball...")
+    print(f"  Trying pybaseball fallback...")
     try:
         df = pitching_stats(year, year, qual=20)
-        print(f"    ✓ {len(df)} rows")
+        print(f"    ✓ {len(df)} rows (via pybaseball)")
         return df
     except Exception as e:
-        print(f"    ✗ FanGraphs fetch failed: {e}")
+        print(f"    ✗ pybaseball fallback also failed: {e}")
         return None
 
 
