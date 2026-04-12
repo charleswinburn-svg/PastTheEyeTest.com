@@ -633,14 +633,14 @@ export default function Summaries({ season }) {
           strikeZoneTop: p.szTop,
           strikeZoneBottom: p.szBot,
           coordinates: {
-            pfxX: p.hBreak != null ? p.hBreak / 12 : null,
-            pfxZ: p.vBreak != null ? p.vBreak / 12 : null,
+            pfxX: p.pfxX_raw,
+            pfxZ: p.pfxZ_raw,
             pX: p.pX, pZ: p.pZ,
-            x0: null, z0: p.relHeight,
-            vX0: null, vY0: p.vY0, vZ0: p.vZ0,
-            aX: null, aY: p.aY, aZ: p.aZ,
+            x0: p.relX, z0: p.relHeight,
+            vX0: p.vX0, vY0: p.vY0, vZ0: p.vZ0,
+            aX: p.aX, aY: p.aY, aZ: p.aZ,
           },
-          breaks: { spinRate: p.spin, spinDirection: null },
+          breaks: { spinRate: p.spin, spinDirection: p.spinDirection },
         },
       }));
     if (!payload.length) { setPitchPlus(null); return; }
@@ -662,7 +662,12 @@ export default function Summaries({ season }) {
         }
         const out = {};
         for (const [pt, v] of Object.entries(byType)) {
-          out[pt] = Math.round((v.sum / v.n) * 10) / 10;
+          // Bayesian shrinkage: shrink toward 100 based on sample size
+          // k=50 prior weight — at n=50 you get the raw value, at n=10 you're pulled 80% toward 100
+          const rawMean = v.sum / v.n;
+          const k = 20;
+          const shrunk = (v.n * rawMean + k * 100) / (v.n + k);
+          out[pt] = Math.round(shrunk * 10) / 10;
         }
         console.log(`[Pitch+] Scored ${data.scores.length} pitches:`, out);
         setPitchPlus(out);
