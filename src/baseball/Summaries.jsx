@@ -662,12 +662,7 @@ export default function Summaries({ season }) {
         }
         const out = {};
         for (const [pt, v] of Object.entries(byType)) {
-          // Bayesian shrinkage: shrink toward 100 based on sample size
-          // k=50 prior weight — at n=50 you get the raw value, at n=10 you're pulled 80% toward 100
-          const rawMean = v.sum / v.n;
-          const k = 20;
-          const shrunk = (v.n * rawMean + k * 100) / (v.n + k);
-          out[pt] = Math.round(shrunk * 10) / 10;
+          out[pt] = Math.round((v.sum / v.n) * 10) / 10;
         }
         console.log(`[Pitch+] Scored ${data.scores.length} pitches:`, out);
         setPitchPlus(out);
