@@ -15,6 +15,7 @@ export const PITCH_NAMES = {
   FF: "4-Seam", SI: "Sinker", FC: "Cutter", SL: "Slider",
   CU: "Curveball", CH: "Changeup", FS: "Splitter", ST: "Sweeper",
   KC: "Knuckle Curve", CS: "Slow Curve", SV: "Slurve", KN: "Knuckleball",
+  FO: "Forkball", FA: "Fastball", EP: "Eephus", SC: "Screwball",
 };
 
 // ── Hit result colors ──
@@ -287,6 +288,49 @@ export async function fetchGameLog(playerId, season, group = "pitching") {
 }
 
 // ── Get all roster players for a season ──
+// Fetch every pitcher/hitter in the league with a stat line this season.
+// Source of truth: /stats with seasonStatType, paginated. Returns everyone
+// who has recorded any action, including DFA'd, released, traded, call-ups.
+export async function fetchLeagueStatLeaders(season, seasonType = "R", sportId = 1) {
+  const gameType = seasonType;
+  const result = { pitchers: [], hitters: [] };
+  const seen = new Set();
+
+  for (const group of ["pitching", "hitting"]) {
+    let offset = 0;
+    const LIMIT = 500;
+    while (true) {
+      const url = `${API}/stats?stats=season&sportIds=${sportId}&season=${season}&group=${group}&gameType=${gameType}&limit=${LIMIT}&offset=${offset}&playerPool=All`;
+      let data;
+      try {
+        const r = await fetch(url);
+        if (!r.ok) break;
+        data = await r.json();
+      } catch { break; }
+      const splits = (data.stats || []).flatMap(s => s.splits || []);
+      if (splits.length === 0) break;
+      for (const sp of splits) {
+        const person = sp.player;
+        if (!person || seen.has(person.id)) continue;
+        seen.add(person.id);
+        const entry = {
+          id: person.id,
+          name: person.fullName,
+          team: sp.team?.abbreviation || "",
+          teamId: sp.team?.id,
+          position: sp.position?.abbreviation,
+        };
+        if (group === "pitching") result.pitchers.push(entry);
+        else result.hitters.push(entry);
+      }
+      if (splits.length < LIMIT) break;
+      offset += LIMIT;
+      if (offset > 5000) break; // safety cap
+    }
+  }
+  return result;
+}
+
 export async function fetchAllPlayers(season, sportId = 1) {
   const teams = await fetchJson(`${API}/teams?sportId=${sportId}&season=${season}&hydrate=parentOrg`);
   const players = { pitchers: [], hitters: [] };
@@ -294,7 +338,7 @@ export async function fetchAllPlayers(season, sportId = 1) {
 
   for (const team of (teams.teams || [])) {
     try {
-      const r = await fetch(`${API}/teams/${team.id}/roster?season=${season}`);
+      const r = await fetch(`${API}/teams/${team.id}/roster?season=${season}&rosterType=fullRoster`);
       if (!r.ok) continue;
       const d = await r.json();
       for (const p of (d.roster || [])) {
@@ -471,16 +515,20 @@ export function extractPitcherData(pbp, pitcherId) {
           pitchName: evt.details?.type?.description || "Unknown",
           velo: pd.startSpeed,
           spin: br.spinRate,
+          spinDirection: br.spinDirection,
           hBreak: br.breakHorizontal,
           vBreak: br.breakVerticalInduced,
+          pfxX_raw: coords.pfxX,
+          pfxZ_raw: coords.pfxZ,
           pX: coords.pX,
           pZ: coords.pZ,
           szTop: pd.strikeZoneTop,
           szBot: pd.strikeZoneBottom,
           relHeight: coords.z0,
+          relX: coords.x0,
           extension: pd.extension,
-          vY0: coords.vY0, vZ0: coords.vZ0,
-          aY: coords.aY, aZ: coords.aZ,
+          vX0: coords.vX0, vY0: coords.vY0, vZ0: coords.vZ0,
+          aX: coords.aX, aY: coords.aY, aZ: coords.aZ,
           vaa: null,
           balls: prevBalls,
           strikes: prevStrikes,
@@ -492,6 +540,8 @@ export function extractPitcherData(pbp, pitcherId) {
           result: play.result?.event,
           hitData: evt.hitData || null,
           batSide: play.matchup?.batSide?.code || null,
+          atBatIndex: play.atBatIndex,
+          pitchNumber: evt.pitchNumber,
         });
         // Update count for next pitch (evt.count is count AFTER this pitch)
         if (evt.count) {
@@ -607,7 +657,7 @@ export function extractBatterData(pbp, batterId) {
 
   const totalSwings = pitches.filter(p => p.isSwing).length;
   const whiffs = pitches.filter(p => p.isWhiff).length;
-  const chases = pitches.filter(p => p.isSwing && p.pX != null && p.pZ != null && (Math.abs(p.pX) > 0.83 || p.pZ > (p.szTop || 3.5) || p.pZ < (p.szBot || 1.5))).length;
+  const chases = pitches.filter(p => p.isSwing && p.pX != null && p.pZ != null && (Math.abs(p.pX) > 0.88 || p.pZ > (p.szTop || 3.5) || p.pZ < (p.szBot || 1.5))).length;
   const outsideTotal = pitches.filter(p => p.pX != null && p.pZ != null && (Math.abs(p.pX) > 0.95 || p.pZ > (p.szTop || 3.5) + 0.1 || p.pZ < (p.szBot || 1.5) - 0.1)).length;
 
   return {
@@ -646,7 +696,7 @@ export function aggregateByPitchType(pitches) {
     const vaas = group.map(p => p.vaa).filter(v => v != null);
     const relHts = group.map(p => p.relHeight).filter(Boolean);
     const exts = group.map(p => p.extension).filter(Boolean);
-    const inZone = group.filter(p => p.pX != null && p.pZ != null && Math.abs(p.pX) <= 0.83 && p.pZ <= (p.szTop || 3.5) && p.pZ >= (p.szBot || 1.5));
+    const inZone = group.filter(p => p.pX != null && p.pZ != null && Math.abs(p.pX) <= 0.88 && p.pZ <= (p.szTop || 3.5) && p.pZ >= (p.szBot || 1.5));
     const swings = group.filter(p => p.isSwing);
     const whiffs = group.filter(p => p.isWhiff);
 
