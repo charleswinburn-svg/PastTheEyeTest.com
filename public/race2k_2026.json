@@ -4,36 +4,49 @@
   "starters": [],
   "relievers": [
     {
-      "player_id": 663623,
-      "name": "Jake Irvin",
-      "team": "WSH",
-      "ip": 21.0,
+      "player_id": 813349,
+      "name": "Connelly Early",
+      "team": "BOS",
+      "ip": 22.4,
       "gs": 4,
       "is_sp": false,
-      "avg_pitches_to_2k": 2.848,
-      "qualifying_pas": 46,
-      "total_pas": 87,
-      "reach_pct": 52.9,
+      "avg_pitches_to_2k": 2.932,
+      "qualifying_pas": 44,
+      "total_pas": 91,
+      "reach_pct": 48.4,
       "pctile": 100.0
     },
     {
-      "player_id": 693821,
-      "name": "Bryce Elder",
-      "team": "ATL",
-      "ip": 24.4,
+      "player_id": 684007,
+      "name": "Shota Imanaga",
+      "team": "CHC",
+      "ip": 24.9,
       "gs": 4,
       "is_sp": false,
-      "avg_pitches_to_2k": 3.119,
-      "qualifying_pas": 42,
-      "total_pas": 99,
-      "reach_pct": 42.4,
-      "pctile": 50.0
+      "avg_pitches_to_2k": 3.02,
+      "qualifying_pas": 50,
+      "total_pas": 92,
+      "reach_pct": 54.3,
+      "pctile": 66.7
+    },
+    {
+      "player_id": 677958,
+      "name": "Kumar Rocker",
+      "team": "TEX",
+      "ip": 22.0,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.098,
+      "qualifying_pas": 41,
+      "total_pas": 92,
+      "reach_pct": 44.6,
+      "pctile": 33.3
     }
   ],
   "meta": {
     "min_ip": 20,
     "gs_threshold": 10,
     "total_pitches_analyzed": 50000,
-    "generated_at": "2026-04-26 10:47:58 UTC"
+    "generated_at": "2026-04-27 11:47:55 UTC"
   }
 }
