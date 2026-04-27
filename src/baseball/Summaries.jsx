@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import {
-  fetchSchedule, fetchPlayByPlay, fetchBoxscore, fetchAllPlayers, fetchWbcPlayers, fetchGameLog,
+  fetchSchedule, fetchPlayByPlay, fetchBoxscore, fetchAllPlayers, fetchWbcPlayers, fetchGameLog, fetchLeagueStatLeaders,
   extractPitcherData, extractBatterData, aggregateByPitchType,
   fetchSavantGameData, enrichWithSavant, fetchSavantBulkXwoba,
   PITCH_COLORS, PITCH_NAMES, GAME_TYPE_LABELS, getWbcFlag,
@@ -112,7 +112,7 @@ export default function Summaries({ season }) {
       .catch(() => setProspectXwoba(null));
   }, [isAAA]);
 
-  // Load players: start with roster, then supplement from game boxscores
+  // Load players: start with roster, then supplement from game boxscores AND league stats
   useEffect(() => {
     setLoadingPlayers(true);
     setError(null);
@@ -123,8 +123,23 @@ export default function Summaries({ season }) {
         .catch(e => { setError(e.message); setLoadingPlayers(false); });
       return;
     }
-    fetchAllPlayers(currentSeason, sportId)
-      .then(p => { setPlayers(p); setLoadingPlayers(false); })
+    // Fetch roster + MLB stats leaders in parallel. The stats endpoint
+    // returns EVERYONE who threw a pitch / had a PA in the league this season,
+    // including DFA'd, released, AAA-to-MLB guys. This is the source of truth.
+    Promise.all([
+      fetchAllPlayers(currentSeason, sportId),
+      fetchLeagueStatLeaders(currentSeason, seasonType, sportId),
+    ])
+      .then(([roster, leaders]) => {
+        const seen = new Set([...roster.pitchers.map(x => x.id), ...roster.hitters.map(x => x.id)]);
+        for (const p of leaders.pitchers) if (!seen.has(p.id)) { roster.pitchers.push(p); seen.add(p.id); }
+        for (const p of leaders.hitters)  if (!seen.has(p.id)) { roster.hitters.push(p); seen.add(p.id); }
+        roster.pitchers.sort((a, b) => a.name.localeCompare(b.name));
+        roster.hitters.sort((a, b) => a.name.localeCompare(b.name));
+        console.log(`[Summaries] Loaded ${roster.pitchers.length} pitchers, ${roster.hitters.length} hitters`);
+        setPlayers(roster);
+        setLoadingPlayers(false);
+      })
       .catch(e => { setError(e.message); setLoadingPlayers(false); });
   }, [currentSeason, seasonType, sportId]);
 
@@ -140,14 +155,20 @@ export default function Summaries({ season }) {
     let cancelled = false;
     (async () => {
       const newPitchers = [], newHitters = [];
-      for (const game of games.slice(0, 40)) {
+      // Scan ALL games in parallel batches of 8 for speed
+      const BATCH = 8;
+      const allGames = games; // full list, not slice(0, 40)
+      for (let i = 0; i < allGames.length; i += BATCH) {
         if (cancelled) break;
-        try {
-          const box = await fetchBoxscore(game.gamePk);
+        const batch = allGames.slice(i, i + BATCH);
+        const boxes = await Promise.all(
+          batch.map(g => fetchBoxscore(g.gamePk).catch(() => null).then(b => ({ box: b, game: g })))
+        );
+        for (const { box, game } of boxes) {
+          if (!box) continue;
           for (const side of ["away", "home"]) {
             const team = box.teams?.[side];
             if (!team) continue;
-            // Use the remapped team info from the game schedule (handles Spring Breakout CRP→CIN etc.)
             const gameTeam = side === "away" ? game.away : game.home;
             const teamAbbr = gameTeam?.abbreviation || team.team?.abbreviation || "";
             const teamId = gameTeam?.id || team.team?.id;
@@ -166,9 +187,10 @@ export default function Summaries({ season }) {
               }
             }
           }
-        } catch (e) { /* skip */ }
+        }
       }
       if (!cancelled && (newPitchers.length || newHitters.length)) {
+        console.log(`[Summaries] Boxscore scan found ${newPitchers.length} additional pitchers, ${newHitters.length} hitters`);
         setPlayers(prev => ({
           pitchers: [...(prev?.pitchers || []), ...newPitchers].sort((a, b) => a.name.localeCompare(b.name)),
           hitters: [...(prev?.hitters || []), ...newHitters].sort((a, b) => a.name.localeCompare(b.name)),
@@ -633,8 +655,9 @@ export default function Summaries({ season }) {
           strikeZoneTop: p.szTop,
           strikeZoneBottom: p.szBot,
           coordinates: {
-            pfxX: p.pfxX_raw,
-            pfxZ: p.pfxZ_raw,
+            // MLB Stats API returns pfxX/pfxZ in INCHES; model trained in feet
+            pfxX: p.pfxX_raw != null ? p.pfxX_raw / 12 : null,
+            pfxZ: p.pfxZ_raw != null ? p.pfxZ_raw / 12 : null,
             pX: p.pX, pZ: p.pZ,
             x0: p.relX, z0: p.relHeight,
             vX0: p.vX0, vY0: p.vY0, vZ0: p.vZ0,
@@ -648,28 +671,38 @@ export default function Summaries({ season }) {
     fetch("https://pitch-plus-api.onrender.com/score", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pitches: payload }),
+      body: JSON.stringify({ pitches: payload, is_aaa: isAAA }),
     })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (cancelled || !data?.scores) return;
         const byType = {};
         for (const s of data.scores) {
-          if (s.pitch_plus == null) continue;
-          if (!byType[s.pitch_type]) byType[s.pitch_type] = { sum: 0, n: 0 };
-          byType[s.pitch_type].sum += s.pitch_plus;
-          byType[s.pitch_type].n++;
+          if (!byType[s.pitch_type]) byType[s.pitch_type] = {
+            stuff: { sum: 0, n: 0 }, loc: { sum: 0, n: 0 },
+            tunnel: { sum: 0, n: 0 }, pitch: { sum: 0, n: 0 },
+          };
+          const b = byType[s.pitch_type];
+          if (s.stuff_plus != null) { b.stuff.sum += s.stuff_plus; b.stuff.n++; }
+          if (s.loc_plus != null) { b.loc.sum += s.loc_plus; b.loc.n++; }
+          if (s.tunnel_plus != null) { b.tunnel.sum += s.tunnel_plus; b.tunnel.n++; }
+          if (s.pitch_plus != null) { b.pitch.sum += s.pitch_plus; b.pitch.n++; }
         }
         const out = {};
         for (const [pt, v] of Object.entries(byType)) {
-          out[pt] = Math.round((v.sum / v.n) * 10) / 10;
+          out[pt] = {
+            stuffPlus: v.stuff.n > 0 ? Math.round((v.stuff.sum / v.stuff.n) * 10) / 10 : null,
+            locPlus: v.loc.n > 0 ? Math.round((v.loc.sum / v.loc.n) * 10) / 10 : null,
+            tunnelPlus: v.tunnel.n > 0 ? Math.round((v.tunnel.sum / v.tunnel.n) * 10) / 10 : null,
+            pitchPlus: v.pitch.n > 0 ? Math.round((v.pitch.sum / v.pitch.n) * 10) / 10 : null,
+          };
         }
         console.log(`[Pitch+] Scored ${data.scores.length} pitches:`, out);
         setPitchPlus(out);
       })
       .catch(err => { console.warn("[Pitch+] API failed:", err); setPitchPlus(null); });
     return () => { cancelled = true; };
-  }, [enrichedData, selectedPlayer, isPitcher]);
+  }, [enrichedData, selectedPlayer, isPitcher, isAAA]);
 
   return (
     <div style={{ padding: "16px 20px" }}>
