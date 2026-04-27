@@ -48,7 +48,8 @@ import unicodedata
 # ============================================================
 
 DEFAULT_SEASONS = [2023, 2024, 2025]
-MIN_PA = 100          # minimum plate appearances for hitters
+MIN_PA = 100          # minimum plate appearances for hitters (full season)
+MIN_PA_EARLY = 25    # early-season threshold (before June 1)
 MIN_PITCHER_IP = 20   # minimum innings pitched for pitchers
 FETCH_DELAY = 2.0     # seconds between API calls (rate limiting)
 MAX_RETRIES = 3
@@ -151,10 +152,14 @@ def csv_to_df(text):
 
 def fetch_savant_expected(year, player_type="batter"):
     """Fetch expected statistics (xSLG, xBA, xwOBA, etc.)"""
+    from datetime import date
+    today = date.today()
+    batter_min = MIN_PA_EARLY if (today.year == year and today.month < 6) else MIN_PA
+    min_val = str(batter_min) if player_type == 'batter' else '1'
     url = (
         f"https://baseballsavant.mlb.com/leaderboard/expected_statistics"
         f"?type={player_type}&year={year}&position=&team="
-        f"&min={'100' if player_type == 'batter' else '1'}&csv=true"
+        f"&min={min_val}&csv=true"
     )
     print(f"  Fetching Savant expected stats ({player_type}, {year})...")
     text = fetch_url(url)
@@ -177,10 +182,14 @@ def fetch_savant_statcast(year, player_type="batter"):
         selections = "xwobacon,exit_velocity_avg,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,oz_swing_percent"
     else:
         selections = "exit_velocity_avg,barrel_batted_rate,whiff_percent,k_percent,bb_percent,p_oSwing_percent,release_extension"
+    from datetime import date
+    today = date.today()
+    batter_min = MIN_PA_EARLY if (today.year == year and today.month < 6) else MIN_PA
+    min_val = str(batter_min) if player_type == 'batter' else '1'
     url = (
         f"https://baseballsavant.mlb.com/leaderboard/custom"
         f"?year={year}&type={player_type}&filter=&sort=4&sortDir=desc"
-        f"&min={'100' if player_type == 'batter' else '1'}"
+        f"&min={min_val}"
         f"&selections={selections}"
         f"&chart=false&x=xba&y=xba&r=no&chartType=beeswarm&csv=true"
     )
@@ -229,60 +238,177 @@ def fetch_savant_pitch_movement(year, pitch_type="FF"):
 
 def fetch_fangraphs_pitching(year):
     """
-    Fetch FanGraphs pitching leaders via pybaseball, with a direct API fallback.
-    Returns DataFrame with Stuff+, Location+, FIP, K%, BB%, GB%, etc.
+    Fetch FanGraphs pitching leaders. Tries in order:
+    1. Browser cookies + API (most reliable — bypasses Cloudflare with your session)
+    2. cloudscraper (handles JS challenges without browser)
+    3. Direct API (works when FG isn't blocking)
+    4. Selenium with system chromedriver
+    5. pybaseball fallback
     """
-    # Try direct FanGraphs API first (more reliable than pybaseball's legacy scraping)
-    print(f"  Fetching FanGraphs pitching stats ({year}) via API...")
+    print(f"  Fetching FanGraphs pitching stats ({year})...")
+    api_url = ("https://www.fangraphs.com/api/leaders/major-league/data"
+               f"?pos=all&stats=pit&lg=all&qual=20&type=36"
+               f"&season={year}&month=0&season1={year}&ind=0"
+               f"&team=0&rost=0&age=0&filter=&players=0"
+               f"&startdate=&enddate=&page=1_2000")
+
+    # --- Attempt 1: Cookie-authenticated session ---
+    cookie_paths = [
+        "fangraphs_cookies.txt",
+        os.path.join(os.path.dirname(__file__), "fangraphs_cookies.txt"),
+        os.path.expanduser("~/project/fangraphs_cookies.txt"),
+        "www.fangraphs.com_cookies.txt",
+    ]
+    for cp in cookie_paths:
+        if not os.path.exists(cp):
+            continue
+        try:
+            from http.cookiejar import MozillaCookieJar
+            jar = MozillaCookieJar(cp)
+            jar.load(ignore_discard=True, ignore_expires=True)
+            s = requests.Session()
+            s.cookies = jar
+            s.headers.update(HTTP_HEADERS)
+            r = s.get(api_url, timeout=30)
+            if r.status_code == 200:
+                data = r.json()
+                rows = data.get("data", [])
+                if rows:
+                    df = _normalize_fg_api_columns(pd.DataFrame(rows))
+                    print(f"    ✓ {len(df)} rows via cookies ({os.path.basename(cp)})")
+                    return df
+            print(f"    Cookies ({os.path.basename(cp)}) returned {r.status_code}")
+        except Exception as e:
+            print(f"    Cookies failed ({os.path.basename(cp)}): {e}")
+
+    # --- Attempt 2: cloudscraper ---
     try:
-        url = (
-            f"https://www.fangraphs.com/api/leaders?"
-            f"pos=all&stats=pit&lg=all&qual=20&type=8"
-            f"&season={year}&month=0&season1={year}&ind=0"
-            f"&team=0&rost=0&age=0&filter=&players=0"
-            f"&startdate=&enddate=&page=1_10000"
-        )
-        resp = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
-        resp.raise_for_status()
-        data = resp.json()
-        if isinstance(data, dict) and "data" in data:
-            rows = data["data"]
-        elif isinstance(data, list):
-            rows = data
-        else:
-            rows = []
-        if rows:
-            df = pd.DataFrame(rows)
-            # Map FG API column names to pybaseball-style names
-            col_map = {
-                "PlayerName": "Name", "playerid": "IDfg", "xMLBAMID": "xMLBAMID",
-                "TeamName": "Team", "IP": "IP", "FIP": "FIP",
-                "K%": "K%", "BB%": "BB%", "K-BB%": "K-BB%", "GB%": "GB%",
-                "Stuff+": "Stuff+", "Location+": "Location+",
-                "O-Swing%": "O-Swing%", "SwStr%": "SwStr%",
-                "Pitching+": "Pitching+",
-            }
-            for old, new in col_map.items():
-                if old in df.columns and new != old:
-                    df[new] = df[old]
-            print(f"    ✓ {len(df)} rows (via API)")
+        import cloudscraper
+        scraper = cloudscraper.create_scraper()
+        r = scraper.get(api_url, timeout=30)
+        if r.status_code == 200:
+            data = r.json()
+            rows = data.get("data", [])
+            if rows:
+                df = _normalize_fg_api_columns(pd.DataFrame(rows))
+                print(f"    ✓ {len(df)} rows via cloudscraper")
+                return df
+        print(f"    cloudscraper returned {r.status_code}")
+    except Exception as e:
+        print(f"    cloudscraper failed: {e}")
+
+    # --- Attempt 3: Direct requests ---
+    try:
+        r = requests.get(api_url, headers=HTTP_HEADERS, timeout=30)
+        if r.status_code == 200:
+            data = r.json()
+            rows = data.get("data", [])
+            if rows:
+                df = _normalize_fg_api_columns(pd.DataFrame(rows))
+                print(f"    ✓ {len(df)} rows via direct API")
+                return df
+    except Exception as e:
+        print(f"    Direct API failed: {e}")
+
+    # --- Attempt 4: Selenium ---
+    print(f"    Trying Selenium...")
+    try:
+        df = _fetch_fg_selenium(year)
+        if df is not None and len(df) > 0:
+            print(f"    ✓ {len(df)} rows via Selenium")
             return df
     except Exception as e:
-        print(f"    ✗ FanGraphs API failed: {e}")
+        print(f"    Selenium failed: {e}")
 
-    # Fallback to pybaseball
-    if not HAS_PYBASEBALL:
-        print(f"  Skipping FanGraphs ({year}) — pybaseball not installed")
-        return None
+    # --- Attempt 5: pybaseball ---
+    if HAS_PYBASEBALL:
+        print(f"    Trying pybaseball...")
+        try:
+            df = pitching_stats(year, year, qual=20)
+            print(f"    ✓ {len(df)} rows via pybaseball")
+            return df
+        except Exception as e:
+            print(f"    pybaseball failed: {e}")
 
-    print(f"  Trying pybaseball fallback...")
+    print(f"    ✗ All FanGraphs methods failed for {year}")
+    return None
+
+    print(f"    ✗ All FanGraphs fetch methods failed for {year}")
+    return None
+
+
+def _normalize_fg_api_columns(df):
+    """Map FanGraphs API column names to pybaseball-style names."""
+    fg_api_map = {
+        "playerid": "IDfg", "xMLBAMID": "xMLBAMID",
+        "TeamName": "Team", "IP": "IP", "FIP": "FIP",
+        "Stuff": "Stuff+", "Location": "Location+",
+        "StuffPlus": "Stuff+", "LocationPlus": "Location+",
+        "K%": "K%", "BB%": "BB%", "K-BB%": "K-BB%",
+        "GB%": "GB%", "O-Swing%": "O-Swing%", "SwStr%": "SwStr%",
+        "FBv": "FBv", "mlbamid": "xMLBAMID", "MLBAMID": "xMLBAMID",
+    }
+    # Don't rename PlayerName→Name here — normalize_fg_name handles it
+    # and the API may already have a 'Name' column causing duplicates
+    df = df.rename(columns={k: v for k, v in fg_api_map.items() if k in df.columns})
+    # Ensure no duplicate column names
+    df = df.loc[:, ~df.columns.duplicated()]
+    return df
+
+
+def _fetch_fg_selenium(year):
+    """Use Selenium with system chromium/chromedriver to scrape FanGraphs."""
     try:
-        df = pitching_stats(year, year, qual=20)
-        print(f"    ✓ {len(df)} rows (via pybaseball)")
-        return df
-    except Exception as e:
-        print(f"    ✗ pybaseball fallback also failed: {e}")
+        from selenium import webdriver
+        from selenium.webdriver.chrome.service import Service
+        from selenium.webdriver.chrome.options import Options
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+    except ImportError:
+        print("    selenium not installed")
         return None
+
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.binary_location = "/usr/bin/chromium"
+
+    driver = None
+    try:
+        service = Service("/usr/bin/chromedriver")
+        driver = webdriver.Chrome(service=service, options=options)
+
+        url = (f"https://www.fangraphs.com/leaders/major-league"
+               f"?pos=all&stats=pit&lg=all&qual=20&type=36"
+               f"&season={year}&month=0&season1={year}&ind=0"
+               f"&team=0&rost=0&age=0&filter=&players=0"
+               f"&startdate=&enddate=&page=1_2000")
+        driver.get(url)
+
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".leaders-major__table, .table-scroll, .fg-data-grid"))
+        )
+        time.sleep(2)
+
+        html = driver.page_source
+        tables = pd.read_html(html)
+        if tables:
+            df = max(tables, key=len)
+            print(f"    Parsed {len(df)} rows from HTML table")
+            return df
+    except Exception as e:
+        print(f"    Selenium error: {e}")
+        return None
+    finally:
+        if driver:
+            try: driver.quit()
+            except: pass
+    return None
+
+    return None
 
 
 # ============================================================
@@ -669,11 +795,15 @@ def process_hitters(year):
         team_count = merged["team"].notna().sum()
         print(f"  Team info: {team_count}/{len(merged)} hitters have team")
 
-    # --- Filter to minimum PA ---
+    # --- Filter to minimum PA (dynamic: lower threshold early in the season) ---
+    from datetime import date
+    today = date.today()
+    is_early = (today.year == year and today.month < 6) or (today.year > year)  # if running for current year before June
+    effective_min_pa = MIN_PA_EARLY if (today.year == year and today.month < 6) else MIN_PA
     if "pa" in merged.columns:
         merged["pa"] = pd.to_numeric(merged["pa"], errors="coerce")
-        merged = merged[merged["pa"] >= MIN_PA].copy()
-    print(f"  After min PA filter: {len(merged)} hitters")
+        merged = merged[merged["pa"] >= effective_min_pa].copy()
+    print(f"  After min PA filter ({effective_min_pa}): {len(merged)} hitters")
 
     # --- Debug: show which metric columns are available ---
     available = [m["key"] for m in HITTER_METRICS if m["key"] in merged.columns]

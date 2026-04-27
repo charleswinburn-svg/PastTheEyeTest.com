@@ -212,8 +212,8 @@ export function ZonePlot({ pitches, title, width = 260, height = 300 }) {
   const scaleX = (v) => pad.left + ((v - xRange[0]) / (xRange[1] - xRange[0])) * zoneW;
   const scaleY = (v) => pad.top + ((yRange[1] - v) / (yRange[1] - yRange[0])) * zoneH;
 
-  const szLeft = scaleX(-0.83);
-  const szRight = scaleX(0.83);
+  const szLeft = scaleX(-0.88);
+  const szRight = scaleX(0.88);
   const szTop = scaleY(3.5);
   const szBot = scaleY(1.5);
 
@@ -264,7 +264,7 @@ const LEAGUE_AVG_MLB = {
   velo: { higher_better: true, scale: 2.0, FF: 94.5, SI: 93.9, FC: 89.7, SL: 86.3, CU: 79.8, CH: 86.0, FS: 86.2, ST: 82.5, KC: 82.9, CS: 78.0, SV: 82.0, KN: 83.0, FA: 94.0, DEFAULT: 88.0 },
   spin: { higher_better: true, scale: 200, FF: 2300, SI: 2100, FC: 2350, SL: 2500, CU: 2750, CH: 1800, FS: 1400, ST: 2600, KC: 2650, CS: 2600, DEFAULT: 2200 },
   whiffPct: { higher_better: true, scale: 8.0, FF: 22.0, SI: 14.0, FC: 21.0, SL: 33.0, CU: 30.0, CH: 30.0, FS: 33.0, ST: 33.0, KC: 31.0, CS: 28.0, SV: 31.0, KN: 25.0, FA: 22.0, DEFAULT: 25.0 },
-  zonePct: { higher_better: true, scale: 6.0, FF: 46.0, SI: 49.0, FC: 44.0, SL: 34.0, CU: 36.0, CH: 38.0, FS: 33.0, ST: 31.0, KC: 36.0, CS: 34.0, SV: 32.0, KN: 44.0, FA: 46.0, DEFAULT: 40.0 },
+  zonePct: { higher_better: true, scale: 6.0, FF: 55.0, SI: 57.0, FC: 52.0, SL: 42.0, CU: 44.0, CH: 46.0, FS: 40.0, ST: 38.0, KC: 43.0, CS: 42.0, SV: 40.0, KN: 52.0, FA: 55.0, DEFAULT: 48.0 },
   extension: { higher_better: true, scale: 0.35, FF: 6.4, SI: 6.3, FC: 6.3, SL: 6.2, CU: 6.0, CH: 6.3, FS: 6.2, ST: 6.2, KC: 6.0, CS: 5.9, DEFAULT: 6.3 },
 };
 
@@ -273,7 +273,7 @@ const LEAGUE_AVG_AAA = {
   velo: { higher_better: true, scale: 2.0, FF: 92.5, SI: 92.0, FC: 87.5, SL: 84.0, CU: 78.0, CH: 84.0, FS: 84.0, ST: 80.5, KC: 81.0, CS: 76.5, SV: 80.0, KN: 81.0, FA: 92.0, DEFAULT: 86.0 },
   spin: { higher_better: true, scale: 200, FF: 2200, SI: 2000, FC: 2250, SL: 2400, CU: 2650, CH: 1700, FS: 1350, ST: 2500, KC: 2550, CS: 2500, DEFAULT: 2100 },
   whiffPct: { higher_better: true, scale: 8.0, FF: 20.0, SI: 12.0, FC: 19.0, SL: 30.0, CU: 27.0, CH: 27.0, FS: 30.0, ST: 30.0, KC: 28.0, CS: 25.0, SV: 28.0, KN: 23.0, FA: 20.0, DEFAULT: 23.0 },
-  zonePct: { higher_better: true, scale: 6.0, FF: 47.0, SI: 50.0, FC: 45.0, SL: 35.0, CU: 37.0, CH: 39.0, FS: 34.0, ST: 32.0, KC: 37.0, CS: 35.0, SV: 33.0, KN: 45.0, FA: 47.0, DEFAULT: 41.0 },
+  zonePct: { higher_better: true, scale: 6.0, FF: 56.0, SI: 58.0, FC: 53.0, SL: 43.0, CU: 45.0, CH: 47.0, FS: 41.0, ST: 39.0, KC: 44.0, CS: 43.0, SV: 41.0, KN: 53.0, FA: 56.0, DEFAULT: 49.0 },
   extension: { higher_better: true, scale: 0.35, FF: 6.2, SI: 6.1, FC: 6.1, SL: 6.0, CU: 5.8, CH: 6.1, FS: 6.0, ST: 6.0, KC: 5.8, CS: 5.7, DEFAULT: 6.1 },
 };
 
@@ -366,7 +366,7 @@ export function StatBar({ stats }) {
 // ═══════════════════════════════════════════════════════════
 // PITCH TABLE (per-pitch-type stats)
 // ═══════════════════════════════════════════════════════════
-export function PitchTable({ rows, leagueAvgs, isAAA }) {
+export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
   const { theme: t, isDark } = useTheme();
   if (!rows || rows.length === 0) return null;
 
@@ -385,12 +385,36 @@ export function PitchTable({ rows, leagueAvgs, isAAA }) {
     { key: "extension", label: "Ext", align: "center", fmt: v => v != null ? v.toFixed(1) + "'" : "—" },
     { key: "zonePct", label: "Zone%", align: "center", fmt: v => v != null ? v.toFixed(1) + "%" : "—" },
     { key: "whiffPct", label: "Whiff%", align: "center", fmt: v => v != null ? v.toFixed(1) + "%" : "—" },
+    ...(pitchPlus ? [
+      { key: "stuffPlus", label: "Stuff+", align: "center", fmt: v => v != null ? v.toFixed(0) : "—" },
+      { key: "locPlus", label: "Loc+", align: "center", fmt: v => v != null ? v.toFixed(0) : "—" },
+      { key: "tunnelPlus", label: "Tun+", align: "center", fmt: v => v != null ? v.toFixed(0) : "—" },
+      { key: "pitchPlus", label: "Pitch+", align: "center", fmt: v => v != null ? v.toFixed(0) : "—" },
+    ] : []),
   ];
 
-  const EFF_KEYS = { velo: "velo", spin: "spin", whiffPct: "whiffPct", zonePct: "zonePct", extension: "extension" };
+  const EFF_KEYS = { velo: "velo", spin: "spin", whiffPct: "whiffPct", zonePct: "zonePct", extension: "extension", pitchPlus: "pitchPlus", stuffPlus: "stuffPlus", locPlus: "locPlus", tunnelPlus: "tunnelPlus" };
   const getCellStyle = (key, value, pitchType) => {
     if (value == null || !EFF_KEYS[key]) return {};
     let rawBg = null;
+
+    // Pitch+/Stuff+/Location+/Tunnel+ use the same scale: 100 = neutral, ±10 per std
+    if (key === "pitchPlus" || key === "stuffPlus" || key === "locPlus" || key === "tunnelPlus") {
+      let diff = (value - 100) / 10;
+      diff = Math.max(-1, Math.min(1, diff));
+      if (Math.abs(diff) >= 0.08) {
+        const s = (Math.abs(diff) - 0.08) / 0.92;
+        const alpha = (0.25 + s * 0.65).toFixed(2);
+        rawBg = diff > 0 ? `rgba(30,160,30,${alpha})` : `rgba(200,35,35,${alpha})`;
+      }
+      if (!rawBg) return {};
+      if (isDark) return { background: rawBg };
+      const isGreen = rawBg.includes("30,160,30");
+      const alpha2 = rawBg.match(/[\d.]+(?=\))/)?.[0] || "0.5";
+      const boosted = Math.min(1, parseFloat(alpha2) + 0.35).toFixed(2);
+      return { color: isGreen ? `rgba(20,140,20,${boosted})` : `rgba(190,30,30,${boosted})` };
+    }
+
     // Use live league avgs when available
     if (leagueAvgs?.byPitchType?.[pitchType]?.all && (key === "zonePct" || key === "whiffPct")) {
       const lgPt = leagueAvgs.byPitchType[pitchType].all;
@@ -431,10 +455,13 @@ export function PitchTable({ rows, leagueAvgs, isAAA }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, i) => (
+          {rows.map((row, i) => {
+            const ppData = pitchPlus?.[row.type] || {};
+            const rowExt = pitchPlus ? { ...row, ...ppData } : row;
+            return (
             <tr key={i}>
               {cols.map(c => {
-                const val = row[c.key];
+                const val = rowExt[c.key];
                 const formatted = c.fmt ? c.fmt(val) : (val != null ? val : "—");
                 const effStyle = c.key === "name" ? {} : getCellStyle(c.key, val, row.type);
                 return (
@@ -454,7 +481,8 @@ export function PitchTable({ rows, leagueAvgs, isAAA }) {
                 );
               })}
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -524,7 +552,7 @@ function bucketPitches(pitches) {
 
 function inZone(p) {
   if (p.pX == null || p.pZ == null) return false;
-  return Math.abs(p.pX) <= 0.83 && p.pZ >= (p.szBot || 1.5) && p.pZ <= (p.szTop || 3.5);
+  return Math.abs(p.pX) <= 0.88 && p.pZ >= (p.szBot || 1.5) && p.pZ <= (p.szTop || 3.5);
 }
 
 const PITCH_GROUPS = {
@@ -571,11 +599,11 @@ function cellBg(val, avg, higherGood, scale = 5) {
 }
 
 // Common table styles — dynamic sizing
-function countStyles(sz) {
+function countStyles(sz, t) {
   return {
     tblWrap: { overflowX: "auto", marginBottom: sz > 14 ? 4 : 2 },
     secTitle: { fontSize: sz - 1, fontWeight: 700, color: t.text, margin: `${sz > 14 ? 10 : 6}px 0 ${sz > 14 ? 4 : 2}px`, textAlign: "center", letterSpacing: "-0.01em", textTransform: "uppercase" },
-    thS: { padding: `${Math.max(3, sz - 10)}px 4px`, borderBottom: "2px solid #444", color: t.textMuted, fontSize: sz - 3, fontWeight: 700, textAlign: "center", whiteSpace: "nowrap" },
+    thS: { padding: `${Math.max(3, sz - 10)}px 4px`, borderBottom: `2px solid ${t.divider}`, color: t.textMuted, fontSize: sz - 3, fontWeight: 700, textAlign: "center", whiteSpace: "nowrap" },
     tdS: { padding: `${Math.max(3, sz - 10)}px 4px`, borderBottom: `1px solid ${t.tableBorder}`, textAlign: "center", fontSize: sz, fontFamily: "'DM Mono', monospace", color: t.textSecondary, fontWeight: 500 },
     labelS: { padding: `${Math.max(3, sz - 10)}px 6px`, borderBottom: `1px solid ${t.tableBorder}`, textAlign: "left", fontFamily: "inherit", fontWeight: 700, color: t.text, fontSize: sz - 1, whiteSpace: "nowrap" },
     labelW: Math.max(70, 85 + (sz - 14) * 3),
@@ -584,9 +612,10 @@ function countStyles(sz) {
 
 // rows: [{ label, color?, values: {all,first,...}, lgAvg?: {all,first,...}, higherGood?, scale?, fmt? }]
 function CountTable({ title, rows, showColor, labels, keys, size = 14 }) {
+  const { theme: t } = useTheme();
   const bucketLabels = labels || PITCHER_COL_LABELS;
   const bucketKeys = keys || PITCHER_COL_KEYS;
-  const s = countStyles(size);
+  const s = countStyles(size, t);
   return (
     <div>
       <div style={s.secTitle}>{title}</div>
@@ -899,7 +928,7 @@ function MiniZone({ pitches, pitchType, color, size, isGame }) {
   const toX = x => pad + (x - xMin) / xRange * plotW;
   const toY = z => labelH + (zMax - z) / zRange * plotH;
 
-  const zoneL = toX(-0.83), zoneR = toX(0.83);
+  const zoneL = toX(-0.88), zoneR = toX(0.88);
   const zoneT = toY(3.5), zoneB = toY(1.5);
   const zoneW = zoneR - zoneL, zoneH = zoneB - zoneT;
 
