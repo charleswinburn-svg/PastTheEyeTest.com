@@ -4,49 +4,88 @@
   "starters": [],
   "relievers": [
     {
+      "player_id": 608331,
+      "name": "Max Fried",
+      "team": "NYY",
+      "ip": 21.9,
+      "gs": 3,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.763,
+      "qualifying_pas": 38,
+      "total_pas": 80,
+      "reach_pct": 47.5,
+      "pctile": 100.0
+    },
+    {
       "player_id": 813349,
       "name": "Connelly Early",
       "team": "BOS",
-      "ip": 22.4,
-      "gs": 4,
+      "ip": 21.0,
+      "gs": 3,
       "is_sp": false,
-      "avg_pitches_to_2k": 2.932,
-      "qualifying_pas": 44,
-      "total_pas": 91,
-      "reach_pct": 48.4,
-      "pctile": 100.0
+      "avg_pitches_to_2k": 2.857,
+      "qualifying_pas": 42,
+      "total_pas": 86,
+      "reach_pct": 48.8,
+      "pctile": 83.3
+    },
+    {
+      "player_id": 669160,
+      "name": "Dustin May",
+      "team": "STL",
+      "ip": 20.9,
+      "gs": 3,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.904,
+      "qualifying_pas": 52,
+      "total_pas": 87,
+      "reach_pct": 59.8,
+      "pctile": 66.7
     },
     {
       "player_id": 684007,
       "name": "Shota Imanaga",
       "team": "CHC",
-      "ip": 24.9,
-      "gs": 4,
+      "ip": 23.4,
+      "gs": 3,
       "is_sp": false,
-      "avg_pitches_to_2k": 3.02,
-      "qualifying_pas": 50,
-      "total_pas": 92,
-      "reach_pct": 54.3,
-      "pctile": 66.7
+      "avg_pitches_to_2k": 3.042,
+      "qualifying_pas": 48,
+      "total_pas": 87,
+      "reach_pct": 55.2,
+      "pctile": 50.0
     },
     {
       "player_id": 677958,
       "name": "Kumar Rocker",
       "team": "TEX",
-      "ip": 22.0,
+      "ip": 21.4,
       "gs": 4,
       "is_sp": false,
-      "avg_pitches_to_2k": 3.098,
-      "qualifying_pas": 41,
-      "total_pas": 92,
-      "reach_pct": 44.6,
+      "avg_pitches_to_2k": 3.103,
+      "qualifying_pas": 39,
+      "total_pas": 88,
+      "reach_pct": 44.3,
       "pctile": 33.3
+    },
+    {
+      "player_id": 686799,
+      "name": "Jack Kochanowicz",
+      "team": "LAA",
+      "ip": 24.0,
+      "gs": 3,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.238,
+      "qualifying_pas": 42,
+      "total_pas": 96,
+      "reach_pct": 43.8,
+      "pctile": 16.7
     }
   ],
   "meta": {
     "min_ip": 20,
     "gs_threshold": 10,
     "total_pitches_analyzed": 50000,
-    "generated_at": "2026-04-27 11:47:55 UTC"
+    "generated_at": "2026-04-28 11:49:00 UTC"
   }
 }
