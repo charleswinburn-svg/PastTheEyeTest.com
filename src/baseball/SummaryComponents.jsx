@@ -1252,25 +1252,9 @@ function formatShortDate(iso) {
 // ═══════════════════════════════════════════════════════════
 // PLATOON USAGE BARS (double-sided by handedness)
 // ═══════════════════════════════════════════════════════════
-// Bars sized by % of pitches against THAT batter side (LHH/RHH each sum to 100%).
-// Inside each bar: Pitch+ value (when available) with luminance-aware contrast text.
-// Outside each bar: usage % for that side. No pitch-type abbreviations — color +
-// the table below already encode pitch identity.
-
-// Luminance check for picking readable text on any colored fill.
-// Returns true if the fill is light enough that we should use dark text.
-function isLightFill(hex) {
-  if (!hex || hex[0] !== "#") return false;
-  const h = hex.length === 4
-    ? hex.replace(/#(.)(.)(.)/, "#$1$1$2$2$3$3")
-    : hex;
-  const r = parseInt(h.slice(1, 3), 16);
-  const g = parseInt(h.slice(3, 5), 16);
-  const b = parseInt(h.slice(5, 7), 16);
-  // Perceived luminance (Rec. 601). Threshold 0.62 gives black text on yellows
-  // and bright greens, white text on reds/blues/oranges.
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62;
-}
+// Bars sized by max count on each side (so the most-thrown pitch fills the
+// bar; others scale relative to it). Outer labels show count + per-handedness
+// Pitch+. Matches the back-to-back bar style of Pitch Profiler / FanGraphs.
 
 export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400 }) {
   const { theme: t } = useTheme();
@@ -1289,14 +1273,20 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
   );
   if (types.length === 0) return null;
 
-  const totalL = types.reduce((s, pt) => s + byType[pt].L, 0) || 1;
-  const totalR = types.reduce((s, pt) => s + byType[pt].R, 0) || 1;
+  const totalL = types.reduce((s, pt) => s + byType[pt].L, 0) || 0;
+  const totalR = types.reduce((s, pt) => s + byType[pt].R, 0) || 0;
+
+  // Scale by max count on each side (not by total) — matches Williams reference,
+  // makes the most-thrown pitch fill the bar and others scale relative to it.
+  // This visibly widens bars vs. the previous percentage-of-total scaling.
+  const maxL = Math.max(1, ...types.map(pt => byType[pt].L));
+  const maxR = Math.max(1, ...types.map(pt => byType[pt].R));
 
   const headerH = 30;
-  const rowH = Math.max(34, Math.floor((height - headerH - 12) / Math.max(types.length, 1)));
+  const rowH = Math.max(38, Math.floor((height - headerH - 12) / Math.max(types.length, 1)));
   const centerW = 2;
   const sideW = (width - centerW) / 2;
-  const labelW = 26; // tight outer reserve for the % label; bars expand into the rest
+  const labelW = 54; // outer reserve for "Count: NN" + "{pp} Pitch+" stacked
   const maxBarW = sideW - labelW - 4;
 
   return (
@@ -1340,81 +1330,72 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
         {/* Rows */}
         {types.map((pt, i) => {
           const color = PITCH_COLORS[pt] || "#888";
-          const onBarText = isLightFill(color) ? "#1a1a1a" : "#ffffff";
           const lCount = byType[pt].L;
           const rCount = byType[pt].R;
-          const lPct = lCount / totalL;
-          const rPct = rCount / totalR;
-          const lW = lPct * maxBarW;
-          const rW = rPct * maxBarW;
+          const lW = (lCount / maxL) * maxBarW;
+          const rW = (rCount / maxR) * maxBarW;
           const cx = sideW + centerW / 2;
           const y = headerH + 6 + i * rowH;
-          const barH = rowH - 8;
+          const barH = rowH - 10;
+          const midY = y + barH / 2;
 
-          // Per-handedness Pitch+ (different value for LHH vs RHH within same type)
+          // Per-handedness Pitch+
           const lPp = pitchPlus?.[pt]?.L?.pitchPlus;
           const rPp = pitchPlus?.[pt]?.R?.pitchPlus;
-          const lLabel = lPp != null ? `${Math.round(lPp)}` : null;
-          const rLabel = rPp != null ? `${Math.round(rPp)}` : null;
-
-          // Smaller font + bold so labels fit inside even moderately narrow bars.
-          // "103" at fontSize 10 monospace is ~22px; 26px threshold leaves a
-          // small inset on each side.
-          const fitThresh = 26;
-          const lFitsPp = lLabel && lW >= fitThresh;
-          const rFitsPp = rLabel && rW >= fitThresh;
 
           return (
             <g key={pt}>
-              {/* LHH bar (extends leftward from center) */}
+              {/* LHH bar (anchored at center, extends leftward) */}
               {lCount > 0 && (
                 <>
                   <rect
                     x={cx - lW} y={y}
                     width={lW} height={barH}
                     fill={color} fillOpacity={0.92}
-                    rx={3}
+                    rx={2}
                   />
-                  {lFitsPp && (
-                    <text
-                      x={cx - lW / 2} y={y + barH / 2 + 3.5}
-                      textAnchor="middle" fontSize={10} fontWeight={800}
-                      fill={onBarText}
-                      fontFamily="'DM Mono', monospace"
-                    >{lLabel}</text>
-                  )}
-                  {/* % outside on the left edge */}
+                  {/* Outer labels: count on top, Pitch+ below */}
                   <text
-                    x={cx - lW - 3} y={y + barH / 2 + 3.5}
-                    textAnchor="end" fontSize={10} fontWeight={800}
+                    x={4} y={midY - 1}
+                    fontSize={9} fontWeight={800}
                     fill={t.textSecondary}
                     fontFamily="'DM Mono', monospace"
-                  >{Math.round(lPct * 100)}%</text>
+                  >Count: {lCount}</text>
+                  {lPp != null && (
+                    <text
+                      x={4} y={midY + 9}
+                      fontSize={8} fontWeight={700}
+                      fill={t.textFaint}
+                      fontFamily="'DM Mono', monospace"
+                    >{Math.round(lPp)} Pitch+</text>
+                  )}
                 </>
               )}
-              {/* RHH bar (extends rightward from center) */}
+              {/* RHH bar (anchored at center, extends rightward) */}
               {rCount > 0 && (
                 <>
                   <rect
                     x={cx} y={y}
                     width={rW} height={barH}
                     fill={color} fillOpacity={0.92}
-                    rx={3}
+                    rx={2}
                   />
-                  {rFitsPp && (
-                    <text
-                      x={cx + rW / 2} y={y + barH / 2 + 3.5}
-                      textAnchor="middle" fontSize={10} fontWeight={800}
-                      fill={onBarText}
-                      fontFamily="'DM Mono', monospace"
-                    >{rLabel}</text>
-                  )}
                   <text
-                    x={cx + rW + 3} y={y + barH / 2 + 3.5}
-                    fontSize={10} fontWeight={800}
+                    x={width - 4} y={midY - 1}
+                    textAnchor="end"
+                    fontSize={9} fontWeight={800}
                     fill={t.textSecondary}
                     fontFamily="'DM Mono', monospace"
-                  >{Math.round(rPct * 100)}%</text>
+                  >Count: {rCount}</text>
+                  {rPp != null && (
+                    <text
+                      x={width - 4} y={midY + 9}
+                      textAnchor="end"
+                      fontSize={8} fontWeight={700}
+                      fill={t.textFaint}
+                      fontFamily="'DM Mono', monospace"
+                    >{Math.round(rPp)} Pitch+</text>
+                  )}
                 </>
               )}
             </g>
