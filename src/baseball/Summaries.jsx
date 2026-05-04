@@ -9,6 +9,7 @@ import {
 import {
   MovementPlot, SprayChart, ZonePlot, StatBar, PitchTable, PitchTypeLegend,
   PitcherCountTool, HitterCountTool, LocationZonePanel,
+  RollingVeloChart, PlatoonUsageBars, PanelToggle,
 } from "./SummaryComponents.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm } from "./SharedComponents.jsx";
 
@@ -445,10 +446,11 @@ export default function Summaries({ season }) {
       if (isPitcher) {
         const allPitches = [];
         let totalOuts = 0, totalH = 0, totalR = 0, totalER = 0, totalK = 0, totalBB = 0, totalHBP = 0, totalHR = 0, totalBF = 0;
-        for (const { pbp, box } of seasonPbps) {
-          // Pitches from PBP (for charts, pitch table)
+        for (const { pbp, box, game } of seasonPbps) {
+          // Pitches from PBP (for charts, pitch table) — tag with game metadata
+          // for season-level rolling charts that need to group by outing.
           const d = extractPitcherData(pbp, selectedPlayer.id);
-          allPitches.push(...d.pitches);
+          for (const p of d.pitches) allPitches.push({ ...p, gamePk: game?.gamePk, gameDate: game?.date });
 
           // Counting stats from boxscore (official MLB source)
           let usedBox = false;
@@ -840,6 +842,9 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const pitchRows = useMemo(() => aggregateByPitchType(data.pitches), [data.pitches]);
+  // Per-side panel selection. Default = current "zones" behavior on both sides.
+  const [leftPanel, setLeftPanel] = useState("zones");   // "zones" | "velo"
+  const [rightPanel, setRightPanel] = useState("zones"); // "zones" | "platoon"
   const strikePct = data.totalPitches > 0 ? Math.round(data.pitches.filter(p => p.isStrike || p.isInPlay).length / data.totalPitches * 1000) / 10 : 0;
   const swings = data.pitches.filter(p => p.isSwing);
   const whiffPct = swings.length > 0 ? Math.round(data.pitches.filter(p => p.isWhiff).length / swings.length * 1000) / 10 : 0;
@@ -881,10 +886,30 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
       <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 1000, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
         <SummaryHeader player={player} subtitle={subtitle} seasonType={seasonType} isAAA={isAAA} />
         <StatBar stats={stats} />
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "0 4px", gap: 4 }}>
-          <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "L")} side="L" width={260} isGame={isGame} />
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "0 4px", gap: 4 }}>
+          <div style={{ width: 260 }}>
+            <PanelToggle
+              value={leftPanel} onChange={setLeftPanel}
+              options={[{ value: "zones", label: "vs LHB" }, { value: "velo", label: "Velo" }]}
+            />
+            {leftPanel === "zones" ? (
+              <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "L")} side="L" width={260} isGame={isGame} />
+            ) : (
+              <RollingVeloChart pitches={data.pitches} mode={isGame ? "game" : "season"} width={260} height={400} />
+            )}
+          </div>
           <MovementPlot pitches={data.pitches} width={420} height={400} maxPitches={200} />
-          <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} />
+          <div style={{ width: 260 }}>
+            <PanelToggle
+              value={rightPanel} onChange={setRightPanel}
+              options={[{ value: "zones", label: "vs RHB" }, { value: "platoon", label: "Platoon" }]}
+            />
+            {rightPanel === "zones" ? (
+              <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} />
+            ) : (
+              <PlatoonUsageBars pitches={data.pitches} pitchPlus={pitchPlus} width={260} height={400} />
+            )}
+          </div>
         </div>
         <PitchTypeLegend types={[...new Set(data.pitches.map(p => p.pitchType))].filter(t => t !== "UN")} />
         <PitchTable rows={pitchRows} leagueAvgs={leagueAvgs} isAAA={isAAA} pitchPlus={pitchPlus} />
@@ -953,10 +978,9 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
 function SummaryHeader({ player, subtitle, seasonType, isAAA }) {
   const { theme: t } = useTheme();
   const headshot = player.id ? `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,h_213,c_thumb,g_face,q_auto:best/v1/people/${player.id}/headshot/67/current` : null;
-  // For AAA: use the AAA team's own logo via teamId; for MLB: use team abbrev
-  const logo = isAAA
-    ? (player.teamId ? `/mlb-logos/v1/team/${player.teamId}/spots/128` : null)
-    : getLogoUrl(player.team);
+  // Single resolver: tries abbreviation, falls back to teamId. Works for MLB,
+  // AAA, and any other level — teamId path hits the logo CDN directly.
+  const logo = getLogoUrl(player.team, player.teamId);
   const flag = (!isAAA && seasonType === "W") ? getWbcFlag(player.team) : null;
   const showFlag = seasonType === "W" ? (flag || null) : null;
   const showLogo = seasonType === "W" ? (!flag ? logo : null) : logo;

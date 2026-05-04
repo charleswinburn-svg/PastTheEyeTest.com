@@ -1065,3 +1065,388 @@ export function LocationZonePanel({ pitches, side, width = 260, isGame }) {
     </div>
   );
 }
+
+
+// ═══════════════════════════════════════════════════════════
+// ROLLING VELO CHART
+// ═══════════════════════════════════════════════════════════
+// Game mode: x = pitch # within pitch-type, y = velo. One line per pitch type.
+//            Pitches are already in chronological order from extractPitcherData.
+// Season mode: x = outing date, y = avg velo per pitch type per outing.
+//              Requires pitches tagged with gamePk + gameDate.
+export function RollingVeloChart({ pitches, mode = "game", width = 260, height = 400 }) {
+  const { theme: t, isDark } = useTheme();
+  if (!pitches || pitches.length === 0) return null;
+
+  const pad = { top: 22, right: 14, bottom: 38, left: 36 };
+  const plotW = width - pad.left - pad.right;
+  const plotH = height - pad.top - pad.bottom;
+
+  // ── Build series: { [pitchType]: [{x, y}, ...] }
+  const series = {};
+  let xLabels = [];
+
+  if (mode === "game") {
+    // Walk pitches in order, assign per-type ordinal
+    const counts = {};
+    for (const p of pitches) {
+      if (!p.pitchType || p.pitchType === "UN" || p.velo == null) continue;
+      counts[p.pitchType] = (counts[p.pitchType] || 0) + 1;
+      if (!series[p.pitchType]) series[p.pitchType] = [];
+      series[p.pitchType].push({ x: counts[p.pitchType], y: p.velo });
+    }
+  } else {
+    // Group by gamePk, then per-type avg velo
+    const byGame = new Map();
+    for (const p of pitches) {
+      if (!p.gamePk || !p.pitchType || p.pitchType === "UN" || p.velo == null) continue;
+      if (!byGame.has(p.gamePk)) byGame.set(p.gamePk, { date: p.gameDate || "", types: {} });
+      const g = byGame.get(p.gamePk);
+      if (!g.types[p.pitchType]) g.types[p.pitchType] = [];
+      g.types[p.pitchType].push(p.velo);
+    }
+    const entries = [...byGame.entries()].sort((a, b) =>
+      (a[1].date || "").localeCompare(b[1].date || "")
+    );
+    xLabels = entries.map(([, g]) => formatShortDate(g.date));
+    entries.forEach(([, g], i) => {
+      for (const [pt, vs] of Object.entries(g.types)) {
+        if (!series[pt]) series[pt] = [];
+        const avg = vs.reduce((a, b) => a + b, 0) / vs.length;
+        series[pt].push({ x: i + 1, y: Math.round(avg * 10) / 10 });
+      }
+    });
+  }
+
+  const types = Object.keys(series);
+  if (types.length === 0) return null;
+
+  // ── Scales
+  const allY = types.flatMap(pt => series[pt].map(p => p.y));
+  const allX = types.flatMap(pt => series[pt].map(p => p.x));
+  const yMin = Math.floor(Math.min(...allY) - 1);
+  const yMax = Math.ceil(Math.max(...allY) + 1);
+  const xMax = Math.max(...allX);
+  const xMin = mode === "game" ? 1 : 1;
+  const xRange = Math.max(1, xMax - xMin);
+  const yRange = Math.max(1, yMax - yMin);
+
+  const xPos = (x) => pad.left + ((x - xMin) / xRange) * plotW;
+  const yPos = (y) => pad.top + (1 - (y - yMin) / yRange) * plotH;
+
+  // ── Y ticks (5 evenly spaced)
+  const yTicks = [];
+  const step = Math.max(1, Math.round(yRange / 4));
+  for (let v = yMin; v <= yMax; v += step) yTicks.push(v);
+
+  // ── X ticks
+  const xTicks = [];
+  if (mode === "game") {
+    const xStep = Math.max(1, Math.ceil(xMax / 6));
+    for (let v = 1; v <= xMax; v += xStep) xTicks.push({ x: v, label: String(v) });
+    if (xTicks[xTicks.length - 1]?.x !== xMax) xTicks.push({ x: xMax, label: String(xMax) });
+  } else {
+    // Sparser if many outings to avoid overlap
+    const everyN = Math.max(1, Math.ceil(xLabels.length / 6));
+    for (let i = 0; i < xLabels.length; i++) {
+      if (i % everyN === 0 || i === xLabels.length - 1) {
+        xTicks.push({ x: i + 1, label: xLabels[i] });
+      }
+    }
+  }
+
+  return (
+    <div style={{ width, padding: "4px 6px" }}>
+      <div style={{
+        fontSize: 10, fontWeight: 800, color: t.textMuted, marginBottom: 4,
+        textTransform: "uppercase", letterSpacing: "0.06em", textAlign: "center",
+      }}>
+        Velocity {mode === "game" ? "by Pitch #" : "by Outing"}
+      </div>
+      <svg width={width} height={height} style={{ display: "block" }}>
+        {/* Y grid + labels */}
+        {yTicks.map(v => (
+          <g key={`y${v}`}>
+            <line
+              x1={pad.left} x2={width - pad.right}
+              y1={yPos(v)} y2={yPos(v)}
+              stroke={t.cardBorder} strokeDasharray="3 3" strokeWidth={0.5}
+            />
+            <text
+              x={pad.left - 4} y={yPos(v) + 3}
+              textAnchor="end" fontSize={9} fill={t.textFaint}
+              fontFamily="'DM Mono', monospace"
+            >{v}</text>
+          </g>
+        ))}
+        {/* Y axis label */}
+        <text
+          x={10} y={pad.top + plotH / 2}
+          fontSize={9} fill={t.textFaint}
+          textAnchor="middle"
+          transform={`rotate(-90 10 ${pad.top + plotH / 2})`}
+        >mph</text>
+
+        {/* X axis line */}
+        <line
+          x1={pad.left} x2={width - pad.right}
+          y1={pad.top + plotH} y2={pad.top + plotH}
+          stroke={t.divider} strokeWidth={1}
+        />
+
+        {/* X labels */}
+        {xTicks.map((tk, i) => (
+          <text
+            key={`x${i}`}
+            x={xPos(tk.x)} y={pad.top + plotH + 14}
+            textAnchor={mode === "season" ? "end" : "middle"}
+            fontSize={9} fill={t.textFaint}
+            fontFamily={mode === "game" ? "'DM Mono', monospace" : "inherit"}
+            transform={mode === "season" ? `rotate(-35 ${xPos(tk.x)} ${pad.top + plotH + 14})` : ""}
+          >{tk.label}</text>
+        ))}
+
+        {/* Lines + dots */}
+        {types.map(pt => {
+          const color = PITCH_COLORS[pt] || "#888";
+          const pts = series[pt];
+          const path = pts.map((p, i) =>
+            `${i === 0 ? "M" : "L"} ${xPos(p.x)} ${yPos(p.y)}`
+          ).join(" ");
+          return (
+            <g key={pt}>
+              {pts.length > 1 && (
+                <path
+                  d={path} fill="none"
+                  stroke={color} strokeWidth={1.8}
+                  strokeOpacity={0.85} strokeLinecap="round"
+                />
+              )}
+              {pts.map((p, i) => (
+                <circle
+                  key={i}
+                  cx={xPos(p.x)} cy={yPos(p.y)}
+                  r={2.5} fill={color}
+                  stroke={isDark ? "#0d0d0d" : "#fff"} strokeWidth={0.8}
+                />
+              ))}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function formatShortDate(iso) {
+  if (!iso) return "";
+  // Accepts "YYYY-MM-DD" or full ISO; returns "M/D"
+  const m = iso.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return iso;
+  return `${parseInt(m[2])}/${parseInt(m[3])}`;
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// PLATOON USAGE BARS (double-sided by handedness)
+// ═══════════════════════════════════════════════════════════
+// Counts pitches per pitch type split by batter side, renders back-to-back
+// horizontal bars. Bars are sized by % of pitches against that batter side.
+export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400 }) {
+  const { theme: t, isDark } = useTheme();
+  if (!pitches || pitches.length === 0) return null;
+
+  const byType = {};
+  for (const p of pitches) {
+    if (!p.pitchType || p.pitchType === "UN") continue;
+    if (!byType[p.pitchType]) byType[p.pitchType] = { L: 0, R: 0 };
+    if (p.batSide === "L") byType[p.pitchType].L++;
+    else if (p.batSide === "R") byType[p.pitchType].R++;
+  }
+
+  const types = Object.keys(byType).sort((a, b) =>
+    (byType[b].L + byType[b].R) - (byType[a].L + byType[a].R)
+  );
+  if (types.length === 0) return null;
+
+  const totalL = types.reduce((s, pt) => s + byType[pt].L, 0) || 1;
+  const totalR = types.reduce((s, pt) => s + byType[pt].R, 0) || 1;
+
+  const headerH = 26;
+  const rowH = Math.max(34, Math.floor((height - headerH - 12) / Math.max(types.length, 1)));
+  const centerW = 2;
+  const sideW = (width - centerW) / 2;
+  const labelW = 50; // count + label width on outer edge
+  const maxBarW = sideW - labelW - 6;
+
+  return (
+    <div style={{ width, padding: "4px 4px" }}>
+      <div style={{
+        fontSize: 10, fontWeight: 800, color: t.textMuted, marginBottom: 4,
+        textTransform: "uppercase", letterSpacing: "0.06em", textAlign: "center",
+      }}>
+        Usage by Platoon
+      </div>
+      <svg width={width} height={height} style={{ display: "block" }}>
+        {/* Headers */}
+        <text
+          x={sideW / 2} y={14}
+          textAnchor="middle" fontSize={11} fontWeight={800} fill={t.text}
+          letterSpacing="0.08em"
+        >LHH</text>
+        <text
+          x={sideW + centerW + sideW / 2} y={14}
+          textAnchor="middle" fontSize={11} fontWeight={800} fill={t.text}
+          letterSpacing="0.08em"
+        >RHH</text>
+        <text
+          x={sideW / 2} y={26}
+          textAnchor="middle" fontSize={9} fill={t.textFaint}
+          fontFamily="'DM Mono', monospace"
+        >{totalL} pitches</text>
+        <text
+          x={sideW + centerW + sideW / 2} y={26}
+          textAnchor="middle" fontSize={9} fill={t.textFaint}
+          fontFamily="'DM Mono', monospace"
+        >{totalR} pitches</text>
+
+        {/* Center divider */}
+        <line
+          x1={sideW + centerW / 2} x2={sideW + centerW / 2}
+          y1={headerH + 4} y2={height - 4}
+          stroke={t.divider} strokeWidth={1}
+        />
+
+        {/* Rows */}
+        {types.map((pt, i) => {
+          const color = PITCH_COLORS[pt] || "#888";
+          const lCount = byType[pt].L;
+          const rCount = byType[pt].R;
+          const lPct = lCount / totalL;
+          const rPct = rCount / totalR;
+          const lW = lPct * maxBarW;
+          const rW = rPct * maxBarW;
+          const cx = sideW + centerW / 2;
+          const y = headerH + 6 + i * rowH;
+          const barH = rowH - 8;
+          const labelOnBar = lW > 32 || rW > 32;
+          const lOnBar = lW > 32;
+          const rOnBar = rW > 32;
+
+          // Optional pitch+ next to count (subtle)
+          const ppVal = pitchPlus?.[pt]?.pitchPlus;
+
+          return (
+            <g key={pt}>
+              {/* LHH bar (extends leftward from center) */}
+              {lCount > 0 && (
+                <>
+                  <rect
+                    x={cx - lW} y={y}
+                    width={lW} height={barH}
+                    fill={color} fillOpacity={0.85}
+                    rx={3}
+                  />
+                  {lOnBar && (
+                    <text
+                      x={cx - lW + 6} y={y + barH / 2 + 4}
+                      fontSize={11} fontWeight={800} fill="#fff"
+                    >{pt}</text>
+                  )}
+                  {/* Count outside on left */}
+                  <text
+                    x={cx - lW - 4} y={y + barH / 2 + 4}
+                    textAnchor="end" fontSize={11} fontWeight={700}
+                    fill={t.textSecondary}
+                    fontFamily="'DM Mono', monospace"
+                  >{lCount}</text>
+                  {/* Pitch+ tiny badge if available */}
+                  {ppVal != null && (
+                    <text
+                      x={cx - lW - 4} y={y + barH / 2 + 16}
+                      textAnchor="end" fontSize={8}
+                      fill={t.textFaint}
+                      fontFamily="'DM Mono', monospace"
+                    >{Math.round(ppVal)} P+</text>
+                  )}
+                </>
+              )}
+              {/* RHH bar (extends rightward from center) */}
+              {rCount > 0 && (
+                <>
+                  <rect
+                    x={cx} y={y}
+                    width={rW} height={barH}
+                    fill={color} fillOpacity={0.85}
+                    rx={3}
+                  />
+                  {rOnBar && (
+                    <text
+                      x={cx + rW - 6} y={y + barH / 2 + 4}
+                      textAnchor="end" fontSize={11} fontWeight={800} fill="#fff"
+                    >{pt}</text>
+                  )}
+                  <text
+                    x={cx + rW + 4} y={y + barH / 2 + 4}
+                    fontSize={11} fontWeight={700}
+                    fill={t.textSecondary}
+                    fontFamily="'DM Mono', monospace"
+                  >{rCount}</text>
+                  {ppVal != null && (
+                    <text
+                      x={cx + rW + 4} y={y + barH / 2 + 16}
+                      fontSize={8}
+                      fill={t.textFaint}
+                      fontFamily="'DM Mono', monospace"
+                    >{Math.round(ppVal)} P+</text>
+                  )}
+                </>
+              )}
+              {/* If neither side has a wide enough bar, show pt label inline near center */}
+              {!labelOnBar && (
+                <text
+                  x={cx} y={y + barH / 2 + 4}
+                  textAnchor="middle" fontSize={10} fontWeight={700} fill={t.textMuted}
+                >{pt}</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// SIDE PANEL SELECTOR (small toggle bar)
+// ═══════════════════════════════════════════════════════════
+export function PanelToggle({ value, onChange, options }) {
+  const { theme: t } = useTheme();
+  return (
+    <div style={{
+      display: "flex", justifyContent: "center", gap: 4,
+      padding: "4px 0 6px",
+    }}>
+      {options.map(opt => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value)}
+            style={{
+              padding: "3px 10px",
+              fontSize: 10, fontWeight: 700,
+              letterSpacing: "0.04em", textTransform: "uppercase",
+              background: active ? t.text : "transparent",
+              color: active ? t.cardBg : t.textMuted,
+              border: `1px solid ${active ? t.text : t.inputBorder}`,
+              borderRadius: 4, cursor: "pointer",
+              fontFamily: "inherit",
+            }}
+          >{opt.label}</button>
+        );
+      })}
+    </div>
+  );
+}
