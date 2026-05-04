@@ -394,6 +394,28 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
   ];
 
   const EFF_KEYS = { velo: "velo", spin: "spin", whiffPct: "whiffPct", zonePct: "zonePct", extension: "extension", pitchPlus: "pitchPlus", stuffPlus: "stuffPlus", locPlus: "locPlus", tunnelPlus: "tunnelPlus" };
+
+  // Convert raw rgba bg from the scoring logic into a renderable style.
+  // Dark mode: unchanged — full-cell tint as before.
+  // Light mode: PILL style — tinted background + readable text inside cell;
+  // text auto-flips to white once tint saturates so contrast holds at any value.
+  // ── No scoring math here. Same alpha, same colors, same thresholds as before.
+  const presentBg = (rawBg) => {
+    if (!rawBg) return {};
+    if (isDark) return { background: rawBg };
+    const isGreen = rawBg.includes("30,160,30");
+    const alpha = parseFloat(rawBg.match(/[\d.]+(?=\))/)?.[0] || "0.5");
+    const bgAlpha = Math.min(0.92, alpha + 0.10).toFixed(2);
+    const tint = isGreen
+      ? `rgba(34,160,60,${bgAlpha})`
+      : `rgba(210,45,55,${bgAlpha})`;
+    const useWhite = parseFloat(bgAlpha) > 0.55;
+    const textColor = useWhite
+      ? "#ffffff"
+      : (isGreen ? "rgb(20,110,40)" : "rgb(165,25,35)");
+    return { background: tint, color: textColor, isPill: true };
+  };
+
   const getCellStyle = (key, value, pitchType) => {
     if (value == null || !EFF_KEYS[key]) return {};
     let rawBg = null;
@@ -407,12 +429,7 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
         const alpha = (0.25 + s * 0.65).toFixed(2);
         rawBg = diff > 0 ? `rgba(30,160,30,${alpha})` : `rgba(200,35,35,${alpha})`;
       }
-      if (!rawBg) return {};
-      if (isDark) return { background: rawBg };
-      const isGreen = rawBg.includes("30,160,30");
-      const alpha2 = rawBg.match(/[\d.]+(?=\))/)?.[0] || "0.5";
-      const boosted = Math.min(1, parseFloat(alpha2) + 0.35).toFixed(2);
-      return { color: isGreen ? `rgba(20,140,20,${boosted})` : `rgba(190,30,30,${boosted})` };
+      return presentBg(rawBg);
     }
 
     // Use live league avgs when available
@@ -431,25 +448,20 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
       }
     }
     if (!rawBg) rawBg = effColor(value, EFF_KEYS[key], pitchType, avgSet);
-    if (!rawBg) return {};
-    if (isDark) return { background: rawBg };
-    // Light mode: colored text, no bg
-    const isGreen = rawBg.includes("30,160,30");
-    const alpha = rawBg.match(/[\d.]+(?=\))/)?.[0] || "0.5";
-    const boosted = Math.min(1, parseFloat(alpha) + 0.35).toFixed(2);
-    return { color: isGreen ? `rgba(20,140,20,${boosted})` : `rgba(190,30,30,${boosted})` };
+    return presentBg(rawBg);
   };
 
   return (
     <div style={{ overflowX: "auto", padding: "0 8px 12px" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
         <thead>
           <tr>
             {cols.map(c => (
               <th key={c.key} style={{
-                padding: "8px 6px", textAlign: c.align || "center",
-                borderBottom: `2px solid ${t.divider}`, color: t.textMuted, fontSize: 10,
-                fontWeight: 700, whiteSpace: "nowrap",
+                padding: "10px 6px", textAlign: c.align || "center",
+                borderBottom: `2px solid ${t.divider}`, color: t.textMuted, fontSize: 11,
+                fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase",
+                whiteSpace: "nowrap",
               }}>{c.label}</th>
             ))}
           </tr>
@@ -464,17 +476,58 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
                 const val = rowExt[c.key];
                 const formatted = c.fmt ? c.fmt(val) : (val != null ? val : "—");
                 const effStyle = c.key === "name" ? {} : getCellStyle(c.key, val, row.type);
+
+                // Pitch name cell — colored chip (unchanged behavior, slightly bolder)
+                if (c.key === "name") {
+                  return (
+                    <td key={c.key} style={{
+                      padding: "7px 6px", textAlign: "center",
+                      borderBottom: `1px solid ${t.tableBorder}`,
+                      color: "#fff", fontWeight: 800,
+                      background: row.color, borderRadius: 4, minWidth: 90,
+                      letterSpacing: "0.02em",
+                    }}>
+                      {formatted}
+                    </td>
+                  );
+                }
+
+                // Light-mode pill: tinted span inside transparent cell
+                if (effStyle.isPill) {
+                  return (
+                    <td key={c.key} style={{
+                      padding: "6px 4px", textAlign: c.align || "center",
+                      borderBottom: `1px solid ${t.tableBorder}`,
+                      fontFamily: "'DM Mono', monospace",
+                      whiteSpace: "nowrap",
+                    }}>
+                      <span style={{
+                        display: "inline-block",
+                        background: effStyle.background,
+                        color: effStyle.color,
+                        padding: "3px 10px",
+                        borderRadius: 6,
+                        fontWeight: 800,
+                        minWidth: 32,
+                        letterSpacing: "0.01em",
+                      }}>
+                        {formatted}
+                      </span>
+                    </td>
+                  );
+                }
+
+                // Dark mode (full-cell tint) OR neutral cell
                 return (
                   <td key={c.key} style={{
-                    padding: "6px 6px",
+                    padding: "7px 6px",
                     textAlign: c.align || "center",
                     borderBottom: `1px solid ${t.tableBorder}`,
-                    color: c.key === "name" ? "#fff" : (effStyle.color || t.textSecondary),
-                    fontWeight: (c.key === "name" || effStyle.background || effStyle.color) ? 700 : 400,
-                    background: c.key === "name" ? row.color : (effStyle.background || "transparent"),
-                    fontFamily: c.key === "name" ? "inherit" : "'DM Mono', monospace",
+                    color: effStyle.color || t.textSecondary,
+                    fontWeight: effStyle.background ? 800 : 600,
+                    background: effStyle.background || "transparent",
+                    fontFamily: "'DM Mono', monospace",
                     whiteSpace: "nowrap",
-                    ...(c.key === "name" ? { borderRadius: 4, textAlign: "center", minWidth: 85 } : {}),
                   }}>
                     {formatted}
                   </td>
