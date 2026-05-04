@@ -1354,18 +1354,18 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                     fill={color} fillOpacity={0.92}
                     rx={2}
                   />
-                  {/* Outer labels: count on top, Pitch+ below */}
+                  {/* Outer labels: % on top, Pitch+ below (same color) */}
                   <text
                     x={4} y={midY - 1}
                     fontSize={9} fontWeight={800}
                     fill={t.textSecondary}
                     fontFamily="'DM Mono', monospace"
-                  >Count: {lCount}</text>
+                  >{totalL > 0 ? Math.round(lCount / totalL * 100) : 0}%</text>
                   {lPp != null && (
                     <text
                       x={4} y={midY + 9}
                       fontSize={8} fontWeight={700}
-                      fill={t.textFaint}
+                      fill={t.textSecondary}
                       fontFamily="'DM Mono', monospace"
                     >{Math.round(lPp)} Pitch+</text>
                   )}
@@ -1386,13 +1386,13 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                     fontSize={9} fontWeight={800}
                     fill={t.textSecondary}
                     fontFamily="'DM Mono', monospace"
-                  >Count: {rCount}</text>
+                  >{totalR > 0 ? Math.round(rCount / totalR * 100) : 0}%</text>
                   {rPp != null && (
                     <text
                       x={width - 4} y={midY + 9}
                       textAnchor="end"
                       fontSize={8} fontWeight={700}
-                      fill={t.textFaint}
+                      fill={t.textSecondary}
                       fontFamily="'DM Mono', monospace"
                     >{Math.round(rPp)} Pitch+</text>
                   )}
