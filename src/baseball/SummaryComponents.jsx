@@ -396,20 +396,30 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
   const EFF_KEYS = { velo: "velo", spin: "spin", whiffPct: "whiffPct", zonePct: "zonePct", extension: "extension", pitchPlus: "pitchPlus", stuffPlus: "stuffPlus", locPlus: "locPlus", tunnelPlus: "tunnelPlus" };
 
   // Convert raw rgba bg from the scoring logic into a renderable style.
-  // Dark mode: unchanged — full-cell tint as before.
-  // Light mode: PILL style — tinted background + readable text inside cell;
-  // text auto-flips to white once tint saturates so contrast holds at any value.
+  // Both modes use PILL style — tinted background + readable text.
+  // Text auto-flips to white once tint saturates so contrast holds at any value.
+  // Dark mode uses brighter green/red text on subtle tints; light mode uses deeper hues.
   // ── No scoring math here. Same alpha, same colors, same thresholds as before.
   const presentBg = (rawBg) => {
     if (!rawBg) return {};
-    if (isDark) return { background: rawBg };
     const isGreen = rawBg.includes("30,160,30");
     const alpha = parseFloat(rawBg.match(/[\d.]+(?=\))/)?.[0] || "0.5");
     const bgAlpha = Math.min(0.92, alpha + 0.10).toFixed(2);
+    const useWhite = parseFloat(bgAlpha) > 0.55;
+
+    if (isDark) {
+      const tint = isGreen
+        ? `rgba(40,170,60,${bgAlpha})`
+        : `rgba(220,55,65,${bgAlpha})`;
+      const textColor = useWhite
+        ? "#ffffff"
+        : (isGreen ? "rgb(140,235,160)" : "rgb(255,150,160)");
+      return { background: tint, color: textColor, isPill: true };
+    }
+
     const tint = isGreen
       ? `rgba(34,160,60,${bgAlpha})`
       : `rgba(210,45,55,${bgAlpha})`;
-    const useWhite = parseFloat(bgAlpha) > 0.55;
     const textColor = useWhite
       ? "#ffffff"
       : (isGreen ? "rgb(20,110,40)" : "rgb(165,25,35)");
@@ -492,7 +502,7 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
                   );
                 }
 
-                // Light-mode pill: tinted span inside transparent cell
+                // Pill cell (both modes): tinted span inside transparent cell
                 if (effStyle.isPill) {
                   return (
                     <td key={c.key} style={{
@@ -517,15 +527,14 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
                   );
                 }
 
-                // Dark mode (full-cell tint) OR neutral cell
+                // Neutral cell (no scoring tint applied)
                 return (
                   <td key={c.key} style={{
                     padding: "7px 6px",
                     textAlign: c.align || "center",
                     borderBottom: `1px solid ${t.tableBorder}`,
-                    color: effStyle.color || t.textSecondary,
-                    fontWeight: effStyle.background ? 800 : 600,
-                    background: effStyle.background || "transparent",
+                    color: t.textSecondary,
+                    fontWeight: 600,
                     fontFamily: "'DM Mono', monospace",
                     whiteSpace: "nowrap",
                   }}>
