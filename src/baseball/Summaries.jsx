@@ -685,25 +685,39 @@ export default function Summaries({ season }) {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (cancelled || !data?.scores) return;
+        // Per-pitch scores come back in the same order as we sent them, so we
+        // can read each pitch's batter side from `payload[i]._stand` to bucket
+        // by handedness in addition to the overall aggregation.
         const byType = {};
-        for (const s of data.scores) {
+        for (let i = 0; i < data.scores.length; i++) {
+          const s = data.scores[i];
+          const stand = (payload[i]?._stand === "L" || payload[i]?._stand === "R")
+            ? payload[i]._stand : null;
           if (!byType[s.pitch_type]) byType[s.pitch_type] = {
             stuff: { sum: 0, n: 0 }, loc: { sum: 0, n: 0 },
             tunnel: { sum: 0, n: 0 }, pitch: { sum: 0, n: 0 },
+            L: { sum: 0, n: 0 }, R: { sum: 0, n: 0 },
           };
           const b = byType[s.pitch_type];
           if (s.stuff_plus != null) { b.stuff.sum += s.stuff_plus; b.stuff.n++; }
           if (s.loc_plus != null) { b.loc.sum += s.loc_plus; b.loc.n++; }
           if (s.tunnel_plus != null) { b.tunnel.sum += s.tunnel_plus; b.tunnel.n++; }
-          if (s.pitch_plus != null) { b.pitch.sum += s.pitch_plus; b.pitch.n++; }
+          if (s.pitch_plus != null) {
+            b.pitch.sum += s.pitch_plus; b.pitch.n++;
+            if (stand) { b[stand].sum += s.pitch_plus; b[stand].n++; }
+          }
         }
+        const round = (v) => Math.round(v * 10) / 10;
         const out = {};
         for (const [pt, v] of Object.entries(byType)) {
           out[pt] = {
-            stuffPlus: v.stuff.n > 0 ? Math.round((v.stuff.sum / v.stuff.n) * 10) / 10 : null,
-            locPlus: v.loc.n > 0 ? Math.round((v.loc.sum / v.loc.n) * 10) / 10 : null,
-            tunnelPlus: v.tunnel.n > 0 ? Math.round((v.tunnel.sum / v.tunnel.n) * 10) / 10 : null,
-            pitchPlus: v.pitch.n > 0 ? Math.round((v.pitch.sum / v.pitch.n) * 10) / 10 : null,
+            stuffPlus: v.stuff.n > 0 ? round(v.stuff.sum / v.stuff.n) : null,
+            locPlus: v.loc.n > 0 ? round(v.loc.sum / v.loc.n) : null,
+            tunnelPlus: v.tunnel.n > 0 ? round(v.tunnel.sum / v.tunnel.n) : null,
+            pitchPlus: v.pitch.n > 0 ? round(v.pitch.sum / v.pitch.n) : null,
+            // Per-handedness Pitch+ for platoon splits (PlatoonUsageBars uses these)
+            L: { pitchPlus: v.L.n > 0 ? round(v.L.sum / v.L.n) : null },
+            R: { pitchPlus: v.R.n > 0 ? round(v.R.sum / v.R.n) : null },
           };
         }
         console.log(`[Pitch+] Scored ${data.scores.length} pitches:`, out);

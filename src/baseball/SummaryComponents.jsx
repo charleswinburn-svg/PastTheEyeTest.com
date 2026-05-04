@@ -1296,7 +1296,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
   const rowH = Math.max(34, Math.floor((height - headerH - 12) / Math.max(types.length, 1)));
   const centerW = 2;
   const sideW = (width - centerW) / 2;
-  const labelW = 38; // small space outside for the % label
+  const labelW = 26; // tight outer reserve for the % label; bars expand into the rest
   const maxBarW = sideW - labelW - 4;
 
   return (
@@ -1351,14 +1351,18 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
           const y = headerH + 6 + i * rowH;
           const barH = rowH - 8;
 
-          const ppVal = pitchPlus?.[pt]?.pitchPlus;
-          const ppLabel = ppVal != null ? `${Math.round(ppVal)} P+` : null;
+          // Per-handedness Pitch+ (different value for LHH vs RHH within same type)
+          const lPp = pitchPlus?.[pt]?.L?.pitchPlus;
+          const rPp = pitchPlus?.[pt]?.R?.pitchPlus;
+          const lLabel = lPp != null ? `${Math.round(lPp)}` : null;
+          const rLabel = rPp != null ? `${Math.round(rPp)}` : null;
 
-          // Render Pitch+ inside bar only if there's room; otherwise omit (the
-          // color + table convey the rest). Threshold matches roughly the width
-          // needed to fit "100 P+" at fontSize 11.
-          const lFitsPp = ppLabel && lW >= 38;
-          const rFitsPp = ppLabel && rW >= 38;
+          // Smaller font + bold so labels fit inside even moderately narrow bars.
+          // "103" at fontSize 10 monospace is ~22px; 26px threshold leaves a
+          // small inset on each side.
+          const fitThresh = 26;
+          const lFitsPp = lLabel && lW >= fitThresh;
+          const rFitsPp = rLabel && rW >= fitThresh;
 
           return (
             <g key={pt}>
@@ -1373,16 +1377,16 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                   />
                   {lFitsPp && (
                     <text
-                      x={cx - lW / 2} y={y + barH / 2 + 4}
-                      textAnchor="middle" fontSize={11} fontWeight={800}
+                      x={cx - lW / 2} y={y + barH / 2 + 3.5}
+                      textAnchor="middle" fontSize={10} fontWeight={800}
                       fill={onBarText}
                       fontFamily="'DM Mono', monospace"
-                    >{ppLabel}</text>
+                    >{lLabel}</text>
                   )}
                   {/* % outside on the left edge */}
                   <text
-                    x={cx - lW - 4} y={y + barH / 2 + 4}
-                    textAnchor="end" fontSize={11} fontWeight={700}
+                    x={cx - lW - 3} y={y + barH / 2 + 3.5}
+                    textAnchor="end" fontSize={10} fontWeight={800}
                     fill={t.textSecondary}
                     fontFamily="'DM Mono', monospace"
                   >{Math.round(lPct * 100)}%</text>
@@ -1399,15 +1403,15 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                   />
                   {rFitsPp && (
                     <text
-                      x={cx + rW / 2} y={y + barH / 2 + 4}
-                      textAnchor="middle" fontSize={11} fontWeight={800}
+                      x={cx + rW / 2} y={y + barH / 2 + 3.5}
+                      textAnchor="middle" fontSize={10} fontWeight={800}
                       fill={onBarText}
                       fontFamily="'DM Mono', monospace"
-                    >{ppLabel}</text>
+                    >{rLabel}</text>
                   )}
                   <text
-                    x={cx + rW + 4} y={y + barH / 2 + 4}
-                    fontSize={11} fontWeight={700}
+                    x={cx + rW + 3} y={y + barH / 2 + 3.5}
+                    fontSize={10} fontWeight={800}
                     fill={t.textSecondary}
                     fontFamily="'DM Mono', monospace"
                   >{Math.round(rPct * 100)}%</text>
