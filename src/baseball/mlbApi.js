@@ -280,9 +280,9 @@ export async function fetchBoxscore(gamePk) {
 }
 
 // ── Get game log for a player ──
-export async function fetchGameLog(playerId, season, group = "pitching") {
+export async function fetchGameLog(playerId, season, group = "pitching", sportId = 1) {
   const d = await fetchJson(
-    `${API}/people/${playerId}/stats?stats=gameLog&group=${group}&season=${season}&gameType=S,E,R,P,W`
+    `${API}/people/${playerId}/stats?stats=gameLog&group=${group}&season=${season}&gameType=S,E,R,P,W&sportId=${sportId}`
   );
   return d.stats?.[0]?.splits || [];
 }
@@ -294,9 +294,12 @@ export async function fetchGameLog(playerId, season, group = "pitching") {
 export async function fetchLeagueStatLeaders(season, seasonType = "R", sportId = 1) {
   const gameType = seasonType;
   const result = { pitchers: [], hitters: [] };
-  const seen = new Set();
+  // Per-group seen sets so two-way players (Ohtani, etc.) appear in both
+  const seenPitchers = new Set();
+  const seenHitters = new Set();
 
   for (const group of ["pitching", "hitting"]) {
+    const seen = group === "pitching" ? seenPitchers : seenHitters;
     let offset = 0;
     const LIMIT = 500;
     while (true) {
@@ -325,7 +328,7 @@ export async function fetchLeagueStatLeaders(season, seasonType = "R", sportId =
       }
       if (splits.length < LIMIT) break;
       offset += LIMIT;
-      if (offset > 5000) break; // safety cap
+      if (offset > 5000) break;
     }
   }
   return result;

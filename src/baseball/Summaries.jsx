@@ -265,15 +265,16 @@ export default function Summaries({ season }) {
   // Fetch game log when player changes (for season view)
   // Skip for WBC — game log API doesn't cover sportId=51
   useEffect(() => {
-    if (!selectedPlayer || isGame || seasonType === "W" || isAAA) { setPlayerGamePks(null); return; }
+    if (!selectedPlayer || isGame || seasonType === "W") { setPlayerGamePks(null); return; }
     const group = isPitcher ? "pitching" : "hitting";
-    fetchGameLog(selectedPlayer.id, currentSeason, group)
+    // sportId=1 (MLB) on MLB tab, sportId=11 (AAA) on AAA tab — keeps stats level-correct for two-way players
+    fetchGameLog(selectedPlayer.id, currentSeason, group, sportId)
       .then(splits => {
         const pks = new Set(splits.map(s => s.game?.gamePk).filter(Boolean));
-        setPlayerGamePks(pks.size > 0 ? pks : null); // null if empty so fallback kicks in
+        setPlayerGamePks(pks.size > 0 ? pks : null);
       })
       .catch(() => setPlayerGamePks(null));
-  }, [selectedPlayer, currentSeason, isPitcher, isGame, seasonType]);
+  }, [selectedPlayer, currentSeason, isPitcher, isGame, seasonType, sportId]);
 
   const playerGames = useMemo(() => {
     if (!selectedPlayer || !games.length || isGame) return [];
