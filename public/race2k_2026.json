@@ -4,6 +4,136 @@
   "starters": [],
   "relievers": [
     {
+      "player_id": 669387,
+      "name": "Carmen Mlodzinski",
+      "team": "PIT",
+      "ip": 21.0,
+      "gs": 3,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.735,
+      "qualifying_pas": 49,
+      "total_pas": 92,
+      "reach_pct": 53.3,
+      "pctile": 100.0
+    },
+    {
+      "player_id": 605280,
+      "name": "Clay Holmes",
+      "team": "NYM",
+      "ip": 23.4,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.75,
+      "qualifying_pas": 52,
+      "total_pas": 92,
+      "reach_pct": 56.5,
+      "pctile": 91.7
+    },
+    {
+      "player_id": 676106,
+      "name": "Emerson Hancock",
+      "team": "SEA",
+      "ip": 24.0,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.818,
+      "qualifying_pas": 55,
+      "total_pas": 96,
+      "reach_pct": 57.3,
+      "pctile": 83.3
+    },
+    {
+      "player_id": 680736,
+      "name": "Justin Wrobleski",
+      "team": "LAD",
+      "ip": 20.0,
+      "gs": 3,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.889,
+      "qualifying_pas": 36,
+      "total_pas": 77,
+      "reach_pct": 46.8,
+      "pctile": 75.0
+    },
+    {
+      "player_id": 663623,
+      "name": "Jake Irvin",
+      "team": "WSH",
+      "ip": 21.0,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.944,
+      "qualifying_pas": 54,
+      "total_pas": 93,
+      "reach_pct": 58.1,
+      "pctile": 66.7
+    },
+    {
+      "player_id": 677944,
+      "name": "Slade Cecconi",
+      "team": "CLE",
+      "ip": 20.4,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.0,
+      "qualifying_pas": 51,
+      "total_pas": 92,
+      "reach_pct": 55.4,
+      "pctile": 58.3
+    },
+    {
+      "player_id": 684007,
+      "name": "Shota Imanaga",
+      "team": "CHC",
+      "ip": 24.4,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.0,
+      "qualifying_pas": 53,
+      "total_pas": 92,
+      "reach_pct": 57.6,
+      "pctile": 58.3
+    },
+    {
+      "player_id": 669160,
+      "name": "Dustin May",
+      "team": "STL",
+      "ip": 22.9,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.019,
+      "qualifying_pas": 52,
+      "total_pas": 95,
+      "reach_pct": 54.7,
+      "pctile": 41.7
+    },
+    {
+      "player_id": 666200,
+      "name": "Jes\u00fas Luzardo",
+      "team": "PHI",
+      "ip": 23.0,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.02,
+      "qualifying_pas": 51,
+      "total_pas": 99,
+      "reach_pct": 51.5,
+      "pctile": 33.3
+    },
+    {
+      "player_id": 813349,
+      "name": "Connelly Early",
+      "team": "BOS",
+      "ip": 21.0,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.047,
+      "qualifying_pas": 43,
+      "total_pas": 88,
+      "reach_pct": 48.9,
+      "pctile": 25.0
+    },
+    {
       "player_id": 693821,
       "name": "Bryce Elder",
       "team": "ATL",
@@ -14,13 +144,26 @@
       "qualifying_pas": 41,
       "total_pas": 98,
       "reach_pct": 41.8,
-      "pctile": 100.0
+      "pctile": 16.7
+    },
+    {
+      "player_id": 686799,
+      "name": "Jack Kochanowicz",
+      "team": "LAA",
+      "ip": 26.0,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.378,
+      "qualifying_pas": 45,
+      "total_pas": 106,
+      "reach_pct": 42.5,
+      "pctile": 8.3
     }
   ],
   "meta": {
     "min_ip": 20,
     "gs_threshold": 10,
-    "total_pitches_analyzed": 50000,
-    "generated_at": "2026-05-01 11:09:21 UTC"
+    "total_pitches_analyzed": 63130,
+    "generated_at": "2026-05-04 11:53:07 UTC"
   }
 }
