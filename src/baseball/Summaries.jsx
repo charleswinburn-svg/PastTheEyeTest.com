@@ -937,7 +937,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
       <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 1000, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
         <SummaryHeader player={player} subtitle={subtitle} seasonType={seasonType} isAAA={isAAA} />
         <StatBar stats={stats} />
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "8px 4px 0", gap: 4 }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 4px 0", gap: 4 }}>
           <div style={{ width: 260 }}>
             {leftPanel === "zones" ? (
               <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "L")} side="L" width={260} isGame={isGame} />
