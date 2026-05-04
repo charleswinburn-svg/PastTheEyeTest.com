@@ -131,9 +131,11 @@ export default function Summaries({ season }) {
       fetchLeagueStatLeaders(currentSeason, seasonType, sportId),
     ])
       .then(([roster, leaders]) => {
-        const seen = new Set([...roster.pitchers.map(x => x.id), ...roster.hitters.map(x => x.id)]);
-        for (const p of leaders.pitchers) if (!seen.has(p.id)) { roster.pitchers.push(p); seen.add(p.id); }
-        for (const p of leaders.hitters)  if (!seen.has(p.id)) { roster.hitters.push(p); seen.add(p.id); }
+        // Per-group dedup so two-way players (Ohtani etc.) appear in both lists.
+        const seenPitchers = new Set(roster.pitchers.map(x => x.id));
+        const seenHitters = new Set(roster.hitters.map(x => x.id));
+        for (const p of leaders.pitchers) if (!seenPitchers.has(p.id)) { roster.pitchers.push(p); seenPitchers.add(p.id); }
+        for (const p of leaders.hitters)  if (!seenHitters.has(p.id))  { roster.hitters.push(p);  seenHitters.add(p.id); }
         roster.pitchers.sort((a, b) => a.name.localeCompare(b.name));
         roster.hitters.sort((a, b) => a.name.localeCompare(b.name));
         console.log(`[Summaries] Loaded ${roster.pitchers.length} pitchers, ${roster.hitters.length} hitters`);
@@ -148,16 +150,14 @@ export default function Summaries({ season }) {
   useEffect(() => {
     if (!games.length || !players || seasonType === "W" || hasScannedBoxscores.current) return;
     hasScannedBoxscores.current = true;
-    const seen = new Set([
-      ...players.pitchers.map(p => p.id),
-      ...players.hitters.map(p => p.id),
-    ]);
+    // Per-group sets so a two-way player who's already a hitter can still be added as a pitcher
+    const seenPitchers = new Set(players.pitchers.map(p => p.id));
+    const seenHitters = new Set(players.hitters.map(p => p.id));
     let cancelled = false;
     (async () => {
       const newPitchers = [], newHitters = [];
-      // Scan ALL games in parallel batches of 8 for speed
       const BATCH = 8;
-      const allGames = games; // full list, not slice(0, 40)
+      const allGames = games;
       for (let i = 0; i < allGames.length; i += BATCH) {
         if (cancelled) break;
         const batch = allGames.slice(i, i + BATCH);
@@ -174,16 +174,22 @@ export default function Summaries({ season }) {
             const teamId = gameTeam?.id || team.team?.id;
             for (const [, p] of Object.entries(team.players || {})) {
               const person = p.person;
-              if (!person || seen.has(person.id)) continue;
-              seen.add(person.id);
+              if (!person) continue;
               const hasPitching = p.stats?.pitching && Object.keys(p.stats.pitching).length > 0;
               const hasBatting = p.stats?.batting && Object.keys(p.stats.batting).length > 0;
               const entry = { id: person.id, name: person.fullName, team: teamAbbr, teamId, position: p.position?.abbreviation };
-              if (hasPitching) newPitchers.push(entry);
-              if (hasBatting) newHitters.push(entry);
+              if (hasPitching && !seenPitchers.has(person.id)) {
+                newPitchers.push(entry); seenPitchers.add(person.id);
+              }
+              if (hasBatting && !seenHitters.has(person.id)) {
+                newHitters.push(entry); seenHitters.add(person.id);
+              }
               if (!hasPitching && !hasBatting) {
-                if (p.position?.type === "Pitcher") newPitchers.push(entry);
-                else newHitters.push(entry);
+                if (p.position?.type === "Pitcher" && !seenPitchers.has(person.id)) {
+                  newPitchers.push(entry); seenPitchers.add(person.id);
+                } else if (p.position?.type !== "Pitcher" && !seenHitters.has(person.id)) {
+                  newHitters.push(entry); seenHitters.add(person.id);
+                }
               }
             }
           }
