@@ -1250,10 +1250,30 @@ function formatShortDate(iso) {
 // ═══════════════════════════════════════════════════════════
 // PLATOON USAGE BARS (double-sided by handedness)
 // ═══════════════════════════════════════════════════════════
-// Counts pitches per pitch type split by batter side, renders back-to-back
-// horizontal bars. Bars are sized by % of pitches against that batter side.
+// PLATOON USAGE BARS (double-sided by handedness)
+// ═══════════════════════════════════════════════════════════
+// Bars sized by % of pitches against THAT batter side (LHH/RHH each sum to 100%).
+// Inside each bar: Pitch+ value (when available) with luminance-aware contrast text.
+// Outside each bar: usage % for that side. No pitch-type abbreviations — color +
+// the table below already encode pitch identity.
+
+// Luminance check for picking readable text on any colored fill.
+// Returns true if the fill is light enough that we should use dark text.
+function isLightFill(hex) {
+  if (!hex || hex[0] !== "#") return false;
+  const h = hex.length === 4
+    ? hex.replace(/#(.)(.)(.)/, "#$1$1$2$2$3$3")
+    : hex;
+  const r = parseInt(h.slice(1, 3), 16);
+  const g = parseInt(h.slice(3, 5), 16);
+  const b = parseInt(h.slice(5, 7), 16);
+  // Perceived luminance (Rec. 601). Threshold 0.62 gives black text on yellows
+  // and bright greens, white text on reds/blues/oranges.
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62;
+}
+
 export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400 }) {
-  const { theme: t, isDark } = useTheme();
+  const { theme: t } = useTheme();
   if (!pitches || pitches.length === 0) return null;
 
   const byType = {};
@@ -1272,12 +1292,12 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
   const totalL = types.reduce((s, pt) => s + byType[pt].L, 0) || 1;
   const totalR = types.reduce((s, pt) => s + byType[pt].R, 0) || 1;
 
-  const headerH = 26;
+  const headerH = 30;
   const rowH = Math.max(34, Math.floor((height - headerH - 12) / Math.max(types.length, 1)));
   const centerW = 2;
   const sideW = (width - centerW) / 2;
-  const labelW = 50; // count + label width on outer edge
-  const maxBarW = sideW - labelW - 6;
+  const labelW = 38; // small space outside for the % label
+  const maxBarW = sideW - labelW - 4;
 
   return (
     <div style={{ width, padding: "4px 4px" }}>
@@ -1320,6 +1340,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
         {/* Rows */}
         {types.map((pt, i) => {
           const color = PITCH_COLORS[pt] || "#888";
+          const onBarText = isLightFill(color) ? "#1a1a1a" : "#ffffff";
           const lCount = byType[pt].L;
           const rCount = byType[pt].R;
           const lPct = lCount / totalL;
@@ -1329,12 +1350,15 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
           const cx = sideW + centerW / 2;
           const y = headerH + 6 + i * rowH;
           const barH = rowH - 8;
-          const labelOnBar = lW > 32 || rW > 32;
-          const lOnBar = lW > 32;
-          const rOnBar = rW > 32;
 
-          // Optional pitch+ next to count (subtle)
           const ppVal = pitchPlus?.[pt]?.pitchPlus;
+          const ppLabel = ppVal != null ? `${Math.round(ppVal)} P+` : null;
+
+          // Render Pitch+ inside bar only if there's room; otherwise omit (the
+          // color + table convey the rest). Threshold matches roughly the width
+          // needed to fit "100 P+" at fontSize 11.
+          const lFitsPp = ppLabel && lW >= 38;
+          const rFitsPp = ppLabel && rW >= 38;
 
           return (
             <g key={pt}>
@@ -1344,31 +1368,24 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                   <rect
                     x={cx - lW} y={y}
                     width={lW} height={barH}
-                    fill={color} fillOpacity={0.85}
+                    fill={color} fillOpacity={0.92}
                     rx={3}
                   />
-                  {lOnBar && (
+                  {lFitsPp && (
                     <text
-                      x={cx - lW + 6} y={y + barH / 2 + 4}
-                      fontSize={11} fontWeight={800} fill="#fff"
-                    >{pt}</text>
+                      x={cx - lW / 2} y={y + barH / 2 + 4}
+                      textAnchor="middle" fontSize={11} fontWeight={800}
+                      fill={onBarText}
+                      fontFamily="'DM Mono', monospace"
+                    >{ppLabel}</text>
                   )}
-                  {/* Count outside on left */}
+                  {/* % outside on the left edge */}
                   <text
                     x={cx - lW - 4} y={y + barH / 2 + 4}
                     textAnchor="end" fontSize={11} fontWeight={700}
                     fill={t.textSecondary}
                     fontFamily="'DM Mono', monospace"
-                  >{lCount}</text>
-                  {/* Pitch+ tiny badge if available */}
-                  {ppVal != null && (
-                    <text
-                      x={cx - lW - 4} y={y + barH / 2 + 16}
-                      textAnchor="end" fontSize={8}
-                      fill={t.textFaint}
-                      fontFamily="'DM Mono', monospace"
-                    >{Math.round(ppVal)} P+</text>
-                  )}
+                  >{Math.round(lPct * 100)}%</text>
                 </>
               )}
               {/* RHH bar (extends rightward from center) */}
@@ -1377,37 +1394,24 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                   <rect
                     x={cx} y={y}
                     width={rW} height={barH}
-                    fill={color} fillOpacity={0.85}
+                    fill={color} fillOpacity={0.92}
                     rx={3}
                   />
-                  {rOnBar && (
+                  {rFitsPp && (
                     <text
-                      x={cx + rW - 6} y={y + barH / 2 + 4}
-                      textAnchor="end" fontSize={11} fontWeight={800} fill="#fff"
-                    >{pt}</text>
+                      x={cx + rW / 2} y={y + barH / 2 + 4}
+                      textAnchor="middle" fontSize={11} fontWeight={800}
+                      fill={onBarText}
+                      fontFamily="'DM Mono', monospace"
+                    >{ppLabel}</text>
                   )}
                   <text
                     x={cx + rW + 4} y={y + barH / 2 + 4}
                     fontSize={11} fontWeight={700}
                     fill={t.textSecondary}
                     fontFamily="'DM Mono', monospace"
-                  >{rCount}</text>
-                  {ppVal != null && (
-                    <text
-                      x={cx + rW + 4} y={y + barH / 2 + 16}
-                      fontSize={8}
-                      fill={t.textFaint}
-                      fontFamily="'DM Mono', monospace"
-                    >{Math.round(ppVal)} P+</text>
-                  )}
+                  >{Math.round(rPct * 100)}%</text>
                 </>
-              )}
-              {/* If neither side has a wide enough bar, show pt label inline near center */}
-              {!labelOnBar && (
-                <text
-                  x={cx} y={y + barH / 2 + 4}
-                  textAnchor="middle" fontSize={10} fontWeight={700} fill={t.textMuted}
-                >{pt}</text>
               )}
             </g>
           );

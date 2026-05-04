@@ -9,7 +9,7 @@ import {
 import {
   MovementPlot, SprayChart, ZonePlot, StatBar, PitchTable, PitchTypeLegend,
   PitcherCountTool, HitterCountTool, LocationZonePanel,
-  RollingVeloChart, PlatoonUsageBars, PanelToggle,
+  RollingVeloChart, PlatoonUsageBars,
 } from "./SummaryComponents.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm } from "./SharedComponents.jsx";
 
@@ -883,15 +883,48 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
   };
   return (
     <div>
+      {/* Panel selectors live OUTSIDE cardRef so they don't appear in the saved PNG */}
+      <div style={{
+        maxWidth: 1000, margin: "0 auto 10px", display: "flex",
+        justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+      }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          Left panel
+          <select
+            value={leftPanel}
+            onChange={e => setLeftPanel(e.target.value)}
+            style={{
+              padding: "5px 10px", background: t.inputBg, color: t.textSecondary,
+              border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12,
+              fontFamily: "inherit", fontWeight: 600, outline: "none", minWidth: 140,
+            }}
+          >
+            <option value="zones">Zones — vs LHB</option>
+            <option value="velo">Velocity — by pitch #{!isGame ? " / outing" : ""}</option>
+          </select>
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          Right panel
+          <select
+            value={rightPanel}
+            onChange={e => setRightPanel(e.target.value)}
+            style={{
+              padding: "5px 10px", background: t.inputBg, color: t.textSecondary,
+              border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12,
+              fontFamily: "inherit", fontWeight: 600, outline: "none", minWidth: 140,
+            }}
+          >
+            <option value="zones">Zones — vs RHB</option>
+            <option value="platoon">Usage — by platoon</option>
+          </select>
+        </label>
+      </div>
+
       <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 1000, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
         <SummaryHeader player={player} subtitle={subtitle} seasonType={seasonType} isAAA={isAAA} />
         <StatBar stats={stats} />
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "0 4px", gap: 4 }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "8px 4px 0", gap: 4 }}>
           <div style={{ width: 260 }}>
-            <PanelToggle
-              value={leftPanel} onChange={setLeftPanel}
-              options={[{ value: "zones", label: "vs LHB" }, { value: "velo", label: "Velo" }]}
-            />
             {leftPanel === "zones" ? (
               <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "L")} side="L" width={260} isGame={isGame} />
             ) : (
@@ -900,10 +933,6 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
           </div>
           <MovementPlot pitches={data.pitches} width={420} height={400} maxPitches={200} />
           <div style={{ width: 260 }}>
-            <PanelToggle
-              value={rightPanel} onChange={setRightPanel}
-              options={[{ value: "zones", label: "vs RHB" }, { value: "platoon", label: "Platoon" }]}
-            />
             {rightPanel === "zones" ? (
               <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} />
             ) : (
