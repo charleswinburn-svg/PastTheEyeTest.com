@@ -69,19 +69,6 @@
       "pctile": 66.7
     },
     {
-      "player_id": 677944,
-      "name": "Slade Cecconi",
-      "team": "CLE",
-      "ip": 20.4,
-      "gs": 4,
-      "is_sp": false,
-      "avg_pitches_to_2k": 3.0,
-      "qualifying_pas": 51,
-      "total_pas": 92,
-      "reach_pct": 55.4,
-      "pctile": 58.3
-    },
-    {
       "player_id": 684007,
       "name": "Shota Imanaga",
       "team": "CHC",
@@ -105,7 +92,7 @@
       "qualifying_pas": 52,
       "total_pas": 95,
       "reach_pct": 54.7,
-      "pctile": 41.7
+      "pctile": 50.0
     },
     {
       "player_id": 666200,
@@ -118,7 +105,20 @@
       "qualifying_pas": 51,
       "total_pas": 99,
       "reach_pct": 51.5,
-      "pctile": 33.3
+      "pctile": 41.7
+    },
+    {
+      "player_id": 677944,
+      "name": "Slade Cecconi",
+      "team": "CLE",
+      "ip": 20.4,
+      "gs": 4,
+      "is_sp": false,
+      "avg_pitches_to_2k": 3.02,
+      "qualifying_pas": 51,
+      "total_pas": 92,
+      "reach_pct": 55.4,
+      "pctile": 41.7
     },
     {
       "player_id": 813349,
@@ -163,7 +163,7 @@
   "meta": {
     "min_ip": 20,
     "gs_threshold": 10,
-    "total_pitches_analyzed": 63130,
-    "generated_at": "2026-05-04 11:53:07 UTC"
+    "total_pitches_analyzed": 66392,
+    "generated_at": "2026-05-05 11:20:01 UTC"
   }
 }
