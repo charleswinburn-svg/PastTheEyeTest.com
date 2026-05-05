@@ -1048,7 +1048,7 @@ export function LocationZonePanel({ pitches, side, width = 260, isGame }) {
   return (
     <div style={{ width, display: "flex", flexDirection: "column", alignItems: "center" }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: th.textMuted, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-        vs {side === "L" ? "LHB" : "RHB"} ({filtered.length})
+        {side === "ALL" ? `All Batters (${filtered.length})` : `vs ${side === "L" ? "LHB" : "RHB"} (${filtered.length})`}
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap, justifyContent: "center", width }}>
         {types.slice(0, 9).map(pt => (

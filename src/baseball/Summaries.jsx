@@ -914,6 +914,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             }}
           >
             <option value="zones">Zones — vs LHB</option>
+            <option value="zonesAll">Zones — overall</option>
             <option value="velo">Velocity — by pitch #{!isGame ? " / outing" : ""}</option>
           </select>
         </label>
@@ -929,6 +930,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             }}
           >
             <option value="zones">Zones — vs RHB</option>
+            <option value="zonesAll">Zones — overall</option>
             <option value="platoon">Usage — by platoon</option>
           </select>
         </label>
@@ -941,6 +943,8 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
           <div style={{ width: 260 }}>
             {leftPanel === "zones" ? (
               <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "L")} side="L" width={260} isGame={isGame} />
+            ) : leftPanel === "zonesAll" ? (
+              <LocationZonePanel pitches={data.pitches} side="ALL" width={260} isGame={isGame} />
             ) : (
               <RollingVeloChart pitches={data.pitches} mode={isGame ? "game" : "season"} width={260} height={400} />
             )}
@@ -949,6 +953,8 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
           <div style={{ width: 260 }}>
             {rightPanel === "zones" ? (
               <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} />
+            ) : rightPanel === "zonesAll" ? (
+              <LocationZonePanel pitches={data.pitches} side="ALL" width={260} isGame={isGame} />
             ) : (
               <PlatoonUsageBars pitches={data.pitches} pitchPlus={pitchPlus} width={260} height={400} />
             )}
