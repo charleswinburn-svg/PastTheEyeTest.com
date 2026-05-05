@@ -40,21 +40,37 @@ export function fuzzyLookup(obj, name) {
   return undefined;
 }
 
+// All known abbreviation variants → MLB team ID.
+// MLB Stats API, FanGraphs, and Savant don't agree on every code, so we map them all.
 export const TEAM_IDS = {
-  ARI: 109, ATL: 144, BAL: 110, BOS: 111, CHC: 112, CHW: 145, CIN: 113,
-  CLE: 114, COL: 115, DET: 116, HOU: 117, KCR: 118, KC: 118, LAA: 108,
-  LAD: 119, MIA: 146, MIL: 158, MIN: 142, NYM: 121, NYY: 147, OAK: 133, ATH: 133,
-  PHI: 143, PIT: 134, SDP: 135, SD: 135, SEA: 136, SFG: 137, SF: 137,
-  STL: 138, TBR: 139, TB: 139, TEX: 140, TOR: 141, WSH: 120, WSN: 120,
+  // AL East
+  BAL: 110, BOS: 111, NYY: 147, TB: 139, TBR: 139, TBD: 139, TOR: 141,
+  // AL Central
+  CHW: 145, CWS: 145, CLE: 114, DET: 116, KC: 118, KCR: 118, MIN: 142,
+  // AL West
+  HOU: 117, LAA: 108, ANA: 108, OAK: 133, ATH: 133, SEA: 136, TEX: 140,
+  // NL East
+  ATL: 144, MIA: 146, FLA: 146, NYM: 121, PHI: 143, WSH: 120, WSN: 120, WAS: 120, MON: 120,
+  // NL Central
+  CHC: 112, CIN: 113, MIL: 158, PIT: 134, STL: 138,
+  // NL West
+  ARI: 109, AZ: 109, COL: 115, LAD: 119, SD: 135, SDP: 135, SF: 137, SFG: 137,
 };
+
+// Normalize: trim, uppercase, strip dots ("S.F." → "SF").
+const normAbbr = (s) => (s || "").toString().trim().toUpperCase().replace(/\./g, "");
 
 export function getHeadshotUrl(playerId) {
   if (!playerId) return null;
   return `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,h_213,c_thumb,g_face,q_auto:best/v1/people/${playerId}/headshot/67/current`;
 }
 
-export function getLogoUrl(teamAbbr) {
-  const tid = TEAM_IDS[teamAbbr?.toUpperCase()];
+// Resolve a team logo URL. Tries the abbreviation map first, then falls back
+// to teamId — which works for ANY team id (MLB, AAA, WBC) since the logo
+// endpoint is just /mlb-logos/v1/team/{id}/spots/128.
+// Pass teamId whenever you have it; it makes the lookup bulletproof.
+export function getLogoUrl(teamAbbr, teamId) {
+  const tid = TEAM_IDS[normAbbr(teamAbbr)] ?? (teamId || null);
   if (!tid) return null;
   return `/mlb-logos/v1/team/${tid}/spots/128`;
 }
@@ -167,10 +183,10 @@ export function BubblePercentileBar({ label, pctile, display }) {
 // PLAYER HEADER
 // ═══════════════════════════════════════════════════════════
 
-export function PlayerHeader({ name, team, season, playerId, subtitle }) {
+export function PlayerHeader({ name, team, teamId, season, playerId, subtitle }) {
   const { theme: t } = useTheme();
   const headshot = getHeadshotUrl(playerId);
-  const logo = getLogoUrl(team);
+  const logo = getLogoUrl(team, teamId);
 
   return (
     <div style={{
