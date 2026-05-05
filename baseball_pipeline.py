@@ -47,10 +47,10 @@ import unicodedata
 # CONFIG
 # ============================================================
 
-DEFAULT_SEASONS = [2023, 2024, 2025]
+DEFAULT_SEASONS = [2023, 2024, 2025, 2026]
 MIN_PA = 100          # minimum plate appearances for hitters (full season)
 MIN_PA_EARLY = 25    # early-season threshold (before June 1)
-MIN_PITCHER_IP = 20   # minimum innings pitched for pitchers
+MIN_PITCHER_IP = 10   # minimum innings pitched for pitchers
 FETCH_DELAY = 2.0     # seconds between API calls (rate limiting)
 MAX_RETRIES = 3
 
@@ -88,8 +88,8 @@ HITTER_METRICS = [
 # ============================================================
 
 PITCHER_METRICS = [
-    {"key": "stuff_plus",     "label": "Stuff+ (FG)",    "lower_better": False, "fmt": ".0f",  "src": "fg"},
-    {"key": "location_plus",  "label": "Location+ (FG)", "lower_better": False, "fmt": ".0f",  "src": "fg"},
+#     {"key": "stuff_plus",     "label": "Stuff+ (FG)",    "lower_better": False, "fmt": ".0f",  "src": "fg"},
+#     {"key": "location_plus",  "label": "Location+ (FG)", "lower_better": False, "fmt": ".0f",  "src": "fg"},
     {"key": "fip",            "label": "FIP",             "lower_better": True,  "fmt": ".2f",  "src": "fg"},
     {"key": "avg_ev",         "label": "Avg Exit Velo",   "lower_better": True,  "fmt": ".1f",  "src": "savant"},
     {"key": "barrel_pct",     "label": "Barrel%",         "lower_better": True,  "fmt": ".1f",  "src": "savant"},
@@ -247,10 +247,10 @@ def fetch_fangraphs_pitching(year):
     """
     print(f"  Fetching FanGraphs pitching stats ({year})...")
     api_url = ("https://www.fangraphs.com/api/leaders/major-league/data"
-               f"?pos=all&stats=pit&lg=all&qual=20&type=36"
+               f"?pos=all&stats=pit&lg=all&qual=10&type=36"
                f"&season={year}&month=0&season1={year}&ind=0"
                f"&team=0&rost=0&age=0&filter=&players=0"
-               f"&startdate=&enddate=&page=1_2000")
+               f"&startdate=&enddate=&pageitems=2000&page=1")
 
     # --- Attempt 1: Cookie-authenticated session ---
     cookie_paths = [
@@ -324,7 +324,7 @@ def fetch_fangraphs_pitching(year):
     if HAS_PYBASEBALL:
         print(f"    Trying pybaseball...")
         try:
-            df = pitching_stats(year, year, qual=20)
+            df = pitching_stats(year, year, qual=10)
             print(f"    ✓ {len(df)} rows via pybaseball")
             return df
         except Exception as e:
@@ -382,10 +382,10 @@ def _fetch_fg_selenium(year):
         driver = webdriver.Chrome(service=service, options=options)
 
         url = (f"https://www.fangraphs.com/leaders/major-league"
-               f"?pos=all&stats=pit&lg=all&qual=20&type=36"
+               f"?pos=all&stats=pit&lg=all&qual=10&type=36"
                f"&season={year}&month=0&season1={year}&ind=0"
                f"&team=0&rost=0&age=0&filter=&players=0"
-               f"&startdate=&enddate=&page=1_2000")
+               f"&startdate=&enddate=&pageitems=2000&page=1")
         driver.get(url)
 
         WebDriverWait(driver, 30).until(
@@ -532,6 +532,20 @@ def normalize_savant_name(df):
 
     return df
 
+
+
+import re as _re
+def _clean_team_abbr(val):
+    """FanGraphs returns Team wrapped in <a href="...">ABBR</a>. Strip to ABBR."""
+    if val is None:
+        return None
+    s = str(val).strip()
+    if not s or s in ("- - -", "---"):
+        return None
+    m = _re.search(r">([A-Z]{2,4})<", s)
+    if m:
+        return m.group(1)
+    return s if (len(s) <= 4 and s.isalpha()) else None
 
 def normalize_fg_name(df):
     """Standardize FanGraphs / pybaseball name columns."""
@@ -929,6 +943,8 @@ def process_pitchers(year):
             "Ext": "extension", "Extension": "extension",
         }
         fg_merged = fg_merged.rename(columns={k: v for k, v in fg_col_map.items() if k in fg_merged.columns})
+        if "team" in fg_merged.columns:
+            fg_merged["team"] = fg_merged["team"].apply(_clean_team_abbr)
     else:
         fg_merged = pd.DataFrame()
 
@@ -1022,6 +1038,11 @@ def process_pitchers(year):
             sv_merged["_nname"] = sv_merged["player_name"].apply(norm_name)
 
         if "player_id" in fg_merged.columns and "player_id" in sv_merged.columns:
+            # Coerce both sides to the same dtype so the merge actually matches.
+            # FG normalizes to Int64 (nullable); Savant uses int64 — the merge
+            # silently produces NaN rows when these don't align.
+            fg_merged["player_id"] = pd.to_numeric(fg_merged["player_id"], errors="coerce").astype("Int64")
+            sv_merged["player_id"] = pd.to_numeric(sv_merged["player_id"], errors="coerce").astype("Int64")
             existing = set(fg_merged.columns)
             new_cols = [c for c in sv_merged.columns if c not in existing or c == "player_id"]
             # First: merge rows that have matching player_id
