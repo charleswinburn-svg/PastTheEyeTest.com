@@ -4,3 +4,5 @@ dist/
 *.log
 __pycache__/
 2026/
+fangraphs_cookies.txt
+.env
