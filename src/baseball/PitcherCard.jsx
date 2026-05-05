@@ -183,8 +183,8 @@ function ProBubblesRow({ data, theme }) {
             display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
           }}>
             <div style={{
-              fontSize: 10, fontWeight: 700,
-              color: t.textMuted,
+              fontSize: 10, fontWeight: 800,
+              color: t.text,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}>{label}</div>
@@ -207,11 +207,13 @@ function ProBubblesRow({ data, theme }) {
               </div>
             </div>
             <div style={{
-              fontSize: 10, fontWeight: 700,
+              fontSize: 9, fontWeight: 700,
               color: pctile != null ? t.textSecondary : t.textFaintest,
               fontFamily: "'DM Mono', monospace",
+              letterSpacing: "0.02em",
+              whiteSpace: "nowrap",
             }}>
-              {pctile != null ? `${ordinal(Math.round(pctile))} pct` : (placeholder && data?.qualified === false ? "n/a" : "…")}
+              {pctile != null ? `${ordinal(Math.round(pctile))} percentile` : (placeholder && data?.qualified === false ? "n/a" : "…")}
             </div>
           </div>
         );
