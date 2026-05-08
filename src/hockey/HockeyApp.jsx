@@ -95,12 +95,12 @@ function useHeadshots(){
 function PercentileBar({label,pctile,isOverall,weight}){
   const w=pctile!=null?Math.max(2,pctile):0;
   return(
-    <div style={{display:"flex",alignItems:"center",marginBottom:isOverall?12:5,gap:8}}>
-      <div style={{width:135,textAlign:"right",fontSize:isOverall?13:12,fontWeight:isOverall?800:500,color:isOverall?"#f8fafc":"#e2e8f0",flexShrink:0,whiteSpace:"nowrap"}}>{label}{weight===0&&pctile==null?" (N/A)":""}</div>
+    <div style={{display:"flex",alignItems:"center",marginBottom:isOverall?12:5,gap:8,width:"100%"}}>
+      <div style={{width:115,textAlign:"right",fontSize:isOverall?13:12,fontWeight:isOverall?800:500,color:isOverall?"#f8fafc":"#e2e8f0",flexShrink:0,whiteSpace:"nowrap"}}>{label}{weight===0&&pctile==null?" (N/A)":""}</div>
       <div style={{flex:1,position:"relative",height:isOverall?28:22,background:"#0f172a",borderRadius:4,border:isOverall?"2px solid #f59e0b":"1px solid #1e3a5f",overflow:"hidden"}}>
         <div style={{width:`${w}%`,height:"100%",background:binColor(pctile),borderRadius:3,transition:"width 0.6s cubic-bezier(0.25,0.46,0.45,0.94)"}}/>
       </div>
-      <div style={{width:36,textAlign:"right",fontSize:isOverall?14:12,fontWeight:isOverall?800:600,color:pctile!=null?"#f8fafc":"#64748b",fontFamily:"'DM Mono',monospace",flexShrink:0}}>{pctile!=null?Math.round(pctile):"—"}</div>
+      <div style={{width:32,textAlign:"right",fontSize:isOverall?14:12,fontWeight:isOverall?800:600,color:pctile!=null?"#f8fafc":"#64748b",fontFamily:"'DM Mono',monospace",flexShrink:0}}>{pctile!=null?Math.round(pctile):"—"}</div>
     </div>
   );
 }
@@ -208,7 +208,7 @@ function Card({player,type,trends,mode,headshots,logos}){
     <div>
       <div ref={cardRef} style={{background:"#111827",borderRadius:12,border:"1px solid #1e3a5f",overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.5)",maxWidth:600,margin:"0 auto"}}>
         <PlayerHeader name={pname} team={player.team} subtitle={subtitle} olympicCountry={player.olympic_country} headshotUrl={headshotUrl} logoSrc={logos?.[player.team]}/>
-        <div style={{padding:"8px 16px 4px"}}>
+        <div style={{padding:"8px 12px 4px"}}>
           <PercentileBar label="Impact" pctile={player.overall_pctile} isOverall={true}/>
           <div style={{height:4}}/>
           {cats.map(([name,cat])=><PercentileBar key={name} label={name} pctile={cat.pctile} weight={cat.weight} isOverall={false}/>)}
