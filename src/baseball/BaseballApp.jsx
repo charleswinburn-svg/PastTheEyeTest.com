@@ -184,11 +184,11 @@ function BaseballApp() {
     <div style={{ minHeight: "100vh", background: t.bg, transition: "background 0.3s" }} onClick={handleBackdropClick}>
       {/* ── Full-Width Navigation Bar ── */}
       <div style={{
-        background: t.headerBgSolid || t.headerBg, 
+        background: t.headerBgSolid || t.headerBg,
         borderBottom: `2px solid ${t.accent}`,
         padding: "0 24px",
-        display: "flex", 
-        alignItems: "stretch", 
+        display: "flex",
+        alignItems: "stretch",
         justifyContent: "space-between",
         transition: "background 0.3s",
         position: "sticky",
@@ -196,40 +196,8 @@ function BaseballApp() {
         zIndex: 100,
         boxShadow: `0 2px 12px ${t.shadow}`,
       }}>
-        {/* Left: Logo + Navigation */}
-        <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
-          {/* Logo */}
-          <div style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            padding: "8px 20px 8px 0",
-            borderRight: `1px solid ${t.divider}`,
-            marginRight: 8,
-            gap: 12,
-          }}>
-            <img 
-              src="/logo.jpg" 
-              alt="Past The Eye Test" 
-              style={{ 
-                height: 40, 
-                width: 40, 
-                borderRadius: 8,
-                objectFit: "cover",
-              }} 
-            />
-            <div style={{ 
-              fontSize: 16, 
-              fontWeight: 700, 
-              color: t.text, 
-              letterSpacing: "-0.02em",
-              fontStyle: "italic",
-            }}>
-              <span style={{ color: t.accentSecondary || t.accent }}>Past The</span>{" "}
-              <span style={{ color: t.accent }}>Eye Test</span>
-            </div>
-          </div>
-
-          {/* Navigation Items */}
+        {/* Center: Tab Navigation */}
+        <div style={{ flex: 1, display: "flex", alignItems: "stretch", justifyContent: "center" }}>
           {TABS.map(tb => (
             <div
               key={tb.id}
@@ -257,8 +225,8 @@ function BaseballApp() {
               >
                 {tb.label}
                 {tb.dropdown && (
-                  <span style={{ 
-                    fontSize: 8, 
+                  <span style={{
+                    fontSize: 8,
                     marginLeft: 2,
                     transform: openDropdown === tb.id ? "rotate(180deg)" : "rotate(0deg)",
                     transition: "transform 0.2s",
@@ -267,7 +235,7 @@ function BaseballApp() {
                   </span>
                 )}
               </button>
-              
+
               {/* Dropdown Menu */}
               {tb.dropdown && openDropdown === tb.id && (
                 <div style={{

@@ -25,6 +25,7 @@ export default function App() {
         zIndex: 100,
         boxShadow: "0 2px 12px rgba(0,0,0,0.4)",
       }}>
+        {/* Logo — left-anchored */}
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -32,16 +33,17 @@ export default function App() {
           padding: "10px 20px 10px 4px",
           marginRight: 8,
           borderRight: "1px solid #1e3a5f",
+          flexShrink: 0,
         }}>
-          <img 
-            src="/logo.jpg" 
-            alt="Past The Eye Test" 
-            style={{ 
-              height: 32, 
-              width: 32, 
+          <img
+            src="/logo.jpg"
+            alt="Past The Eye Test"
+            style={{
+              height: 32,
+              width: 32,
               borderRadius: 6,
               objectFit: "cover",
-            }} 
+            }}
           />
           <span style={{
             fontSize: 14,
@@ -54,31 +56,34 @@ export default function App() {
             <span style={{ color: "#f59e0b" }}>Eye Test</span>
           </span>
         </div>
-        {SPORTS.map(s => (
-          <button
-            key={s.id}
-            onClick={() => setSport(s.id)}
-            style={{
-              padding: "12px 20px",
-              fontSize: 12,
-              fontWeight: sport === s.id ? 700 : 600,
-              letterSpacing: "0.04em",
-              color: sport === s.id ? "#f59e0b" : "#94a3b8",
-              background: sport === s.id ? "rgba(245,158,11,0.1)" : "transparent",
-              border: "none",
-              borderBottom: sport === s.id ? "3px solid #f59e0b" : "3px solid transparent",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              fontFamily: "inherit",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <span style={{ fontSize: 14 }}>{s.icon}</span>
-            {s.label}
-          </button>
-        ))}
+        {/* Sport buttons — centered in remaining space */}
+        <div style={{ flex: 1, display: "flex", alignItems: "stretch", justifyContent: "center" }}>
+          {SPORTS.map(s => (
+            <button
+              key={s.id}
+              onClick={() => setSport(s.id)}
+              style={{
+                padding: "12px 20px",
+                fontSize: 12,
+                fontWeight: sport === s.id ? 700 : 600,
+                letterSpacing: "0.04em",
+                color: sport === s.id ? "#f59e0b" : "#94a3b8",
+                background: sport === s.id ? "rgba(245,158,11,0.1)" : "transparent",
+                border: "none",
+                borderBottom: sport === s.id ? "3px solid #f59e0b" : "3px solid transparent",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                fontFamily: "inherit",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <span style={{ fontSize: 14 }}>{s.icon}</span>
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Sport Content ── */}
