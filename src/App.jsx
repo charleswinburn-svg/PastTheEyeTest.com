@@ -11,11 +11,11 @@ export default function App() {
   const [sport, setSport] = useState("hockey");
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0d0d0d" }}>
+    <div style={{ minHeight: "100vh", background: "#0a0f1a" }}>
       {/* ── Sport Selector Bar ── */}
       <div style={{
-        background: "#080808",
-        borderBottom: "1px solid #1a1a1a",
+        background: "#0f172a",
+        borderBottom: "2px solid #f59e0b",
         padding: "0 16px",
         display: "flex",
         alignItems: "stretch",
@@ -23,22 +23,35 @@ export default function App() {
         position: "sticky",
         top: 0,
         zIndex: 100,
+        boxShadow: "0 2px 12px rgba(0,0,0,0.4)",
       }}>
         <div style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
-          padding: "10px 16px 10px 4px",
+          gap: 10,
+          padding: "10px 20px 10px 4px",
           marginRight: 8,
-          borderRight: "1px solid #1a1a1a",
+          borderRight: "1px solid #1e3a5f",
         }}>
+          <img 
+            src="/logo.jpg" 
+            alt="Past The Eye Test" 
+            style={{ 
+              height: 32, 
+              width: 32, 
+              borderRadius: 6,
+              objectFit: "cover",
+            }} 
+          />
           <span style={{
-            fontSize: 13,
-            fontWeight: 800,
-            color: "#fff",
-            letterSpacing: "-0.03em",
+            fontSize: 14,
+            fontWeight: 700,
+            color: "#f8fafc",
+            letterSpacing: "-0.02em",
+            fontStyle: "italic",
           }}>
-            <span style={{ color: "#888" }}>Past</span>TheEyeTest
+            <span style={{ color: "#3b82f6" }}>Past The</span>{" "}
+            <span style={{ color: "#f59e0b" }}>Eye Test</span>
           </span>
         </div>
         {SPORTS.map(s => (
@@ -46,20 +59,20 @@ export default function App() {
             key={s.id}
             onClick={() => setSport(s.id)}
             style={{
-              padding: "10px 18px",
+              padding: "12px 20px",
               fontSize: 12,
-              fontWeight: sport === s.id ? 700 : 500,
-              letterSpacing: "0.02em",
-              color: sport === s.id ? "#fff" : "#666",
-              background: "transparent",
+              fontWeight: sport === s.id ? 700 : 600,
+              letterSpacing: "0.04em",
+              color: sport === s.id ? "#f59e0b" : "#94a3b8",
+              background: sport === s.id ? "rgba(245,158,11,0.1)" : "transparent",
               border: "none",
-              borderBottom: sport === s.id ? "2px solid #d22d49" : "2px solid transparent",
+              borderBottom: sport === s.id ? "3px solid #f59e0b" : "3px solid transparent",
               cursor: "pointer",
-              transition: "all 0.15s",
+              transition: "all 0.2s",
               fontFamily: "inherit",
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 8,
             }}
           >
             <span style={{ fontSize: 14 }}>{s.icon}</span>

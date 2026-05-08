@@ -731,7 +731,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         {SEASON_TYPES.map(st => (
           <button key={st.id} onClick={() => { setSeasonType(st.id); if (st.id !== "R") setLevel("MLB"); }} style={{
             padding: "4px 10px", fontSize: 10, fontWeight: seasonType === st.id ? 700 : 400,
-            background: seasonType === st.id ? "#d22d49" : "transparent",
+            background: seasonType === st.id ? "#f59e0b" : "transparent",
             color: seasonType === st.id ? "#fff" : "#666",
             border: seasonType === st.id ? "none" : "1px solid #333",
             borderRadius: 4, cursor: "pointer", fontFamily: "inherit",
@@ -753,7 +753,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         )}
       </div>
 
-      {error && <div style={{ color: "#d22d49", fontSize: 12, marginBottom: 8 }}>{error}</div>}
+      {error && <div style={{ color: "#f59e0b", fontSize: 12, marginBottom: 8 }}>{error}</div>}
 
       {isGame && (
         <div>

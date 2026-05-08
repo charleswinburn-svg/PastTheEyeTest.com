@@ -13,7 +13,7 @@ const TEAM_COLORS = {
   SF: "#FD5A1E", STL: "#C41E3A", TBR: "#092C5C", TB: "#092C5C",
   TEX: "#003278", TOR: "#134A8E", WSH: "#AB0003", WSN: "#AB0003",
 };
-const teamColor = (abbr) => TEAM_COLORS[abbr?.toUpperCase()] || "#d22d49";
+const teamColor = (abbr) => TEAM_COLORS[abbr?.toUpperCase()] || "#f59e0b";
 
 
 // ═══════════════════════════════════════════════════════════
@@ -32,7 +32,7 @@ function LeaderboardBar({ rank, name, team, value, maxValue, isSelected, onClick
         display: "flex", alignItems: "center", gap: 10, padding: "6px 12px",
         cursor: "pointer",
         background: isSelected ? "rgba(210,45,73,0.12)" : "transparent",
-        borderLeft: isSelected ? "3px solid #d22d49" : "3px solid transparent",
+        borderLeft: isSelected ? "3px solid #f59e0b" : "3px solid transparent",
         transition: "all 0.15s",
       }}
       onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
@@ -141,7 +141,7 @@ function RaceComparison({ player1, player2, players }) {
           {isWinner && <span style={{ fontSize: 11, fontWeight: 700, color: "#4ade80" }}>⚡ FASTER</span>}
         </div>
         <div style={{ position: "relative", height: 44, borderRadius: 8, background: "#1a1a1a", border: "1px solid #2a2a2a", overflow: "hidden" }}>
-          <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 3, background: "#d22d49", zIndex: 1 }} />
+          <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 3, background: "#f59e0b", zIndex: 1 }} />
           <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 24, background: "rgba(210,45,73,0.08)" }} />
           <div style={{
             position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)",
@@ -160,7 +160,7 @@ function RaceComparison({ player1, player2, players }) {
           }}>
             <span style={{ fontSize: 16 }}>⚾</span>
           </div>
-          <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 8, fontWeight: 800, color: "#d22d49", letterSpacing: "0.1em", zIndex: 3 }}>
+          <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 8, fontWeight: 800, color: "#f59e0b", letterSpacing: "0.1em", zIndex: 3 }}>
             2K
           </div>
         </div>
@@ -178,7 +178,7 @@ function RaceComparison({ player1, player2, players }) {
           onClick={racing ? resetRace : startRace}
           style={{
             padding: "6px 20px", fontSize: 12, fontWeight: 700,
-            background: racing ? "#333" : "#d22d49", color: "#fff",
+            background: racing ? "#333" : "#f59e0b", color: "#fff",
             border: "none", borderRadius: 6, cursor: "pointer", transition: "all 0.15s",
           }}
         >
@@ -266,7 +266,7 @@ export default function RaceToTwoStrikes({ season }) {
   }
   if (error) {
     return (
-      <div style={{ color: "#d22d49", textAlign: "center", padding: 60, fontSize: 13, lineHeight: 1.8 }}>
+      <div style={{ color: "#f59e0b", textAlign: "center", padding: 60, fontSize: 13, lineHeight: 1.8 }}>
         {error}<br /><br />
         <span style={{ color: "#888", fontSize: 12 }}>
           Run: <code style={{ background: "#1a1a1a", padding: "2px 6px", borderRadius: 3 }}>python3 race2k_pipeline.py ./public {season}</code>
@@ -285,7 +285,7 @@ export default function RaceToTwoStrikes({ season }) {
             <button key={l} onClick={() => setLeague(l)}
               style={{
                 padding: "5px 14px", fontSize: 11, fontWeight: league === l ? 700 : 500,
-                background: league === l ? "#d22d49" : "transparent",
+                background: league === l ? "#f59e0b" : "transparent",
                 color: league === l ? "#fff" : aaaData || l === "MLB" ? "#888" : "#444",
                 border: "none", borderRadius: 4, cursor: aaaData || l === "MLB" ? "pointer" : "default",
                 transition: "all 0.15s", fontFamily: "inherit",
