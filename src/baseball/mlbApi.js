@@ -134,8 +134,8 @@ export async function fetchSchedule(season, gameType = "S", sportId = null) {
       home: homeTeam,
       awayScore: g.teams?.away?.score,
       homeScore: g.teams?.home?.score,
-      awayFlag: !isMLBTeam(awayTeam?.id) ? (getWbcFlag(awayTeam?.teamName || awayTeam?.name) || getWbcFlag(awayTeam?.abbreviation)) : null,
-      homeFlag: !isMLBTeam(homeTeam?.id) ? (getWbcFlag(homeTeam?.teamName || homeTeam?.name) || getWbcFlag(homeTeam?.abbreviation)) : null,
+      awayFlag: gameType === "W" && !isMLBTeam(awayTeam?.id) ? (getWbcFlag(awayTeam?.teamName || awayTeam?.name) || getWbcFlag(awayTeam?.abbreviation)) : null,
+      homeFlag: gameType === "W" && !isMLBTeam(homeTeam?.id) ? (getWbcFlag(homeTeam?.teamName || homeTeam?.name) || getWbcFlag(homeTeam?.abbreviation)) : null,
       ...extra,
     };
   };
@@ -1066,4 +1066,3 @@ export function enrichWithSavant(savantRows, playerId, type = "pitcher") {
 
   return { xwoba, pitchVAAs };
 }
-
