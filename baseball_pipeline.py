@@ -203,13 +203,18 @@ def fetch_savant_statcast(year, player_type="batter"):
 
 def fetch_savant_bat_tracking(year):
     """Fetch bat tracking leaderboard (swing speed, length, attack angle, blasts)."""
+    from datetime import date
+    today = date.today()
+    # Use a low swing minimum so all pipeline players (down to MIN_PA_EARLY) get data.
+    # A player with 25 PA has ~40-50 swings; minSwings=10 captures everyone.
+    min_swings = "10"
     url = (
         f"https://baseballsavant.mlb.com/leaderboard/bat-tracking"
         f"?attackZone=&batSide=&contactType=&count=&dateStart=&dateEnd="
-        f"&gameType=&isHardHit=&minSwings=q&month=&opposingTeam=&pitchHand="
+        f"&gameType=&isHardHit=&minSwings={min_swings}&month=&opposingTeam=&pitchHand="
         f"&pitchType=&playerPool=All&season={year}&team=&type=batter&csv=true"
     )
-    print(f"  Fetching Savant bat tracking ({year})...")
+    print(f"  Fetching Savant bat tracking ({year}, minSwings={min_swings})...")
     text = fetch_url(url)
     df = csv_to_df(text)
     if df is not None:
@@ -719,9 +724,16 @@ def process_hitters(year):
             "blast_per_bat_contact": "blasts_contact",
             "hard_swing_rate": "fast_swing_rate",
             "squared_up_per_bat_contact": "squared_up_contact",
+            # attack angle variants
+            "avg_attack_angle": "attack_angle",
+            "ideal_attack_angle_percent": "ideal_angle_rate",
+            "ideal_attack_angle_rate": "ideal_angle_rate",
+            "swing_rate_ideal_attack_angle": "ideal_angle_rate",
         }
         df_batting = df_batting.rename(columns={k: v for k, v in col_renames.items() if k in df_batting.columns})
-        print(f"  Bat tracking columns after rename: {[c for c in df_batting.columns if c in ['player_id','player_name','avg_swing_speed','avg_swing_length','blasts_contact','fast_swing_rate']]}")
+        bt_check = ["player_id","player_name","avg_swing_speed","avg_swing_length","attack_angle","ideal_angle_rate","blasts_contact","fast_swing_rate"]
+        print(f"  Bat tracking columns present: {[c for c in bt_check if c in df_batting.columns]}")
+        print(f"  Bat tracking all columns: {list(df_batting.columns)}")
         dfs_to_merge.append(("bat_tracking", df_batting))
 
     # --- Merge on player_id (preferred) or player_name ---
