@@ -96,7 +96,7 @@ def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
 def enrich(df: pd.DataFrame) -> pd.DataFrame:
     """Add derived features needed by the model."""
     if 'attack_angle' in df.columns:
-        df['ideal_attack_angle'] = df['attack_angle'].between(5, 20).astype(int)
+        df['ideal_attack_angle'] = df['attack_angle'].between(5, 20).fillna(False).astype(int)
 
     CONTACT = ['hit_into_play', 'foul', 'hit_into_play_no_out', 'hit_into_play_score', 'foul_bunt']
     df['made_contact'] = df['description'].isin(CONTACT).astype(int)
@@ -104,10 +104,10 @@ def enrich(df: pd.DataFrame) -> pd.DataFrame:
     if all(c in df.columns for c in ['plate_x', 'plate_z', 'sz_top', 'sz_bot']):
         df['in_zone'] = ((df['plate_x'].abs() <= 0.83) &
                          (df['plate_z'] >= df['sz_bot']) &
-                         (df['plate_z'] <= df['sz_top'])).astype(int)
+                         (df['plate_z'] <= df['sz_top'])).fillna(False).astype(int)
     elif all(c in df.columns for c in ['plate_x', 'plate_z']):
         df['in_zone'] = ((df['plate_x'].abs() <= 0.83) &
-                         (df['plate_z'].between(1.5, 3.5))).astype(int)
+                         (df['plate_z'].between(1.5, 3.5))).fillna(False).astype(int)
 
     if all(c in df.columns for c in ['plate_x', 'plate_z']):
         df['location_difficulty'] = np.sqrt(df['plate_x']**2 + (df['plate_z'] - 2.5)**2)
