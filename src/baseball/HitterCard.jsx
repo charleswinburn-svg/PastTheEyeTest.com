@@ -56,7 +56,7 @@ export default function HitterCard({ player, season, trends, allHitters }) {
           playerId={player.player_id}
           subtitle={buildBioSubtitle(bio, "bats") || `${season} | ${player.pa || "—"} PA`}
         />
-        <div style={{ padding: "8px 16px 4px" }}>
+        <div style={{ padding: "8px 12px 4px" }}>
           {cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
             <BubblePercentileBar
               key={label}
