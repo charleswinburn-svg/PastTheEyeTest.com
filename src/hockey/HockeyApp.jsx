@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ReferenceLine } from "recharts";
 
-const BIN_COLORS={"0-10":"#1e3a8a","10-25":"#2563eb","25-45":"#60a5fa","45-55":"#94a3b8","55-75":"#fbbf24","75-90":"#f59e0b","90-100":"#ea580c"};
+const BIN_COLORS={"0-10":"#08306B","10-25":"#2171B5","25-45":"#6BAED6","45-55":"#D9D9D9","55-75":"#FC9272","75-90":"#FB6A4A","90-100":"#CB181D"};
 const pctToBin=p=>{if(p==null||!isFinite(p))return"NA";if(p>=90)return"90-100";if(p>=75)return"75-90";if(p>=55)return"55-75";if(p>=45)return"45-55";if(p>=25)return"25-45";if(p>=10)return"10-25";return"0-10"};
 const binColor=p=>BIN_COLORS[pctToBin(p)]||"#444";
 const textOnBin=p=>{if(p==null)return"#aaa";return(p<25||p>=75)?"#fff":"#111"};
@@ -9,6 +9,27 @@ const LOGO_FALLBACK=a=>{const m={"L.A":"LAK","N.J":"NJD","S.J":"SJS","T.B":"TBL"
 const FLAG=c=>c?`/flag-assets/w80/${c.toLowerCase()}.png`:null;
 
 const NST_TO_NHL={"L.A":"LAK","N.J":"NJD","S.J":"SJS","T.B":"TBL"};
+
+const NHL_TEAM_PRIMARY={
+  ANA:"#F47A38",BOS:"#FFB81C",BUF:"#003087",CAR:"#CC0000",
+  CBJ:"#002654",CGY:"#C8102E",CHI:"#CF0A2C",COL:"#6F263D",
+  DAL:"#006847",DET:"#CE1126",EDM:"#FF4C00",FLA:"#041E42",
+  LAK:"#111111",MIN:"#154734",MTL:"#AF1E2D",NJD:"#CE1126",
+  NSH:"#FFB81C",NYI:"#003087",NYR:"#0038A8",OTT:"#E31837",
+  PHI:"#F74902",PIT:"#FCB514",SEA:"#001628",SJS:"#006D75",
+  STL:"#002F87",TBL:"#002868",TOR:"#00205B",UTA:"#71B2C9",
+  VAN:"#00205B",VGK:"#B4975A",WPG:"#041E42",WSH:"#C8102E",
+  // NST abbreviations
+  "L.A":"#111111","N.J":"#CE1126","S.J":"#006D75","T.B":"#002868",
+};
+
+function nhlHexLuminance(hex){
+  return[hex.slice(1,3),hex.slice(3,5),hex.slice(5,7)].reduce((sum,h,i)=>{
+    const c=parseInt(h,16)/255;
+    const lin=c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);
+    return sum+lin*[0.2126,0.7152,0.0722][i];
+  },0);
+}
 
 function useLogos(){
   const[map,setMap]=useState({});
@@ -85,17 +106,23 @@ function PercentileBar({label,pctile,isOverall,weight}){
 }
 
 function PlayerHeader({name,team,subtitle,olympicCountry,headshotUrl,logoSrc}){
+  const nhlTeam=NST_TO_NHL[team]||team;
+  const bgColor=NHL_TEAM_PRIMARY[nhlTeam]||NHL_TEAM_PRIMARY[team]||"#1e293b";
+  const light=nhlHexLuminance(bgColor)>0.179;
+  const textColor=light?"#111111":"#ffffff";
+  const subColor=light?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.72)";
+  const ringColor=light?"rgba(0,0,0,0.2)":"rgba(255,255,255,0.25)";
   return(
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 20px 8px",gap:16}}>
-      <img crossOrigin="anonymous" src={logoSrc||LOGO_FALLBACK(team)} alt={team} style={{width:64,height:64,objectFit:"contain",filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.5))"}} onError={e=>{e.target.style.display="none"}}/>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 20px 14px",gap:16,background:bgColor}}>
+      <img crossOrigin="anonymous" src={logoSrc||LOGO_FALLBACK(team)} alt={team} style={{width:64,height:64,objectFit:"contain",filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.4))"}} onError={e=>{e.target.style.display="none"}}/>
       <div style={{flex:1,textAlign:"center"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          <span style={{fontSize:22,fontWeight:800,color:"#f8fafc",letterSpacing:"-0.02em"}}>{name}</span>
-          {FLAG(olympicCountry)&&<img crossOrigin="anonymous" src={FLAG(olympicCountry)} alt="" style={{height:16,border:"1px solid #475569",borderRadius:2}}/>}
+          <span style={{fontSize:22,fontWeight:800,color:textColor,letterSpacing:"-0.02em"}}>{name}</span>
+          {FLAG(olympicCountry)&&<img crossOrigin="anonymous" src={FLAG(olympicCountry)} alt="" style={{height:16,border:"1px solid rgba(255,255,255,0.4)",borderRadius:2}}/>}
         </div>
-        <div style={{fontSize:11,color:"#94a3b8",marginTop:2,letterSpacing:"0.04em"}}>{subtitle}</div>
+        <div style={{fontSize:11,color:subColor,marginTop:4,letterSpacing:"0.06em",fontStyle:"italic",fontWeight:600,textTransform:"uppercase"}}>{subtitle}</div>
       </div>
-      <div style={{width:64,height:64,borderRadius:"50%",background:"#1e293b",overflow:"hidden",border:"2px solid #f59e0b",flexShrink:0,position:"relative"}}>
+      <div style={{width:64,height:64,borderRadius:"50%",background:ringColor,overflow:"hidden",border:`2px solid ${ringColor}`,flexShrink:0,position:"relative"}}>
         {headshotUrl&&<img crossOrigin="anonymous" src={headshotUrl} alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none"}}/>}
       </div>
     </div>

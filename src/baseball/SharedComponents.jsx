@@ -19,6 +19,26 @@ export const textOnBin = (p) => {
   return (p < 25 || p >= 75) ? "#fff" : "#111";
 };
 
+// ── MLB team primary colors ──
+export const MLB_TEAM_PRIMARY = {
+  ARI: "#A71930", ATL: "#CE1141", BAL: "#DF4601", BOS: "#BD3039",
+  CHC: "#0E3386", CWS: "#27251F", CIN: "#C6011F", CLE: "#00385D",
+  COL: "#33006F", DET: "#0C2340", HOU: "#002D62", KC:  "#004687",
+  LAA: "#BA0021", LAD: "#005A9C", MIA: "#00A3E0", MIL: "#FFC52F",
+  MIN: "#002B5C", NYM: "#002D72", NYY: "#003087", OAK: "#003831",
+  PHI: "#E81828", PIT: "#FDB827", SD:  "#2F241D", SEA: "#0C2C56",
+  SF:  "#FD5A1E", STL: "#C41E3A", TB:  "#092C5C", TEX: "#003278",
+  TOR: "#134A8E", WSH: "#AB0003",
+};
+
+export function hexLuminance(hex) {
+  return [hex.slice(1,3), hex.slice(3,5), hex.slice(5,7)].reduce((sum, h, i) => {
+    const c = parseInt(h, 16) / 255;
+    const lin = c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    return sum + lin * [0.2126, 0.7152, 0.0722][i];
+  }, 0);
+}
+
 // ── MLB Team ID mapping (for logos) ──
 
 // Strip diacritics for accent-insensitive matching
@@ -184,28 +204,32 @@ export function BubblePercentileBar({ label, pctile, display }) {
 // ═══════════════════════════════════════════════════════════
 
 export function PlayerHeader({ name, team, teamId, season, playerId, subtitle }) {
-  const { theme: t } = useTheme();
   const headshot = getHeadshotUrl(playerId);
   const logo = getLogoUrl(team, teamId);
+
+  const bgColor = MLB_TEAM_PRIMARY[team] || "#1e293b";
+  const light = hexLuminance(bgColor) > 0.179;
+  const textColor = light ? "#111111" : "#ffffff";
+  const subColor = light ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.72)";
+  const ringColor = light ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.25)";
+  const initColor = light ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.2)";
 
   return (
     <div style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "16px 20px 10px", gap: 16,
+      padding: "16px 20px 14px", gap: 16, background: bgColor,
     }}>
       {/* Headshot */}
       <div style={{
-        width: 72, height: 72, borderRadius: "50%", background: t.inputBg,
-        overflow: "hidden", border: `2px solid ${t.inputBorder}`, flexShrink: 0, position: "relative",
+        width: 72, height: 72, borderRadius: "50%", background: ringColor,
+        overflow: "hidden", border: `2px solid ${ringColor}`, flexShrink: 0, position: "relative",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
-        <span style={{ fontSize: 22, fontWeight: 700, color: t.textFaintest, position: "absolute" }}>
+        <span style={{ fontSize: 22, fontWeight: 700, color: initColor, position: "absolute" }}>
           {name ? name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : ""}
         </span>
         {headshot && (
-          <img
-            src={headshot} alt=""
-           
+          <img src={headshot} alt=""
             style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 1 }}
             onError={e => { e.target.style.display = "none"; }}
           />
@@ -214,10 +238,10 @@ export function PlayerHeader({ name, team, teamId, season, playerId, subtitle })
 
       {/* Name + subtitle */}
       <div style={{ flex: 1, textAlign: "center" }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: t.text, letterSpacing: "-0.02em" }}>
+        <div style={{ fontSize: 20, fontWeight: 800, color: textColor, letterSpacing: "-0.02em" }}>
           {name}
         </div>
-        <div style={{ fontSize: 11, color: t.textMuted, marginTop: 2, letterSpacing: "0.04em" }}>
+        <div style={{ fontSize: 11, color: subColor, marginTop: 4, letterSpacing: "0.06em", fontStyle: "italic", fontWeight: 600, textTransform: "uppercase" }}>
           {subtitle || `${team ? `${team} | ` : ""}${season} Season`}
         </div>
       </div>
@@ -225,10 +249,8 @@ export function PlayerHeader({ name, team, teamId, season, playerId, subtitle })
       {/* Logo */}
       <div style={{ width: 72, height: 72, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {logo && (
-          <img
-            src={logo} alt={team}
-           
-            style={{ width: 72, height: 72, objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
+          <img src={logo} alt={team}
+            style={{ width: 72, height: 72, objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }}
             onError={e => { e.target.style.display = "none"; }}
           />
         )}

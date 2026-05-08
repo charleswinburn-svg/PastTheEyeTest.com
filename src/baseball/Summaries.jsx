@@ -11,7 +11,7 @@ import {
   PitcherCountTool, HitterCountTool, LocationZonePanel,
   RollingVeloChart, PlatoonUsageBars,
 } from "./SummaryComponents.jsx";
-import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm } from "./SharedComponents.jsx";
+import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance } from "./SharedComponents.jsx";
 
 const SEASON_TYPES = [
   { id: "S", label: "Spring Training" },
@@ -1047,25 +1047,6 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
   );
 }
 
-const TEAM_PRIMARY = {
-  ARI: "#A71930", ATL: "#CE1141", BAL: "#DF4601", BOS: "#BD3039",
-  CHC: "#0E3386", CWS: "#27251F", CIN: "#C6011F", CLE: "#00385D",
-  COL: "#33006F", DET: "#0C2340", HOU: "#002D62", KC:  "#004687",
-  LAA: "#BA0021", LAD: "#005A9C", MIA: "#00A3E0", MIL: "#FFC52F",
-  MIN: "#002B5C", NYM: "#002D72", NYY: "#003087", OAK: "#003831",
-  PHI: "#E81828", PIT: "#FDB827", SD:  "#2F241D", SEA: "#0C2C56",
-  SF:  "#FD5A1E", STL: "#C41E3A", TB:  "#092C5C", TEX: "#003278",
-  TOR: "#134A8E", WSH: "#AB0003",
-};
-
-function hexLuminance(hex) {
-  return [hex.slice(1,3), hex.slice(3,5), hex.slice(5,7)].reduce((sum, h, i) => {
-    const c = parseInt(h, 16) / 255;
-    const lin = c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    return sum + lin * [0.2126, 0.7152, 0.0722][i];
-  }, 0);
-}
-
 function SummaryHeader({ player, subtitle, seasonType, isAAA }) {
   const headshot = player.id ? `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,h_213,c_thumb,g_face,q_auto:best/v1/people/${player.id}/headshot/67/current` : null;
   const logo = getLogoUrl(player.team, player.teamId);
@@ -1073,7 +1054,7 @@ function SummaryHeader({ player, subtitle, seasonType, isAAA }) {
   const showFlag = seasonType === "W" ? (flag || null) : null;
   const showLogo = seasonType === "W" ? (!flag ? logo : null) : logo;
 
-  const bgColor = TEAM_PRIMARY[player.team] || "#1e293b";
+  const bgColor = MLB_TEAM_PRIMARY[player.team] || "#1e293b";
   const light = hexLuminance(bgColor) > 0.179;
   const textColor = light ? "#111111" : "#ffffff";
   const subColor = light ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.72)";
