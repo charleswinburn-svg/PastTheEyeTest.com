@@ -43,9 +43,12 @@ const TABS = [
     id: "summaries",  
     label: "SUMMARIES",
     dropdown: [
-      { id: "summaries_game", label: "Game" },
-      { id: "summaries_season", label: "Season" },
-      { id: "summaries_counts", label: "Counts" },
+      { id: "pitcher_game", label: "Pitcher Game" },
+      { id: "pitcher_season", label: "Pitcher Season" },
+      { id: "pitcher_counts", label: "Pitcher Counts" },
+      { id: "hitter_game", label: "Hitter Game" },
+      { id: "hitter_season", label: "Hitter Season" },
+      { id: "hitter_counts", label: "Hitter Counts" },
     ]
   },
   { id: "hitter_lb",  label: "HITTER LB" },
@@ -72,8 +75,8 @@ function BaseballApp() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [season, setSeason] = useState("2026");
-  const [tab, setTab] = useState("summaries_game");
-  const [summarySubType, setSummarySubType] = useState("game"); // game, season, counts
+  const [tab, setTab] = useState("pitcher_game");
+  const [summarySubTab, setSummarySubTab] = useState("pitcher_game");
   const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedHitter, setSelectedHitter] = useState(null);
   const [selectedPitcher, setSelectedPitcher] = useState(null);
@@ -148,8 +151,9 @@ function BaseballApp() {
   const pipelineReady = data && !loading && !error;
 
   // Helper to check if tab is active (handles dropdown sub-items)
+  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_counts", "hitter_game", "hitter_season", "hitter_counts"].includes(id);
   const isTabActive = (tabId) => {
-    if (tabId === "summaries") return tab.startsWith("summaries");
+    if (tabId === "summaries") return isSummaryTab(tab);
     return tab === tabId;
   };
 
@@ -167,7 +171,7 @@ function BaseballApp() {
   // Handle dropdown item click
   const handleDropdownSelect = (subItem) => {
     setTab(subItem.id);
-    setSummarySubType(subItem.label.toLowerCase());
+    setSummarySubTab(subItem.id);
     setOpenDropdown(null);
   };
 
@@ -357,8 +361,8 @@ function BaseballApp() {
 
       {/* ── Content ── */}
       <div style={{
-        padding: tab.startsWith("summaries") ? 0 : 24,
-        maxWidth: tab.includes("lb") || tab === "race2k" ? 1200 : tab.startsWith("summaries") ? 1200 : tab === "evla" ? 780 : 640,
+        padding: isSummaryTab(tab) ? 0 : 24,
+        maxWidth: tab.includes("lb") || tab === "race2k" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : 640,
         margin: "0 auto",
       }}>
         {tab === "hitter" && (
@@ -389,8 +393,8 @@ function BaseballApp() {
             </div>
           )
         )}
-        {tab.startsWith("summaries") && (
-          <Summaries season={season} initialSubType={summarySubType} />
+        {isSummaryTab(tab) && (
+          <Summaries season={season} initialSubTab={summarySubTab} />
         )}
         {tab === "hitter_lb" && (
           pipelineReady ? (

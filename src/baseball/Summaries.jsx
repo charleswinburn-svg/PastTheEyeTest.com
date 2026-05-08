@@ -13,15 +13,6 @@ import {
 } from "./SummaryComponents.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm } from "./SharedComponents.jsx";
 
-const SUB_TABS = [
-  { id: "pitcher_game",   label: "Pitcher Game" },
-  { id: "pitcher_season", label: "Pitcher Season" },
-  { id: "pitcher_counts", label: "Pitcher Counts" },
-  { id: "hitter_game",    label: "Hitter Game" },
-  { id: "hitter_season",  label: "Hitter Season" },
-  { id: "hitter_counts",  label: "Hitter Counts" },
-];
-
 const SEASON_TYPES = [
   { id: "S", label: "Spring Training" },
   { id: "W", label: "WBC" },
@@ -29,28 +20,15 @@ const SEASON_TYPES = [
   { id: "P", label: "Postseason" },
 ];
 
-export default function Summaries({ season, initialSubType = "game" }) {
+export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const { theme: t } = useTheme();
   
-  // Map initialSubType to a default subTab
-  const getDefaultSubTab = (subType) => {
-    switch (subType) {
-      case "game": return "pitcher_game";
-      case "season": return "pitcher_season";
-      case "counts": return "pitcher_counts";
-      default: return "pitcher_game";
-    }
-  };
+  const [subTab, setSubTab] = useState(initialSubTab);
   
-  const [subTab, setSubTab] = useState(() => getDefaultSubTab(initialSubType));
-  
-  // Update subTab when initialSubType changes from parent
+  // Update subTab when initialSubTab changes from parent (dropdown selection)
   useEffect(() => {
-    // Keep current pitcher/hitter preference, just change the view type
-    const isPitcher = subTab.startsWith("pitcher");
-    const prefix = isPitcher ? "pitcher" : "hitter";
-    setSubTab(`${prefix}_${initialSubType}`);
-  }, [initialSubType]);
+    setSubTab(initialSubTab);
+  }, [initialSubTab]);
   
   const [seasonType, setSeasonType] = useState("S");
   const [level, setLevel] = useState("MLB"); // "MLB" or "AAA"
@@ -750,15 +728,6 @@ export default function Summaries({ season, initialSubType = "game" }) {
   return (
     <div style={{ padding: "16px 20px" }}>
       <div style={{ display: "flex", gap: 2, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
-        {SUB_TABS.map(t => (
-          <button key={t.id} onClick={() => setSubTab(t.id)} style={{
-            padding: "6px 14px", fontSize: 11, fontWeight: subTab === t.id ? 700 : 500,
-            background: subTab === t.id ? "#333" : "transparent",
-            color: subTab === t.id ? "#fff" : "#888",
-            border: "none", borderRadius: 6, cursor: "pointer", fontFamily: "inherit",
-          }}>{t.label}</button>
-        ))}
-        <div style={{ width: 1, height: 22, background: t.divider, margin: "0 8px" }} />
         {SEASON_TYPES.map(st => (
           <button key={st.id} onClick={() => { setSeasonType(st.id); if (st.id !== "R") setLevel("MLB"); }} style={{
             padding: "4px 10px", fontSize: 10, fontWeight: seasonType === st.id ? 700 : 400,
