@@ -867,7 +867,16 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
   const strikePct = data.totalPitches > 0 ? Math.round(data.pitches.filter(p => p.isStrike || p.isInPlay).length / data.totalPitches * 1000) / 10 : 0;
   const swings = data.pitches.filter(p => p.isSwing);
   const whiffPct = swings.length > 0 ? Math.round(data.pitches.filter(p => p.isWhiff).length / swings.length * 1000) / 10 : 0;
-  const subtitle = isGame && game ? `${game.away?.abbreviation || game.away?.teamName || "?"} @ ${game.home?.abbreviation || game.home?.teamName || "?"} | ${game.date} | ${data.totalPitches} pitches` : `${season} ${GAME_TYPE_LABELS[seasonType]} • ${data.totalPitches} pitches`;
+  const subtitle = (() => {
+    if (isGame && game) {
+      const home = game.home?.abbreviation || game.home?.teamName || "?";
+      const away = game.away?.abbreviation || game.away?.teamName || "?";
+      const [y, m, d] = (game.date || "").split("-");
+      const dateStr = y && m && d ? `${m}/${d}/${y}` : (game.date || "");
+      return `${home} vs. ${away} — ${dateStr}`;
+    }
+    return `${season} ${GAME_TYPE_LABELS[seasonType]}`;
+  })();
   const stats = isGame ? [
     { label: "IP", value: data.ip, format: ".1f" },
     { label: "H", value: data.hits }, { label: "R", value: data.runs },
@@ -982,7 +991,16 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
 function HitterView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
-  const subtitle = isGame && game ? `${game.away?.abbreviation || game.away?.teamName || "?"} @ ${game.home?.abbreviation || game.home?.teamName || "?"} | ${game.date} | ${data.pas} PA` : `${season} ${GAME_TYPE_LABELS[seasonType]} • ${data.pas} PA`;
+  const subtitle = (() => {
+    if (isGame && game) {
+      const home = game.home?.abbreviation || game.home?.teamName || "?";
+      const away = game.away?.abbreviation || game.away?.teamName || "?";
+      const [y, m, d] = (game.date || "").split("-");
+      const dateStr = y && m && d ? `${m}/${d}/${y}` : (game.date || "");
+      return `${home} vs. ${away} — ${dateStr}`;
+    }
+    return `${season} ${GAME_TYPE_LABELS[seasonType]}`;
+  })();
 
   const stats = [
     // xwOBA only for RS/PS — Savant doesn't compute expected stats for ST/WBC
@@ -1029,27 +1047,51 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
   );
 }
 
+const TEAM_PRIMARY = {
+  ARI: "#A71930", ATL: "#CE1141", BAL: "#DF4601", BOS: "#BD3039",
+  CHC: "#0E3386", CWS: "#27251F", CIN: "#C6011F", CLE: "#00385D",
+  COL: "#33006F", DET: "#0C2340", HOU: "#002D62", KC:  "#004687",
+  LAA: "#BA0021", LAD: "#005A9C", MIA: "#00A3E0", MIL: "#FFC52F",
+  MIN: "#002B5C", NYM: "#002D72", NYY: "#003087", OAK: "#003831",
+  PHI: "#E81828", PIT: "#FDB827", SD:  "#2F241D", SEA: "#0C2C56",
+  SF:  "#FD5A1E", STL: "#C41E3A", TB:  "#092C5C", TEX: "#003278",
+  TOR: "#134A8E", WSH: "#AB0003",
+};
+
+function hexLuminance(hex) {
+  return [hex.slice(1,3), hex.slice(3,5), hex.slice(5,7)].reduce((sum, h, i) => {
+    const c = parseInt(h, 16) / 255;
+    const lin = c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    return sum + lin * [0.2126, 0.7152, 0.0722][i];
+  }, 0);
+}
+
 function SummaryHeader({ player, subtitle, seasonType, isAAA }) {
-  const { theme: t } = useTheme();
   const headshot = player.id ? `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,h_213,c_thumb,g_face,q_auto:best/v1/people/${player.id}/headshot/67/current` : null;
-  // Single resolver: tries abbreviation, falls back to teamId. Works for MLB,
-  // AAA, and any other level — teamId path hits the logo CDN directly.
   const logo = getLogoUrl(player.team, player.teamId);
   const flag = (!isAAA && seasonType === "W") ? getWbcFlag(player.team) : null;
   const showFlag = seasonType === "W" ? (flag || null) : null;
   const showLogo = seasonType === "W" ? (!flag ? logo : null) : logo;
+
+  const bgColor = TEAM_PRIMARY[player.team] || "#1e293b";
+  const light = hexLuminance(bgColor) > 0.179;
+  const textColor = light ? "#111111" : "#ffffff";
+  const subColor = light ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.72)";
+  const ringColor = light ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.25)";
+  const initColor = light ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.2)";
+
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px 10px", gap: 20 }}>
-      <div style={{ width: 72, height: 72, borderRadius: "50%", background: t.headerBorder, overflow: "hidden", flexShrink: 0, border: "2px solid #333", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-        <span style={{ fontSize: 22, fontWeight: 700, color: t.textFaintest, position: "absolute" }}>{player.name ? player.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : ""}</span>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px 14px", gap: 20, background: bgColor }}>
+      <div style={{ width: 72, height: 72, borderRadius: "50%", background: ringColor, overflow: "hidden", flexShrink: 0, border: `2px solid ${ringColor}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+        <span style={{ fontSize: 22, fontWeight: 700, color: initColor, position: "absolute" }}>{player.name ? player.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : ""}</span>
         {headshot && <img src={headshot} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 1 }} onError={e => { e.target.style.display = "none"; }} />}
       </div>
       <div style={{ flex: 1, textAlign: "center" }}>
-        <div style={{ fontSize: 24, fontWeight: 800, color: t.text, letterSpacing: "-0.02em" }}>{player.name}</div>
-        <div style={{ fontSize: 12, color: t.textMuted, marginTop: 3, letterSpacing: "0.03em" }}>{subtitle}</div>
+        <div style={{ fontSize: 24, fontWeight: 800, color: textColor, letterSpacing: "-0.02em" }}>{player.name}</div>
+        <div style={{ fontSize: 12, color: subColor, marginTop: 4, letterSpacing: "0.06em", fontStyle: "italic", fontWeight: 600, textTransform: "uppercase" }}>{subtitle}</div>
       </div>
       <div style={{ width: 80, height: 80, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {showLogo && <img src={showLogo} alt={player.team} style={{ width: 80, height: 80, objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }} onError={e => { e.target.style.display = "none"; }} />}
+        {showLogo && <img src={showLogo} alt={player.team} style={{ width: 80, height: 80, objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }} onError={e => { e.target.style.display = "none"; }} />}
         {!showLogo && showFlag && <span style={{ fontSize: 48, lineHeight: 1 }}>{showFlag}</span>}
       </div>
     </div>
