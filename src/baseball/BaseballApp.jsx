@@ -39,8 +39,8 @@ function deduplicatePlayers(players) {
 const TABS = [
   { id: "hitter",     label: "HITTER CARD" },
   { id: "pitcher",    label: "PITCHER CARD" },
-  { 
-    id: "summaries",  
+  {
+    id: "summaries",
     label: "SUMMARIES",
     dropdown: [
       { id: "pitcher_game", label: "Pitcher Game" },
@@ -51,8 +51,14 @@ const TABS = [
       { id: "hitter_counts", label: "Hitter Counts" },
     ]
   },
-  { id: "hitter_lb",  label: "HITTER LB" },
-  { id: "pitcher_lb", label: "PITCHER LB" },
+  {
+    id: "leaderboard",
+    label: "LEADERBOARD",
+    dropdown: [
+      { id: "hitter_lb",  label: "Hitter" },
+      { id: "pitcher_lb", label: "Pitcher" },
+    ]
+  },
   { id: "race2k",     label: "RACE TO 2K" },
   { id: "evla",       label: "EV/LA FAN" },
 ];
@@ -152,8 +158,10 @@ function BaseballApp() {
 
   // Helper to check if tab is active (handles dropdown sub-items)
   const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_counts", "hitter_game", "hitter_season", "hitter_counts"].includes(id);
+  const isLeaderboardTab = (id) => ["hitter_lb", "pitcher_lb"].includes(id);
   const isTabActive = (tabId) => {
     if (tabId === "summaries") return isSummaryTab(tab);
+    if (tabId === "leaderboard") return isLeaderboardTab(tab);
     return tab === tabId;
   };
 
@@ -189,15 +197,14 @@ function BaseballApp() {
         padding: "0 24px",
         display: "flex",
         alignItems: "stretch",
-        justifyContent: "space-between",
-        transition: "background 0.3s",
         position: "sticky",
         top: 0,
         zIndex: 100,
+        transition: "background 0.3s",
         boxShadow: `0 2px 12px ${t.shadow}`,
       }}>
-        {/* Center: Tab Navigation */}
-        <div style={{ flex: 1, display: "flex", alignItems: "stretch", justifyContent: "center" }}>
+        {/* Center: Tab Navigation — absolutely centered on the full page */}
+        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "stretch", height: "100%" }}>
           {TABS.map(tb => (
             <div
               key={tb.id}
@@ -285,7 +292,7 @@ function BaseballApp() {
         </div>
 
         {/* Right: Season selector, player selector, theme toggle, stats */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginLeft: "auto" }}>
           {/* Season Selector */}
           <select
             value={season}

@@ -297,7 +297,14 @@ function HockeyLeaderboard({players,columns,sortDefault}){
   );
 }
 
-const TABS=[{id:"skater",label:"Player Card"},{id:"goalie",label:"Goalie Card"},{id:"skater_lb",label:"Leaderboard"},{id:"goalie_lb",label:"Goalie LB"}];
+const TABS=[
+  {id:"skater",label:"Player Card"},
+  {id:"goalie",label:"Goalie Card"},
+  {id:"leaderboard",label:"Leaderboard",dropdown:[
+    {id:"skater_lb",label:"Player LB"},
+    {id:"goalie_lb",label:"Goalie LB"},
+  ]},
+];
 const MODES=[{id:"rolling",label:"3-Year Rolling",file:"hockey_data_rolling.json"},{id:"2025",label:"2025-26",file:"hockey_data_2025.json"},{id:"2024",label:"2024-25",file:"hockey_data_2024.json"},{id:"2023",label:"2023-24",file:"hockey_data_2023.json"}];
 const SK_COLS=[{key:"name",label:"Player"},{key:"team",label:"Tm"},{key:"position",label:"Pos"},{key:"gp",label:"GP"},{key:"toi_min",label:"TOI"},{key:"overall_pctile",label:"Overall"},{key:"5v5 Offense",label:"5v5 Off"},{key:"5v5 Defense",label:"5v5 Def"},{key:"Production",label:"Prod"},{key:"Power Play",label:"PP"},{key:"Penalty Kill",label:"PK"},{key:"Penalties",label:"Pen"},{key:"Competition",label:"Comp"},{key:"Teammates",label:"Tmts"}];
 const GL_COLS=[{key:"name",label:"Goalie"},{key:"team",label:"Tm"},{key:"gp",label:"GP"},{key:"overall_pctile",label:"Overall"},{key:"5v5 GSAx",label:"5v5"},{key:"Penalty Kill",label:"PK"},{key:"High Danger GSAx",label:"HD"},{key:"Med Danger GSAx",label:"MD"},{key:"Low Danger GSAx",label:"LD"},{key:"Rebound Control",label:"Reb"},{key:"Ice Time",label:"TOI"}];
@@ -307,6 +314,7 @@ export default function HockeyApp(){
   const[error,setError]=useState(null);
   const[loading,setLoading]=useState(true);
   const[tab,setTab]=useState("skater");
+  const[openDropdown,setOpenDropdown]=useState(null);
   const[modeId,setModeId]=useState("rolling");
   const[selectedSkater,setSelectedSkater]=useState(null);
   const[selectedGoalie,setSelectedGoalie]=useState(null);
@@ -337,10 +345,14 @@ export default function HockeyApp(){
   const curSkater=useMemo(()=>skaters.find(s=>s.display_name===selectedSkater),[skaters,selectedSkater]);
   const curGoalie=useMemo(()=>goalies.find(g=>g.name===selectedGoalie),[goalies,selectedGoalie]);
 
+  const isLbTab=(id)=>id==="skater_lb"||id==="goalie_lb";
+  const isTabActive=(id)=>id==="leaderboard"?isLbTab(tab):tab===id;
+
   return(
-    <div style={{minHeight:"100vh",background:"#0a0f1a"}}>
-      <div style={{background:"#111827",borderBottom:"2px solid #f59e0b",padding:"0 20px",display:"flex",alignItems:"stretch",justifyContent:"space-between",flexWrap:"wrap",boxShadow:"0 2px 12px rgba(0,0,0,0.4)"}}>
-        <div style={{display:"flex",alignItems:"stretch",gap:0}}>
+    <div style={{minHeight:"100vh",background:"#0a0f1a"}} onClick={()=>setOpenDropdown(null)}>
+      <div style={{background:"#111827",borderBottom:"2px solid #f59e0b",padding:"0 20px",display:"flex",alignItems:"stretch",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 12px rgba(0,0,0,0.4)"}}>
+        {/* Left: brand + mode selector */}
+        <div style={{display:"flex",alignItems:"stretch",gap:0,flexShrink:0}}>
           <div style={{display:"flex",alignItems:"center",padding:"12px 20px 12px 0",borderRight:"1px solid #1e3a5f",marginRight:8}}>
             <div style={{fontSize:16,fontWeight:700,color:"#f8fafc",letterSpacing:"-0.02em",fontStyle:"italic"}}><span style={{color:"#3b82f6"}}>NHL</span> <span style={{color:"#f59e0b"}}>Player Cards</span></div>
           </div>
@@ -350,13 +362,34 @@ export default function HockeyApp(){
               {MODES.map(m=><option key={m.id} value={m.id} style={{background:"#0f172a",color:"#f8fafc"}}>{m.label}</option>)}
             </select>
           </div>
-          <div style={{display:"flex",gap:0,alignItems:"stretch"}}>
-            {TABS.map(t=>(
-              <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"16px 18px",fontSize:12,fontWeight:tab===t.id?700:600,letterSpacing:"0.04em",background:tab===t.id?"rgba(245,158,11,0.1)":"transparent",color:tab===t.id?"#f59e0b":"#94a3b8",border:"none",borderBottom:tab===t.id?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s"}}>{t.label.toUpperCase()}</button>
-            ))}
-          </div>
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:16,padding:"12px 0"}}>
+        {/* Center: tabs — absolutely centered on full page */}
+        <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"stretch",height:"100%"}}>
+          {TABS.map(t=>(
+            <div key={t.id} style={{position:"relative",display:"flex",alignItems:"stretch"}} onClick={e=>e.stopPropagation()}>
+              <button
+                onClick={()=>t.dropdown?setOpenDropdown(openDropdown===t.id?null:t.id):setTab(t.id)&&setOpenDropdown(null)}
+                style={{padding:"16px 18px",fontSize:12,fontWeight:isTabActive(t.id)?700:600,letterSpacing:"0.04em",background:isTabActive(t.id)?"rgba(245,158,11,0.1)":"transparent",color:isTabActive(t.id)?"#f59e0b":"#94a3b8",border:"none",borderBottom:isTabActive(t.id)?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,fontFamily:"inherit"}}
+              >
+                {t.label.toUpperCase()}
+                {t.dropdown&&<span style={{fontSize:8,marginLeft:2,display:"inline-block",transform:openDropdown===t.id?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>▼</span>}
+              </button>
+              {t.dropdown&&openDropdown===t.id&&(
+                <div style={{position:"absolute",top:"100%",left:0,background:"#1e293b",border:"1px solid #f59e0b",borderRadius:10,boxShadow:"0 12px 32px rgba(0,0,0,0.5)",minWidth:140,overflow:"hidden",zIndex:200}}>
+                  {t.dropdown.map((sub,idx)=>(
+                    <button key={sub.id} onClick={()=>{setTab(sub.id);setOpenDropdown(null);}}
+                      style={{width:"100%",padding:"12px 18px",fontSize:13,fontWeight:tab===sub.id?700:500,color:tab===sub.id?"#f59e0b":"#cbd5e1",background:tab===sub.id?"rgba(245,158,11,0.15)":"transparent",border:"none",borderBottom:idx<t.dropdown.length-1?"1px solid #334155":"none",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all 0.15s"}}
+                      onMouseEnter={e=>{if(tab!==sub.id)e.target.style.background="rgba(59,130,246,0.1)"}}
+                      onMouseLeave={e=>{if(tab!==sub.id)e.target.style.background="transparent"}}
+                    >{sub.label}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {/* Right: player selector + stats */}
+        <div style={{display:"flex",alignItems:"center",gap:16,padding:"12px 0",marginLeft:"auto"}}>
           {(tab==="skater"||tab==="goalie")&&(
             <select value={tab==="goalie"?selectedGoalie||"":selectedSkater||""}
               onChange={e=>tab==="goalie"?setSelectedGoalie(e.target.value):setSelectedSkater(e.target.value)}
