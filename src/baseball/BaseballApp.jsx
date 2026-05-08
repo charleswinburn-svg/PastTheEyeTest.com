@@ -184,8 +184,8 @@ function BaseballApp() {
     <div style={{ minHeight: "100vh", background: t.bg, transition: "background 0.3s" }} onClick={handleBackdropClick}>
       {/* ── Full-Width Navigation Bar ── */}
       <div style={{
-        background: t.headerBg, 
-        borderBottom: `1px solid ${t.headerBorder}`,
+        background: t.headerBgSolid || t.headerBg, 
+        borderBottom: `2px solid ${t.accent}`,
         padding: "0 24px",
         display: "flex", 
         alignItems: "stretch", 
@@ -194,6 +194,7 @@ function BaseballApp() {
         position: "sticky",
         top: 0,
         zIndex: 100,
+        boxShadow: `0 2px 12px ${t.shadow}`,
       }}>
         {/* Left: Logo + Navigation */}
         <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
@@ -201,12 +202,30 @@ function BaseballApp() {
           <div style={{ 
             display: "flex", 
             alignItems: "center", 
-            padding: "0 24px 0 0",
+            padding: "8px 20px 8px 0",
             borderRight: `1px solid ${t.divider}`,
             marginRight: 8,
+            gap: 12,
           }}>
-            <div style={{ fontSize: 18, fontWeight: 800, color: t.text, letterSpacing: "-0.03em" }}>
-              <span style={{ color: t.accent }}>MLB</span> Player Cards
+            <img 
+              src="/logo.jpg" 
+              alt="Past The Eye Test" 
+              style={{ 
+                height: 40, 
+                width: 40, 
+                borderRadius: 8,
+                objectFit: "cover",
+              }} 
+            />
+            <div style={{ 
+              fontSize: 16, 
+              fontWeight: 700, 
+              color: t.text, 
+              letterSpacing: "-0.02em",
+              fontStyle: "italic",
+            }}>
+              <span style={{ color: t.accentSecondary || t.accent }}>Past The</span>{" "}
+              <span style={{ color: t.accent }}>Eye Test</span>
             </div>
           </div>
 
@@ -220,20 +239,20 @@ function BaseballApp() {
               <button
                 onClick={(e) => handleTabClick(tb, e)}
                 style={{
-                  padding: "16px 16px",
+                  padding: "16px 18px",
                   fontSize: 12,
-                  fontWeight: isTabActive(tb.id) ? 700 : 500,
-                  letterSpacing: "0.04em",
-                  color: isTabActive(tb.id) ? t.text : t.textMuted,
-                  background: "transparent",
+                  fontWeight: isTabActive(tb.id) ? 700 : 600,
+                  letterSpacing: "0.05em",
+                  color: isTabActive(tb.id) ? t.accent : t.textMuted,
+                  background: isTabActive(tb.id) ? (t.id === "dark" ? "rgba(245,158,11,0.1)" : "rgba(234,88,12,0.08)") : "transparent",
                   border: "none",
-                  borderBottom: isTabActive(tb.id) ? `2px solid ${t.accent}` : "2px solid transparent",
+                  borderBottom: isTabActive(tb.id) ? `3px solid ${t.accent}` : "3px solid transparent",
                   cursor: "pointer",
-                  transition: "all 0.15s",
+                  transition: "all 0.2s",
                   fontFamily: "inherit",
                   display: "flex",
                   alignItems: "center",
-                  gap: 4,
+                  gap: 6,
                 }}
               >
                 {tb.label}
@@ -256,33 +275,33 @@ function BaseballApp() {
                   top: "100%",
                   left: 0,
                   background: t.cardBg,
-                  border: `1px solid ${t.cardBorder}`,
-                  borderRadius: 8,
-                  boxShadow: `0 8px 24px ${t.shadow}`,
-                  minWidth: 140,
+                  border: `1px solid ${t.accent}`,
+                  borderRadius: 10,
+                  boxShadow: `0 12px 32px ${t.shadow}`,
+                  minWidth: 160,
                   overflow: "hidden",
                   zIndex: 200,
                 }}>
-                  {tb.dropdown.map(sub => (
+                  {tb.dropdown.map((sub, idx) => (
                     <button
                       key={sub.id}
                       onClick={() => handleDropdownSelect(sub)}
                       style={{
                         width: "100%",
-                        padding: "10px 16px",
-                        fontSize: 12,
-                        fontWeight: tab === sub.id ? 600 : 400,
-                        color: tab === sub.id ? t.text : t.textSecondary,
-                        background: tab === sub.id ? (t.id === "dark" ? "#2a2a2a" : "#f0f0f0") : "transparent",
+                        padding: "12px 18px",
+                        fontSize: 13,
+                        fontWeight: tab === sub.id ? 700 : 500,
+                        color: tab === sub.id ? t.accent : t.textSecondary,
+                        background: tab === sub.id ? (t.id === "dark" ? "rgba(245,158,11,0.15)" : "rgba(234,88,12,0.1)") : "transparent",
                         border: "none",
-                        borderBottom: `1px solid ${t.tableBorder}`,
+                        borderBottom: idx < tb.dropdown.length - 1 ? `1px solid ${t.tableBorder}` : "none",
                         cursor: "pointer",
                         textAlign: "left",
                         fontFamily: "inherit",
-                        transition: "background 0.15s",
+                        transition: "all 0.15s",
                       }}
                       onMouseEnter={(e) => {
-                        if (tab !== sub.id) e.target.style.background = t.id === "dark" ? "#1a1a1a" : "#f5f5f5";
+                        if (tab !== sub.id) e.target.style.background = t.id === "dark" ? "rgba(59,130,246,0.1)" : "rgba(37,99,235,0.05)";
                       }}
                       onMouseLeave={(e) => {
                         if (tab !== sub.id) e.target.style.background = "transparent";
@@ -304,16 +323,17 @@ function BaseballApp() {
             value={season}
             onChange={e => setSeason(e.target.value)}
             style={{
-              padding: "6px 12px", 
-              background: t.accent, 
+              padding: "8px 16px", 
+              background: `linear-gradient(135deg, ${t.accentSecondary || t.accent} 0%, ${t.accent} 100%)`,
               color: "#fff",
               border: "none", 
-              borderRadius: 6, 
-              fontSize: 12, 
+              borderRadius: 8, 
+              fontSize: 13, 
               fontWeight: 700,
               cursor: "pointer", 
               outline: "none", 
               fontFamily: "inherit",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
             }}
           >
             {SEASONS.map(s => (
