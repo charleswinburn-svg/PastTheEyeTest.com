@@ -20,16 +20,39 @@ export const textOnBin = (p) => {
   return (p < 25 || p >= 75) ? "#fff" : "#111";
 };
 
-// ── MLB team primary colors ──
+// ── MLB team primary colors (all known abbreviation variants) ──
 export const MLB_TEAM_PRIMARY = {
-  ARI: "#A71930", ATL: "#CE1141", BAL: "#DF4601", BOS: "#BD3039",
-  CHC: "#0E3386", CWS: "#27251F", CIN: "#C6011F", CLE: "#00385D",
-  COL: "#33006F", DET: "#0C2340", HOU: "#002D62", KC:  "#004687",
-  LAA: "#BA0021", LAD: "#005A9C", MIA: "#00A3E0", MIL: "#FFC52F",
-  MIN: "#002B5C", NYM: "#002D72", NYY: "#003087", OAK: "#003831",
-  PHI: "#E81828", PIT: "#FDB827", SD:  "#2F241D", SEA: "#0C2C56",
-  SF:  "#FD5A1E", STL: "#C41E3A", TB:  "#092C5C", TEX: "#003278",
-  TOR: "#134A8E", WSH: "#AB0003",
+  // Standard + Fangraphs/Savant variants
+  ARI: "#A71930", AZ:  "#A71930",              // Arizona
+  ATL: "#CE1141",                              // Atlanta
+  BAL: "#DF4601",                              // Baltimore
+  BOS: "#BD3039",                              // Boston
+  CHC: "#0E3386",                              // Cubs
+  CWS: "#27251F", CHW: "#27251F",              // White Sox
+  CIN: "#C6011F",                              // Cincinnati
+  CLE: "#00385D",                              // Cleveland
+  COL: "#33006F",                              // Colorado
+  DET: "#0C2340",                              // Detroit
+  HOU: "#002D62",                              // Houston
+  KC:  "#004687", KCR: "#004687",              // Kansas City
+  LAA: "#BA0021",                              // Angels
+  LAD: "#005A9C",                              // Dodgers
+  MIA: "#00A3E0",                              // Miami
+  MIL: "#FFC52F",                              // Milwaukee
+  MIN: "#002B5C",                              // Minnesota
+  NYM: "#002D72",                              // Mets
+  NYY: "#003087",                              // Yankees
+  OAK: "#003831", ATH: "#003831",              // Athletics
+  PHI: "#E81828",                              // Philadelphia
+  PIT: "#FDB827",                              // Pittsburgh
+  SD:  "#2F241D", SDP: "#2F241D",              // San Diego
+  SEA: "#0C2C56",                              // Seattle
+  SF:  "#FD5A1E", SFG: "#FD5A1E",              // San Francisco
+  STL: "#C41E3A",                              // St. Louis
+  TB:  "#092C5C", TBR: "#092C5C",              // Tampa Bay
+  TEX: "#003278",                              // Texas
+  TOR: "#134A8E",                              // Toronto
+  WSH: "#AB0003", WSN: "#AB0003",              // Washington
 };
 
 export function hexLuminance(hex) {
