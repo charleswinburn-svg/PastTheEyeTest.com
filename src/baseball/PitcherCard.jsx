@@ -292,7 +292,7 @@ export default function PitcherCard({ player, season, trends, allPitchers }) {
           subtitle={subtitle}
         />
         <ProBubblesRow data={pitchPlusData} theme={t} />
-        <div style={{ padding: "8px 16px 4px" }}>
+        <div style={{ padding: "8px 12px 4px" }}>
           {cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
             <BubblePercentileBar
               key={label}
