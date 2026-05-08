@@ -29,9 +29,29 @@ const SEASON_TYPES = [
   { id: "P", label: "Postseason" },
 ];
 
-export default function Summaries({ season }) {
+export default function Summaries({ season, initialSubType = "game" }) {
   const { theme: t } = useTheme();
-  const [subTab, setSubTab] = useState("pitcher_game");
+  
+  // Map initialSubType to a default subTab
+  const getDefaultSubTab = (subType) => {
+    switch (subType) {
+      case "game": return "pitcher_game";
+      case "season": return "pitcher_season";
+      case "counts": return "pitcher_counts";
+      default: return "pitcher_game";
+    }
+  };
+  
+  const [subTab, setSubTab] = useState(() => getDefaultSubTab(initialSubType));
+  
+  // Update subTab when initialSubType changes from parent
+  useEffect(() => {
+    // Keep current pitcher/hitter preference, just change the view type
+    const isPitcher = subTab.startsWith("pitcher");
+    const prefix = isPitcher ? "pitcher" : "hitter";
+    setSubTab(`${prefix}_${initialSubType}`);
+  }, [initialSubType]);
+  
   const [seasonType, setSeasonType] = useState("S");
   const [level, setLevel] = useState("MLB"); // "MLB" or "AAA"
   const [players, setPlayers] = useState(null);

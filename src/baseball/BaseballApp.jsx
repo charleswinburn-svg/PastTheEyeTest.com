@@ -37,13 +37,21 @@ function deduplicatePlayers(players) {
 }
 
 const TABS = [
-  { id: "hitter",     label: "Hitter Card" },
-  { id: "pitcher",    label: "Pitcher Card" },
-  { id: "summaries",  label: "Summaries" },
-  { id: "hitter_lb",  label: "Hitter LB" },
-  { id: "pitcher_lb", label: "Pitcher LB" },
-  { id: "race2k",     label: "Race to 2K" },
-  { id: "evla",       label: "EV/LA Fan" },
+  { id: "hitter",     label: "HITTER CARD" },
+  { id: "pitcher",    label: "PITCHER CARD" },
+  { 
+    id: "summaries",  
+    label: "SUMMARIES",
+    dropdown: [
+      { id: "summaries_game", label: "Game" },
+      { id: "summaries_season", label: "Season" },
+      { id: "summaries_counts", label: "Counts" },
+    ]
+  },
+  { id: "hitter_lb",  label: "HITTER LB" },
+  { id: "pitcher_lb", label: "PITCHER LB" },
+  { id: "race2k",     label: "RACE TO 2K" },
+  { id: "evla",       label: "EV/LA FAN" },
 ];
 
 const SEASONS = ["2026", "2025", "2024", "2023"];
@@ -64,7 +72,9 @@ function BaseballApp() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [season, setSeason] = useState("2026");
-  const [tab, setTab] = useState("summaries");
+  const [tab, setTab] = useState("summaries_game");
+  const [summarySubType, setSummarySubType] = useState("game"); // game, season, counts
+  const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedHitter, setSelectedHitter] = useState(null);
   const [selectedPitcher, setSelectedPitcher] = useState(null);
   const [iswingData, setIswingData] = useState(null);
@@ -137,61 +147,192 @@ function BaseballApp() {
 
   const pipelineReady = data && !loading && !error;
 
+  // Helper to check if tab is active (handles dropdown sub-items)
+  const isTabActive = (tabId) => {
+    if (tabId === "summaries") return tab.startsWith("summaries");
+    return tab === tabId;
+  };
+
+  // Handle tab click with dropdown support
+  const handleTabClick = (tb, e) => {
+    if (tb.dropdown) {
+      e.stopPropagation();
+      setOpenDropdown(openDropdown === tb.id ? null : tb.id);
+    } else {
+      setTab(tb.id);
+      setOpenDropdown(null);
+    }
+  };
+
+  // Handle dropdown item click
+  const handleDropdownSelect = (subItem) => {
+    setTab(subItem.id);
+    setSummarySubType(subItem.label.toLowerCase());
+    setOpenDropdown(null);
+  };
+
+  // Close dropdown when clicking outside
+  const handleBackdropClick = () => {
+    setOpenDropdown(null);
+  };
+
   return (
-    <div style={{ minHeight: "100vh", background: t.bg, transition: "background 0.3s" }}>
-      {/* ── Header Bar ── */}
+    <div style={{ minHeight: "100vh", background: t.bg, transition: "background 0.3s" }} onClick={handleBackdropClick}>
+      {/* ── Full-Width Navigation Bar ── */}
       <div style={{
-        background: t.headerBg, borderBottom: `1px solid ${t.headerBorder}`,
-        padding: "10px 20px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        flexWrap: "wrap", gap: 10, transition: "background 0.3s",
+        background: t.headerBg, 
+        borderBottom: `1px solid ${t.headerBorder}`,
+        padding: "0 24px",
+        display: "flex", 
+        alignItems: "stretch", 
+        justifyContent: "space-between",
+        transition: "background 0.3s",
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ fontSize: 16, fontWeight: 800, color: t.text, letterSpacing: "-0.03em" }}>
-            <span style={{ color: t.accent }}>MLB</span> Player Cards
+        {/* Left: Logo + Navigation */}
+        <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
+          {/* Logo */}
+          <div style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            padding: "0 24px 0 0",
+            borderRight: `1px solid ${t.divider}`,
+            marginRight: 8,
+          }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: t.text, letterSpacing: "-0.03em" }}>
+              <span style={{ color: t.accent }}>MLB</span> Player Cards
+            </div>
           </div>
-          <div style={{ width: 1, height: 22, background: t.divider }} />
+
+          {/* Navigation Items */}
+          {TABS.map(tb => (
+            <div
+              key={tb.id}
+              style={{ position: "relative", display: "flex", alignItems: "stretch" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={(e) => handleTabClick(tb, e)}
+                style={{
+                  padding: "16px 16px",
+                  fontSize: 12,
+                  fontWeight: isTabActive(tb.id) ? 700 : 500,
+                  letterSpacing: "0.04em",
+                  color: isTabActive(tb.id) ? t.text : t.textMuted,
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: isTabActive(tb.id) ? `2px solid ${t.accent}` : "2px solid transparent",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  fontFamily: "inherit",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}
+              >
+                {tb.label}
+                {tb.dropdown && (
+                  <span style={{ 
+                    fontSize: 8, 
+                    marginLeft: 2,
+                    transform: openDropdown === tb.id ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s",
+                  }}>
+                    ▼
+                  </span>
+                )}
+              </button>
+              
+              {/* Dropdown Menu */}
+              {tb.dropdown && openDropdown === tb.id && (
+                <div style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  background: t.cardBg,
+                  border: `1px solid ${t.cardBorder}`,
+                  borderRadius: 8,
+                  boxShadow: `0 8px 24px ${t.shadow}`,
+                  minWidth: 140,
+                  overflow: "hidden",
+                  zIndex: 200,
+                }}>
+                  {tb.dropdown.map(sub => (
+                    <button
+                      key={sub.id}
+                      onClick={() => handleDropdownSelect(sub)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 16px",
+                        fontSize: 12,
+                        fontWeight: tab === sub.id ? 600 : 400,
+                        color: tab === sub.id ? t.text : t.textSecondary,
+                        background: tab === sub.id ? (t.id === "dark" ? "#2a2a2a" : "#f0f0f0") : "transparent",
+                        border: "none",
+                        borderBottom: `1px solid ${t.tableBorder}`,
+                        cursor: "pointer",
+                        textAlign: "left",
+                        fontFamily: "inherit",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (tab !== sub.id) e.target.style.background = t.id === "dark" ? "#1a1a1a" : "#f5f5f5";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (tab !== sub.id) e.target.style.background = "transparent";
+                      }}
+                    >
+                      {sub.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Right: Season selector, player selector, theme toggle, stats */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          {/* Season Selector */}
           <select
             value={season}
             onChange={e => setSeason(e.target.value)}
             style={{
-              padding: "5px 10px", background: t.accent, color: "#fff",
-              border: "none", borderRadius: 6, fontSize: 12, fontWeight: 700,
-              cursor: "pointer", outline: "none", fontFamily: "inherit",
+              padding: "6px 12px", 
+              background: t.accent, 
+              color: "#fff",
+              border: "none", 
+              borderRadius: 6, 
+              fontSize: 12, 
+              fontWeight: 700,
+              cursor: "pointer", 
+              outline: "none", 
+              fontFamily: "inherit",
             }}
           >
             {SEASONS.map(s => (
               <option key={s} value={s} style={{ background: t.inputBg, color: t.text }}>{s}</option>
             ))}
           </select>
-          <div style={{ width: 1, height: 22, background: t.divider }} />
-          <div style={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            {TABS.map(tb => (
-              <button
-                key={tb.id}
-                onClick={() => setTab(tb.id)}
-                style={{
-                  padding: "5px 12px", fontSize: 11,
-                  fontWeight: tab === tb.id ? 700 : 500,
-                  background: tab === tb.id ? (t.id === "dark" ? "#333" : "#e0e0e0") : "transparent",
-                  color: tab === tb.id ? t.text : t.textMuted,
-                  border: "none", borderRadius: 6, cursor: "pointer",
-                  transition: "all 0.15s", fontFamily: "inherit",
-                }}
-              >{tb.label}</button>
-            ))}
-          </div>
-        </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          {/* Player Selector (for card views) */}
           {(tab === "hitter" || tab === "pitcher") && (
             <select
               value={tab === "pitcher" ? selectedPitcher || "" : selectedHitter || ""}
               onChange={e => tab === "pitcher" ? setSelectedPitcher(e.target.value) : setSelectedHitter(e.target.value)}
               style={{
-                padding: "5px 10px", background: t.inputBg, border: `1px solid ${t.inputBorder}`,
-                borderRadius: 6, color: t.text, fontSize: 12, outline: "none",
-                minWidth: 200, maxWidth: 280, fontFamily: "inherit",
+                padding: "6px 12px", 
+                background: t.inputBg, 
+                border: `1px solid ${t.inputBorder}`,
+                borderRadius: 6, 
+                color: t.text, 
+                fontSize: 12, 
+                outline: "none",
+                minWidth: 180, 
+                maxWidth: 260, 
+                fontFamily: "inherit",
               }}
             >
               {(tab === "pitcher" ? pitcherNames : hitterNames).map(n => (
@@ -199,8 +340,16 @@ function BaseballApp() {
               ))}
             </select>
           )}
+
           <ThemeToggle />
-          <div style={{ fontSize: 9, color: t.textFaint, letterSpacing: "0.04em" }}>
+          
+          <div style={{ 
+            fontSize: 10, 
+            color: t.textFaint, 
+            letterSpacing: "0.03em",
+            borderLeft: `1px solid ${t.divider}`,
+            paddingLeft: 16,
+          }}>
             {season} | {hitters.length} hitters | {pitchers.length} pitchers
           </div>
         </div>
@@ -208,8 +357,8 @@ function BaseballApp() {
 
       {/* ── Content ── */}
       <div style={{
-        padding: tab === "summaries" ? 0 : 24,
-        maxWidth: tab.includes("lb") || tab === "race2k" ? 1200 : tab === "summaries" ? 1200 : tab === "evla" ? 780 : 640,
+        padding: tab.startsWith("summaries") ? 0 : 24,
+        maxWidth: tab.includes("lb") || tab === "race2k" ? 1200 : tab.startsWith("summaries") ? 1200 : tab === "evla" ? 780 : 640,
         margin: "0 auto",
       }}>
         {tab === "hitter" && (
@@ -240,8 +389,8 @@ function BaseballApp() {
             </div>
           )
         )}
-        {tab === "summaries" && (
-          <Summaries season={season} />
+        {tab.startsWith("summaries") && (
+          <Summaries season={season} initialSubType={summarySubType} />
         )}
         {tab === "hitter_lb" && (
           pipelineReady ? (
