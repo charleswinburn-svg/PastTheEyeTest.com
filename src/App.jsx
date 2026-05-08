@@ -56,8 +56,8 @@ export default function App() {
             <span style={{ color: "#f59e0b" }}>Eye Test</span>
           </span>
         </div>
-        {/* Sport buttons — centered in remaining space */}
-        <div style={{ flex: 1, display: "flex", alignItems: "stretch", justifyContent: "center" }}>
+        {/* Sport buttons — left-aligned next to logo */}
+        <div style={{ display: "flex", alignItems: "stretch" }}>
           {SPORTS.map(s => (
             <button
               key={s.id}
