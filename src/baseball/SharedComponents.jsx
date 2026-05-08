@@ -53,6 +53,38 @@ export const MLB_TEAM_PRIMARY = {
   TEX: "#003278",                              // Texas
   TOR: "#134A8E",                              // Toronto
   WSH: "#AB0003", WSN: "#AB0003",              // Washington
+
+  // AAA affiliates → parent org color
+  SWB: "#003087",                              // Scranton/WB RailRiders → NYY
+  WOR: "#BD3039",                              // Worcester Red Sox → BOS
+  BUF: "#134A8E",                              // Buffalo Bisons → TOR
+  DUR: "#092C5C",                              // Durham Bulls → TB
+  NOR: "#DF4601",                              // Norfolk Tides → BAL
+  CLB: "#00385D",                              // Columbus Clippers → CLE
+  STP: "#002B5C",                              // St. Paul Saints → MIN
+  CLT: "#27251F",                              // Charlotte Knights → CWS
+  TOL: "#0C2340",                              // Toledo Mud Hens → DET
+  OMA: "#004687",                              // Omaha Storm Chasers → KC
+  SUG: "#002D62", SL:  "#002D62",             // Sugar Land Space Cowboys → HOU
+  TAC: "#0C2C56",                              // Tacoma Rainiers → SEA
+  SLC: "#BA0021",                              // Salt Lake Bees → LAA
+  RR:  "#003278",                              // Round Rock Express → TEX
+  LV:  "#003831",                              // Las Vegas Aviators → ATH
+  SYR: "#002D72",                              // Syracuse Mets → NYM
+  GWN: "#CE1141",                              // Gwinnett Stripers → ATL
+  LHV: "#E81828",                              // Lehigh Valley IronPigs → PHI
+  JAX: "#00A3E0",                              // Jacksonville Jumbo Shrimp → MIA
+  ROC: "#AB0003",                              // Rochester Red Wings → WSH
+  IOW: "#0E3386",                              // Iowa Cubs → CHC
+  MEM: "#C41E3A",                              // Memphis Redbirds → STL
+  NAS: "#FFC52F",                              // Nashville Sounds → MIL
+  IND: "#FDB827",                              // Indianapolis Indians → PIT
+  LOU: "#C6011F",                              // Louisville Bats → CIN
+  OKC: "#005A9C",                              // Oklahoma City Baseball Club → LAD
+  RNO: "#A71930",                              // Reno Aces → ARI
+  EP:  "#2F241D", ELP: "#2F241D",             // El Paso Chihuahuas → SD
+  SAC: "#FD5A1E",                              // Sacramento River Cats → SF
+  ABQ: "#33006F",                              // Albuquerque Isotopes → COL
 };
 
 export function hexLuminance(hex) {
@@ -96,7 +128,7 @@ export function buildBioSubtitle(bio, hand) {
 // ── MLB Team ID mapping (for logos) ──
 
 // Strip diacritics for accent-insensitive matching
-export const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+export const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 // Fuzzy name key: strip accents, periods, commas, Jr/Sr suffixes, extra spaces
 const nameKey = s => norm(s).replace(/[.\-,]/g, "").replace(/\b(jr|sr|ii|iii|iv)\b/g, "").replace(/\s+/g, " ").trim();
