@@ -545,6 +545,97 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
             </tr>
             );
           })}
+
+          {/* TOTAL row — usage-weighted Stuff+/Loc+/Tun+/Pitch+ across all
+              pitch types. Only renders when modeling values are loaded.
+              All non-modeling columns are blank by design. */}
+          {pitchPlus && (() => {
+            const totalsKeys = ["stuffPlus", "locPlus", "tunnelPlus", "pitchPlus"];
+            const wsum = { stuffPlus: 0, locPlus: 0, tunnelPlus: 0, pitchPlus: 0 };
+            const wn   = { stuffPlus: 0, locPlus: 0, tunnelPlus: 0, pitchPlus: 0 };
+            for (const row of rows) {
+              const pp = pitchPlus[row.type] || {};
+              const n = row.n || 0;
+              if (!n) continue;
+              for (const k of totalsKeys) {
+                const v = pp[k];
+                if (v != null) { wsum[k] += v * n; wn[k] += n; }
+              }
+            }
+            const totals = {};
+            for (const k of totalsKeys) totals[k] = wn[k] > 0 ? wsum[k] / wn[k] : null;
+            const hasAny = totalsKeys.some(k => totals[k] != null);
+            if (!hasAny) return null;
+
+            return (
+              <tr>
+                {cols.map(c => {
+                  // 'Total' label in the pitch-name column.
+                  if (c.key === "name") {
+                    return (
+                      <td key={c.key} style={{
+                        padding: "8px 6px",
+                        textAlign: "center",
+                        borderTop: `2px solid ${t.divider}`,
+                        color: t.text,
+                        fontWeight: 800,
+                        fontSize: 11,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                      }}>Total</td>
+                    );
+                  }
+                  // Plus column → render as pill so it matches the per-type rows.
+                  if (totalsKeys.includes(c.key)) {
+                    const val = totals[c.key];
+                    const fmtted = c.fmt ? c.fmt(val) : (val != null ? val : "—");
+                    const effStyle = getCellStyle(c.key, val, null);
+                    if (effStyle.isPill) {
+                      return (
+                        <td key={c.key} style={{
+                          padding: "8px 4px",
+                          textAlign: "center",
+                          borderTop: `2px solid ${t.divider}`,
+                          fontFamily: "'DM Mono', monospace",
+                          whiteSpace: "nowrap",
+                        }}>
+                          <span style={{
+                            display: "inline-block",
+                            background: effStyle.background,
+                            color: effStyle.color,
+                            padding: "3px 10px",
+                            borderRadius: 6,
+                            fontWeight: 800,
+                            minWidth: 32,
+                            letterSpacing: "0.01em",
+                          }}>{fmtted}</span>
+                        </td>
+                      );
+                    }
+                    // Neutral (no tint) plus value — keep weight bold.
+                    return (
+                      <td key={c.key} style={{
+                        padding: "8px 6px",
+                        textAlign: "center",
+                        borderTop: `2px solid ${t.divider}`,
+                        color: t.text,
+                        fontWeight: 800,
+                        fontFamily: "'DM Mono', monospace",
+                        whiteSpace: "nowrap",
+                      }}>{fmtted}</td>
+                    );
+                  }
+                  // Every other column stays blank — only modeling combination shown.
+                  return (
+                    <td key={c.key} style={{
+                      padding: "8px 6px",
+                      borderTop: `2px solid ${t.divider}`,
+                    }} />
+                  );
+                })}
+              </tr>
+            );
+          })()}
         </tbody>
       </table>
     </div>

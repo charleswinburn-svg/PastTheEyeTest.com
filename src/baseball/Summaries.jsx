@@ -13,15 +13,6 @@ import {
 } from "./SummaryComponents.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm } from "./SharedComponents.jsx";
 
-const SUB_TABS = [
-  { id: "pitcher_game",   label: "Pitcher Game" },
-  { id: "pitcher_season", label: "Pitcher Season" },
-  { id: "pitcher_counts", label: "Pitcher Counts" },
-  { id: "hitter_game",    label: "Hitter Game" },
-  { id: "hitter_season",  label: "Hitter Season" },
-  { id: "hitter_counts",  label: "Hitter Counts" },
-];
-
 const SEASON_TYPES = [
   { id: "S", label: "Spring Training" },
   { id: "W", label: "WBC" },
@@ -29,9 +20,16 @@ const SEASON_TYPES = [
   { id: "P", label: "Postseason" },
 ];
 
-export default function Summaries({ season }) {
+export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const { theme: t } = useTheme();
-  const [subTab, setSubTab] = useState("pitcher_game");
+  
+  const [subTab, setSubTab] = useState(initialSubTab);
+  
+  // Update subTab when initialSubTab changes from parent (dropdown selection)
+  useEffect(() => {
+    setSubTab(initialSubTab);
+  }, [initialSubTab]);
+  
   const [seasonType, setSeasonType] = useState("S");
   const [level, setLevel] = useState("MLB"); // "MLB" or "AAA"
   const [players, setPlayers] = useState(null);
@@ -646,17 +644,32 @@ export default function Summaries({ season }) {
 
   // Live Pitch+ scoring: send loaded pitches to API, get back per-pitch grades
   useEffect(() => {
+    let cancelled = false;
+    (async () => {
     if (!isPitcher || !enrichedData?.pitches?.length || !selectedPlayer) {
       setPitchPlus(null);
       return;
     }
     let cancelled = false;
+    // Resolve pitcher hand. selectedPlayer.pitchHand is undefined for most
+    // pitchers (only set when loaded via WBC roster fetch), so we hit
+    // /people/{id} as a fallback. This used to default to R for everyone,
+    // which inflated Stuff+ for left-handed pitchers (the model treats
+    // matchup handedness asymmetrically).
+    let pitcherHand = selectedPlayer.pitchHand?.code;
+    if (pitcherHand !== "L" && pitcherHand !== "R") {
+      try {
+        const r = await fetch(`/mlb-api/api/v1/people/${selectedPlayer.id}`);
+        const j = await r.json();
+        pitcherHand = j?.people?.[0]?.pitchHand?.code || "R";
+      } catch { pitcherHand = "R"; }
+    }
     const payload = enrichedData.pitches
       .filter(p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN")
       .map(p => ({
         pitcher_id: selectedPlayer.id,
         _stand: p.batSide || "R",
-        _p_throws: selectedPlayer.pitchHand?.code || "R",
+        _p_throws: pitcherHand,
         details: { type: { code: p.pitchType } },
         pitchData: {
           startSpeed: p.velo,
@@ -724,25 +737,17 @@ export default function Summaries({ season }) {
         setPitchPlus(out);
       })
       .catch(err => { console.warn("[Pitch+] API failed:", err); setPitchPlus(null); });
+    })();
     return () => { cancelled = true; };
   }, [enrichedData, selectedPlayer, isPitcher, isAAA]);
 
   return (
     <div style={{ padding: "16px 20px" }}>
       <div style={{ display: "flex", gap: 2, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
-        {SUB_TABS.map(t => (
-          <button key={t.id} onClick={() => setSubTab(t.id)} style={{
-            padding: "6px 14px", fontSize: 11, fontWeight: subTab === t.id ? 700 : 500,
-            background: subTab === t.id ? "#333" : "transparent",
-            color: subTab === t.id ? "#fff" : "#888",
-            border: "none", borderRadius: 6, cursor: "pointer", fontFamily: "inherit",
-          }}>{t.label}</button>
-        ))}
-        <div style={{ width: 1, height: 22, background: t.divider, margin: "0 8px" }} />
         {SEASON_TYPES.map(st => (
           <button key={st.id} onClick={() => { setSeasonType(st.id); if (st.id !== "R") setLevel("MLB"); }} style={{
             padding: "4px 10px", fontSize: 10, fontWeight: seasonType === st.id ? 700 : 400,
-            background: seasonType === st.id ? "#d22d49" : "transparent",
+            background: seasonType === st.id ? "#f59e0b" : "transparent",
             color: seasonType === st.id ? "#fff" : "#666",
             border: seasonType === st.id ? "none" : "1px solid #333",
             borderRadius: 4, cursor: "pointer", fontFamily: "inherit",
@@ -764,7 +769,7 @@ export default function Summaries({ season }) {
         )}
       </div>
 
-      {error && <div style={{ color: "#d22d49", fontSize: 12, marginBottom: 8 }}>{error}</div>}
+      {error && <div style={{ color: "#f59e0b", fontSize: 12, marginBottom: 8 }}>{error}</div>}
 
       {isGame && (
         <div>

@@ -521,7 +521,7 @@ export default function EVLAChart({ season }) {
 
   if (loading) return <div style={{ color: "#666", textAlign: "center", padding: 60, fontSize: 13 }}>Loading {season} EV/LA data...</div>;
   if (error) return (
-    <div style={{ color: "#d22d49", textAlign: "center", padding: 60, fontSize: 13, lineHeight: 1.8 }}>
+    <div style={{ color: "#f59e0b", textAlign: "center", padding: 60, fontSize: 13, lineHeight: 1.8 }}>
       {error}<br /><br />
       <span style={{ color: t.textMuted, fontSize: 12 }}>
         Run: <code style={{ background: t.inputBg, padding: "2px 6px", borderRadius: 3 }}>python3 evla_pipeline.py ./public {season}</code>
@@ -539,7 +539,7 @@ export default function EVLAChart({ season }) {
               disabled={v === "spring" && !stData}
               style={{
                 padding: "5px 14px", fontSize: 11, fontWeight: mode === v ? 700 : 500,
-                background: mode === v ? "#d22d49" : "transparent",
+                background: mode === v ? "#f59e0b" : "transparent",
                 color: mode === v ? t.text : (v === "spring" && !stData) ? t.textFaintest : t.textMuted,
                 border: "none", borderRadius: 4,
                 cursor: (v === "spring" && !stData) ? "default" : "pointer",

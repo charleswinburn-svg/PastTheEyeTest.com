@@ -270,8 +270,8 @@ export function TrendChart({ data, metricLabel, metricKey }) {
           />
           <Line
             type="monotone" dataKey={metricKey}
-            stroke="#d22d49" strokeWidth={2.5}
-            dot={{ r: 4, fill: "#d22d49", stroke: t.headerBg, strokeWidth: 2 }}
+            stroke="#f59e0b" strokeWidth={2.5}
+            dot={{ r: 4, fill: "#f59e0b", stroke: t.headerBg, strokeWidth: 2 }}
           />
           <ReferenceLine y={0} stroke={t.textFaintest} strokeDasharray="4 4" />
         </LineChart>
