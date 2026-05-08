@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { BubblePercentileBar, PlayerHeader, TrendChart, MetricSelector, saveCardAsPng, fuzzyLookup, binColor, textOnBin } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, TrendChart, MetricSelector, saveCardAsPng, fuzzyLookup, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import { fetchPlayByPlay, extractPitcherData } from "./mlbApi.js";
 
 const PITCH_PLUS_API = "https://pitch-plus-api.onrender.com";
@@ -43,6 +43,7 @@ export default function PitcherCard({ player, season, trends, allPitchers }) {
   const [trendMetric, setTrendMetric] = useState("Stuff+ (FG)");
   const [pitchPlusData, setPitchPlusData] = useState(null);
   const cardRef = useRef(null);
+  const bio = useBio(player?.player_id);
 
   // Compute Stuff+/Loc+/Tun+/Pitch+ live from MLB Stats API to guarantee an
   // exact match with the Summary card. Same data path: game log → per-game
@@ -265,9 +266,7 @@ export default function PitcherCard({ player, season, trends, allPitchers }) {
   }
 
   const cats = Object.entries(player.categories);
-  const subtitleParts = [season];
-  if (player.ip) subtitleParts.push(`${player.ip} IP`);
-  const subtitle = subtitleParts.filter(Boolean).join(" | ");
+  const subtitle = buildBioSubtitle(bio, "throws") || `${season}${player.ip ? ` | ${player.ip} IP` : ""}`;
 
   return (
     <div>

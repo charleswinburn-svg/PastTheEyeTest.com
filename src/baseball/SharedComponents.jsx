@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
 
@@ -37,6 +38,36 @@ export function hexLuminance(hex) {
     const lin = c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     return sum + lin * [0.2126, 0.7152, 0.0722][i];
   }, 0);
+}
+
+// ── Player bio hook — fetches age/height/weight/hand/birthplace from MLB API ──
+export function useBio(playerId) {
+  const [bio, setBio] = useState(null);
+  useEffect(() => {
+    if (!playerId) return;
+    setBio(null);
+    fetch(`/mlb-api/api/v1/people/${playerId}?fields=people,id,currentAge,height,weight,batSide,pitchHand,birthCity,birthStateProvince,birthCountry`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { const p = d?.people?.[0]; if (p) setBio(p); })
+      .catch(() => {});
+  }, [playerId]);
+  return bio;
+}
+
+export function buildBioSubtitle(bio, hand) {
+  if (!bio) return null;
+  const parts = [];
+  if (bio.currentAge) parts.push(`Age ${bio.currentAge}`);
+  if (bio.height) parts.push(bio.height);
+  if (bio.weight) parts.push(`${bio.weight} lbs`);
+  if (hand === "bats" && bio.batSide?.code) parts.push(`Bats: ${bio.batSide.code}`);
+  if (hand === "throws" && bio.pitchHand?.code) parts.push(`Throws: ${bio.pitchHand.code}`);
+  const city = bio.birthCity || "";
+  const state = bio.birthStateProvince || "";
+  const country = bio.birthCountry || "";
+  const place = city ? (state ? `${city}, ${state}` : country && country !== "USA" ? `${city}, ${country}` : city) : "";
+  if (place) parts.push(place);
+  return parts.join(" · ") || null;
 }
 
 // ── MLB Team ID mapping (for logos) ──

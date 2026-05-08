@@ -1,11 +1,12 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useRef, useCallback, useMemo } from "react";
-import { BubblePercentileBar, PlayerHeader, TrendChart, MetricSelector, saveCardAsPng, fuzzyLookup } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, TrendChart, MetricSelector, saveCardAsPng, fuzzyLookup, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 
 export default function HitterCard({ player, season, trends, allHitters }) {
   const { theme: t } = useTheme();
   const [trendMetric, setTrendMetric] = useState("xSLG");
   const cardRef = useRef(null);
+  const bio = useBio(player?.player_id);
 
   const metricList = useMemo(() => {
     if (!player) return [];
@@ -53,7 +54,7 @@ export default function HitterCard({ player, season, trends, allHitters }) {
           team={player.team}
           season={season}
           playerId={player.player_id}
-          subtitle={`${season} | ${player.pa || "—"} PA`}
+          subtitle={buildBioSubtitle(bio, "bats") || `${season} | ${player.pa || "—"} PA`}
         />
         <div style={{ padding: "8px 16px 4px" }}>
           {cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
