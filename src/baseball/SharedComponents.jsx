@@ -196,21 +196,29 @@ export function BubblePercentileBar({ label, pctile, display }) {
   const txtColor = textOnBin(pctile);
 
   return (
-    <div style={{
-      display: "flex", alignItems: "center", marginBottom: 6,
-    }}>
-      {/* Label */}
+    <div style={{ marginBottom: 8 }}>
+      {/* Label row: label on left, raw value on right */}
       <div style={{
-        width: 130, textAlign: "right", fontSize: 11, fontWeight: 500,
-        color: t.text, flexShrink: 0, lineHeight: 1.2,
-        marginRight: 6,
+        display: "flex", justifyContent: "space-between", alignItems: "baseline",
+        marginBottom: 3,
       }}>
-        {label}
+        <div style={{
+          fontSize: 11, fontWeight: 500, color: t.text, lineHeight: 1.2,
+        }}>
+          {label}
+        </div>
+        <div style={{
+          fontSize: 11, fontWeight: 600,
+          color: hasValue ? t.textSecondary : t.textFaintest,
+          fontFamily: "'DM Mono', monospace",
+        }}>
+          {display || "—"}
+        </div>
       </div>
 
-      {/* Bar track + bubble */}
+      {/* Bar track + bubble — full width */}
       <div style={{
-        flex: 1, position: "relative", height: bubbleSize + 2,
+        position: "relative", height: bubbleSize + 2,
         display: "flex", alignItems: "center",
       }}>
         {/* Track background */}
@@ -269,16 +277,6 @@ export function BubblePercentileBar({ label, pctile, display }) {
             N/A
           </div>
         )}
-      </div>
-
-      {/* Raw value */}
-      <div style={{
-        width: 52, textAlign: "right", fontSize: 11, fontWeight: 600,
-        color: hasValue ? t.textSecondary : t.textFaintest,
-        fontFamily: "'DM Mono', monospace",
-        flexShrink: 0, marginLeft: 6,
-      }}>
-        {display || "—"}
       </div>
     </div>
   );
