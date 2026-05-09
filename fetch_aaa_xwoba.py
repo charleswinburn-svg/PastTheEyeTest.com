@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-fetch_aaa_xwoba.py — Fetch AAA hitter xwOBA from Baseball Savant and update
-public/prospect_xwoba.json.
+fetch_aaa_xwoba.py — Fetch AAA hitter xwOBA and update public/prospect_xwoba.json.
 
-Strategy:
-  1. Try the Savant minor-league expected-statistics leaderboard (fast, one request).
-  2. Fall back to computing xwOBA from raw pitch-by-pitch statcast data.
+Strategy (in order):
+  1. Prospect Savant API (level-adjusted xwOBA, the preferred source).
+  2. Savant minor-league expected-statistics leaderboard.
+  3. Compute xwOBA from raw Savant pitch-by-pitch statcast data.
 
 Usage:
   python3 fetch_aaa_xwoba.py                   # default: current year
   python3 fetch_aaa_xwoba.py 2026
   python3 fetch_aaa_xwoba.py 2025,2026
-  python3 fetch_aaa_xwoba.py 2026 --min-pa 10
+  python3 fetch_aaa_xwoba.py 2026 --min-pitches 100
   python3 fetch_aaa_xwoba.py 2026 --output-dir ./public
 
 Output:
@@ -33,9 +33,13 @@ import pandas as pd
 # ── config ────────────────────────────────────────────────────────────────────
 
 SAVANT_BASE = "https://baseballsavant.mlb.com"
+PROSPECT_SAVANT_API = "https://oriolebird.pythonanywhere.com"
 FETCH_DELAY = 3.0
 MAX_RETRIES = 4
 DEFAULT_MIN_PA = 10
+DEFAULT_MIN_PITCHES = 100
+DEFAULT_AGE_MIN = 16
+DEFAULT_AGE_MAX = 40
 
 HTTP_HEADERS = {
     "User-Agent": (
@@ -124,7 +128,95 @@ def parse_csv(text):
         return None
 
 
-# ── strategy 1: minor-league leaderboard ─────────────────────────────────────
+# ── strategy 1: Prospect Savant API ──────────────────────────────────────────
+
+# Possible field names for player name and xwOBA across API versions
+NAME_FIELDS = ("Name", "name", "player_name", "playerName", "player", "full_name", "fullName")
+XWOBA_FIELDS = ("xwOBA", "xwoba", "xWOBA", "expected_woba", "est_woba", "x_woba")
+
+
+def _extract_name_xwoba(row):
+    """Pull (name, xwoba) from a row dict, trying multiple field name variants."""
+    name = None
+    for f in NAME_FIELDS:
+        v = row.get(f)
+        if v and isinstance(v, str) and v.strip():
+            name = v.strip()
+            # Handle "Last, First" → "First Last"
+            if "," in name and name.count(",") == 1:
+                last, first = name.split(",", 1)
+                name = f"{first.strip()} {last.strip()}"
+            break
+
+    xw = None
+    for f in XWOBA_FIELDS:
+        v = row.get(f)
+        if v is None or v == "":
+            continue
+        try:
+            xw = float(v)
+            break
+        except (ValueError, TypeError):
+            continue
+
+    return name, xw
+
+
+def fetch_prospect_savant(year, min_pitches=DEFAULT_MIN_PITCHES,
+                           age_min=DEFAULT_AGE_MIN, age_max=DEFAULT_AGE_MAX):
+    """
+    Fetch AAA hitter xwOBA from Prospect Savant's API
+    (oriolebird.pythonanywhere.com — the backend behind prospectsavant.com).
+
+    URL pattern: /leaders/hitters/AAA/{year}/{min_pitches}/{age_min}/{age_max}
+    """
+    url = f"{PROSPECT_SAVANT_API}/leaders/hitters/AAA/{year}/{min_pitches}/{age_min}/{age_max}"
+    print(f"  → Prospect Savant: {url}")
+    text = fetch_url(url)
+    if not text:
+        print(f"    ✗ No response")
+        return None
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as e:
+        print(f"    ✗ JSON parse error: {e}")
+        print(f"    First 200 chars: {text[:200]}")
+        return None
+
+    # API may return a list directly, or {"data": [...]} / {"leaders": [...]}
+    rows = None
+    if isinstance(data, list):
+        rows = data
+    elif isinstance(data, dict):
+        for key in ("data", "leaders", "hitters", "players", "results", "rows"):
+            if key in data and isinstance(data[key], list):
+                rows = data[key]
+                break
+
+    if not rows:
+        print(f"    ✗ No rows found in response (keys: {list(data.keys()) if isinstance(data, dict) else type(data).__name__})")
+        return None
+
+    print(f"    Got {len(rows)} rows; sample keys: {list(rows[0].keys())[:15] if rows else 'none'}")
+
+    result = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        name, xw = _extract_name_xwoba(row)
+        if name and xw is not None and xw > 0:
+            result[name] = round(xw, 3)
+
+    if len(result) < 5:
+        print(f"    ✗ Too few players parsed ({len(result)})")
+        return None
+
+    print(f"    ✓ Prospect Savant: {len(result)} hitters with xwOBA")
+    return result
+
+
+# ── strategy 2: Savant minor-league leaderboard ──────────────────────────────
 
 def fetch_leaderboard(year, min_pa=DEFAULT_MIN_PA):
     """
@@ -391,18 +483,23 @@ def merge_and_save(data, new_players, year, path):
 
 # ── main ──────────────────────────────────────────────────────────────────────
 
-def run(year, output_dir, min_pa):
+def run(year, output_dir, min_pa, min_pitches, age_min, age_max):
     os.makedirs(output_dir, exist_ok=True)
     out_path = os.path.join(output_dir, "prospect_xwoba.json")
 
     print(f"\n{'='*60}")
-    print(f"  AAA xwOBA fetch — {year}  (min {min_pa} PA)")
+    print(f"  AAA xwOBA fetch — {year}")
     print(f"{'='*60}")
 
-    # 1. Try leaderboard
-    players = fetch_leaderboard(year, min_pa)
+    # 1. Try Prospect Savant first (level-adjusted, preferred)
+    players = fetch_prospect_savant(year, min_pitches, age_min, age_max)
 
-    # 2. Fall back to raw computation
+    # 2. Try Savant minor-league leaderboard
+    if not players:
+        print(f"\n  Prospect Savant unavailable — trying Savant leaderboard...")
+        players = fetch_leaderboard(year, min_pa)
+
+    # 3. Fall back to computing from raw Statcast data
     if not players:
         print(f"\n  Leaderboard unavailable — computing from raw Statcast data...")
         aaa_ids = get_aaa_player_ids(year)
@@ -418,18 +515,23 @@ def run(year, output_dir, min_pa):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fetch AAA xwOBA from Savant")
+    parser = argparse.ArgumentParser(description="Fetch AAA xwOBA from Prospect Savant / Savant")
     parser.add_argument(
         "season", nargs="?", default=str(date.today().year),
         help="Comma-separated seasons (default: current year)",
     )
-    parser.add_argument("--min-pa", type=int, default=DEFAULT_MIN_PA)
+    parser.add_argument("--min-pa", type=int, default=DEFAULT_MIN_PA,
+                        help="Min PA for Savant fallback paths")
+    parser.add_argument("--min-pitches", type=int, default=DEFAULT_MIN_PITCHES,
+                        help="Min pitches seen for Prospect Savant API")
+    parser.add_argument("--age-min", type=int, default=DEFAULT_AGE_MIN)
+    parser.add_argument("--age-max", type=int, default=DEFAULT_AGE_MAX)
     parser.add_argument("--output-dir", default="./public")
     args = parser.parse_args()
 
     seasons = [int(s.strip()) for s in args.season.split(",")]
     for yr in seasons:
-        run(yr, args.output_dir, args.min_pa)
+        run(yr, args.output_dir, args.min_pa, args.min_pitches, args.age_min, args.age_max)
 
 
 if __name__ == "__main__":
