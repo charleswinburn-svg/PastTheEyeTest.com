@@ -30,6 +30,9 @@ jobs:
       - name: Run league avgs pipeline
         run: python3 league_avgs_pipeline.py ./public 2026
 
+      - name: Fetch AAA xwOBA
+        run: python3 fetch_aaa_xwoba.py 2026 --output-dir ./public
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
