@@ -420,7 +420,7 @@ function BaseballApp() {
           )
         )}
         {tab === "team_plots" && (
-          <TeamScatter season={season} />
+          <TeamScatter season={season} hitters={hittersFull} iswingData={iswingData} />
         )}
         {tab === "race2k" && (
           <RaceToTwoStrikes season={season} />

@@ -6,7 +6,22 @@ const METRICS = [
   { id: "location", label: "Location+" },
   { id: "tunnel",   label: "Tunnel+"   },
   { id: "pitch",    label: "Pitch+"    },
+  { id: "iswing",   label: "iSwing+",  kind: "bar" },
 ];
+
+// MLB team primary colors. Keys match the team abbr produced by Statcast /
+// our data files. Falls back to the orange theme accent if missing.
+const TEAM_COLORS = {
+  ARI: "#A71930", ATL: "#13274F", BAL: "#DF4601", BOS: "#BD3039",
+  CHC: "#0E3386", CWS: "#27251F", CIN: "#C6011F", CLE: "#00385D",
+  COL: "#33006F", DET: "#0C2340", HOU: "#EB6E1F", KCR: "#004687",
+  LAA: "#BA0021", LAD: "#005A9C", MIA: "#00A3E0", MIL: "#FFC52F",
+  MIN: "#002B5C", NYM: "#FF5910", NYY: "#003087", OAK: "#003831",
+  ATH: "#003831", PHI: "#E81828", PIT: "#FDB827", SDP: "#2F241D",
+  SEA: "#0C2C56", SFG: "#FD5A1E", STL: "#C41E3A", TBR: "#092C5C",
+  TEX: "#003278", TOR: "#134A8E", WSH: "#AB0003", AZ: "#A71930",
+};
+const teamColor = (abbr) => TEAM_COLORS[abbr] || "#f59e0b";
 
 // Statcast → ESPN logo-CDN slug. Falls back to lowercase if not listed.
 const ESPN_SLUG = {
@@ -18,11 +33,12 @@ const espnLogo = (abbr) => {
   return `https://a.espncdn.com/i/teamlogos/mlb/500/${slug}.png`;
 };
 
-export default function TeamScatter({ season }) {
+export default function TeamScatter({ season, hitters, iswingData }) {
   const { theme: t } = useTheme();
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
   const [metric, setMetric] = useState("stuff");
+  const isBar = METRICS.find(m => m.id === metric)?.kind === "bar";
 
   useEffect(() => {
     setData(null);
@@ -49,6 +65,50 @@ export default function TeamScatter({ season }) {
       }))
       .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
   }, [data, metric]);
+
+  // ── iSwing+ bar chart: PA-weighted average per team ──
+  const bars = useMemo(() => {
+    if (metric !== "iswing" || !hitters?.length || !iswingData) return [];
+    const yr = String(season);
+    // Use the same normalisation as fuzzyLookup so we hit iSwing entries
+    const norm = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "")
+                                   .toLowerCase().replace(/[.\-,]/g, "")
+                                   .replace(/\b(jr|sr|ii|iii|iv)\b/g, "")
+                                   .replace(/\s+/g, " ").trim();
+    const byNorm = {};
+    for (const [name, rec] of Object.entries(iswingData)) byNorm[norm(name)] = rec;
+
+    const teamAgg = {};
+    for (const h of hitters) {
+      if (!h.team || !h.pa) continue;
+      const rec = byNorm[norm(h.name)];
+      const val = rec?.[yr];
+      if (val == null) continue;
+      if (!teamAgg[h.team]) teamAgg[h.team] = { num: 0, den: 0, n: 0 };
+      teamAgg[h.team].num += val * h.pa;
+      teamAgg[h.team].den += h.pa;
+      teamAgg[h.team].n += 1;
+    }
+    return Object.entries(teamAgg)
+      .filter(([, v]) => v.den > 0)
+      .map(([abbr, v]) => ({ abbr, value: v.num / v.den, n: v.n, pa: v.den }))
+      .sort((a, b) => b.value - a.value);
+  }, [metric, hitters, iswingData, season]);
+
+  if (isBar) {
+    return (
+      <div>
+        <MetricButtons metric={metric} setMetric={setMetric} theme={t} />
+        {bars.length === 0 ? (
+          <div style={{ color: t.textMuted, padding: 40, textAlign: "center", fontSize: 13 }}>
+            No iSwing+ data for {season}.
+          </div>
+        ) : (
+          <ISwingBars bars={bars} theme={t} season={season} />
+        )}
+      </div>
+    );
+  }
 
   if (err) return <div style={{ color: t.textMuted, padding: 40, textAlign: "center", fontSize: 13 }}>{err}</div>;
   if (!data) return <div style={{ color: t.textMuted, padding: 40, textAlign: "center", fontSize: 13 }}>Loading…</div>;
@@ -84,30 +144,7 @@ export default function TeamScatter({ season }) {
 
   return (
     <div>
-      {/* Metric selector */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 14, justifyContent: "center", flexWrap: "wrap" }}>
-        {METRICS.map(m => (
-          <button
-            key={m.id}
-            onClick={() => setMetric(m.id)}
-            style={{
-              padding: "7px 14px",
-              fontSize: 12,
-              fontWeight: metric === m.id ? 700 : 600,
-              letterSpacing: "0.03em",
-              color: metric === m.id ? "#fff" : t.textSecondary,
-              background: metric === m.id ? t.accent : t.inputBg,
-              border: `1px solid ${metric === m.id ? t.accent : t.inputBorder}`,
-              borderRadius: 6,
-              cursor: "pointer",
-              fontFamily: "inherit",
-              transition: "all 0.15s",
-            }}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
+      <MetricButtons metric={metric} setMetric={setMetric} theme={t} />
 
       <div style={{
         background: t.cardBg,
@@ -168,6 +205,128 @@ export default function TeamScatter({ season }) {
 
       <div style={{ fontSize: 10, color: t.textFaint, marginTop: 8, textAlign: "center" }}>
         {points.length} teams · season {data.season} · 100 = league average for each role · ±10 ≈ 1σ
+      </div>
+    </div>
+  );
+}
+
+
+// ── Metric selector buttons (shared by scatter + bar views) ────────────────
+function MetricButtons({ metric, setMetric, theme: t }) {
+  return (
+    <div style={{ display: "flex", gap: 6, marginBottom: 14, justifyContent: "center", flexWrap: "wrap" }}>
+      {METRICS.map(m => (
+        <button
+          key={m.id}
+          onClick={() => setMetric(m.id)}
+          style={{
+            padding: "7px 14px",
+            fontSize: 12,
+            fontWeight: metric === m.id ? 700 : 600,
+            letterSpacing: "0.03em",
+            color: metric === m.id ? "#fff" : t.textSecondary,
+            background: metric === m.id ? t.accent : t.inputBg,
+            border: `1px solid ${metric === m.id ? t.accent : t.inputBorder}`,
+            borderRadius: 6,
+            cursor: "pointer",
+            fontFamily: "inherit",
+            transition: "all 0.15s",
+          }}
+        >
+          {m.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+
+// ── iSwing+ team bar chart ────────────────────────────────────────────────
+function ISwingBars({ bars, theme: t, season }) {
+  const W = 900;
+  const M = { l: 48, r: 16, t: 28, b: 64 };  // bottom leaves room for logos + abbr
+  const barGap = 6;
+  const innerW = W - M.l - M.r;
+  const barW = (innerW - barGap * (bars.length - 1)) / bars.length;
+  const H = 460;
+  const innerH = H - M.t - M.b;
+
+  const maxVal = Math.max(...bars.map(b => b.value));
+  const minVal = Math.min(...bars.map(b => b.value));
+  // Y range padded to nearest 5 below the minimum and above the maximum,
+  // and snapped so 100 is always visible
+  const yLo = Math.min(95, Math.floor(Math.min(minVal, 100) / 5) * 5 - 2);
+  const yHi = Math.max(105, Math.ceil(Math.max(maxVal, 100) / 5) * 5 + 2);
+  const sy = v => M.t + (1 - (v - yLo) / (yHi - yLo)) * innerH;
+  const y100 = sy(100);
+
+  const ticks = [];
+  for (let v = Math.ceil(yLo / 5) * 5; v <= yHi; v += 5) ticks.push(v);
+
+  const logoSize = Math.min(28, barW * 0.85);
+
+  return (
+    <div style={{
+      background: t.cardBg,
+      border: `1px solid ${t.cardBorder}`,
+      borderRadius: 10,
+      padding: 12,
+    }}>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }}>
+        {/* Y gridlines + labels */}
+        {ticks.map(v => (
+          <g key={`g-${v}`}>
+            <line x1={M.l} y1={sy(v)} x2={M.l + innerW} y2={sy(v)}
+                  stroke={t.tableBorder} strokeWidth={v === 100 ? 1.2 : 0.5} />
+            <text x={M.l - 8} y={sy(v) + 3} fontSize={10} fill={t.textMuted} textAnchor="end">{v}</text>
+          </g>
+        ))}
+
+        {/* 100 reference baseline emphasised */}
+        <line x1={M.l} y1={y100} x2={M.l + innerW} y2={y100}
+              stroke={t.textMuted} strokeDasharray="4 4" strokeWidth={0.8} />
+
+        {/* Bars */}
+        {bars.map((b, i) => {
+          const x = M.l + i * (barW + barGap);
+          const v = b.value;
+          const yTop = sy(Math.max(v, 100));
+          const yBot = sy(Math.min(v, 100));
+          const h = Math.max(1, yBot - yTop);
+          const fill = teamColor(b.abbr);
+          // Logo and label sit below the chart area regardless of bar height
+          const logoY = M.t + innerH + 6;
+          const labelY = logoY + logoSize + 12;
+          return (
+            <g key={b.abbr}>
+              <rect x={x} y={yTop} width={barW} height={h} fill={fill}
+                    stroke={t.cardBg} strokeWidth={1}>
+                <title>{`${b.abbr}  •  iSwing+: ${v.toFixed(1)}  •  ${b.n} hitters · ${b.pa} PA`}</title>
+              </rect>
+              {/* Value above the bar */}
+              <text x={x + barW / 2} y={(v >= 100 ? yTop : yBot) - 4}
+                    fontSize={10} fontWeight={700} fill={t.textSecondary} textAnchor="middle">
+                {v.toFixed(0)}
+              </text>
+              {/* Logo at the base */}
+              <image href={`https://a.espncdn.com/i/teamlogos/mlb/500/${(b.abbr || "").toLowerCase()}.png`}
+                     x={x + barW / 2 - logoSize / 2} y={logoY}
+                     width={logoSize} height={logoSize} />
+              <text x={x + barW / 2} y={labelY} fontSize={9} fill={t.textMuted} textAnchor="middle">
+                {b.abbr}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Y axis label */}
+        <text transform={`translate(${14},${M.t + innerH / 2}) rotate(-90)`}
+              fontSize={13} fontWeight={600} fill={t.textSecondary} textAnchor="middle">
+          iSwing+
+        </text>
+      </svg>
+      <div style={{ fontSize: 10, color: t.textFaint, marginTop: 8, textAlign: "center" }}>
+        {bars.length} teams · season {season} · PA-weighted average · 100 = league average
       </div>
     </div>
   );
