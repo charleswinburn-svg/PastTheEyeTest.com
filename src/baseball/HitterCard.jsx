@@ -1,22 +1,12 @@
 import { useTheme } from "./ThemeContext.jsx";
-import { useState, useRef, useCallback, useMemo } from "react";
-import { BubblePercentileBar, PlayerHeader, TrendChart, MetricSelector, saveCardAsPng, fuzzyLookup, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
+import { useRef, useCallback } from "react";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
+import RollingChart from "./RollingChart.jsx";
 
-export default function HitterCard({ player, season, trends, allHitters }) {
+export default function HitterCard({ player, season }) {
   const { theme: t } = useTheme();
-  const [trendMetric, setTrendMetric] = useState("xSLG");
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
-
-  const metricList = useMemo(() => {
-    if (!player) return [];
-    return Object.keys(player.categories).map(label => ({ label }));
-  }, [player]);
-
-  const trendData = useMemo(() => {
-    if (!player || !trends) return null;
-    return fuzzyLookup(trends, player.name) || null;
-  }, [player, trends]);
 
   const saveCard = useCallback(async () => {
     if (!player) return;
@@ -93,24 +83,9 @@ export default function HitterCard({ player, season, trends, allHitters }) {
         </button>
       </div>
 
-      {/* === TREND CHART (below card, separate) === */}
-      {trendData && trendData.length >= 2 && (
-        <div style={{
-          background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
-          maxWidth: 600, margin: "16px auto 0", padding: "12px 0 4px",
-        }}>
-          <MetricSelector
-            metrics={metricList}
-            selected={trendMetric}
-            onChange={setTrendMetric}
-          />
-          <TrendChart
-            data={trendData}
-            metricLabel={trendMetric}
-            metricKey={trendMetric}
-          />
-        </div>
-      )}
+      {/* === ROLLING 50-PA CHART === */}
+      <RollingChart playerId={player.player_id} season={season} type="hitter" />
+
     </div>
   );
 }

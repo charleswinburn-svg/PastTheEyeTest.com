@@ -1,7 +1,8 @@
 import { useTheme } from "./ThemeContext.jsx";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { BubblePercentileBar, PlayerHeader, TrendChart, MetricSelector, saveCardAsPng, fuzzyLookup, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import { fetchPlayByPlay, extractPitcherData } from "./mlbApi.js";
+import RollingChart from "./RollingChart.jsx";
 
 const PITCH_PLUS_API = "https://pitch-plus-api.onrender.com";
 
@@ -38,9 +39,8 @@ function percentileRank(value, sorted) {
   return Math.round(rank * 1000) / 10; // one decimal
 }
 
-export default function PitcherCard({ player, season, trends, allPitchers }) {
+export default function PitcherCard({ player, season, allPitchers }) {
   const { theme: t } = useTheme();
-  const [trendMetric, setTrendMetric] = useState("Stuff+ (FG)");
   const [pitchPlusData, setPitchPlusData] = useState(null);
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
@@ -241,16 +241,6 @@ export default function PitcherCard({ player, season, trends, allPitchers }) {
     return () => { cancelled = true; };
   }, [player?.player_id, season, allPitchers]);
 
-  const metricList = useMemo(() => {
-    if (!player) return [];
-    return Object.keys(player.categories).map(label => ({ label }));
-  }, [player]);
-
-  const trendData = useMemo(() => {
-    if (!player || !trends) return null;
-    return fuzzyLookup(trends, player.name) || null;
-  }, [player, trends]);
-
   const saveCard = useCallback(async () => {
     if (!player) return;
     const safeName = player.name.replace(/\s+/g, "_");
@@ -329,24 +319,8 @@ export default function PitcherCard({ player, season, trends, allPitchers }) {
         </button>
       </div>
 
-      {/* === TREND CHART (separate) === */}
-      {trendData && trendData.length >= 2 && (
-        <div style={{
-          background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
-          maxWidth: 600, margin: "16px auto 0", padding: "12px 0 4px",
-        }}>
-          <MetricSelector
-            metrics={metricList}
-            selected={trendMetric}
-            onChange={setTrendMetric}
-          />
-          <TrendChart
-            data={trendData}
-            metricLabel={trendMetric}
-            metricKey={trendMetric}
-          />
-        </div>
-      )}
+      {/* === ROLLING 10-IP CHART === */}
+      <RollingChart playerId={player.player_id} season={season} type="pitcher" />
     </div>
   );
 }
