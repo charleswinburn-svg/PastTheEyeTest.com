@@ -26,7 +26,7 @@ const teamColor = (abbr) => TEAM_COLORS[abbr] || "#f59e0b";
 // Statcast → ESPN logo-CDN slug. Falls back to lowercase if not listed.
 const ESPN_SLUG = {
   SFG: "sf", KCR: "kc", SDP: "sd", TBR: "tb", CWS: "chw",
-  AZ: "ari", WAS: "wsh",
+  AZ: "ari", ARI: "ari", WAS: "wsh", WSH: "wsh", ATH: "oak",
 };
 const espnLogo = (abbr) => {
   const slug = ESPN_SLUG[abbr] ?? abbr.toLowerCase();
@@ -286,16 +286,16 @@ function ISwingBars({ bars, theme: t, season }) {
         <line x1={M.l} y1={y100} x2={M.l + innerW} y2={y100}
               stroke={t.textMuted} strokeDasharray="4 4" strokeWidth={0.8} />
 
-        {/* Bars */}
+        {/* Bars — anchored to the bottom of the chart so every team's bar
+            grows up from the X-axis, regardless of value */}
         {bars.map((b, i) => {
           const x = M.l + i * (barW + barGap);
           const v = b.value;
-          const yTop = sy(Math.max(v, 100));
-          const yBot = sy(Math.min(v, 100));
+          const yTop = sy(v);
+          const yBot = M.t + innerH;
           const h = Math.max(1, yBot - yTop);
           const fill = teamColor(b.abbr);
-          // Logo and label sit below the chart area regardless of bar height
-          const logoY = M.t + innerH + 6;
+          const logoY = yBot + 6;
           const labelY = logoY + logoSize + 12;
           return (
             <g key={b.abbr}>
@@ -304,7 +304,7 @@ function ISwingBars({ bars, theme: t, season }) {
                 <title>{`${b.abbr}  •  iSwing+: ${v.toFixed(1)}  •  ${b.n} hitters · ${b.pa} PA`}</title>
               </rect>
               {/* Logo at the base */}
-              <image href={`https://a.espncdn.com/i/teamlogos/mlb/500/${(b.abbr || "").toLowerCase()}.png`}
+              <image href={espnLogo(b.abbr)}
                      x={x + barW / 2 - logoSize / 2} y={logoY}
                      width={logoSize} height={logoSize} />
               <text x={x + barW / 2} y={labelY} fontSize={9} fill={t.textMuted} textAnchor="middle">
