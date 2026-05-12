@@ -4,6 +4,7 @@ import PitcherCard from "./PitcherCard.jsx";
 import Summaries from "./Summaries.jsx";
 import RaceToTwoStrikes from "./RaceToTwoStrikes.jsx";
 import EVLAChart from "./EVLAChart.jsx";
+import TeamScatter from "./TeamScatter.jsx";
 import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
@@ -59,6 +60,7 @@ const TABS = [
       { id: "pitcher_lb", label: "Pitcher" },
     ]
   },
+  { id: "team_plots", label: "TEAM PLOTS" },
   { id: "race2k",     label: "RACE TO 2K" },
   { id: "evla",       label: "EV/LA FAN" },
 ];
@@ -357,7 +359,7 @@ function BaseballApp() {
       {/* ── Content ── */}
       <div style={{
         padding: isSummaryTab(tab) ? 0 : 24,
-        maxWidth: tab.includes("lb") || tab === "race2k" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : 640,
+        maxWidth: tab.includes("lb") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : 640,
         margin: "0 auto",
       }}>
         {tab === "hitter" && (
@@ -416,6 +418,9 @@ function BaseballApp() {
               {loading ? `Loading ${season} data...` : `No pipeline data for ${season}.`}
             </div>
           )
+        )}
+        {tab === "team_plots" && (
+          <TeamScatter season={season} />
         )}
         {tab === "race2k" && (
           <RaceToTwoStrikes season={season} />
