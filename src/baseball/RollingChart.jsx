@@ -1,7 +1,125 @@
 import { useEffect, useMemo, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
-import { fetchGameLog } from "./mlbApi.js";
+import { fetchGameLog, fetchSavantPlayerSeason } from "./mlbApi.js";
+
+// ── Statcast counter aggregation ───────────────────────────────────────────
+// Aggregate per-pitch Savant rows into per-game counters that can be summed
+// in a sliding window. Returns { [gameDate]: { ...counters } }.
+function aggregateSavantToGames(rows) {
+  const out = {};
+  for (const r of rows) {
+    const date = r.game_date;
+    if (!date) continue;
+    if (!out[date]) {
+      out[date] = {
+        date,
+        // PA-level
+        PA_sav: 0, AB_sav: 0,
+        xwoba_num: 0, xwoba_den: 0,
+        xba_num: 0, xba_den: 0,
+        xslg_num: 0, xslg_den: 0,
+        xwoba_con_num: 0, xwoba_con_den: 0,
+        bbe: 0, barrels: 0, hard_hits: 0,
+        sum_ev: 0, sum_la: 0,
+        // Pitch-level
+        pitches: 0, swings: 0, whiffs: 0,
+        oz_pitches: 0, oz_swings: 0,
+        // Bat tracking
+        bs_n: 0, sum_bs: 0, fast_swings: 0,
+        sl_n: 0, sum_sl: 0,
+        aa_n: 0, sum_aa: 0,
+        // Pitcher-specific
+        ff_n: 0, sum_ff_velo: 0,
+      };
+    }
+    const g = out[date];
+    const num = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : null; };
+
+    // Pitch-level counters
+    g.pitches += 1;
+    const zone = num(r.zone);
+    const inZone = zone != null && zone >= 1 && zone <= 9;
+    const ozPitch = zone != null && zone >= 10;
+    if (ozPitch) g.oz_pitches += 1;
+
+    const desc = (r.description || "").toLowerCase();
+    const isSwing =
+      desc === "swinging_strike" || desc === "swinging_strike_blocked" ||
+      desc === "foul" || desc === "foul_tip" || desc === "hit_into_play" ||
+      desc === "foul_bunt" || desc === "missed_bunt";
+    const isWhiff =
+      desc === "swinging_strike" || desc === "swinging_strike_blocked" ||
+      desc === "missed_bunt";
+    if (isSwing) {
+      g.swings += 1;
+      if (ozPitch) g.oz_swings += 1;
+    }
+    if (isWhiff) g.whiffs += 1;
+
+    // Bat tracking
+    if (isSwing) {
+      const bs = num(r.bat_speed);
+      if (bs != null) { g.sum_bs += bs; g.bs_n += 1; if (bs >= 75) g.fast_swings += 1; }
+      const sl = num(r.swing_length);
+      if (sl != null) { g.sum_sl += sl; g.sl_n += 1; }
+      const aa = num(r.attack_angle);
+      if (aa != null) { g.sum_aa += aa; g.aa_n += 1; }
+    }
+
+    // Pitcher-specific FF velo
+    if ((r.pitch_type || "").toUpperCase() === "FF") {
+      const v = num(r.release_speed);
+      if (v != null) { g.sum_ff_velo += v; g.ff_n += 1; }
+    }
+
+    // Batted-ball metrics (terminal BIP)
+    if (desc === "hit_into_play") {
+      g.bbe += 1;
+      const ev = num(r.launch_speed);
+      const la = num(r.launch_angle);
+      if (ev != null) { g.sum_ev += ev; if (ev >= 95) g.hard_hits += 1; }
+      if (la != null) g.sum_la += la;
+      const lsa = num(r.launch_speed_angle);
+      if (lsa === 6) g.barrels += 1;
+      const xba = num(r.estimated_ba_using_speedangle);
+      if (xba != null) { g.xba_num += xba; g.xba_den += 1; }
+      const xslg = num(r.estimated_slg_using_speedangle);
+      if (xslg != null) { g.xslg_num += xslg; g.xslg_den += 1; }
+      const xwc = num(r.estimated_woba_using_speedangle);
+      if (xwc != null) { g.xwoba_con_num += xwc; g.xwoba_con_den += 1; }
+    }
+
+    // PA-level (terminal pitch of an at-bat)
+    const wDen = num(r.woba_denom);
+    if (wDen && wDen > 0) {
+      g.PA_sav += 1;
+      const events = (r.events || "").toLowerCase();
+      const nonAb = events === "walk" || events === "hit_by_pitch" ||
+                    events === "sac_fly" || events === "sac_bunt" ||
+                    events === "intent_walk" || events === "catcher_interf";
+      if (!nonAb) g.AB_sav += 1;
+
+      let contrib = null;
+      if (desc === "hit_into_play") {
+        contrib = num(r.estimated_woba_using_speedangle);
+      }
+      if (contrib == null) contrib = num(r.woba_value) ?? 0;
+      g.xwoba_num += contrib;
+      g.xwoba_den += wDen;
+    }
+  }
+  return out;
+}
+
+// Merge Savant per-game counters into the gameLog row array by date.
+function mergeSavant(gameLogRows, savantByDate) {
+  return gameLogRows.map(r => {
+    const sav = savantByDate[r.date];
+    if (!sav) return r;
+    return { ...r, ...sav };
+  });
+}
 
 // ── Computable metrics ──
 // Each entry maps an id (matched against card category labels + a few of our
@@ -13,14 +131,35 @@ import { fetchGameLog } from "./mlbApi.js";
 // FIP constant varies year to year (~3.10); using 3.15 as a reasonable mid.
 const FIP_C = 3.15;
 
+// Stats whose compute uses Savant counters; flagged so we know to fetch
+// per-pitch CSVs for the player.
+const STATCAST_COMPUTE = {
+  "xwOBA":    { compute: w => safe(w.xwoba_num, w.xwoba_den), digits: 3 },
+  "xBA":      { compute: w => safe(w.xba_num, w.xba_den),     digits: 3 },
+  "xSLG":     { compute: w => safe(w.xslg_num, w.xslg_den),   digits: 3 },
+  "xwOBACON": { compute: w => safe(w.xwoba_con_num, w.xwoba_con_den), digits: 3 },
+  "Barrel%":  { compute: w => safe(w.barrels, w.bbe) * 100, suffix: "%" },
+  "Hard Hit%":{ compute: w => safe(w.hard_hits, w.bbe) * 100, suffix: "%" },
+  "Avg Exit Velo":  { compute: w => safe(w.sum_ev, w.bbe), suffix: " mph", digits: 1 },
+  "Avg Launch Angle": { compute: w => safe(w.sum_la, w.bbe), suffix: "°", digits: 1 },
+  "Whiff%":   { compute: w => safe(w.whiffs, w.swings) * 100, suffix: "%" },
+  "Chase%":   { compute: w => safe(w.oz_swings, w.oz_pitches) * 100, suffix: "%" },
+  "Avg Bat Speed":   { compute: w => safe(w.sum_bs, w.bs_n), suffix: " mph", digits: 1 },
+  "Fast Swing %":    { compute: w => safe(w.fast_swings, w.bs_n) * 100, suffix: "%" },
+  "Avg Swing Length":{ compute: w => safe(w.sum_sl, w.sl_n), suffix: " ft", digits: 2 },
+  "Avg. Attack Angle":{ compute: w => safe(w.sum_aa, w.aa_n), suffix: "°", digits: 1 },
+  "Avg FB Velo":     { compute: w => safe(w.sum_ff_velo, w.ff_n), suffix: " mph", digits: 1 },
+};
+
 const HITTER_COMPUTE = {
-  "AVG":  { compute: w => safe(w.H,  w.AB) },
-  "OBP":  { compute: w => safe(w.H + w.BB + w.HBP, w.AB + w.BB + w.HBP + w.SF) },
-  "SLG":  { compute: w => safe(w.TB, w.AB) },
-  "OPS":  { compute: w => safe(w.H + w.BB + w.HBP, w.AB + w.BB + w.HBP + w.SF) + safe(w.TB, w.AB) },
-  "ISO":  { compute: w => safe(w.TB, w.AB) - safe(w.H, w.AB) },
+  "AVG":  { compute: w => safe(w.H,  w.AB), digits: 3 },
+  "OBP":  { compute: w => safe(w.H + w.BB + w.HBP, w.AB + w.BB + w.HBP + w.SF), digits: 3 },
+  "SLG":  { compute: w => safe(w.TB, w.AB), digits: 3 },
+  "OPS":  { compute: w => safe(w.H + w.BB + w.HBP, w.AB + w.BB + w.HBP + w.SF) + safe(w.TB, w.AB), digits: 3 },
+  "ISO":  { compute: w => safe(w.TB, w.AB) - safe(w.H, w.AB), digits: 3 },
   "BB%":  { compute: w => safe(w.BB, w.PA) * 100, suffix: "%" },
   "K%":   { compute: w => safe(w.K,  w.PA) * 100, suffix: "%" },
+  ...STATCAST_COMPUTE,
 };
 
 const PITCHER_COMPUTE = {
@@ -32,7 +171,17 @@ const PITCHER_COMPUTE = {
   "K-BB%": { compute: w => (safe(w.K, w.BF) - safe(w.BB, w.BF)) * 100, suffix: "%" },
   "HR/9":  { compute: w => safe(9 * w.HR, w.IP) },
   "GB%":   { compute: w => safe(w.GO, w.GO + w.AO) * 100, suffix: "%" },
+  ...STATCAST_COMPUTE,
 };
+
+const STATCAST_KEYS = [
+  "xwoba_num", "xwoba_den", "xba_num", "xba_den", "xslg_num", "xslg_den",
+  "xwoba_con_num", "xwoba_con_den",
+  "bbe", "barrels", "hard_hits", "sum_ev", "sum_la",
+  "pitches", "swings", "whiffs", "oz_pitches", "oz_swings",
+  "bs_n", "sum_bs", "fast_swings", "sl_n", "sum_sl", "aa_n", "sum_aa",
+  "ff_n", "sum_ff_velo",
+];
 
 // Some card labels differ from the canonical id above. Map them so the same
 // compute fn fires whether the card calls it "Avg Exit Velo" or "Avg Exit
@@ -98,8 +247,8 @@ function subRow(acc, r, keys) {
   for (const k of keys) acc[k] = (acc[k] || 0) - (r[k] || 0);
 }
 
-const HITTER_KEYS  = ["PA", "AB", "H", "BB", "HBP", "SF", "TB", "K"];
-const PITCHER_KEYS = ["IP", "BF", "H", "BB", "HBP", "K", "HR", "ER", "GO", "AO"];
+const HITTER_KEYS  = ["PA", "AB", "H", "BB", "HBP", "SF", "TB", "K", ...STATCAST_KEYS];
+const PITCHER_KEYS = ["IP", "BF", "H", "BB", "HBP", "K", "HR", "ER", "GO", "AO", ...STATCAST_KEYS];
 
 // Walk games chronologically and emit one point per game once the trailing
 // window (looking BACK from this game inclusive) accumulates at least
@@ -178,17 +327,26 @@ export default function RollingChart({ playerId, season, type, cardMetrics }) {
     const targetKey = type === "pitcher" ? "IP" : "PA";
     const rowFor = type === "pitcher" ? gameRowPitcher : gameRowHitter;
     const group = type === "pitcher" ? "pitching" : "hitting";
+    const savantType = type === "pitcher" ? "pitcher" : "batter";
 
     (async () => {
       try {
         const yr = Number(season);
         const collected = [];
         let total = 0;
-        // Walk back up to 5 seasons until we reach the target
+        // Walk back up to 5 seasons until we reach the target. For each
+        // season we fetch the gameLog and the Savant per-pitch CSV in
+        // parallel, then merge the per-game Statcast counters into the
+        // gameLog rows by date.
         for (let s = yr; s > yr - 5 && total < target; s--) {
-          const log = await fetchGameLog(playerId, s, group);
+          const [log, savantRows] = await Promise.all([
+            fetchGameLog(playerId, s, group),
+            fetchSavantPlayerSeason(playerId, s, savantType).catch(() => []),
+          ]);
           if (cancelled) return;
-          const seasonRows = (log || []).map(rowFor).filter(r => r.date);
+          const savByDate = aggregateSavantToGames(savantRows || []);
+          let seasonRows = (log || []).map(rowFor).filter(r => r.date);
+          seasonRows = mergeSavant(seasonRows, savByDate);
           // Sort within season by date (gameLog usually already chronological)
           seasonRows.sort((a, b) => a.date.localeCompare(b.date));
           // Prepend older season's rows so the full array is chronological
@@ -221,6 +379,8 @@ export default function RollingChart({ playerId, season, type, cardMetrics }) {
   if (rows.length === 0) return null;     // insufficient career data, hide
 
   const suffix = computeDef?.suffix || "";
+  const digits = computeDef?.digits ?? (suffix === "%" ? 1 : 3);
+  const tickDigits = suffix === "%" ? 0 : (digits === 3 ? 3 : Math.max(0, digits - 1));
   const target = type === "pitcher" ? 10 : 50;
   const unitLbl = type === "pitcher" ? "IP" : "PA";
   const currentLabel = options.find(o => o.id === metric)?.label || metric;
@@ -277,12 +437,12 @@ export default function RollingChart({ playerId, season, type, cardMetrics }) {
                   tick={{ fill: t.textFaint, fontSize: 10 }} tickLine={false}
                   axisLine={false} width={40}
                   domain={["auto", "auto"]}
-                  tickFormatter={v => (suffix === "%" ? v.toFixed(0) : v.toFixed(suffix ? 0 : 3))}
+                  tickFormatter={v => v.toFixed(tickDigits)}
                 />
                 <Tooltip
                   contentStyle={{ background: t.cardBg, border: `1px solid ${t.cardBorder}`, fontSize: 11 }}
                   labelStyle={{ color: t.textMuted }}
-                  formatter={(v) => [`${(suffix === "%" ? v.toFixed(1) : v.toFixed(3))}${suffix}`, currentLabel]}
+                  formatter={(v) => [`${v.toFixed(digits)}${suffix}`, currentLabel]}
                 />
                 <Line
                   type="monotone" dataKey="value"
