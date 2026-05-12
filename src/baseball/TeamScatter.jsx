@@ -54,10 +54,11 @@ export default function TeamScatter({ season }) {
   if (!data) return <div style={{ color: t.textMuted, padding: 40, textAlign: "center", fontSize: 13 }}>Loading…</div>;
   if (points.length === 0) return <div style={{ color: t.textMuted, padding: 40, textAlign: "center", fontSize: 13 }}>No team-role rows in team_plus_{season}.json</div>;
 
-  // Axis range: symmetric around 100, padded to nearest 5
+  // Axis range: symmetric around 100, padded to the next 10 so each gridline
+  // is one std (matches the +/-10 = 1 sigma convention used in summary tables)
   const allVals = points.flatMap(p => [p.x, p.y]);
   const maxDev = Math.max(...allVals.map(v => Math.abs(v - 100)));
-  const pad = Math.max(8, Math.ceil(maxDev / 5) * 5 + 2);
+  const pad = Math.max(10, Math.ceil(maxDev / 10) * 10);
   const lo = 100 - pad, hi = 100 + pad;
 
   const W = 700, H = 700;
@@ -75,9 +76,9 @@ export default function TeamScatter({ season }) {
   const QUAD_GREEN = "rgba(34,197,94,0.10)";
   const QUAD_RED   = "rgba(239,68,68,0.10)";
 
-  // Tick marks every 5
+  // Tick marks every 10 (= 1 std on the +/- scale)
   const ticks = [];
-  for (let v = Math.ceil(lo / 5) * 5; v <= hi; v += 5) ticks.push(v);
+  for (let v = Math.ceil(lo / 10) * 10; v <= hi; v += 10) ticks.push(v);
 
   const metricLabel = METRICS.find(m => m.id === metric).label;
 

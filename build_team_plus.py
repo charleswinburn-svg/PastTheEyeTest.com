@@ -108,30 +108,60 @@ def classify_roles(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def aggregate_team_role(df: pd.DataFrame) -> pd.DataFrame:
-    """Mean xRV columns by (team, role)."""
-    agg = (df.groupby(['pitching_team', 'role'])
+def pitcher_plus_table(df: pd.DataFrame, min_pitches: int = 50) -> pd.DataFrame:
+    """Compute each individual pitcher's overall Stuff+/Loc+/Tun+/Pitch+ on
+    the same convention used in the summary tables and build_pitch_plus.py:
+
+        +value = 100 - 10 * (mean_xRV - μ) / σ
+
+    where μ/σ are computed across all qualified individual pitchers. Lower
+    xRV is better, so we subtract z.
+
+    Splits a pitcher into (team, role) sub-rows when they pitched for
+    multiple teams or in both starter and reliever roles, so traded /
+    opener pitchers contribute proportionally to each bucket.
+    """
+    sub = (df.groupby(['pitcher', 'pitching_team', 'role'])
              .agg(n=('xRV_final', 'count'),
                   xRV=('xRV_final', 'mean'),
                   stuff=('xRV_stuff', 'mean'),
                   loc=('xRV_location', 'mean'),
                   tun=('xRV_tunnel', 'mean'))
              .reset_index())
-    # Scale to per-100 pitches for readability (matches build_pitch_plus.py)
+    sub = sub[sub['n'] >= min_pitches].reset_index(drop=True)
     for c in ['xRV', 'stuff', 'loc', 'tun']:
-        agg[c] = agg[c] * 100
+        sub[c] = sub[c] * 100  # per-100 pitches, matches build_pitch_plus.py
+
+    # Population (mean, std) across these per-pitcher rows
+    pop = {c: (float(sub[c].mean()), float(sub[c].std()))
+           for c in ['xRV', 'stuff', 'loc', 'tun']}
+
+    def to_plus(col, mu, sd):
+        if sd == 0 or pd.isna(sd):
+            return 100.0
+        return (100 - 10 * (sub[col] - mu) / sd).round(2)
+
+    sub['stuff_plus'] = to_plus('stuff', *pop['stuff'])
+    sub['loc_plus']   = to_plus('loc',   *pop['loc'])
+    sub['tun_plus']   = to_plus('tun',   *pop['tun'])
+    sub['pitch_plus'] = to_plus('xRV',   *pop['xRV'])
+    return sub, pop
+
+
+def aggregate_team_role(pitchers: pd.DataFrame) -> pd.DataFrame:
+    """Simple mean of per-pitcher "+" values within each (team, role).
+    Aggregating player-level plus matches what the summaries display."""
+    agg = (pitchers.groupby(['pitching_team', 'role'])
+                   .agg(n_pitchers=('pitcher', 'nunique'),
+                        n=('n', 'sum'),
+                        stuff_plus=('stuff_plus', 'mean'),
+                        loc_plus=('loc_plus', 'mean'),
+                        tun_plus=('tun_plus', 'mean'),
+                        pitch_plus=('pitch_plus', 'mean'))
+                   .reset_index())
+    for c in ['stuff_plus', 'loc_plus', 'tun_plus', 'pitch_plus']:
+        agg[c] = agg[c].round(1)
     return agg
-
-
-def to_plus(values: pd.Series) -> pd.Series:
-    """Convert xRV → "+" scale where 100=mean and +/-10 = 1 std.
-    Lower xRV is better for a pitcher, so we invert (subtract z)."""
-    mean = values.mean()
-    std = values.std()
-    if std == 0 or pd.isna(std):
-        return pd.Series([100.0] * len(values), index=values.index)
-    z = (values - mean) / std
-    return (100 - z * 10).round(1)
 
 
 def build_pitcher_baselines(df: pd.DataFrame) -> dict:
@@ -227,17 +257,14 @@ def build(parquet_path: Path, year: int, out_path: Path):
     n_reliever = (df['role'] == 'reliever').sum()
     print(f'  starter pitches: {n_starter:,}   reliever pitches: {n_reliever:,}')
 
-    print('Aggregating to team × role ...')
-    agg = aggregate_team_role(df)
-    # Drop tiny samples
-    agg = agg[agg['n'] >= 50].reset_index(drop=True)
+    print('Computing per-pitcher Stuff+/Loc+/Tun+/Pitch+ ...')
+    pitchers, pop = pitcher_plus_table(df, min_pitches=50)
+    for c, (m, s) in pop.items():
+        print(f'  {c} per-pitcher: mean={m:+.3f}  std={s:.3f}')
+    print(f'  {len(pitchers)} qualifying (pitcher, team, role) rows')
 
-    # Convert each metric to + scale, computed across the full team-role
-    # population so a 110 means "10% better than the average team-role group".
-    agg['stuff_plus'] = to_plus(agg['stuff'])
-    agg['loc_plus']   = to_plus(agg['loc'])
-    agg['tun_plus']   = to_plus(agg['tun'])
-    agg['pitch_plus'] = to_plus(agg['xRV'])
+    print('Aggregating player-level "+" to team × role ...')
+    agg = aggregate_team_role(pitchers)
 
     teams = {}
     for _, row in agg.iterrows():
@@ -245,11 +272,12 @@ def build(parquet_path: Path, year: int, out_path: Path):
         if tm not in teams:
             teams[tm] = {}
         teams[tm][row['role']] = {
-            'stuff':    float(row['stuff_plus']),
-            'location': float(row['loc_plus']),
-            'tunnel':   float(row['tun_plus']),
-            'pitch':    float(row['pitch_plus']),
-            'n':        int(row['n']),
+            'stuff':      float(row['stuff_plus']),
+            'location':   float(row['loc_plus']),
+            'tunnel':     float(row['tun_plus']),
+            'pitch':      float(row['pitch_plus']),
+            'n_pitchers': int(row['n_pitchers']),
+            'n':          int(row['n']),
         }
 
     out = {'season': year, 'teams': teams}
