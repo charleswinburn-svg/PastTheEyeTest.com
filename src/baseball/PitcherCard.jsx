@@ -320,7 +320,12 @@ export default function PitcherCard({ player, season, allPitchers }) {
       </div>
 
       {/* === ROLLING 10-IP CHART === */}
-      <RollingChart playerId={player.player_id} season={season} type="pitcher" />
+      <RollingChart
+        playerId={player.player_id}
+        season={season}
+        type="pitcher"
+        cardMetrics={Object.keys(player.categories || {})}
+      />
     </div>
   );
 }

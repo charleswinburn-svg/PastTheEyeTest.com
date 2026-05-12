@@ -3,31 +3,47 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Refe
 import { useTheme } from "./ThemeContext.jsx";
 import { fetchGameLog } from "./mlbApi.js";
 
-// ── Supported metrics ──
-// Only metrics that can be computed from standard MLB Stats API gameLog
-// counters. Each entry: id (matches a player.categories key), display label,
-// and compute(window) → number, where window is a summed counter object.
-const HITTER_METRICS = [
-  { id: "AVG",  label: "AVG",   compute: w => safe(w.H,  w.AB)              },
-  { id: "OBP",  label: "OBP",   compute: w => safe(w.H + w.BB + w.HBP, w.AB + w.BB + w.HBP + w.SF) },
-  { id: "SLG",  label: "SLG",   compute: w => safe(w.TB, w.AB)              },
-  { id: "OPS",  label: "OPS",   compute: w => safe(w.H + w.BB + w.HBP, w.AB + w.BB + w.HBP + w.SF) + safe(w.TB, w.AB) },
-  { id: "ISO",  label: "ISO",   compute: w => safe(w.TB, w.AB) - safe(w.H, w.AB) },
-  { id: "BB%",  label: "BB%",   compute: w => safe(w.BB, w.PA) * 100, suffix: "%" },
-  { id: "K%",   label: "K%",    compute: w => safe(w.K,  w.PA) * 100, suffix: "%" },
-];
+// ── Computable metrics ──
+// Each entry maps an id (matched against card category labels + a few of our
+// own additions) to a compute(window) → number, where window is a summed
+// counter object built from gameLog rows. Metrics not present here are
+// surfaced in the dropdown but render a "not available" message — those
+// stats are Statcast-derived and aren't in the MLB Stats API gameLog.
 
 // FIP constant varies year to year (~3.10); using 3.15 as a reasonable mid.
 const FIP_C = 3.15;
-const PITCHER_METRICS = [
-  { id: "ERA",     label: "ERA",     compute: w => safe(9 * w.ER, w.IP) },
-  { id: "FIP",     label: "FIP",     compute: w => w.IP > 0 ? (13*w.HR + 3*(w.BB + w.HBP) - 2*w.K)/w.IP + FIP_C : 0 },
-  { id: "WHIP",    label: "WHIP",    compute: w => safe(w.BB + w.H, w.IP) },
-  { id: "K%",      label: "K%",      compute: w => safe(w.K,  w.BF) * 100, suffix: "%" },
-  { id: "BB%",     label: "BB%",     compute: w => safe(w.BB, w.BF) * 100, suffix: "%" },
-  { id: "K-BB%",   label: "K-BB%",   compute: w => (safe(w.K, w.BF) - safe(w.BB, w.BF)) * 100, suffix: "%" },
-  { id: "HR/9",    label: "HR/9",    compute: w => safe(9 * w.HR, w.IP) },
-];
+
+const HITTER_COMPUTE = {
+  "AVG":  { compute: w => safe(w.H,  w.AB) },
+  "OBP":  { compute: w => safe(w.H + w.BB + w.HBP, w.AB + w.BB + w.HBP + w.SF) },
+  "SLG":  { compute: w => safe(w.TB, w.AB) },
+  "OPS":  { compute: w => safe(w.H + w.BB + w.HBP, w.AB + w.BB + w.HBP + w.SF) + safe(w.TB, w.AB) },
+  "ISO":  { compute: w => safe(w.TB, w.AB) - safe(w.H, w.AB) },
+  "BB%":  { compute: w => safe(w.BB, w.PA) * 100, suffix: "%" },
+  "K%":   { compute: w => safe(w.K,  w.PA) * 100, suffix: "%" },
+};
+
+const PITCHER_COMPUTE = {
+  "ERA":   { compute: w => safe(9 * w.ER, w.IP) },
+  "FIP":   { compute: w => w.IP > 0 ? (13*w.HR + 3*(w.BB + w.HBP) - 2*w.K)/w.IP + FIP_C : 0 },
+  "WHIP":  { compute: w => safe(w.BB + w.H, w.IP) },
+  "K%":    { compute: w => safe(w.K,  w.BF) * 100, suffix: "%" },
+  "BB%":   { compute: w => safe(w.BB, w.BF) * 100, suffix: "%" },
+  "K-BB%": { compute: w => (safe(w.K, w.BF) - safe(w.BB, w.BF)) * 100, suffix: "%" },
+  "HR/9":  { compute: w => safe(9 * w.HR, w.IP) },
+  "GB%":   { compute: w => safe(w.GO, w.GO + w.AO) * 100, suffix: "%" },
+};
+
+// Some card labels differ from the canonical id above. Map them so the same
+// compute fn fires whether the card calls it "Avg Exit Velo" or "Avg Exit
+// Velocity", "Barrel%" or "Barrel %", etc.
+const LABEL_ALIASES = {
+  "Barrel %": "Barrel%",
+  "Avg Exit Velocity": "Avg Exit Velo",
+  "Whiff %": "Whiff%",
+  "Chase %": "Chase%",
+};
+const canon = (label) => LABEL_ALIASES[label] || label;
 
 function safe(n, d) { return d > 0 ? n / d : 0; }
 
@@ -69,6 +85,8 @@ function gameRowPitcher(g) {
     K:   Number(s.strikeOuts)   || 0,
     HR:  Number(s.homeRuns)     || 0,
     ER:  Number(s.earnedRuns)   || 0,
+    GO:  Number(s.groundOuts)   || 0,
+    AO:  Number(s.airOuts)      || 0,
   };
 }
 
@@ -81,7 +99,7 @@ function subRow(acc, r, keys) {
 }
 
 const HITTER_KEYS  = ["PA", "AB", "H", "BB", "HBP", "SF", "TB", "K"];
-const PITCHER_KEYS = ["IP", "BF", "H", "BB", "HBP", "K", "HR", "ER"];
+const PITCHER_KEYS = ["IP", "BF", "H", "BB", "HBP", "K", "HR", "ER", "GO", "AO"];
 
 // Walk games chronologically and emit one point per game once the trailing
 // window (looking BACK from this game inclusive) accumulates at least
@@ -110,20 +128,44 @@ function buildRolling(rows, windowSize, windowKey, keys, compute) {
   return out;
 }
 
-export default function RollingChart({ playerId, season, type, defaultMetric }) {
+export default function RollingChart({ playerId, season, type, cardMetrics }) {
   const { theme: t } = useTheme();
-  const metrics = type === "pitcher" ? PITCHER_METRICS : HITTER_METRICS;
+  const computeMap = type === "pitcher" ? PITCHER_COMPUTE : HITTER_COMPUTE;
+
+  // Dropdown options: every label that appears on the card, plus any of
+  // our computable extras that the card doesn't already cover. Card order
+  // first, extras appended at the end.
+  const options = useMemo(() => {
+    const seen = new Set();
+    const out = [];
+    for (const lbl of cardMetrics || []) {
+      const key = canon(lbl);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ id: key, label: lbl, supported: !!computeMap[key] });
+    }
+    for (const key of Object.keys(computeMap)) {
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ id: key, label: key, supported: true });
+    }
+    return out;
+  }, [cardMetrics, computeMap]);
+
+  // Default selection: first supported option, falling back to first option
   const [metric, setMetric] = useState(() => {
-    const def = metrics.find(m => m.id === defaultMetric);
-    return def?.id || metrics[0].id;
+    const first = options.find(o => o.supported) || options[0];
+    return first?.id;
   });
+  useEffect(() => {
+    if (!options.some(o => o.id === metric)) {
+      const first = options.find(o => o.supported) || options[0];
+      if (first) setMetric(first.id);
+    }
+  }, [options]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [rows, setRows] = useState(null);  // chronologically-sorted game rows
   const [err, setErr] = useState(null);
-
-  // Reset metric whenever player changes if previous selection no longer in list
-  useEffect(() => {
-    if (!metrics.some(m => m.id === metric)) setMetric(metrics[0].id);
-  }, [type]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let cancelled = false;
@@ -164,26 +206,24 @@ export default function RollingChart({ playerId, season, type, defaultMetric }) 
     return () => { cancelled = true; };
   }, [playerId, season, type]);
 
+  const computeDef = computeMap[metric] || null;
   const series = useMemo(() => {
-    if (!rows || !rows.length) return [];
+    if (!rows || !rows.length || !computeDef) return [];
     const target = type === "pitcher" ? 10 : 50;
     const targetKey = type === "pitcher" ? "IP" : "PA";
     const keys = type === "pitcher" ? PITCHER_KEYS : HITTER_KEYS;
-    const def = metrics.find(m => m.id === metric);
-    if (!def) return [];
-    return buildRolling(rows, target, targetKey, keys, def.compute);
-  }, [rows, metric, type]);  // eslint-disable-line react-hooks/exhaustive-deps
+    return buildRolling(rows, target, targetKey, keys, computeDef.compute);
+  }, [rows, metric, type, computeDef]);
 
-  // Don't render anything if we couldn't reach the threshold or no points
+  // Hide entirely if data fetch failed or we never reached the threshold
   if (err) return null;
   if (rows == null) return null;          // loading
-  if (rows.length === 0) return null;     // insufficient data, hide
-  if (series.length < 2) return null;
+  if (rows.length === 0) return null;     // insufficient career data, hide
 
-  const def = metrics.find(m => m.id === metric);
-  const suffix = def?.suffix || "";
+  const suffix = computeDef?.suffix || "";
   const target = type === "pitcher" ? 10 : 50;
   const unitLbl = type === "pitcher" ? "IP" : "PA";
+  const currentLabel = options.find(o => o.id === metric)?.label || metric;
 
   return (
     <div style={{
@@ -202,7 +242,9 @@ export default function RollingChart({ playerId, season, type, defaultMetric }) 
             fontFamily: "inherit",
           }}
         >
-          {metrics.map(m => (<option key={m.id} value={m.id}>{m.label}</option>))}
+          {options.map(o => (
+            <option key={o.id} value={o.id}>{o.label}{o.supported ? "" : " (Statcast only)"}</option>
+          ))}
         </select>
         <span style={{ fontSize: 10, color: t.textFaintest, marginLeft: "auto" }}>
           Trailing {target} {unitLbl}
@@ -210,42 +252,55 @@ export default function RollingChart({ playerId, season, type, defaultMetric }) 
       </div>
 
       <div style={{ fontSize: 11, fontWeight: 600, color: t.textMuted, textAlign: "center", marginBottom: 4 }}>
-        {def.label} — Rolling {target}-{unitLbl}
+        {currentLabel} — Rolling {target}-{unitLbl}
       </div>
 
-      <div style={{ padding: "0 12px" }}>
-        <ResponsiveContainer width="100%" height={160}>
-          <LineChart data={series} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={t.cardBorder} />
-            <XAxis
-              dataKey="date"
-              tick={{ fill: t.textMuted, fontSize: 10 }}
-              tickLine={false}
-              axisLine={{ stroke: t.divider }}
-              tickFormatter={(d) => (d || "").slice(5)}   // MM-DD
-              minTickGap={28}
-            />
-            <YAxis
-              tick={{ fill: t.textFaint, fontSize: 10 }} tickLine={false}
-              axisLine={false} width={40}
-              domain={["auto", "auto"]}
-              tickFormatter={v => (suffix === "%" ? v.toFixed(0) : v.toFixed(suffix ? 0 : 3))}
-            />
-            <Tooltip
-              contentStyle={{ background: t.cardBg, border: `1px solid ${t.cardBorder}`, fontSize: 11 }}
-              labelStyle={{ color: t.textMuted }}
-              formatter={(v) => [`${(suffix === "%" ? v.toFixed(1) : v.toFixed(3))}${suffix}`, def.label]}
-            />
-            <Line
-              type="monotone" dataKey="value"
-              stroke="#f59e0b" strokeWidth={2.5}
-              dot={false}
-              isAnimationActive={false}
-            />
-            <ReferenceLine y={0} stroke={t.textFaintest} strokeDasharray="4 4" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {computeDef ? (
+        series.length < 2 ? (
+          <div style={{ padding: "24px 12px 28px", textAlign: "center", color: t.textFaint, fontSize: 12 }}>
+            Not enough recent games to fill a trailing {target}-{unitLbl} window.
+          </div>
+        ) : (
+          <div style={{ padding: "0 12px" }}>
+            <ResponsiveContainer width="100%" height={160}>
+              <LineChart data={series} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={t.cardBorder} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: t.textMuted, fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={{ stroke: t.divider }}
+                  tickFormatter={(d) => (d || "").slice(5)}
+                  minTickGap={28}
+                />
+                <YAxis
+                  tick={{ fill: t.textFaint, fontSize: 10 }} tickLine={false}
+                  axisLine={false} width={40}
+                  domain={["auto", "auto"]}
+                  tickFormatter={v => (suffix === "%" ? v.toFixed(0) : v.toFixed(suffix ? 0 : 3))}
+                />
+                <Tooltip
+                  contentStyle={{ background: t.cardBg, border: `1px solid ${t.cardBorder}`, fontSize: 11 }}
+                  labelStyle={{ color: t.textMuted }}
+                  formatter={(v) => [`${(suffix === "%" ? v.toFixed(1) : v.toFixed(3))}${suffix}`, currentLabel]}
+                />
+                <Line
+                  type="monotone" dataKey="value"
+                  stroke="#f59e0b" strokeWidth={2.5}
+                  dot={false}
+                  isAnimationActive={false}
+                />
+                <ReferenceLine y={0} stroke={t.textFaintest} strokeDasharray="4 4" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )
+      ) : (
+        <div style={{ padding: "24px 16px 28px", textAlign: "center", color: t.textFaint, fontSize: 12, lineHeight: 1.5 }}>
+          Rolling chart not available for <b>{currentLabel}</b>.<br />
+          Statcast-derived stats aren’t in the MLB Stats API gameLog.
+        </div>
+      )}
     </div>
   );
 }
