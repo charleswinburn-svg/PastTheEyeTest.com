@@ -73,7 +73,9 @@ function aggregateSavantToGames(rows) {
       if (v != null) { g.sum_ff_velo += v; g.ff_n += 1; }
     }
 
-    // Batted-ball metrics (terminal BIP)
+    // Batted-ball metrics (terminal BIP) — counted on the BIP itself,
+    // not on the AB. xBA/xSLG denominators are filled in the PA block
+    // below so strikeouts contribute 0 to the numerator and 1 to the AB.
     if (desc === "hit_into_play") {
       g.bbe += 1;
       const ev = num(r.launch_speed);
@@ -82,10 +84,6 @@ function aggregateSavantToGames(rows) {
       if (la != null) g.sum_la += la;
       const lsa = num(r.launch_speed_angle);
       if (lsa === 6) g.barrels += 1;
-      const xba = num(r.estimated_ba_using_speedangle);
-      if (xba != null) { g.xba_num += xba; g.xba_den += 1; }
-      const xslg = num(r.estimated_slg_using_speedangle);
-      if (xslg != null) { g.xslg_num += xslg; g.xslg_den += 1; }
       const xwc = num(r.estimated_woba_using_speedangle);
       if (xwc != null) { g.xwoba_con_num += xwc; g.xwoba_con_den += 1; }
     }
@@ -98,7 +96,19 @@ function aggregateSavantToGames(rows) {
       const nonAb = events === "walk" || events === "hit_by_pitch" ||
                     events === "sac_fly" || events === "sac_bunt" ||
                     events === "intent_walk" || events === "catcher_interf";
-      if (!nonAb) g.AB_sav += 1;
+      if (!nonAb) {
+        g.AB_sav += 1;
+        // xBA / xSLG are expected stats per AB. BIPs contribute their
+        // estimated values; non-BIP ABs (strikeouts) contribute 0.
+        g.xba_den  += 1;
+        g.xslg_den += 1;
+        if (desc === "hit_into_play") {
+          const xba  = num(r.estimated_ba_using_speedangle);
+          const xslg = num(r.estimated_slg_using_speedangle);
+          if (xba  != null) g.xba_num  += xba;
+          if (xslg != null) g.xslg_num += xslg;
+        }
+      }
 
       let contrib = null;
       if (desc === "hit_into_play") {
