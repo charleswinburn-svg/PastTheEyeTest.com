@@ -303,11 +303,6 @@ function ISwingBars({ bars, theme: t, season }) {
                     stroke={t.cardBg} strokeWidth={1}>
                 <title>{`${b.abbr}  •  iSwing+: ${v.toFixed(1)}  •  ${b.n} hitters · ${b.pa} PA`}</title>
               </rect>
-              {/* Value above the bar */}
-              <text x={x + barW / 2} y={(v >= 100 ? yTop : yBot) - 4}
-                    fontSize={10} fontWeight={700} fill={t.textSecondary} textAnchor="middle">
-                {v.toFixed(0)}
-              </text>
               {/* Logo at the base */}
               <image href={`https://a.espncdn.com/i/teamlogos/mlb/500/${(b.abbr || "").toLowerCase()}.png`}
                      x={x + barW / 2 - logoSize / 2} y={logoY}
