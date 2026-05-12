@@ -134,7 +134,82 @@ def to_plus(values: pd.Series) -> pd.Series:
     return (100 - z * 10).round(1)
 
 
+def build_pitcher_baselines(df: pd.DataFrame) -> dict:
+    """Compute per-pitcher fastball baselines (FF, falling back to SI/FC).
+    Mirrors the fields score_pitches.engineer_stuff_features expects.
+    """
+    df = df.copy()
+    # Trajectory math for tunnel & plate positions (mirrors engineer_tunnel_features)
+    PLATE_Y = 17.0 / 12.0
+    y_tun = PLATE_Y + 23.0
+    y0 = 50.0
+    a_ = 0.5 * df['ay'].values
+    b_ = df['vy0'].values
+    c_ = y0 - y_tun
+    with np.errstate(invalid='ignore', divide='ignore'):
+        disc = b_**2 - 4 * a_ * c_
+        t_tun = np.where(disc >= 0,
+                         (-b_ - np.sqrt(np.maximum(disc, 0))) / (2 * a_),
+                         np.nan)
+        t_tun = np.where((t_tun > 0) & (t_tun < 0.5), t_tun, np.nan)
+    df['tunnel_x'] = (df['release_pos_x'].values + df['vx0'].values * t_tun
+                      + 0.5 * df['ax'].values * t_tun**2)
+    df['tunnel_z'] = (df['release_pos_z'].values + df['vz0'].values * t_tun
+                      + 0.5 * df['az'].values * t_tun**2)
+
+    # VAA at plate
+    with np.errstate(invalid='ignore', divide='ignore'):
+        tp = np.clip(50.0 / (-df['vy0'].values), 0.35, 0.55)
+    df['vaa'] = np.degrees(np.arctan2(df['vz0'].values + df['az'].values * tp,
+                                       -(df['vy0'].values + df['ay'].values * tp)))
+
+    out = {}
+    for pid, sub in df.groupby('pitcher'):
+        fb = None
+        for pt_pref in ('FF', 'SI', 'FC'):
+            cand = sub[sub['pitch_type'] == pt_pref]
+            if len(cand) >= 20:
+                fb = cand
+                break
+        if fb is None:
+            continue
+        rec = {
+            'fb_velo':      float(fb['release_speed'].mean()),
+            'fb_pfx_x':     float(fb['pfx_x'].mean()),
+            'fb_pfx_z':     float(fb['pfx_z'].mean()),
+            'fb_spin':      float(fb['release_spin_rate'].mean()) if 'release_spin_rate' in fb else 0.0,
+            'fb_extension': float(fb['release_extension'].mean()) if 'release_extension' in fb else 0.0,
+            'fb_vaa':       float(fb['vaa'].mean()),
+            'fb_release_x': float(fb['release_pos_x'].mean()),
+            'fb_release_z': float(fb['release_pos_z'].mean()),
+            'fb_tunnel_x':  float(fb['tunnel_x'].mean()),
+            'fb_tunnel_z':  float(fb['tunnel_z'].mean()),
+            'fb_plate_x':   float(fb['plate_x'].mean()),
+            'fb_plate_z':   float(fb['plate_z'].mean()),
+        }
+        # Replace any NaN with 0.0 so json.dump succeeds
+        rec = {k: (0.0 if (v != v) else v) for k, v in rec.items()}
+        out[str(int(pid))] = rec
+    return out
+
+
+def ensure_baselines(parquet_path: Path):
+    """Create models/pitcher_baselines.json from the parquet if missing."""
+    target = MODELS_DIR / 'pitcher_baselines.json'
+    if target.exists():
+        return
+    print(f'Building {target.name} from parquet (not present in models/) ...')
+    df = pd.read_parquet(parquet_path)
+    baselines = build_pitcher_baselines(df)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with open(target, 'w') as f:
+        json.dump(baselines, f)
+    print(f'  wrote baselines for {len(baselines)} pitchers')
+
+
 def build(parquet_path: Path, year: int, out_path: Path):
+    ensure_baselines(parquet_path)
+
     print(f'Loading {parquet_path} ...')
     df = pd.read_parquet(parquet_path)
     print(f'  {len(df):,} pitches')
