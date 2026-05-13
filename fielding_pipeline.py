@@ -350,6 +350,10 @@ def fetch_savant_catcher_blocks(year: int, fetch_url, csv_to_df) -> Optional[pd.
 
 
 def fetch_savant_of_jump(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
+    # OF jump leaderboard uses `min` as opportunity (jump attempt) count,
+    # not innings — a 50-innings outfielder typically only has a handful
+    # of trackable jumps, so 50 returns header-only. Use the leaderboard's
+    # qualified default instead.
     primary = (
         f"https://baseballsavant.mlb.com/leaderboard/outfield_jump"
         f"?year={year}&team=&min=50&csv=true"
