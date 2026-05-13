@@ -446,7 +446,7 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
                 continue
             cols = sorted(rows[0].keys())
             print(f"    FG stats={stats_code} type={tc}: {len(rows)} rows  "
-                  f"hasDef={'Def' in cols} hasDRS={'DRS' in cols}")
+                  f"hasDef={'Defense' in cols or 'Def' in cols} hasDRS={'DRS' in cols}")
             print(f"    FG stats={stats_code} all columns: {cols}")
             return rows, tc
         return None, None
@@ -483,6 +483,11 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
         keep = ["player_id", "player_name", "position"] + [c for c in value_cols if c in df.columns]
         return df[keep]
 
+    # FG ships the field-value column as "Defense" (not "Def").
+    if df_def is not None and "Defense" in df_def.columns and "Def" not in df_def.columns:
+        df_def = df_def.rename(columns={"Defense": "Def"})
+    if df_drs is not None and "Defense" in df_drs.columns and "Def" not in df_drs.columns:
+        df_drs = df_drs.rename(columns={"Defense": "Def"})
     df_def_slim = _slim(df_def, ["Def"])
     df_drs_slim = _slim(df_drs, ["DRS"])
     if df_def_slim is not None and df_drs_slim is not None:
