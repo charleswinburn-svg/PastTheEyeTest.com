@@ -947,6 +947,21 @@ export async function fetchSavantGameData(gamePk) {
   return rows;
 }
 
+// Per-pitch Statcast CSV for a single player across a full season.
+// type = "batter" | "pitcher". Returns parsed rows (one per pitch) or [].
+export async function fetchSavantPlayerSeason(playerId, season, type = "batter") {
+  const lookupParam = type === "pitcher" ? "pitchers_lookup%5B%5D" : "batters_lookup%5B%5D";
+  const url =
+    `/savant-api/statcast_search/csv?all=true&type=details` +
+    `&hfSea=${season}%7C&hfGT=R%7CS%7CE%7CP%7CW%7C` +
+    `&player_type=${type}&${lookupParam}=${playerId}`;
+  const r = await fetch(url);
+  if (!r.ok) return [];
+  const text = await r.text();
+  if (!text || text.length < 50) return [];
+  return parseCSV(text);
+}
+
 function parseCSV(text) {
   const lines = text.trim().split("\n");
   if (lines.length < 2) return [];

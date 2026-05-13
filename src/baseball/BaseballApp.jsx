@@ -344,15 +344,17 @@ function BaseballApp() {
 
           <ThemeToggle />
           
-          <div style={{ 
-            fontSize: 10, 
-            color: t.textFaint, 
-            letterSpacing: "0.03em",
-            borderLeft: `1px solid ${t.divider}`,
-            paddingLeft: 16,
-          }}>
-            {season} | {hitters.length} hitters | {pitchers.length} pitchers
-          </div>
+          {tab !== "hitter" && tab !== "pitcher" && (
+            <div style={{
+              fontSize: 10,
+              color: t.textFaint,
+              letterSpacing: "0.03em",
+              borderLeft: `1px solid ${t.divider}`,
+              paddingLeft: 16,
+            }}>
+              {season} | {hitters.length} hitters | {pitchers.length} pitchers
+            </div>
+          )}
         </div>
       </div>
 
@@ -420,7 +422,7 @@ function BaseballApp() {
           )
         )}
         {tab === "team_plots" && (
-          <TeamScatter season={season} />
+          <TeamScatter season={season} hitters={hittersFull} iswingData={iswingData} />
         )}
         {tab === "race2k" && (
           <RaceToTwoStrikes season={season} />

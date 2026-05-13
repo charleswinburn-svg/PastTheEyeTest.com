@@ -75,10 +75,9 @@ HITTER_METRICS = [
     {"key": "avg_swing_speed",   "label": "Avg Bat Speed",       "lower_better": False, "fmt": ".1f"},
     {"key": "fast_swing_rate",   "label": "Fast Swing %",        "lower_better": False, "fmt": ".1f", "pct_stored_decimal": True},
     {"key": "avg_swing_length",  "label": "Avg Swing Length",    "lower_better": True,  "fmt": ".1f"},
-    {"key": "attack_angle",      "label": "Avg. Attack Angle",   "lower_better": False, "fmt": ".1f"},
-    {"key": "ideal_angle_rate",  "label": "Ideal Attack Angle %","lower_better": False, "fmt": ".1f"},
     {"key": "oz_swing_percent",  "label": "Chase %",             "lower_better": True,  "fmt": ".1f"},
     {"key": "k_percent",         "label": "K%",                  "lower_better": True,  "fmt": ".1f"},
+    {"key": "iz_contact_percent","label": "Z-Contact%",          "lower_better": False, "fmt": ".1f"},
     {"key": "whiff_percent",     "label": "Whiff %",             "lower_better": True,  "fmt": ".1f"},
     {"key": "bb_percent",        "label": "BB%",                 "lower_better": False, "fmt": ".1f"},
 ]
@@ -179,7 +178,7 @@ def fetch_savant_expected(year, player_type="batter"):
 def fetch_savant_statcast(year, player_type="batter"):
     """Fetch standard statcast metrics (EV, barrel%, sweet spot, K%, BB%, etc.)"""
     if player_type == "batter":
-        selections = "xwobacon,exit_velocity_avg,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,oz_swing_percent"
+        selections = "xwobacon,exit_velocity_avg,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,iz_contact_percent,oz_swing_percent"
     else:
         selections = "exit_velocity_avg,barrel_batted_rate,whiff_percent,k_percent,bb_percent,p_oSwing_percent,release_extension"
     from datetime import date
@@ -731,6 +730,19 @@ def process_hitters(year):
             "swing_rate_ideal_attack_angle": "ideal_angle_rate",
         }
         df_batting = df_batting.rename(columns={k: v for k, v in col_renames.items() if k in df_batting.columns})
+
+        # Fuzzy fallback for the ideal-attack-angle column — Savant has
+        # renamed it across seasons (e.g. 2026 ships it under a different
+        # slug). Any column containing both "ideal" and "angle" (and
+        # optionally "rate"/"percent") that we haven't already mapped is
+        # treated as the ideal-attack-angle rate. Picks the first match.
+        if "ideal_angle_rate" not in df_batting.columns:
+            for c in df_batting.columns:
+                cl = c.lower()
+                if "ideal" in cl and "angle" in cl:
+                    print(f"  ↪ aliasing bat-tracking column {c!r} → ideal_angle_rate")
+                    df_batting = df_batting.rename(columns={c: "ideal_angle_rate"})
+                    break
         bt_check = ["player_id","player_name","avg_swing_speed","avg_swing_length","attack_angle","ideal_angle_rate","blasts_contact","fast_swing_rate"]
         print(f"  Bat tracking columns present: {[c for c in bt_check if c in df_batting.columns]}")
         print(f"  Bat tracking all columns: {list(df_batting.columns)}")
