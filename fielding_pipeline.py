@@ -62,6 +62,18 @@ INFIELD_POS = {"1B", "2B", "3B", "SS"}
 OUTFIELD_POS = {"LF", "CF", "RF"}
 
 
+def _flip_name(s: Optional[str]) -> Optional[str]:
+    """Savant ships names as 'Last, First'. Flip to 'First Last' for display."""
+    if not s or not isinstance(s, str):
+        return s
+    s = s.strip()
+    if "," in s:
+        parts = [p.strip() for p in s.split(",", 1)]
+        if len(parts) == 2 and parts[0] and parts[1]:
+            return f"{parts[1]} {parts[0]}"
+    return s
+
+
 def _grp(pos: str) -> str:
     if pos in CATCHER_POS: return "catcher"
     if pos in INFIELD_POS: return "infielder"
@@ -125,8 +137,8 @@ COLUMN_ALIASES = {
     "oaa_left":  ["outs_above_average_lateral_toward3bline", "outs_above_average_left",  "oaa_left"],
     "oaa_right": ["outs_above_average_lateral_toward1bline", "outs_above_average_right", "oaa_right"],
 
-    # FRV
-    "frv": ["fielding_run_value", "run_value", "frv", "rv", "rv_tot"],
+    # FRV — the leaderboard ships per-player totals; total_runs is the FRV.
+    "frv": ["total_runs", "fielding_run_value", "run_value", "frv", "rv", "rv_tot"],
 
     # Arm strength leaderboard — overall + per-position mph
     "arm_strength_mph": ["arm_overall", "avg_arm_strength_mph", "avg_arm_strength",
@@ -428,6 +440,7 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
             if "player_id" in df.columns:
                 df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce").astype("Int64")
             print(f"    ✓ {len(df)} FG fielding rows ({os.path.basename(cp)})")
+            print(f"    FG fielding columns: {list(df.columns)[:30]}")
             return df
         except Exception as e:
             print(f"    cookies({os.path.basename(cp)}) failed: {e}")
@@ -598,11 +611,37 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict) -> dict:
         "outs_above_average", "estimated_success_rate_added",
         "oaa_in", "oaa_back", "oaa_left", "oaa_right",
     ])
-    # FRV: per (player, position)
-    merge_one(frv, "position", ["frv"])
+    # FRV: per-player totals (no position column on the leaderboard).
+    # Fan out to every position the player qualifies at — FRV is a season
+    # total, attributed to each position they actually played.
+    def fan_out_all_pos(df, val_cols):
+        if df is None:
+            return
+        for _, r in df.iterrows():
+            pid = r.get("player_id")
+            if pd.isna(pid):
+                continue
+            pid = int(pid)
+            qualified_positions = [p for p, inn in inn_map.get(pid, {}).items()
+                                   if inn >= MIN_INN]
+            if not qualified_positions:
+                continue
+            name = r.get("player_name")
+            for pos in qualified_positions:
+                cell = stamp(pid, pos, name=str(name) if isinstance(name, str) else None)
+                for c in val_cols:
+                    if c in r and r[c] is not None and not (isinstance(r[c], float) and np.isnan(r[c])):
+                        cell[c] = r[c]
+    fan_out_all_pos(frv, ["frv"])
     # Catcher framing / pop / csaa / blocks → all default to C
     merge_one(framing, None, ["framing_runs", "shadow_zone_called_strike_rate"], default_pos="C")
-    merge_one(poptime, None, ["pop_time_2b_avg"], default_pos="C")
+    # Pop time also carries the catcher's max-effort arm strength on caught
+    # stealing throws — Savant's arm-strength leaderboard does NOT include
+    # catchers, so use this column as the C arm_strength_mph.
+    if poptime is not None and "maxeff_arm_2b_3b_sba" in poptime.columns:
+        poptime = poptime.copy()
+        poptime["arm_strength_mph"] = pd.to_numeric(poptime["maxeff_arm_2b_3b_sba"], errors="coerce")
+    merge_one(poptime, None, ["pop_time_2b_avg", "arm_strength_mph"], default_pos="C")
     merge_one(csaa, None, ["csaa"], default_pos="C")
     merge_one(blocks, None, ["blocks_above_average"], default_pos="C")
     # OF jump / catch / arm → fan out to LF/CF/RF (we don't know the player's
@@ -701,7 +740,7 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict) -> dict:
                 }
             fielders.setdefault(pid, {
                 "player_id": pid,
-                "name": c.get("name") or "",
+                "name": _flip_name(c.get("name")) or "",
                 "team": c.get("team") or "",
                 "positions": {},
             })
