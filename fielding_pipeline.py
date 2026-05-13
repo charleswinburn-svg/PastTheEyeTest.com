@@ -356,11 +356,11 @@ def fetch_savant_of_jump(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFra
     # qualified default instead.
     primary = (
         f"https://baseballsavant.mlb.com/leaderboard/outfield_jump"
-        f"?year={year}&team=&min=q&csv=true"
+        f"?year={year}&team=&min=10&csv=true"
     )
     fallbacks = [
-        f"https://baseballsavant.mlb.com/leaderboard/of_jump?year={year}&min=q&csv=true",
-        f"https://baseballsavant.mlb.com/leaderboard/jump?year={year}&min=q&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/of_jump?year={year}&min=10&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/jump?year={year}&min=10&csv=true",
         os.environ.get("SAVANT_OF_JUMP_URL", "").format(year=year) if os.environ.get("SAVANT_OF_JUMP_URL") else "",
     ]
     df = _safe_fetch_csv(primary, "Savant OF jump", fetch_url, csv_to_df, [u for u in fallbacks if u])
