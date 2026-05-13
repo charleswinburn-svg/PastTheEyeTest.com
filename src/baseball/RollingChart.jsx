@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
 import { fetchGameLog, fetchSavantPlayerSeason } from "./mlbApi.js";
+import { saveCardAsPng } from "./SharedComponents.jsx";
 
 // ── Statcast counter aggregation ───────────────────────────────────────────
 // Aggregate per-pitch Savant rows into per-game counters that can be summed
@@ -332,6 +333,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
 
   const [rows, setRows] = useState(null);  // chronologically-sorted game rows
   const [err, setErr] = useState(null);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -402,8 +404,15 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
   const unitLbl = type === "pitcher" ? "IP" : "PA";
   const currentLabel = options.find(o => o.id === metric)?.label || metric;
 
+  const saveChart = useCallback(async () => {
+    const safeName = (playerName || "player").replace(/\s+/g, "_");
+    const safeMetric = currentLabel.replace(/[^A-Za-z0-9]+/g, "_");
+    await saveCardAsPng(cardRef, `${safeName}_${safeMetric}_rolling_${season}.png`);
+  }, [playerName, currentLabel, season]);
+
   return (
-    <div style={{
+    <div>
+    <div ref={cardRef} style={{
       background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
       maxWidth: 600, margin: "16px auto 0", padding: "12px 0 8px",
     }}>
@@ -478,6 +487,25 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
           Statcast-derived stats aren’t in the MLB Stats API gameLog.
         </div>
       )}
+    </div>
+    {computeDef && series.length >= 2 && (
+      <div style={{ textAlign: "center", marginTop: 10 }}>
+        <button
+          onClick={saveChart}
+          style={{
+            padding: "6px 16px", fontSize: 11, fontWeight: 600,
+            background: t.inputBg, color: t.textMuted,
+            border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+            cursor: "pointer", transition: "all 0.15s",
+            fontFamily: "inherit",
+          }}
+          onMouseEnter={e => { e.target.style.background = t.divider; e.target.style.color = t.text; }}
+          onMouseLeave={e => { e.target.style.background = t.inputBg; e.target.style.color = t.textMuted; }}
+        >
+          📥 Save as PNG
+        </button>
+      </div>
+    )}
     </div>
   );
 }
