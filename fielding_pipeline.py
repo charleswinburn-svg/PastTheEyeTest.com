@@ -278,32 +278,39 @@ def _env_url(env_key: str, year: int) -> Optional[str]:
 
 
 def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    """Outs Above Average leaderboard, split per position. The CSV URL uses
-    startYear/endYear (not year=) and split=yes for per-position rows."""
-    url = _env_url("SAVANT_OAA_URL", year) or (
-        f"https://baseballsavant.mlb.com/leaderboard/outs_above_average"
-        f"?type=Fielder&startYear={year}&endYear={year}&split=yes"
-        f"&team=&range=year&min=1&pos=&roles=&viz=show&csv=true"
-    )
-    df = _safe_fetch_csv(url, "Savant OAA", fetch_url, csv_to_df)
-    if df is not None:
-        print(f"    Savant OAA all columns: {sorted(df.columns)}")
-        # Sanity: find a player with multiple rows and show their position
-        # values so we can confirm split=yes actually gives per-position rows.
-        if "player_id" in df.columns:
-            try:
-                dupes = df["player_id"].value_counts()
-                multi = dupes[dupes > 1].head(1)
-                if len(multi):
-                    pid = multi.index[0]
-                    sub = df[df["player_id"] == pid]
-                    pos_like = [c for c in df.columns
-                                if "pos" in c.lower() or "position" in c.lower()]
-                    print(f"    Sample multi-pos OAA player {pid}: rows={len(sub)} "
-                          f"pos-like cols={pos_like} values=\n{sub[pos_like].to_dict(orient='records')}")
-            except Exception as e:
-                print(f"    OAA sample-debug failed: {e}")
-    return _apply_aliases(_ensure_id_name(df))
+    """Outs Above Average leaderboard. `split=yes` does NOT actually return
+    per-position rows in the CSV — every player gets one row at their
+    primary position — so multi-position players lose OAA on their
+    secondary spots. Fetch once per Savant position code and tag the
+    rows with that position, then concat."""
+    if _env_url("SAVANT_OAA_URL", year):
+        # Env override: assume the user has built a URL that returns
+        # per-position rows already.
+        url = _env_url("SAVANT_OAA_URL", year)
+        df = _safe_fetch_csv(url, "Savant OAA", fetch_url, csv_to_df)
+        return _apply_aliases(_ensure_id_name(df))
+
+    frames = []
+    for pos_name, pos_code in POS_CODE.items():
+        url = (
+            f"https://baseballsavant.mlb.com/leaderboard/outs_above_average"
+            f"?type=Fielder&startYear={year}&endYear={year}&split=yes"
+            f"&team=&range=year&min=1&pos={pos_code}&roles=&viz=show&csv=true"
+        )
+        df = _safe_fetch_csv(url, f"Savant OAA pos={pos_name}", fetch_url, csv_to_df)
+        if df is None or df.empty:
+            continue
+        df = df.copy()
+        # Force position to the queried slot so downstream merge_one(... "position", ...)
+        # routes the row to the right (player, position) cell regardless of
+        # what primary_pos_formatted says.
+        df["position"] = pos_name
+        frames.append(df)
+    if not frames:
+        return None
+    combined = pd.concat(frames, ignore_index=True)
+    print(f"    Savant OAA combined across positions: {len(combined)} rows")
+    return _apply_aliases(_ensure_id_name(combined))
 
 
 def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
