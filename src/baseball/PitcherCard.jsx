@@ -1,7 +1,7 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
-import { fetchPlayByPlay, extractPitcherData } from "./mlbApi.js";
+import { fetchPlayByPlay, extractPitcherData, scorePitchCode } from "./mlbApi.js";
 import RollingChart from "./RollingChart.jsx";
 
 const PITCH_PLUS_API = "https://pitch-plus-api.onrender.com";
@@ -136,7 +136,7 @@ export default function PitcherCard({ player, season, allPitchers }) {
             pitcher_id: player.player_id,
             _stand: p.batSide || "R",
             _p_throws: pitcherHand,
-            details: { type: { code: p.pitchType } },
+            details: { type: { code: scorePitchCode(p.pitchType) } },
             pitchData: {
               startSpeed: p.velo,
               extension: p.extension,
