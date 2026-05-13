@@ -116,11 +116,14 @@ OUTFIELDER_METRICS = [
 COLUMN_ALIASES = {
     # OAA + directional splits
     "outs_above_average": ["outs_above_average", "oaa", "outs_above_avg"],
-    "estimated_success_rate_added": ["estimated_success_rate_added", "est_success_rate_added", "estimated_success_added", "diff_success_rate"],
-    "oaa_in": ["outs_above_average_in", "oaa_in", "in_oaa", "oaa_in_field"],
-    "oaa_back": ["outs_above_average_back", "oaa_back", "back_oaa", "oaa_back_field"],
-    "oaa_left": ["outs_above_average_left", "oaa_left", "left_oaa", "oaa_lateral_to_left"],
-    "oaa_right": ["outs_above_average_right", "oaa_right", "right_oaa", "oaa_lateral_to_right"],
+    "estimated_success_rate_added": ["estimated_success_rate_added", "est_success_rate_added",
+                                       "estimated_success_added", "diff_success_rate",
+                                       "estimated_success_rate_formatted_diff",
+                                       "success_rate_added_estimated", "success_rate_added"],
+    "oaa_in":    ["outs_above_average_infront", "outs_above_average_in",   "oaa_in"],
+    "oaa_back":  ["outs_above_average_behind",  "outs_above_average_back",  "oaa_back"],
+    "oaa_left":  ["outs_above_average_lateral_toward3bline", "outs_above_average_left",  "oaa_left"],
+    "oaa_right": ["outs_above_average_lateral_toward1bline", "outs_above_average_right", "oaa_right"],
 
     # FRV
     "frv": ["fielding_run_value", "run_value", "frv", "rv", "rv_tot"],
@@ -158,7 +161,7 @@ COLUMN_ALIASES = {
     "jump_feet_vs_avg": ["jump_feet_vs_avg", "feet_vs_avg", "jump_vs_avg", "ft_above_avg",
                           "feet_covered_vs_avg", "feet_covered_above_avg",
                           "rel_league_burst_distance"],
-    "of_arm_value": ["of_arm_value", "arm_value", "rERAA", "arm_runs", "rerd_total", "outfielder_arm_runs"],
+    "of_arm_value": ["fielder_runs", "of_arm_value", "arm_value", "rERAA", "arm_runs", "rerd_total", "outfielder_arm_runs"],
 
     # FG
     "fg_def": ["Def", "Def_relative", "Defensive"],
@@ -166,7 +169,7 @@ COLUMN_ALIASES = {
 
     # ID / name / position
     "innings": ["innings_played", "inn", "inn_pos", "innings"],
-    "position": ["pos", "position", "primary_position", "primary_position_name"],
+    "position": ["pos", "position", "primary_pos_formatted", "primary_position", "primary_position_name"],
     "player_id": ["player_id", "entity_id", "resp_fielder_id", "id", "playerid", "mlbamid"],
     "player_name": ["player_name", "entity_name", "fielder_name", "name", "Name", "last_name, first_name"],
 }
@@ -275,12 +278,15 @@ def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
 
 
 def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    """Fielding Run Value leaderboard."""
+    """Fielding Run Value leaderboard. Savant's CSV ignores year= here and
+    returns all years; filter to the requested year by the 'year' column."""
     url = _env_url("SAVANT_FRV_URL", year) or (
-        f"https://baseballsavant.mlb.com/leaderboard/fielding-run-value"
-        f"?year={year}&csv=true"
+        "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?csv=true"
     )
     df = _safe_fetch_csv(url, "Savant FRV", fetch_url, csv_to_df)
+    if df is not None and "year" in df.columns:
+        df = df[pd.to_numeric(df["year"], errors="coerce") == year].reset_index(drop=True)
+        print(f"    Filtered FRV to year={year}: {len(df)} rows")
     return _apply_aliases(_ensure_id_name(df))
 
 
