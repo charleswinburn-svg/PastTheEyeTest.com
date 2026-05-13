@@ -75,10 +75,10 @@ HITTER_METRICS = [
     {"key": "avg_swing_speed",   "label": "Avg Bat Speed",       "lower_better": False, "fmt": ".1f"},
     {"key": "fast_swing_rate",   "label": "Fast Swing %",        "lower_better": False, "fmt": ".1f", "pct_stored_decimal": True},
     {"key": "avg_swing_length",  "label": "Avg Swing Length",    "lower_better": True,  "fmt": ".1f"},
-    {"key": "attack_angle",      "label": "Avg. Attack Angle",   "lower_better": False, "fmt": ".1f"},
     {"key": "ideal_angle_rate",  "label": "Ideal Attack Angle %","lower_better": False, "fmt": ".1f"},
     {"key": "oz_swing_percent",  "label": "Chase %",             "lower_better": True,  "fmt": ".1f"},
     {"key": "k_percent",         "label": "K%",                  "lower_better": True,  "fmt": ".1f"},
+    {"key": "iz_contact_percent","label": "Z-Contact%",          "lower_better": False, "fmt": ".1f"},
     {"key": "whiff_percent",     "label": "Whiff %",             "lower_better": True,  "fmt": ".1f"},
     {"key": "bb_percent",        "label": "BB%",                 "lower_better": False, "fmt": ".1f"},
 ]
@@ -179,7 +179,7 @@ def fetch_savant_expected(year, player_type="batter"):
 def fetch_savant_statcast(year, player_type="batter"):
     """Fetch standard statcast metrics (EV, barrel%, sweet spot, K%, BB%, etc.)"""
     if player_type == "batter":
-        selections = "xwobacon,exit_velocity_avg,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,oz_swing_percent"
+        selections = "xwobacon,exit_velocity_avg,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,iz_contact_percent,oz_swing_percent"
     else:
         selections = "exit_velocity_avg,barrel_batted_rate,whiff_percent,k_percent,bb_percent,p_oSwing_percent,release_extension"
     from datetime import date
