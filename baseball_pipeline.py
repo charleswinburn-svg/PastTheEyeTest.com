@@ -222,6 +222,22 @@ def fetch_savant_bat_tracking(year):
     return df
 
 
+def fetch_savant_attack_angle(year):
+    """Fetch Savant's standalone attack-angle leaderboard. As of 2026 the
+    bat-tracking endpoint no longer ships attack_angle / ideal_angle_rate;
+    they live on their own leaderboard at /leaderboard/attack-angle."""
+    url = (
+        f"https://baseballsavant.mlb.com/leaderboard/attack-angle"
+        f"?type=batter&season={year}&minSwings=10&csv=true"
+    )
+    print(f"  Fetching Savant attack-angle ({year})...")
+    text = fetch_url(url)
+    df = csv_to_df(text)
+    if df is not None:
+        print(f"    ✓ {len(df)} rows  columns: {list(df.columns)}")
+    return df
+
+
 def fetch_savant_pitch_movement(year, pitch_type="FF"):
     """Fetch pitch movement leaderboard (velo, release height, extension for VAA calc)."""
     url = (
@@ -676,6 +692,8 @@ def process_hitters(year):
     df_statcast = fetch_savant_statcast(year, "batter")
     time.sleep(FETCH_DELAY)
     df_batting = fetch_savant_bat_tracking(year)
+    time.sleep(FETCH_DELAY)
+    df_attack_angle = fetch_savant_attack_angle(year)
 
     # --- Load supplemental bat tracking CSV (more complete than API) ---
     df_bat_csv = None
@@ -748,6 +766,35 @@ def process_hitters(year):
         print(f"  Bat tracking columns present: {[c for c in bt_check if c in df_batting.columns]}")
         print(f"  Bat tracking all columns: {list(df_batting.columns)}")
         dfs_to_merge.append(("bat_tracking", df_batting))
+
+    # --- Standalone attack-angle leaderboard (2026+) ---
+    if df_attack_angle is not None and not df_attack_angle.empty:
+        if "id" in df_attack_angle.columns:
+            df_attack_angle["player_id"] = pd.to_numeric(df_attack_angle["id"], errors="coerce").astype("Int64")
+        if "name" in df_attack_angle.columns and "player_name" not in df_attack_angle.columns:
+            df_attack_angle["player_name"] = df_attack_angle["name"].astype(str)
+        aa_renames = {
+            "avg_attack_angle": "attack_angle",
+            "ideal_attack_angle_percent": "ideal_angle_rate",
+            "ideal_attack_angle_rate": "ideal_angle_rate",
+            "swing_rate_ideal_attack_angle": "ideal_angle_rate",
+            "ideal_attack_angle_swing_rate": "ideal_angle_rate",
+            "ideal_swing_rate": "ideal_angle_rate",
+        }
+        df_attack_angle = df_attack_angle.rename(columns={k: v for k, v in aa_renames.items() if k in df_attack_angle.columns})
+        if "ideal_angle_rate" not in df_attack_angle.columns:
+            for c in df_attack_angle.columns:
+                cl = c.lower()
+                if "ideal" in cl and "angle" in cl:
+                    print(f"  ↪ aliasing attack-angle column {c!r} → ideal_angle_rate")
+                    df_attack_angle = df_attack_angle.rename(columns={c: "ideal_angle_rate"})
+                    break
+        keep = [c for c in ["player_id", "player_name", "attack_angle", "ideal_angle_rate"] if c in df_attack_angle.columns]
+        if keep and ("attack_angle" in keep or "ideal_angle_rate" in keep):
+            print(f"  Attack-angle columns kept: {keep}")
+            dfs_to_merge.append(("attack_angle", df_attack_angle[keep]))
+        else:
+            print(f"  Attack-angle leaderboard had no usable columns: {list(df_attack_angle.columns)}")
 
     # --- Merge on player_id (preferred) or player_name ---
     merged = None
