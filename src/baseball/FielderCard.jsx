@@ -100,7 +100,7 @@ export default function FielderCard({ player, season, fieldingData }) {
           team={player.team}
           season={season}
           playerId={player.player_id}
-          subtitle={buildBioSubtitle(bio, null) || `${season} | ${activePos} | ${innings.toFixed(0)} IP`}
+          subtitle={buildBioSubtitle(bio, null) || `${season} | ${activePos} | ${innings.toFixed(0)} Innings`}
         />
         <div style={{ padding: "8px 12px 4px" }}>
           {metricList.map(m => {
@@ -121,7 +121,7 @@ export default function FielderCard({ player, season, fieldingData }) {
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{season} | {activePos} | {innings.toFixed(0)} IP (min 100)</span>
+          <span>{season} | {activePos} | {innings.toFixed(0)} Innings (min 100)</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
