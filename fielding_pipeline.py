@@ -392,7 +392,7 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
     """FanGraphs fielding leaders. Cookies path only — no fallbacks (DRS/Def
     are optional, missing them just leaves those bubbles blank)."""
     api_url = ("https://www.fangraphs.com/api/leaders/major-league/data"
-               f"?pos=all&stats=fld&lg=all&qual=0&type=1"
+               f"?pos=all&stats=fld&lg=all&qual=0&type=2"
                f"&season={year}&month=0&season1={year}&ind=0"
                f"&team=0&rost=0&age=0&filter=&players=0"
                f"&startdate=&enddate=&pageitems=4000&page=1")
