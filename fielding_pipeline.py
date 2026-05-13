@@ -283,7 +283,7 @@ def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     url = _env_url("SAVANT_OAA_URL", year) or (
         f"https://baseballsavant.mlb.com/leaderboard/outs_above_average"
         f"?type=Fielder&startYear={year}&endYear={year}&split=yes"
-        f"&team=&range=year&min=50&pos=&roles=&viz=show&csv=true"
+        f"&team=&range=year&min=1&pos=&roles=&viz=show&csv=true"
     )
     df = _safe_fetch_csv(url, "Savant OAA", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
@@ -305,7 +305,7 @@ def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
 def fetch_savant_catcher_framing(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     url = (
         f"https://baseballsavant.mlb.com/leaderboard/catcher-framing"
-        f"?year={year}&team=&min=50&sort=4&sortDir=desc&csv=true"
+        f"?year={year}&team=&min=1&sort=4&sortDir=desc&csv=true"
     )
     df = _safe_fetch_csv(url, "Savant catcher framing", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
@@ -324,7 +324,7 @@ def fetch_savant_arm_strength(year: int, fetch_url, csv_to_df) -> Optional[pd.Da
     """Throws across all positions; columns include avg arm strength + max."""
     url = (
         f"https://baseballsavant.mlb.com/leaderboard/arm-strength"
-        f"?year={year}&team=&min=50&pos=&csv=true"
+        f"?year={year}&team=&min=1&pos=&csv=true"
     )
     df = _safe_fetch_csv(url, "Savant arm strength", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
@@ -334,7 +334,7 @@ def fetch_savant_csaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]
     """Catcher caught-stealing above average. Lives under catcher-throwing."""
     url = (
         f"https://baseballsavant.mlb.com/leaderboard/catcher-throwing"
-        f"?year={year}&team=&min=50&csv=true"
+        f"?year={year}&team=&min=1&csv=true"
     )
     df = _safe_fetch_csv(url, "Savant catcher CSAA", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
@@ -343,7 +343,7 @@ def fetch_savant_csaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]
 def fetch_savant_catcher_blocks(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     url = (
         f"https://baseballsavant.mlb.com/leaderboard/catcher-blocking"
-        f"?year={year}&team=&min=50&csv=true"
+        f"?year={year}&team=&min=1&csv=true"
     )
     df = _safe_fetch_csv(url, "Savant catcher blocking", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
@@ -356,11 +356,11 @@ def fetch_savant_of_jump(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFra
     # qualified default instead.
     primary = (
         f"https://baseballsavant.mlb.com/leaderboard/outfield_jump"
-        f"?year={year}&team=&min=10&csv=true"
+        f"?year={year}&team=&min=1&csv=true"
     )
     fallbacks = [
-        f"https://baseballsavant.mlb.com/leaderboard/of_jump?year={year}&min=10&csv=true",
-        f"https://baseballsavant.mlb.com/leaderboard/jump?year={year}&min=10&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/of_jump?year={year}&min=1&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/jump?year={year}&min=1&csv=true",
         os.environ.get("SAVANT_OF_JUMP_URL", "").format(year=year) if os.environ.get("SAVANT_OF_JUMP_URL") else "",
     ]
     df = _safe_fetch_csv(primary, "Savant OF jump", fetch_url, csv_to_df, [u for u in fallbacks if u])
@@ -371,7 +371,7 @@ def fetch_savant_of_catch_prob(year: int, fetch_url, csv_to_df) -> Optional[pd.D
     """x-star catch% leaderboard."""
     url = (
         f"https://baseballsavant.mlb.com/leaderboard/catch_probability"
-        f"?year={year}&team=&min=50&csv=true"
+        f"?year={year}&team=&min=1&csv=true"
     )
     df = _safe_fetch_csv(url, "Savant OF catch prob", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
