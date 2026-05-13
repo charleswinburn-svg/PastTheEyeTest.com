@@ -294,7 +294,7 @@ function buildRolling(rows, windowSize, windowKey, keys, compute) {
   return out;
 }
 
-export default function RollingChart({ playerId, season, type, cardMetrics }) {
+export default function RollingChart({ playerId, playerName, season, type, cardMetrics }) {
   const { theme: t } = useTheme();
   const computeMap = type === "pitcher" ? PITCHER_COMPUTE : HITTER_COMPUTE;
 
@@ -429,7 +429,7 @@ export default function RollingChart({ playerId, season, type, cardMetrics }) {
       </div>
 
       <div style={{ fontSize: 11, fontWeight: 600, color: t.textMuted, textAlign: "center", marginBottom: 4 }}>
-        {currentLabel} — Rolling {target}-{unitLbl}
+        {playerName ? `${playerName} — ` : ""}{currentLabel} — Rolling {target} {unitLbl}
       </div>
 
       {computeDef ? (

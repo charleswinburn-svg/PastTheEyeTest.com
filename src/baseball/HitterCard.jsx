@@ -86,6 +86,7 @@ export default function HitterCard({ player, season }) {
       {/* === ROLLING 50-PA CHART === */}
       <RollingChart
         playerId={player.player_id}
+        playerName={player.name}
         season={season}
         type="hitter"
         cardMetrics={Object.keys(player.categories || {})}
