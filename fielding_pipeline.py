@@ -315,9 +315,11 @@ def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
 
 def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     """Fielding Run Value leaderboard. Savant's CSV ignores year= here and
-    returns all years; filter to the requested year by the 'year' column."""
+    returns all years; filter to the requested year by the 'year' column.
+    Default `min` is the qualified threshold (~50 games), which drops a
+    lot of lower-innings players — pass min=1 to get everyone."""
     url = _env_url("SAVANT_FRV_URL", year) or (
-        "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?csv=true"
+        "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?min=1&type=Fielder&csv=true"
     )
     df = _safe_fetch_csv(url, "Savant FRV", fetch_url, csv_to_df)
     if df is not None and "year" in df.columns:
