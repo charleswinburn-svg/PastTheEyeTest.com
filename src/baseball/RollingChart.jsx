@@ -25,6 +25,7 @@ function aggregateSavantToGames(rows) {
         // Pitch-level
         pitches: 0, swings: 0, whiffs: 0,
         oz_pitches: 0, oz_swings: 0,
+        iz_swings: 0, iz_whiffs: 0,
         // Bat tracking
         bs_n: 0, sum_bs: 0, fast_swings: 0,
         sl_n: 0, sum_sl: 0,
@@ -54,8 +55,12 @@ function aggregateSavantToGames(rows) {
     if (isSwing) {
       g.swings += 1;
       if (ozPitch) g.oz_swings += 1;
+      if (inZone) g.iz_swings += 1;
     }
-    if (isWhiff) g.whiffs += 1;
+    if (isWhiff) {
+      g.whiffs += 1;
+      if (inZone) g.iz_whiffs += 1;
+    }
 
     // Bat tracking
     if (isSwing) {
@@ -153,6 +158,7 @@ const STATCAST_COMPUTE = {
   "Avg Exit Velo":  { compute: w => safe(w.sum_ev, w.bbe), suffix: " mph", digits: 1 },
   "Avg Launch Angle": { compute: w => safe(w.sum_la, w.bbe), suffix: "°", digits: 1 },
   "Whiff%":   { compute: w => safe(w.whiffs, w.swings) * 100, suffix: "%" },
+  "Z-Contact%": { compute: w => (1 - safe(w.iz_whiffs, w.iz_swings)) * 100, suffix: "%" },
   "Chase%":   { compute: w => safe(w.oz_swings, w.oz_pitches) * 100, suffix: "%" },
   "Avg Bat Speed":   { compute: w => safe(w.sum_bs, w.bs_n), suffix: " mph", digits: 1 },
   "Fast Swing %":    { compute: w => safe(w.fast_swings, w.bs_n) * 100, suffix: "%" },
@@ -189,6 +195,7 @@ const STATCAST_KEYS = [
   "xwoba_con_num", "xwoba_con_den",
   "bbe", "barrels", "hard_hits", "sum_ev", "sum_la",
   "pitches", "swings", "whiffs", "oz_pitches", "oz_swings",
+  "iz_swings", "iz_whiffs",
   "bs_n", "sum_bs", "fast_swings", "sl_n", "sum_sl", "aa_n", "sum_aa",
   "ff_n", "sum_ff_velo",
 ];
