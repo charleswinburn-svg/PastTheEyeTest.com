@@ -392,6 +392,13 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
     return buildRolling(rows, target, targetKey, keys, computeDef.compute);
   }, [rows, metric, type, computeDef]);
 
+  const currentLabel = options.find(o => o.id === metric)?.label || metric;
+  const saveChart = useCallback(async () => {
+    const safeName = (playerName || "player").replace(/\s+/g, "_");
+    const safeMetric = currentLabel.replace(/[^A-Za-z0-9]+/g, "_");
+    await saveCardAsPng(cardRef, `${safeName}_${safeMetric}_rolling_${season}.png`);
+  }, [playerName, currentLabel, season]);
+
   // Hide entirely if data fetch failed or we never reached the threshold
   if (err) return null;
   if (rows == null) return null;          // loading
@@ -402,14 +409,6 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
   const tickDigits = suffix === "%" ? 0 : (digits === 3 ? 3 : Math.max(0, digits - 1));
   const target = type === "pitcher" ? 10 : 50;
   const unitLbl = type === "pitcher" ? "IP" : "PA";
-  const currentLabel = options.find(o => o.id === metric)?.label || metric;
-
-  const saveChart = useCallback(async () => {
-    const safeName = (playerName || "player").replace(/\s+/g, "_");
-    const safeMetric = currentLabel.replace(/[^A-Za-z0-9]+/g, "_");
-    await saveCardAsPng(cardRef, `${safeName}_${safeMetric}_rolling_${season}.png`);
-  }, [playerName, currentLabel, season]);
-
   return (
     <div>
     <div ref={cardRef} style={{
