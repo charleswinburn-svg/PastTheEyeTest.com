@@ -4,15 +4,14 @@
 const API = "/mlb-api/api/v1";
 
 // ── Pitch type colors matching R app ──
-// Pitch colors match the Baseball Savant scheme. Forkball (FO) shares the
-// splitter palette and Slow Curve (CS) shares the curveball palette — Savant
-// treats them as family variants visually, even though we keep distinct
-// display names ("Forkball", "Slow Curve") in PITCH_NAMES.
+// Pitch colors match the Baseball Savant scheme. Forkball (FO) gets a light
+// foamy green and Slow Curve (CS) a deep blue — distinct from splitter/cu
+// even though scoring still aliases them to FS/CU.
 export const PITCH_COLORS = {
   FF: "#D22D49", SI: "#FE9D00", FC: "#933F2C", SL: "#EEE716",
   CU: "#00D1ED", CH: "#1DBE3A", FS: "#3BACAC", ST: "#DDB33A",
-  KC: "#6236CD", CS: "#00D1ED", SV: "#93AFD4", KN: "#3C44CD",
-  SC: "#60DB33", FO: "#3BACAC", GY: "#FFFF99",
+  KC: "#6236CD", CS: "#0068FF", SV: "#93AFD4", KN: "#3C44CD",
+  SC: "#60DB33", FO: "#98DDB1", GY: "#FFFF99",
   EP: "#999999", FA: "#D22D49",
 };
 
