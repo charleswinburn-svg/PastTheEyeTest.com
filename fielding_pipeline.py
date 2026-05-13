@@ -114,30 +114,58 @@ OUTFIELDER_METRICS = [
 # Lower-case substring → canonical column name. Used as a fuzzy fallback if
 # Savant has renamed a column between seasons.
 COLUMN_ALIASES = {
-    "outs_above_average": ["outs_above_average", "oaa"],
-    "estimated_success_rate_added": ["estimated_success_rate_added", "est_success_rate_added", "estimated_success_added"],
-    "oaa_in": ["outs_above_average_in", "oaa_in"],
-    "oaa_back": ["outs_above_average_back", "oaa_back"],
-    "oaa_left": ["outs_above_average_left", "oaa_left"],
-    "oaa_right": ["outs_above_average_right", "oaa_right"],
-    "frv": ["fielding_run_value", "run_value", "frv"],
-    "arm_strength_mph": ["arm_overall", "avg_arm_strength", "max_throw_mph", "arm_strength"],
-    "pop_time_2b_avg": ["pop_time_2b_3b_avg", "pop_2b_sba", "avg_pop_time_2b"],
-    "csaa": ["caught_stealing_above_average", "rcs", "csaa"],
-    "framing_runs": ["runs_extra_strikes", "framing", "framing_runs"],
-    "shadow_zone_called_strike_rate": ["shadow_zone_called_strike_rate", "csaa_shadow", "shadow_zone_strike_rate", "strike_rate_shadow"],
-    "blocks_above_average": ["blocks_above_average", "block_runs", "blocking_runs", "passed_balls_above_average"],
-    "five_star_catch_rate": ["five_star_catch_rate", "5_star_catch_rate", "catch_pct_five"],
-    "four_star_catch_rate": ["four_star_catch_rate", "4_star_catch_rate", "catch_pct_four"],
-    "three_star_catch_rate": ["three_star_catch_rate", "3_star_catch_rate", "catch_pct_three"],
-    "jump_feet_vs_avg": ["jump_feet_vs_avg", "feet_vs_avg", "jump_vs_avg", "ft_above_avg"],
-    "of_arm_value": ["of_arm_value", "arm_value", "rERAA", "arm_runs"],
+    # OAA + directional splits
+    "outs_above_average": ["outs_above_average", "oaa", "outs_above_avg"],
+    "estimated_success_rate_added": ["estimated_success_rate_added", "est_success_rate_added", "estimated_success_added", "diff_success_rate"],
+    "oaa_in": ["outs_above_average_in", "oaa_in", "in_oaa", "oaa_in_field"],
+    "oaa_back": ["outs_above_average_back", "oaa_back", "back_oaa", "oaa_back_field"],
+    "oaa_left": ["outs_above_average_left", "oaa_left", "left_oaa", "oaa_lateral_to_left"],
+    "oaa_right": ["outs_above_average_right", "oaa_right", "right_oaa", "oaa_lateral_to_right"],
+
+    # FRV
+    "frv": ["fielding_run_value", "run_value", "frv", "rv", "rv_tot"],
+
+    # Arm strength leaderboard — overall + per-position mph
+    "arm_strength_mph": ["arm_overall", "avg_arm_strength_mph", "avg_arm_strength",
+                          "arm_strength_mph", "arm_strength", "max_throw_mph",
+                          "avg_max_throw_mph", "throw_mph_avg"],
+
+    # Catcher pop time
+    "pop_time_2b_avg": ["pop_2b_sba", "pop_2b_sba_avg", "pop_time_2b_avg", "avg_pop_time_2b", "pop_time_2b_3b_avg"],
+
+    # Catcher CSAA
+    "csaa": ["caught_stealing_above_average", "cs_aa", "rcs", "csaa"],
+
+    # Catcher framing — Savant ships rv_tot (total framing runs) + pct_tot
+    # (overall shadow-zone called strike rate)
+    "framing_runs": ["runs_extra_strikes", "framing", "framing_runs", "rv_tot"],
+    "shadow_zone_called_strike_rate": ["shadow_zone_called_strike_rate", "csaa_shadow",
+                                        "shadow_zone_strike_rate", "strike_rate_shadow",
+                                        "pct_tot", "shadow_strike_pct"],
+
+    # Catcher blocking
+    "blocks_above_average": ["blocks_above_average", "block_runs", "blocking_runs",
+                              "catcher_blocking_runs", "passed_balls_above_average"],
+
+    # OF catch probability — Savant uses n_5star_percent style
+    "five_star_catch_rate":  ["n_5star_percent", "five_star_catch_rate", "5_star_catch_rate", "catch_pct_five"],
+    "four_star_catch_rate":  ["n_4star_percent", "four_star_catch_rate", "4_star_catch_rate", "catch_pct_four"],
+    "three_star_catch_rate": ["n_3star_percent", "three_star_catch_rate", "3_star_catch_rate", "catch_pct_three"],
+
+    # OF jump + arm value
+    "jump_feet_vs_avg": ["jump_feet_vs_avg", "feet_vs_avg", "jump_vs_avg", "ft_above_avg",
+                          "feet_covered_vs_avg", "feet_covered_above_avg"],
+    "of_arm_value": ["of_arm_value", "arm_value", "rERAA", "arm_runs", "rerd_total", "outfielder_arm_runs"],
+
+    # FG
     "fg_def": ["Def", "Def_relative", "Defensive"],
     "fg_drs": ["DRS"],
+
+    # ID / name / position
     "innings": ["innings_played", "inn", "inn_pos", "innings"],
-    "position": ["pos", "position", "primary_position"],
-    "player_id": ["player_id", "id", "playerid", "mlbamid"],
-    "player_name": ["player_name", "name", "Name"],
+    "position": ["pos", "position", "primary_position", "primary_position_name"],
+    "player_id": ["player_id", "entity_id", "id", "playerid", "mlbamid"],
+    "player_name": ["player_name", "entity_name", "fielder_name", "name", "Name", "last_name, first_name"],
 }
 
 
@@ -145,19 +173,42 @@ COLUMN_ALIASES = {
 # FETCH HELPERS  (use baseball_pipeline.fetch_url / csv_to_df if available)
 # ────────────────────────────────────────────────────────────────────────────
 
-def _safe_fetch_csv(url: str, label: str, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    print(f"  Fetching {label}: {url[:120]}")
-    try:
-        text = fetch_url(url)
-    except Exception as e:
-        print(f"    ⚠ {label} fetch failed: {e}")
-        return None
-    df = csv_to_df(text)
-    if df is None or df.empty:
-        print(f"    ⚠ {label} returned no rows")
-        return None
-    print(f"    ✓ {label}: {len(df)} rows  columns: {list(df.columns)[:14]}{' …' if len(df.columns) > 14 else ''}")
-    return df
+def _strip_html_preamble(text: str) -> str:
+    """Some Savant endpoints prepend HTML / JSON before the actual CSV. Skip
+    to the first line that looks like a CSV header — many commas, no `<`."""
+    if not text:
+        return text
+    lines = text.splitlines()
+    for i, ln in enumerate(lines):
+        stripped = ln.strip()
+        if not stripped or stripped.startswith("<"):
+            continue
+        # Plausible CSV header row: has at least 3 commas and no HTML tag chars
+        if stripped.count(",") >= 3 and "<" not in stripped and ">" not in stripped:
+            return "\n".join(lines[i:])
+    return text
+
+
+def _safe_fetch_csv(url: str, label: str, fetch_url, csv_to_df,
+                    fallback_urls: Optional[List[str]] = None) -> Optional[pd.DataFrame]:
+    candidates = [url] + (fallback_urls or [])
+    for u in candidates:
+        print(f"  Fetching {label}: {u[:140]}")
+        try:
+            text = fetch_url(u)
+        except Exception as e:
+            print(f"    ⚠ {label} fetch failed: {e}")
+            continue
+        if not text:
+            continue
+        cleaned = _strip_html_preamble(text)
+        df = csv_to_df(cleaned)
+        if df is None or df.empty:
+            print(f"    ⚠ {label} returned no usable rows (raw start: {text[:120]!r})")
+            continue
+        print(f"    ✓ {label}: {len(df)} rows  columns: {list(df.columns)[:14]}{' …' if len(df.columns) > 14 else ''}")
+        return df
+    return None
 
 
 def _apply_aliases(df: pd.DataFrame) -> pd.DataFrame:
@@ -203,22 +254,31 @@ def _ensure_id_name(df: pd.DataFrame) -> pd.DataFrame:
 
 def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     """Outs Above Average leaderboard — infield + outfield, with directional
-    splits. `pos=ALL` returns one row per (player, position)."""
-    url = (
+    splits. Primary URL plus a couple of common alternate forms."""
+    primary = (
         f"https://baseballsavant.mlb.com/leaderboard/outs_above_average"
-        f"?type=Fielder&pos=ALL&year={year}&team=&min=0&n=q&roles=&visTeams=&csv=true"
+        f"?type=Fielder&year={year}&team=&min=q&pos=All&roles=&visTeams=&csv=true"
     )
-    df = _safe_fetch_csv(url, "Savant OAA", fetch_url, csv_to_df)
+    fallbacks = [
+        f"https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&year={year}&pos=All&min=q&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/outs-above-average?year={year}&pos=All&type=Fielder&min=q&csv=true",
+        os.environ.get("SAVANT_OAA_URL", "").format(year=year) if os.environ.get("SAVANT_OAA_URL") else "",
+    ]
+    df = _safe_fetch_csv(primary, "Savant OAA", fetch_url, csv_to_df, [u for u in fallbacks if u])
     return _apply_aliases(_ensure_id_name(df))
 
 
 def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     """Fielding Run Value (Savant) — all positions including catcher."""
-    url = (
+    primary = (
         f"https://baseballsavant.mlb.com/leaderboard/fielding-run-value"
-        f"?year={year}&team=&pos=&min=0&type=Fielder&csv=true"
+        f"?year={year}&team=&pos=All&min=q&type=Fielder&csv=true"
     )
-    df = _safe_fetch_csv(url, "Savant FRV", fetch_url, csv_to_df)
+    fallbacks = [
+        f"https://baseballsavant.mlb.com/leaderboard/fielding_run_value?year={year}&pos=All&min=q&type=Fielder&csv=true",
+        os.environ.get("SAVANT_FRV_URL", "").format(year=year) if os.environ.get("SAVANT_FRV_URL") else "",
+    ]
+    df = _safe_fetch_csv(primary, "Savant FRV", fetch_url, csv_to_df, [u for u in fallbacks if u])
     return _apply_aliases(_ensure_id_name(df))
 
 
@@ -270,11 +330,16 @@ def fetch_savant_catcher_blocks(year: int, fetch_url, csv_to_df) -> Optional[pd.
 
 
 def fetch_savant_of_jump(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    url = (
-        f"https://baseballsavant.mlb.com/leaderboard/outfield-jump"
+    primary = (
+        f"https://baseballsavant.mlb.com/leaderboard/outfield_jump"
         f"?year={year}&team=&min=q&csv=true"
     )
-    df = _safe_fetch_csv(url, "Savant OF jump", fetch_url, csv_to_df)
+    fallbacks = [
+        f"https://baseballsavant.mlb.com/leaderboard/of_jump?year={year}&min=q&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/jump?year={year}&min=q&csv=true",
+        os.environ.get("SAVANT_OF_JUMP_URL", "").format(year=year) if os.environ.get("SAVANT_OF_JUMP_URL") else "",
+    ]
+    df = _safe_fetch_csv(primary, "Savant OF jump", fetch_url, csv_to_df, [u for u in fallbacks if u])
     return _apply_aliases(_ensure_id_name(df))
 
 
@@ -290,11 +355,17 @@ def fetch_savant_of_catch_prob(year: int, fetch_url, csv_to_df) -> Optional[pd.D
 
 def fetch_savant_of_arm(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     """Outfielder arm value (rERAA / arm runs)."""
-    url = (
-        f"https://baseballsavant.mlb.com/leaderboard/outfielder-arms"
+    primary = (
+        f"https://baseballsavant.mlb.com/leaderboard/outfielder_arms"
         f"?year={year}&team=&min=q&csv=true"
     )
-    df = _safe_fetch_csv(url, "Savant OF arm value", fetch_url, csv_to_df)
+    fallbacks = [
+        f"https://baseballsavant.mlb.com/leaderboard/outfield_arm?year={year}&min=q&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/arm-value?year={year}&min=q&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/of_arm?year={year}&min=q&csv=true",
+        os.environ.get("SAVANT_OF_ARM_URL", "").format(year=year) if os.environ.get("SAVANT_OF_ARM_URL") else "",
+    ]
+    df = _safe_fetch_csv(primary, "Savant OF arm value", fetch_url, csv_to_df, [u for u in fallbacks if u])
     return _apply_aliases(_ensure_id_name(df))
 
 
