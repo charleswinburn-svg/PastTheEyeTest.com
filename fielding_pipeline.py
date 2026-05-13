@@ -389,13 +389,9 @@ def fetch_savant_of_arm(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFram
 # ────────────────────────────────────────────────────────────────────────────
 
 def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataFrame]:
-    """FanGraphs fielding leaders. Cookies path only — no fallbacks (DRS/Def
-    are optional, missing them just leaves those bubbles blank)."""
-    api_url = ("https://www.fangraphs.com/api/leaders/major-league/data"
-               f"?pos=all&stats=fld&lg=all&qual=0&type=2"
-               f"&season={year}&month=0&season1={year}&ind=0"
-               f"&team=0&rost=0&age=0&filter=&players=0"
-               f"&startdate=&enddate=&pageitems=4000&page=1")
+    """FanGraphs fielding leaders. Tries several `type` values to find one
+    that ships Def + DRS in the response (the API filters columns by type
+    and the right code drifts across seasons). Cookies path only."""
     print(f"  Fetching FanGraphs fielding ({year})...")
     cookie_paths = [
         "fangraphs_cookies.txt",
@@ -403,49 +399,88 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
         os.path.expanduser("~/project/fangraphs_cookies.txt"),
         "www.fangraphs.com_cookies.txt",
     ]
-    for cp in cookie_paths:
-        if not os.path.exists(cp):
-            continue
+    cookie_path = next((cp for cp in cookie_paths if os.path.exists(cp)), None)
+    if not cookie_path:
+        print("    ⚠ No FG cookies file found — Def/DRS will be blank")
+        return None
+
+    try:
+        from http.cookiejar import MozillaCookieJar
+        jar = MozillaCookieJar(cookie_path)
+        jar.load(ignore_discard=True, ignore_expires=True)
+        s = requests.Session()
+        s.cookies = jar
+        s.headers.update(http_headers)
+    except Exception as e:
+        print(f"    ⚠ Failed to load FG cookies ({cookie_path}): {e}")
+        return None
+
+    def _try(type_code):
+        url = ("https://www.fangraphs.com/api/leaders/major-league/data"
+               f"?pos=all&stats=fld&lg=all&qual=0&type={type_code}"
+               f"&season={year}&month=0&season1={year}&ind=0"
+               f"&team=0&rost=0&age=0&filter=&players=0"
+               f"&startdate=&enddate=&pageitems=4000&page=1")
         try:
-            from http.cookiejar import MozillaCookieJar
-            jar = MozillaCookieJar(cp)
-            jar.load(ignore_discard=True, ignore_expires=True)
-            s = requests.Session()
-            s.cookies = jar
-            s.headers.update(http_headers)
-            r = s.get(api_url, timeout=30)
-            if r.status_code != 200:
-                print(f"    cookies({os.path.basename(cp)}): HTTP {r.status_code}")
-                continue
-            rows = r.json().get("data", [])
-            if not rows:
-                continue
-            df = pd.DataFrame(rows)
-            # Common FG field renames → our canonical names
-            ren = {}
-            for canon, cands in {
-                "player_id": ["xMLBAMID", "MLBAMID", "playerid"],
-                "player_name": ["PlayerName", "Name"],
-                "position": ["Pos", "position"],
-                "fg_def": ["Def"],
-                "fg_drs": ["DRS"],
-                "innings_pos": ["Inn"],
-                "team_fg": ["TeamName", "Team"],
-            }.items():
-                for c in cands:
-                    if c in df.columns and canon not in ren.values():
-                        ren[c] = canon
-                        break
-            df = df.rename(columns=ren)
-            if "player_id" in df.columns:
-                df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce").astype("Int64")
-            print(f"    ✓ {len(df)} FG fielding rows ({os.path.basename(cp)})")
-            print(f"    FG fielding columns: {list(df.columns)[:30]}")
-            return df
+            r = s.get(url, timeout=30)
         except Exception as e:
-            print(f"    cookies({os.path.basename(cp)}) failed: {e}")
-    print("    ⚠ No usable FG cookies found — Def/DRS will be blank")
-    return None
+            print(f"    FG type={type_code}: request failed: {e}")
+            return None
+        if r.status_code != 200:
+            print(f"    FG type={type_code}: HTTP {r.status_code}")
+            return None
+        try:
+            rows = r.json().get("data", [])
+        except Exception:
+            print(f"    FG type={type_code}: JSON parse failed")
+            return None
+        return rows or None
+
+    # Try common type codes in the order FG most often uses them for advanced
+    # fielding. Pick the first one whose payload contains Def or DRS.
+    best = None
+    best_rows = None
+    best_type = None
+    for tc in (2, 1, 8, 11, 0):
+        rows = _try(tc)
+        if not rows:
+            print(f"    FG type={tc}: 0 rows")
+            continue
+        cols = set(rows[0].keys())
+        has_def = "Def" in cols
+        has_drs = "DRS" in cols
+        print(f"    FG type={tc}: {len(rows)} rows  hasDef={has_def} hasDRS={has_drs}")
+        # Save the first non-empty response as a fallback even if no Def/DRS
+        if best_rows is None:
+            best_rows, best_type = rows, tc
+        if has_def or has_drs:
+            best_rows, best_type = rows, tc
+            break
+
+    if not best_rows:
+        print("    ⚠ All FG type codes returned empty — Def/DRS will be blank")
+        return None
+    df = pd.DataFrame(best_rows)
+    print(f"    → Using FG type={best_type} ({len(df)} rows)")
+    ren = {}
+    for canon, cands in {
+        "player_id":   ["xMLBAMID", "MLBAMID", "playerid"],
+        "player_name": ["PlayerName", "Name"],
+        "position":    ["Pos", "position"],
+        "fg_def":      ["Def"],
+        "fg_drs":      ["DRS"],
+        "innings_pos": ["Inn"],
+        "team_fg":     ["TeamName", "Team"],
+    }.items():
+        for c in cands:
+            if c in df.columns and canon not in ren.values():
+                ren[c] = canon
+                break
+    df = df.rename(columns=ren)
+    if "player_id" in df.columns:
+        df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce").astype("Int64")
+    print(f"    FG fielding columns: {list(df.columns)[:30]}")
+    return df
 
 
 # ────────────────────────────────────────────────────────────────────────────
