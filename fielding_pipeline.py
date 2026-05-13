@@ -286,6 +286,23 @@ def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
         f"&team=&range=year&min=1&pos=&roles=&viz=show&csv=true"
     )
     df = _safe_fetch_csv(url, "Savant OAA", fetch_url, csv_to_df)
+    if df is not None:
+        print(f"    Savant OAA all columns: {sorted(df.columns)}")
+        # Sanity: find a player with multiple rows and show their position
+        # values so we can confirm split=yes actually gives per-position rows.
+        if "player_id" in df.columns:
+            try:
+                dupes = df["player_id"].value_counts()
+                multi = dupes[dupes > 1].head(1)
+                if len(multi):
+                    pid = multi.index[0]
+                    sub = df[df["player_id"] == pid]
+                    pos_like = [c for c in df.columns
+                                if "pos" in c.lower() or "position" in c.lower()]
+                    print(f"    Sample multi-pos OAA player {pid}: rows={len(sub)} "
+                          f"pos-like cols={pos_like} values=\n{sub[pos_like].to_dict(orient='records')}")
+            except Exception as e:
+                print(f"    OAA sample-debug failed: {e}")
     return _apply_aliases(_ensure_id_name(df))
 
 
