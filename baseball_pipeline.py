@@ -1264,6 +1264,17 @@ def run_pipeline(seasons, output_dir):
             json.dump(output, f, indent=2, default=str)
         print(f"\n  → Wrote {fpath} ({len(hitters)} hitters, {len(pitchers)} pitchers)")
 
+        # ── Fielding sub-pipeline ──
+        try:
+            from fielding_pipeline import build_fielding
+            fielding_out = build_fielding(year, fetch_url, csv_to_df, HTTP_HEADERS)
+            f_path = os.path.join(output_dir, f"fielding_data_{year}.json")
+            with open(f_path, "w") as f:
+                json.dump(fielding_out, f, indent=2, default=str)
+            print(f"  → Wrote {f_path} ({len(fielding_out.get('fielders', []))} fielders)")
+        except Exception as e:
+            print(f"  ⚠ Fielding pipeline failed: {e}")
+
     # --- Build trend data across seasons ---
     hitter_trends = {}
     pitcher_trends = {}

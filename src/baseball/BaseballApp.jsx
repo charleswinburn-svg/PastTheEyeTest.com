@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import HitterCard from "./HitterCard.jsx";
 import PitcherCard from "./PitcherCard.jsx";
+import FielderCard from "./FielderCard.jsx";
 import Summaries from "./Summaries.jsx";
 import RaceToTwoStrikes from "./RaceToTwoStrikes.jsx";
 import EVLAChart from "./EVLAChart.jsx";
@@ -40,6 +41,7 @@ function deduplicatePlayers(players) {
 const TABS = [
   { id: "hitter",     label: "HITTER CARD" },
   { id: "pitcher",    label: "PITCHER CARD" },
+  { id: "fielder",    label: "FIELDER CARD" },
   {
     id: "summaries",
     label: "SUMMARIES",
@@ -89,6 +91,16 @@ function BaseballApp() {
   const [selectedHitter, setSelectedHitter] = useState(null);
   const [selectedPitcher, setSelectedPitcher] = useState(null);
   const [iswingData, setIswingData] = useState(null);
+  const [fieldingData, setFieldingData] = useState(null);
+  const [selectedFielder, setSelectedFielder] = useState(null);
+
+  useEffect(() => {
+    setFieldingData(null);
+    fetch(`/fielding_data_${season}.json`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setFieldingData(d))
+      .catch(() => setFieldingData(null));
+  }, [season]);
 
   useEffect(() => {
     fetch("/iswing.json").then(r => r.json()).then(setIswingData).catch(() => {});
@@ -143,6 +155,18 @@ function BaseballApp() {
   const pitchersFull = useMemo(() => disambiguate(pitchers), [pitchers]);
   const hitterNames = useMemo(() => hittersFull.map(h => h.displayName).sort(), [hittersFull]);
   const pitcherNames = useMemo(() => pitchersFull.map(p => p.displayName).sort(), [pitchersFull]);
+
+  const fielders = useMemo(() => fieldingData?.fielders || [], [fieldingData]);
+  const fielderNames = useMemo(() => fielders.map(f => f.name).filter(Boolean).sort(), [fielders]);
+  const curFielder = useMemo(
+    () => fielders.find(f => f.name === selectedFielder) || null,
+    [fielders, selectedFielder],
+  );
+  useEffect(() => {
+    if (fielderNames.length && (!selectedFielder || !fielderNames.includes(selectedFielder))) {
+      setSelectedFielder(fielderNames[0]);
+    }
+  }, [fielderNames]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (hitterNames.length > 0 && (!selectedHitter || !hitterNames.includes(selectedHitter)))
@@ -319,32 +343,36 @@ function BaseballApp() {
           </select>
 
           {/* Player Selector (for card views) */}
-          {(tab === "hitter" || tab === "pitcher") && (
+          {(tab === "hitter" || tab === "pitcher" || tab === "fielder") && (
             <select
-              value={tab === "pitcher" ? selectedPitcher || "" : selectedHitter || ""}
-              onChange={e => tab === "pitcher" ? setSelectedPitcher(e.target.value) : setSelectedHitter(e.target.value)}
+              value={tab === "pitcher" ? (selectedPitcher || "") : tab === "fielder" ? (selectedFielder || "") : (selectedHitter || "")}
+              onChange={e => {
+                if (tab === "pitcher") setSelectedPitcher(e.target.value);
+                else if (tab === "fielder") setSelectedFielder(e.target.value);
+                else setSelectedHitter(e.target.value);
+              }}
               style={{
-                padding: "6px 12px", 
-                background: t.inputBg, 
+                padding: "6px 12px",
+                background: t.inputBg,
                 border: `1px solid ${t.inputBorder}`,
-                borderRadius: 6, 
-                color: t.text, 
-                fontSize: 12, 
+                borderRadius: 6,
+                color: t.text,
+                fontSize: 12,
                 outline: "none",
-                minWidth: 180, 
-                maxWidth: 260, 
+                minWidth: 180,
+                maxWidth: 260,
                 fontFamily: "inherit",
               }}
             >
-              {(tab === "pitcher" ? pitcherNames : hitterNames).map(n => (
+              {(tab === "pitcher" ? pitcherNames : tab === "fielder" ? fielderNames : hitterNames).map(n => (
                 <option key={n} value={n}>{n}</option>
               ))}
             </select>
           )}
 
           <ThemeToggle />
-          
-          {tab !== "hitter" && tab !== "pitcher" && (
+
+          {tab !== "hitter" && tab !== "pitcher" && tab !== "fielder" && (
             <div style={{
               fontSize: 10,
               color: t.textFaint,
@@ -389,6 +417,19 @@ function BaseballApp() {
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
               {loading ? `Loading ${season} data...` : `No pipeline data for ${season}. Run: python3 baseball_pipeline.py ./public ${season}`}
+            </div>
+          )
+        )}
+        {tab === "fielder" && (
+          fieldingData ? (
+            <FielderCard
+              player={curFielder}
+              season={season}
+              fieldingData={fieldingData}
+            />
+          ) : (
+            <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
+              No fielding data for {season}. Run: python3 baseball_pipeline.py ./public {season}
             </div>
           )
         )}
