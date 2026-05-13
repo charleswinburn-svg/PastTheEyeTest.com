@@ -4,13 +4,23 @@
 const API = "/mlb-api/api/v1";
 
 // ── Pitch type colors matching R app ──
+// Pitch colors match the Baseball Savant scheme. Forkball (FO) shares the
+// splitter palette and Slow Curve (CS) shares the curveball palette — Savant
+// treats them as family variants visually, even though we keep distinct
+// display names ("Forkball", "Slow Curve") in PITCH_NAMES.
 export const PITCH_COLORS = {
   FF: "#D22D49", SI: "#FE9D00", FC: "#933F2C", SL: "#EEE716",
   CU: "#00D1ED", CH: "#1DBE3A", FS: "#3BACAC", ST: "#DDB33A",
-  KC: "#6236CD", CS: "#0068FF", SV: "#93AFD4", KN: "#3C44CD",
-  SC: "#60DB33", FO: "#55CCAB", GY: "#FFFF99",
+  KC: "#6236CD", CS: "#00D1ED", SV: "#93AFD4", KN: "#3C44CD",
+  SC: "#60DB33", FO: "#3BACAC", GY: "#FFFF99",
   EP: "#999999", FA: "#D22D49",
 };
+
+// Scoring API alias: FO is scored against the splitter model, CS against
+// the curveball model. Display and color stay distinct, but the API only
+// understands the canonical family code, so we substitute when sending.
+export const PITCH_SCORE_ALIAS = { FO: "FS", CS: "CU" };
+export const scorePitchCode = (code) => PITCH_SCORE_ALIAS[code] || code;
 export const PITCH_NAMES = {
   FF: "4-Seam", SI: "Sinker", FC: "Cutter", SL: "Slider",
   CU: "Curveball", CH: "Changeup", FS: "Splitter", ST: "Sweeper",

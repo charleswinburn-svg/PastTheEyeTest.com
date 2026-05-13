@@ -4,7 +4,7 @@ import {
   fetchSchedule, fetchPlayByPlay, fetchBoxscore, fetchAllPlayers, fetchWbcPlayers, fetchGameLog, fetchLeagueStatLeaders,
   extractPitcherData, extractBatterData, aggregateByPitchType,
   fetchSavantGameData, enrichWithSavant, fetchSavantBulkXwoba,
-  PITCH_COLORS, PITCH_NAMES, GAME_TYPE_LABELS, getWbcFlag,
+  PITCH_COLORS, PITCH_NAMES, GAME_TYPE_LABELS, getWbcFlag, scorePitchCode,
 } from "./mlbApi.js";
 import {
   MovementPlot, SprayChart, ZonePlot, StatBar, PitchTable, PitchTypeLegend,
@@ -670,7 +670,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         pitcher_id: selectedPlayer.id,
         _stand: p.batSide || "R",
         _p_throws: pitcherHand,
-        details: { type: { code: p.pitchType } },
+        details: { type: { code: scorePitchCode(p.pitchType) } },
         pitchData: {
           startSpeed: p.velo,
           extension: p.extension,
