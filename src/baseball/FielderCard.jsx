@@ -50,7 +50,7 @@ export default function FielderCard({ player, season, fieldingData }) {
   if (!positions.length) {
     return (
       <div style={{ color: t.textMuted, padding: 40, textAlign: "center", fontSize: 13 }}>
-        No qualifying position ({"≥"}100 innings) for {player.name} in {season}.
+        No qualifying position ({"≥"}50 innings) for {player.name} in {season}.
       </div>
     );
   }
@@ -121,7 +121,7 @@ export default function FielderCard({ player, season, fieldingData }) {
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{season} | {activePos} | {innings.toFixed(0)} Innings (min 100)</span>
+          <span>{season} | {activePos} | {innings.toFixed(0)} Innings (min 50)</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
