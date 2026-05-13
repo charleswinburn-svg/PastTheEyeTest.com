@@ -223,13 +223,18 @@ def fetch_savant_bat_tracking(year):
 
 
 def fetch_savant_attack_angle(year):
-    """Fetch Savant's standalone attack-angle leaderboard. As of 2026 the
-    bat-tracking endpoint no longer ships attack_angle / ideal_angle_rate;
-    they live on their own leaderboard at /leaderboard/attack-angle."""
-    url = (
-        f"https://baseballsavant.mlb.com/leaderboard/attack-angle"
-        f"?type=batter&season={year}&minSwings=10&csv=true"
-    )
+    """Fetch Savant's standalone attack-angle leaderboard. Endpoint URL
+    is configured via SAVANT_ATTACK_ANGLE_URL env var because Savant has
+    moved this leaderboard around between seasons. Set it to the CSV
+    download URL from the Savant page, with {year} substituted in:
+
+        export SAVANT_ATTACK_ANGLE_URL='https://baseballsavant.mlb.com/leaderboard/<path>?...&season={year}&csv=true'
+    """
+    tpl = os.environ.get("SAVANT_ATTACK_ANGLE_URL")
+    if not tpl:
+        print("  Skipping Savant attack-angle (SAVANT_ATTACK_ANGLE_URL not set)")
+        return None
+    url = tpl.format(year=year)
     print(f"  Fetching Savant attack-angle ({year})...")
     text = fetch_url(url)
     df = csv_to_df(text)
