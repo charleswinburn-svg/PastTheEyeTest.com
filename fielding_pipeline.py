@@ -350,13 +350,17 @@ def fetch_savant_catcher_blocks(year: int, fetch_url, csv_to_df) -> Optional[pd.
 
 
 def fetch_savant_of_jump(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
+    # OF jump leaderboard uses `min` as opportunity (jump attempt) count,
+    # not innings — a 50-innings outfielder typically only has a handful
+    # of trackable jumps, so 50 returns header-only. Use the leaderboard's
+    # qualified default instead.
     primary = (
         f"https://baseballsavant.mlb.com/leaderboard/outfield_jump"
-        f"?year={year}&team=&min=50&csv=true"
+        f"?year={year}&team=&min=q&csv=true"
     )
     fallbacks = [
-        f"https://baseballsavant.mlb.com/leaderboard/of_jump?year={year}&min=50&csv=true",
-        f"https://baseballsavant.mlb.com/leaderboard/jump?year={year}&min=50&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/of_jump?year={year}&min=q&csv=true",
+        f"https://baseballsavant.mlb.com/leaderboard/jump?year={year}&min=q&csv=true",
         os.environ.get("SAVANT_OF_JUMP_URL", "").format(year=year) if os.environ.get("SAVANT_OF_JUMP_URL") else "",
     ]
     df = _safe_fetch_csv(primary, "Savant OF jump", fetch_url, csv_to_df, [u for u in fallbacks if u])
