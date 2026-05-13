@@ -731,6 +731,19 @@ def process_hitters(year):
             "swing_rate_ideal_attack_angle": "ideal_angle_rate",
         }
         df_batting = df_batting.rename(columns={k: v for k, v in col_renames.items() if k in df_batting.columns})
+
+        # Fuzzy fallback for the ideal-attack-angle column — Savant has
+        # renamed it across seasons (e.g. 2026 ships it under a different
+        # slug). Any column containing both "ideal" and "angle" (and
+        # optionally "rate"/"percent") that we haven't already mapped is
+        # treated as the ideal-attack-angle rate. Picks the first match.
+        if "ideal_angle_rate" not in df_batting.columns:
+            for c in df_batting.columns:
+                cl = c.lower()
+                if "ideal" in cl and "angle" in cl:
+                    print(f"  ↪ aliasing bat-tracking column {c!r} → ideal_angle_rate")
+                    df_batting = df_batting.rename(columns={c: "ideal_angle_rate"})
+                    break
         bt_check = ["player_id","player_name","avg_swing_speed","avg_swing_length","attack_angle","ideal_angle_rate","blasts_contact","fast_swing_rate"]
         print(f"  Bat tracking columns present: {[c for c in bt_check if c in df_batting.columns]}")
         print(f"  Bat tracking all columns: {list(df_batting.columns)}")
