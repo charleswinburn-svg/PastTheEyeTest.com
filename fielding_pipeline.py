@@ -263,25 +263,24 @@ def _env_url(env_key: str, year: int) -> Optional[str]:
 
 
 def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    """Outs Above Average leaderboard. Savant's HTML page does not serve
-    CSV via &csv=true; set SAVANT_OAA_URL to the real CSV download URL
-    from the page (right-click CSV button → Copy Link Address)."""
-    env = _env_url("SAVANT_OAA_URL", year)
-    if not env:
-        print("  Skipping Savant OAA — set SAVANT_OAA_URL env var to the CSV download URL")
-        return None
-    df = _safe_fetch_csv(env, "Savant OAA", fetch_url, csv_to_df)
+    """Outs Above Average leaderboard, split per position. The CSV URL uses
+    startYear/endYear (not year=) and split=yes for per-position rows."""
+    url = _env_url("SAVANT_OAA_URL", year) or (
+        f"https://baseballsavant.mlb.com/leaderboard/outs_above_average"
+        f"?type=Fielder&startYear={year}&endYear={year}&split=yes"
+        f"&team=&range=year&min=q&pos=&roles=&viz=show&csv=true"
+    )
+    df = _safe_fetch_csv(url, "Savant OAA", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
 
 
 def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    """Fielding Run Value (Savant). Same situation as OAA — page does not
-    serve CSV via &csv=true; set SAVANT_FRV_URL env var."""
-    env = _env_url("SAVANT_FRV_URL", year)
-    if not env:
-        print("  Skipping Savant FRV — set SAVANT_FRV_URL env var to the CSV download URL")
-        return None
-    df = _safe_fetch_csv(env, "Savant FRV", fetch_url, csv_to_df)
+    """Fielding Run Value leaderboard."""
+    url = _env_url("SAVANT_FRV_URL", year) or (
+        f"https://baseballsavant.mlb.com/leaderboard/fielding-run-value"
+        f"?year={year}&csv=true"
+    )
+    df = _safe_fetch_csv(url, "Savant FRV", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
 
 
@@ -357,12 +356,13 @@ def fetch_savant_of_catch_prob(year: int, fetch_url, csv_to_df) -> Optional[pd.D
 
 
 def fetch_savant_of_arm(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    """Outfielder arm value. All guessed URLs 404 — set SAVANT_OF_ARM_URL."""
-    env = _env_url("SAVANT_OF_ARM_URL", year)
-    if not env:
-        print("  Skipping Savant OF arm — set SAVANT_OF_ARM_URL env var to the CSV download URL")
-        return None
-    df = _safe_fetch_csv(env, "Savant OF arm value", fetch_url, csv_to_df)
+    """Outfielder arm value lives on Savant's baserunning leaderboard with
+    type=Fld (the fielder-side view of baserunning: arm kills, holds, etc.)."""
+    url = _env_url("SAVANT_OF_ARM_URL", year) or (
+        f"https://baseballsavant.mlb.com/leaderboard/baserunning"
+        f"?type=Fld&year={year}&csv=true"
+    )
+    df = _safe_fetch_csv(url, "Savant OF arm value", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
 
 
