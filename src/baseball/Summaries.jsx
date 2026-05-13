@@ -670,6 +670,10 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         pitcher_id: selectedPlayer.id,
         _stand: p.batSide || "R",
         _p_throws: pitcherHand,
+        // _pitchType preserves the original code so we can bucket FO and FS
+        // (or CS and CU) separately on the way back, even though the scoring
+        // API gets the family-aliased code in details.type.code below.
+        _pitchType: p.pitchType,
         details: { type: { code: scorePitchCode(p.pitchType) } },
         pitchData: {
           startSpeed: p.velo,
@@ -706,12 +710,15 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           const s = data.scores[i];
           const stand = (payload[i]?._stand === "L" || payload[i]?._stand === "R")
             ? payload[i]._stand : null;
-          if (!byType[s.pitch_type]) byType[s.pitch_type] = {
+          // Bucket by the original pitch code (FO stays FO, CS stays CS),
+          // not the aliased code the API echoes back.
+          const pt = payload[i]?._pitchType || s.pitch_type;
+          if (!byType[pt]) byType[pt] = {
             stuff: { sum: 0, n: 0 }, loc: { sum: 0, n: 0 },
             tunnel: { sum: 0, n: 0 }, pitch: { sum: 0, n: 0 },
             L: { sum: 0, n: 0 }, R: { sum: 0, n: 0 },
           };
-          const b = byType[s.pitch_type];
+          const b = byType[pt];
           if (s.stuff_plus != null) { b.stuff.sum += s.stuff_plus; b.stuff.n++; }
           if (s.loc_plus != null) { b.loc.sum += s.loc_plus; b.loc.n++; }
           if (s.tunnel_plus != null) { b.tunnel.sum += s.tunnel_plus; b.tunnel.n++; }
