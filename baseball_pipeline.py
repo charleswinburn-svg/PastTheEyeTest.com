@@ -1267,7 +1267,10 @@ def run_pipeline(seasons, output_dir):
         # ── Fielding sub-pipeline ──
         try:
             from fielding_pipeline import build_fielding
-            fielding_out = build_fielding(year, fetch_url, csv_to_df, HTTP_HEADERS)
+            # Reuse the cached MLB team map (player_id -> 3-letter abbr) so
+            # fielder cards get team logos / colors via the same lookup.
+            fielding_out = build_fielding(year, fetch_url, csv_to_df, HTTP_HEADERS,
+                                           team_map=fetch_mlb_team_map())
             f_path = os.path.join(output_dir, f"fielding_data_{year}.json")
             with open(f_path, "w") as f:
                 json.dump(fielding_out, f, indent=2, default=str)

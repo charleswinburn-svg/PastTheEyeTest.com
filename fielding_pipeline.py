@@ -627,7 +627,8 @@ def _metrics_for(pos_group: str):
             "outfielder": OUTFIELDER_METRICS}.get(pos_group, [])
 
 
-def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict) -> dict:
+def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
+                    team_map: Optional[Dict[int, str]] = None) -> dict:
     """End-to-end build. Returns the JSON-serializable dict."""
     print(f"\n  ─── Fielding pipeline ({year}) ───")
 
@@ -811,7 +812,7 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict) -> dict:
             fielders.setdefault(pid, {
                 "player_id": pid,
                 "name": _flip_name(c.get("name")) or "",
-                "team": c.get("team") or "",
+                "team": (team_map or {}).get(pid) or c.get("team") or "",
                 "positions": {},
             })
             fielders[pid]["positions"][pos] = {
