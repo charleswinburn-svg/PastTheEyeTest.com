@@ -444,9 +444,10 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
             if not rows:
                 print(f"    FG stats={stats_code} type={tc}: 0 rows")
                 continue
-            cols = set(rows[0].keys())
+            cols = sorted(rows[0].keys())
             print(f"    FG stats={stats_code} type={tc}: {len(rows)} rows  "
                   f"hasDef={'Def' in cols} hasDRS={'DRS' in cols}")
+            print(f"    FG stats={stats_code} all columns: {cols}")
             return rows, tc
         return None, None
 
