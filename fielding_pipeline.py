@@ -415,53 +415,82 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
         print(f"    ⚠ Failed to load FG cookies ({cookie_path}): {e}")
         return None
 
-    def _try(type_code):
+    def _try(stats_code, type_code):
         url = ("https://www.fangraphs.com/api/leaders/major-league/data"
-               f"?pos=all&stats=fld&lg=all&qual=0&type={type_code}"
+               f"?pos=all&stats={stats_code}&lg=all&qual=0&type={type_code}"
                f"&season={year}&month=0&season1={year}&ind=0"
                f"&team=0&rost=0&age=0&filter=&players=0"
                f"&startdate=&enddate=&pageitems=4000&page=1")
         try:
             r = s.get(url, timeout=30)
         except Exception as e:
-            print(f"    FG type={type_code}: request failed: {e}")
+            print(f"    FG stats={stats_code} type={type_code}: request failed: {e}")
             return None
         if r.status_code != 200:
-            print(f"    FG type={type_code}: HTTP {r.status_code}")
+            print(f"    FG stats={stats_code} type={type_code}: HTTP {r.status_code}")
             return None
         try:
             rows = r.json().get("data", [])
         except Exception:
-            print(f"    FG type={type_code}: JSON parse failed")
+            print(f"    FG stats={stats_code} type={type_code}: JSON parse failed")
             return None
         return rows or None
 
-    # Try common type codes in the order FG most often uses them for advanced
-    # fielding. Pick the first one whose payload contains Def or DRS.
-    best = None
-    best_rows = None
-    best_type = None
-    for tc in (2, 1, 8, 11, 0):
-        rows = _try(tc)
-        if not rows:
-            print(f"    FG type={tc}: 0 rows")
-            continue
-        cols = set(rows[0].keys())
-        has_def = "Def" in cols
-        has_drs = "DRS" in cols
-        print(f"    FG type={tc}: {len(rows)} rows  hasDef={has_def} hasDRS={has_drs}")
-        # Save the first non-empty response as a fallback even if no Def/DRS
-        if best_rows is None:
-            best_rows, best_type = rows, tc
-        if has_def or has_drs:
-            best_rows, best_type = rows, tc
-            break
+    # FG splits Def vs DRS across two leaderboards: stats=def has Def,
+    # stats=fld type=1 has DRS. Fetch both and merge on player_id+position.
+    def _fetch_combo(stats_code, type_codes):
+        for tc in type_codes:
+            rows = _try(stats_code, tc)
+            if not rows:
+                print(f"    FG stats={stats_code} type={tc}: 0 rows")
+                continue
+            cols = set(rows[0].keys())
+            print(f"    FG stats={stats_code} type={tc}: {len(rows)} rows  "
+                  f"hasDef={'Def' in cols} hasDRS={'DRS' in cols}")
+            return rows, tc
+        return None, None
 
-    if not best_rows:
-        print("    ⚠ All FG type codes returned empty — Def/DRS will be blank")
+    def_rows, def_tc = _fetch_combo("def", (2, 1, 8, 0))
+    drs_rows, drs_tc = _fetch_combo("fld", (1, 2, 8, 0))
+
+    if not def_rows and not drs_rows:
+        print("    ⚠ FG returned nothing usable — Def/DRS will be blank")
         return None
-    df = pd.DataFrame(best_rows)
-    print(f"    → Using FG type={best_type} ({len(df)} rows)")
+
+    def _to_df(rows):
+        return pd.DataFrame(rows) if rows else None
+
+    df_def = _to_df(def_rows)
+    df_drs = _to_df(drs_rows)
+
+    # Merge on (player_id, position). FG's `position`/`Pos` column keys
+    # per-row. We rename only the columns we need.
+    def _slim(df, value_cols):
+        if df is None:
+            return None
+        ren = {}
+        for canon, cands in {
+            "player_id":   ["xMLBAMID", "MLBAMID", "playerid"],
+            "player_name": ["PlayerName", "Name"],
+            "position":    ["Pos", "position"],
+        }.items():
+            for c in cands:
+                if c in df.columns and canon not in ren.values():
+                    ren[c] = canon
+                    break
+        df = df.rename(columns=ren)
+        keep = ["player_id", "player_name", "position"] + [c for c in value_cols if c in df.columns]
+        return df[keep]
+
+    df_def_slim = _slim(df_def, ["Def"])
+    df_drs_slim = _slim(df_drs, ["DRS"])
+    if df_def_slim is not None and df_drs_slim is not None:
+        df = df_def_slim.merge(df_drs_slim, on=["player_id", "player_name", "position"], how="outer")
+    else:
+        df = df_def_slim if df_def_slim is not None else df_drs_slim
+    if df is None or df.empty:
+        return None
+    print(f"    → FG merged: {len(df)} rows  (Def from type={def_tc}, DRS from type={drs_tc})")
     ren = {}
     for canon, cands in {
         "player_id":   ["xMLBAMID", "MLBAMID", "playerid"],
