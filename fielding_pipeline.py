@@ -836,14 +836,17 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
                     val_f = float(v) if v is not None else None
                 except Exception:
                     val_f = None
-                # Optional unit multiplier (e.g. shadow-strike rate stored as
-                # a fraction → display as a percentage).
-                if val_f is not None and m.get("mult"):
-                    val_f = val_f * m["mult"]
+                # Percentile ranks off the raw value (pools are raw too).
+                # The optional unit multiplier only affects the display
+                # value (e.g. shadow-strike fraction → percentage).
+                pctile = _pct(val_f, pools[m["src_col"]], m["lower_better"])
+                disp_f = val_f
+                if disp_f is not None and m.get("mult"):
+                    disp_f = disp_f * m["mult"]
                 cats[m["label"]] = {
-                    "display": _fmt(val_f, m["fmt"]),
-                    "pctile":  _pct(val_f, pools[m["src_col"]], m["lower_better"]),
-                    "value":   val_f,
+                    "display": _fmt(disp_f, m["fmt"]),
+                    "pctile":  pctile,
+                    "value":   disp_f,
                 }
             fielders.setdefault(pid, {
                 "player_id": pid,
