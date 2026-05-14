@@ -92,18 +92,18 @@ CATCHER_METRICS = [
     {"key": "pop_time",     "label": "Pop Time",                     "lower_better": True,  "fmt": ".2f", "src_col": "pop_time_2b_avg"},
     {"key": "csaa",         "label": "Caught Stealing Above Average","lower_better": False, "fmt": ".1f", "src_col": "csaa"},
     {"key": "framing",      "label": "Framing Runs",                 "lower_better": False, "fmt": ".1f", "src_col": "framing_runs"},
-    {"key": "shadow_strike","label": "Shadow Strike%",               "lower_better": False, "fmt": ".1f", "src_col": "shadow_zone_called_strike_rate"},
+    {"key": "shadow_strike","label": "Shadow Strike%",               "lower_better": False, "fmt": ".1f", "mult": 100, "src_col": "shadow_zone_called_strike_rate"},
     {"key": "blocks",       "label": "Blocks Above Average",         "lower_better": False, "fmt": ".1f", "src_col": "blocks_above_average"},
 ]
 
 INFIELDER_METRICS = [
     {"key": "def",          "label": "Def",                       "lower_better": False, "fmt": ".1f", "src_col": "fg_def"},
     {"key": "drs",          "label": "DRS",                       "lower_better": False, "fmt": ".0f", "src_col": "fg_drs"},
-    {"key": "oaa",          "label": "OAA",                       "lower_better": False, "fmt": ".0f", "src_col": "outs_above_average"},
-    {"key": "oaa_in",       "label": "OAA In",                    "lower_better": False, "fmt": ".0f", "src_col": "oaa_in"},
-    {"key": "oaa_back",     "label": "OAA Back",                  "lower_better": False, "fmt": ".0f", "src_col": "oaa_back"},
-    {"key": "oaa_left",     "label": "OAA Left",                  "lower_better": False, "fmt": ".0f", "src_col": "oaa_left"},
-    {"key": "oaa_right",    "label": "OAA Right",                 "lower_better": False, "fmt": ".0f", "src_col": "oaa_right"},
+    {"key": "oaa",          "label": "OAA",                       "lower_better": False, "fmt": ".1f", "src_col": "outs_above_average"},
+    {"key": "oaa_in",       "label": "OAA In",                    "lower_better": False, "fmt": ".1f", "src_col": "oaa_in"},
+    {"key": "oaa_back",     "label": "OAA Back",                  "lower_better": False, "fmt": ".1f", "src_col": "oaa_back"},
+    {"key": "oaa_left",     "label": "OAA Left",                  "lower_better": False, "fmt": ".1f", "src_col": "oaa_left"},
+    {"key": "oaa_right",    "label": "OAA Right",                 "lower_better": False, "fmt": ".1f", "src_col": "oaa_right"},
     {"key": "frv",          "label": "FRV",                       "lower_better": False, "fmt": ".0f", "src_col": "frv"},
     {"key": "esra",         "label": "Estimated Success% Added",  "lower_better": False, "fmt": ".1f", "src_col": "estimated_success_rate_added"},
     {"key": "arm_strength", "label": "Arm Strength",              "lower_better": False, "fmt": ".1f", "src_col": "arm_strength_mph"},
@@ -112,7 +112,7 @@ INFIELDER_METRICS = [
 OUTFIELDER_METRICS = [
     {"key": "def",          "label": "Def",                       "lower_better": False, "fmt": ".1f", "src_col": "fg_def"},
     {"key": "drs",          "label": "DRS",                       "lower_better": False, "fmt": ".0f", "src_col": "fg_drs"},
-    {"key": "oaa",          "label": "OAA",                       "lower_better": False, "fmt": ".0f", "src_col": "outs_above_average"},
+    {"key": "oaa",          "label": "OAA",                       "lower_better": False, "fmt": ".1f", "src_col": "outs_above_average"},
     {"key": "frv",          "label": "FRV",                       "lower_better": False, "fmt": ".0f", "src_col": "frv"},
     {"key": "esra",         "label": "Estimated Success% Added",  "lower_better": False, "fmt": ".1f", "src_col": "estimated_success_rate_added"},
     {"key": "five_star",    "label": "5 Star Catch%",             "lower_better": False, "fmt": ".1f", "src_col": "five_star_catch_rate"},
@@ -836,6 +836,10 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
                     val_f = float(v) if v is not None else None
                 except Exception:
                     val_f = None
+                # Optional unit multiplier (e.g. shadow-strike rate stored as
+                # a fraction → display as a percentage).
+                if val_f is not None and m.get("mult"):
+                    val_f = val_f * m["mult"]
                 cats[m["label"]] = {
                     "display": _fmt(val_f, m["fmt"]),
                     "pctile":  _pct(val_f, pools[m["src_col"]], m["lower_better"]),
