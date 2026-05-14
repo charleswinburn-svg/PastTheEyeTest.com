@@ -824,18 +824,28 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
     fielders: Dict[int, dict] = {}
     for pos, cells in by_pos.items():
         metric_list = _metrics_for(_grp(pos))
-        # Build pools per source column
-        pools = {m["src_col"]: [c.get(m["src_col"]) for c in cells if c.get(m["src_col"]) is not None]
-                 for m in metric_list}
+
+        def _coerce(x):
+            try:
+                f = float(x)
+                return f if f == f else None  # drop NaN
+            except (TypeError, ValueError):
+                return None
+
+        # Build pools per source column — coerce every entry to float so
+        # percentile comparisons never mix str vs float (object-dtype
+        # columns from pandas would otherwise misrank silently).
+        pools = {}
+        for m in metric_list:
+            raw = [_coerce(c.get(m["src_col"])) for c in cells]
+            pools[m["src_col"]] = [v for v in raw if v is not None]
+
         for c in cells:
             pid = c["player_id"]
             cats = {}
             for m in metric_list:
                 v = c.get(m["src_col"])
-                try:
-                    val_f = float(v) if v is not None else None
-                except Exception:
-                    val_f = None
+                val_f = _coerce(v)
                 # Percentile ranks off the raw value (pools are raw too).
                 # The optional unit multiplier only affects the display
                 # value (e.g. shadow-strike fraction → percentage).
@@ -858,6 +868,18 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
                 "innings": round(c.get("innings") or 0, 1),
                 "categories": cats,
             }
+
+        # Debug: dump Shadow Strike% raw value → percentile for catchers so
+        # mis-ranking is easy to spot in the log.
+        if pos == "C":
+            ss_pool = pools.get("shadow_zone_called_strike_rate", [])
+            print(f"    Shadow Strike% pool (raw): n={len(ss_pool)} "
+                  f"min={min(ss_pool) if ss_pool else None} "
+                  f"max={max(ss_pool) if ss_pool else None}")
+            for c in cells[:5]:
+                raw = _coerce(c.get("shadow_zone_called_strike_rate"))
+                pc = _pct(raw, ss_pool, False)
+                print(f"      {_flip_name(c.get('name'))}: raw={raw} pctile={pc}")
 
     out = {
         "season": year,
