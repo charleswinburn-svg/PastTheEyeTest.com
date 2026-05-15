@@ -9,7 +9,7 @@ import {
 import {
   MovementPlot, SprayChart, ZonePlot, StatBar, PitchTable, PitchTypeLegend,
   PitcherCountTool, HitterCountTool, LocationZonePanel,
-  RollingVeloChart, PlatoonUsageBars,
+  RollingVeloChart, PlatoonUsageBars, ReclassifyModal,
 } from "./SummaryComponents.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance } from "./SharedComponents.jsx";
 
@@ -52,6 +52,21 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const [leagueAvgs, setLeagueAvgs] = useState(null);
   const [baselineAvgs, setBaselineAvgs] = useState(null);
   const [pitchPlus, setPitchPlus] = useState(null);
+
+  // ── Reclassification (session-only) ────────────────────────────────────
+  // Two parallel maps: one for single-pitch overrides, one for bulk overrides
+  // by pitch_type. Both are applied during enrichedData derivation; the score
+  // useEffect below picks up the changes automatically because enrichedData
+  // is in its dep array.
+  const [reclassifyMode, setReclassifyMode] = useState(false);
+  // pitchOverrides: Map<key, newType> where key = `${gamePk}_${atBatIndex}_${pitchNumber}`
+  const [pitchOverrides, setPitchOverrides] = useState(() => new Map());
+  // typeOverrides: Map<originalType, newType> — bulk reclassification per pitch_type
+  const [typeOverrides, setTypeOverrides] = useState(() => new Map());
+  // Modal state — which pitch is open for reclassification
+  const [reclassifyTarget, setReclassifyTarget] = useState(null);
+
+  const pitchOverrideKey = (p) => `${p.gamePk ?? ""}_${p.atBatIndex ?? ""}_${p.pitchNumber ?? ""}`;
 
   // Load pre-computed league avgs (from league_avgs_pipeline.py) as baseline
   useEffect(() => {
@@ -637,8 +652,31 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       if (entry && entry[yr] != null) result.xwoba = entry[yr];
     }
 
+    // ── Apply pitch reclassifications (session overrides) ──
+    // pitchOverrides take precedence over typeOverrides so a single-pitch
+    // change overrules a bulk change. Reclassified pitches are flagged with
+    // _reclassified so the movement plot can render them with a thicker stroke.
+    if (isPitcher && result.pitches?.length && (pitchOverrides.size || typeOverrides.size)) {
+      result.pitches = result.pitches.map(p => {
+        const key = pitchOverrideKey(p);
+        if (pitchOverrides.has(key)) {
+          const newType = pitchOverrides.get(key);
+          return newType !== p.pitchType
+            ? { ...p, pitchType: newType, _reclassified: true }
+            : p;
+        }
+        if (typeOverrides.has(p.pitchType)) {
+          const newType = typeOverrides.get(p.pitchType);
+          return newType !== p.pitchType
+            ? { ...p, pitchType: newType, _reclassified: true }
+            : p;
+        }
+        return p;
+      });
+    }
+
     return result;
-  }, [extractedData, savantData, seasonSavant, selectedPlayer, isGame, isPitcher, isAAA, boxscoreData, bulkXwoba, prospectXwoba, currentSeason]);
+  }, [extractedData, savantData, seasonSavant, selectedPlayer, isGame, isPitcher, isAAA, boxscoreData, bulkXwoba, prospectXwoba, currentSeason, pitchOverrides, typeOverrides]);
 
   const hasData = enrichedData && (isPitcher ? enrichedData.totalPitches > 0 : enrichedData.pas > 0);
 
@@ -824,7 +862,56 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
       {enrichedData && !hasData && <div style={{ color: t.textMuted, textAlign: "center", padding: 40 }}>{selectedPlayer?.name} did not {isPitcher ? "pitch" : "bat"} in this {isGame ? "game" : "period"}</div>}
 
-      {hasData && isPitcher && !isCounts && <PitcherView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isAAA} leagueAvgs={effectiveLeagueAvgs} pitchPlus={pitchPlus} />}
+      {/* Reclassify toggle bar — only visible for pitcher views with data.
+          Lives outside cardRef so the saved PNG doesn't include it. */}
+      {hasData && isPitcher && !isCounts && (
+        <div style={{
+          maxWidth: 1000, margin: "0 auto 8px",
+          display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 12,
+          fontSize: 11,
+        }}>
+          {(pitchOverrides.size > 0 || typeOverrides.size > 0) && (
+            <button
+              onClick={() => { setPitchOverrides(new Map()); setTypeOverrides(new Map()); }}
+              style={{
+                padding: "5px 10px", fontSize: 11, fontWeight: 600,
+                background: "transparent", color: t.textMuted,
+                border: `1px solid ${t.divider}`, borderRadius: 5, cursor: "pointer",
+              }}
+              title="Restore original pitch types"
+            >
+              Clear ({pitchOverrides.size + typeOverrides.size})
+            </button>
+          )}
+          <button
+            onClick={() => setReclassifyMode(m => !m)}
+            style={{
+              padding: "6px 14px", fontSize: 11, fontWeight: 700,
+              background: reclassifyMode ? t.text : t.inputBg,
+              color: reclassifyMode ? t.cardBg : t.textSecondary,
+              border: `1px solid ${reclassifyMode ? t.text : t.inputBorder}`,
+              borderRadius: 5, cursor: "pointer",
+              letterSpacing: "0.04em", textTransform: "uppercase",
+            }}
+            title="Click pitches in the movement plot to reclassify"
+          >
+            {reclassifyMode ? "✓ Reclassify on" : "Reclassify"}
+          </button>
+        </div>
+      )}
+
+      {hasData && isPitcher && !isCounts && (
+        <PitcherView
+          data={enrichedData} player={selectedPlayer}
+          game={isGame ? selectedGame : null}
+          season={currentSeason} seasonType={seasonType}
+          isGame={isGame} isAAA={isAAA}
+          leagueAvgs={effectiveLeagueAvgs} pitchPlus={pitchPlus}
+          reclassifyMode={reclassifyMode}
+          onPitchClick={(p) => setReclassifyTarget({ kind: "single", pitch: p })}
+          onTypeClick={(type, count) => setReclassifyTarget({ kind: "bulk", type, count })}
+        />
+      )}
       {hasData && !isPitcher && !isCounts && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isAAA} leagueAvgs={effectiveLeagueAvgs} />}
       {hasData && isPitcher && isCounts && (
         <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={true}>
@@ -835,6 +922,48 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={false}>
           <HitterCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isAAA} />
         </CountsCard>
+      )}
+
+      {/* Reclassify modal — global so it overlays everything. The target
+          object's `kind` field decides whether we update pitchOverrides
+          (single) or typeOverrides (bulk reclassification). */}
+      {reclassifyTarget && (
+        <ReclassifyModal
+          target={reclassifyTarget}
+          onClose={() => setReclassifyTarget(null)}
+          onPick={(newType) => {
+            if (reclassifyTarget.kind === "bulk") {
+              const origType = reclassifyTarget.type;
+              setTypeOverrides(prev => {
+                const next = new Map(prev);
+                if (newType === origType) {
+                  // Picking the same type clears any existing override.
+                  next.delete(origType);
+                } else {
+                  next.set(origType, newType);
+                }
+                return next;
+              });
+              // Bulk reclassification supersedes single overrides for those
+              // pitches: drop any single overrides whose original type matches.
+              setPitchOverrides(prev => {
+                if (!prev.size) return prev;
+                // We don't have original-type info on the override key, so we
+                // just leave them alone — the apply step prefers single over
+                // bulk anyway, which is the right precedence.
+                return prev;
+              });
+            } else {
+              const pitch = reclassifyTarget.pitch;
+              setPitchOverrides(prev => {
+                const next = new Map(prev);
+                next.set(pitchOverrideKey(pitch), newType);
+                return next;
+              });
+            }
+            setReclassifyTarget(null);
+          }}
+        />
       )}
     </div>
   );
@@ -864,7 +993,7 @@ function CountsCard({ player, season, seasonType, isAAA, isPitcher, children }) 
   );
 }
 
-function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus }) {
+function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, reclassifyMode = false, onPitchClick = null, onTypeClick = null }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const pitchRows = useMemo(() => aggregateByPitchType(data.pitches), [data.pitches]);
@@ -970,7 +1099,11 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
               <RollingVeloChart pitches={data.pitches} mode={isGame ? "game" : "season"} width={260} height={400} />
             )}
           </div>
-          <MovementPlot pitches={data.pitches} width={420} height={400} maxPitches={200} />
+          <MovementPlot
+            pitches={data.pitches}
+            width={420} height={400} maxPitches={200}
+            onPitchClick={reclassifyMode ? onPitchClick : null}
+          />
           <div style={{ width: 260 }}>
             {rightPanel === "zones" ? (
               <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} />
@@ -982,7 +1115,10 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
           </div>
         </div>
         <PitchTypeLegend types={[...new Set(data.pitches.map(p => p.pitchType))].filter(t => t !== "UN")} />
-        <PitchTable rows={pitchRows} leagueAvgs={leagueAvgs} isAAA={isAAA} pitchPlus={pitchPlus} />
+        <PitchTable
+          rows={pitchRows} leagueAvgs={leagueAvgs} isAAA={isAAA} pitchPlus={pitchPlus}
+          onTypeClick={reclassifyMode ? onTypeClick : null}
+        />
         <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
           <span>Created by: @PastTheEyeTest on X</span>
           <span style={{ fontStyle: "italic" }}>Data: Baseball Savant / MLB Stats API{isAAA ? " / Prospect Savant" : ""}</span>
