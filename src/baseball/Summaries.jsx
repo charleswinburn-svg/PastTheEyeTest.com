@@ -735,7 +735,12 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     fetch("https://pitch-plus-api.onrender.com/score", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pitches: payload, is_aaa: isAAA }),
+      // Score every pitch against MLB norms regardless of level — we deliberately
+      // don't pass `is_aaa` so AAA pitchers get the same Stuff+/Loc+/Tun+/Pitch+
+      // scale as MLB pitchers (directly comparable). AAA players still live
+      // outside baseball_data_<year>.json — only Summaries shows them, by
+      // fetching live from the MLB Stats API.
+      body: JSON.stringify({ pitches: payload }),
     })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
