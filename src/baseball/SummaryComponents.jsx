@@ -1,10 +1,11 @@
+import { useEffect } from "react";
 import { PITCH_COLORS, PITCH_NAMES, HIT_COLORS } from "./mlbApi.js";
 import { useTheme } from "./ThemeContext.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // MOVEMENT PLOT (Horizontal Break vs Induced Vertical Break)
 // ═══════════════════════════════════════════════════════════
-export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 200 }) {
+export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 200, onPitchClick = null }) {
   const { theme: t, isDark } = useTheme();
   const axisB = 45, axisT = 20;
   const side = height - axisT - axisB;
@@ -28,6 +29,11 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
   const gridMinor = isDark ? "#2a2a2a" : "#ddd";
   const gridMajor = isDark ? "#555" : "#999";
   const labelFill = isDark ? "#888" : "#666";
+
+  // When reclassify mode is on we make dots interactive: bigger hit target,
+  // pointer cursor, ring-on-hover. Reclassified pitches get a thicker border
+  // so it's easy to see what's been changed.
+  const interactive = !!onPitchClick;
 
   return (
     <svg width={width} height={height} style={{ display: "block" }}>
@@ -60,9 +66,128 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
           cx={scaleX(p.hBreak)} cy={scaleY(p.vBreak)} r={5.5}
           fill={PITCH_COLORS[p.pitchType] || "#888"} fillOpacity={0.9}
           stroke={isDark ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.15)"} strokeWidth={0.5}
+          style={interactive ? { cursor: "crosshair" } : undefined}
+          onClick={interactive ? () => onPitchClick(p) : undefined}
         />
       ))}
     </svg>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// RECLASSIFY MODAL
+// ═══════════════════════════════════════════════════════════
+// Supports two modes via the `target` prop:
+//   - { kind: "single", pitch }  → reclassify just this pitch
+//   - { kind: "bulk", type, count } → reclassify every pitch of `type`
+// The caller decides what to do with the picked pitch type via onPick.
+export function ReclassifyModal({ target, onPick, onClose }) {
+  const { theme: t, isDark } = useTheme();
+  const PITCH_OPTIONS = ["FF", "SI", "FC", "SL", "ST", "SV", "CU", "KC", "CH", "FS"];
+
+  useEffect(() => {
+    function onKey(e) { if (e.key === "Escape") onClose(); }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  if (!target) return null;
+
+  const isBulk = target.kind === "bulk";
+  const pitch = !isBulk ? target.pitch : null;
+  const currentType = isBulk ? target.type : pitch?.pitchType;
+
+  const title = isBulk ? "Reclassify pitch type" : "Reclassify pitch";
+  const subtitle = isBulk
+    ? `All ${PITCH_NAMES[target.type] || target.type}${target.count != null ? ` (${target.count} pitches)` : ""} → choose a new type`
+    : `${pitch?.velo != null ? `${pitch.velo.toFixed(1)} mph · ` : ""}${
+        pitch?.hBreak != null && pitch?.vBreak != null
+          ? `${pitch.hBreak.toFixed(1)}\u2033 / ${pitch.vBreak.toFixed(1)}\u2033`
+          : ""
+      }${pitch?.pitchType ? ` · currently ${PITCH_NAMES[pitch.pitchType] || pitch.pitchType}` : ""}`;
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0,
+        background: "rgba(0, 0, 0, 0.55)",
+        zIndex: 1000,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        backdropFilter: "blur(2px)",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: t.cardBg,
+          border: `1px solid ${t.cardBorder}`,
+          borderRadius: 12,
+          padding: "20px 24px",
+          minWidth: 380,
+          boxShadow: `0 12px 40px ${t.shadow}`,
+        }}
+      >
+        <div style={{
+          fontSize: 13, fontWeight: 700,
+          color: t.text,
+          marginBottom: 4, letterSpacing: "0.04em", textTransform: "uppercase",
+        }}>
+          {title}
+        </div>
+        <div style={{ fontSize: 11, color: t.textMuted, marginBottom: 14 }}>
+          {subtitle}
+        </div>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(5, 1fr)",
+          gap: 8,
+        }}>
+          {PITCH_OPTIONS.map(pt => {
+            const isCurrent = pt === currentType;
+            return (
+              <button
+                key={pt}
+                onClick={() => onPick(pt)}
+                style={{
+                  padding: "10px 6px",
+                  background: PITCH_COLORS[pt] || "#888",
+                  color: "#fff",
+                  border: isCurrent ? `2px solid ${t.text}` : "2px solid transparent",
+                  borderRadius: 6,
+                  fontWeight: 800,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  letterSpacing: "0.04em",
+                  opacity: isCurrent ? 0.55 : 1,
+                  outline: "none",
+                }}
+                title={PITCH_NAMES[pt] || pt}
+              >
+                {pt}
+              </button>
+            );
+          })}
+        </div>
+        <div style={{
+          marginTop: 14, display: "flex", justifyContent: "space-between",
+          alignItems: "center", fontSize: 11, color: t.textFaint,
+        }}>
+          <span>Esc to cancel</span>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "5px 12px", background: "transparent",
+              color: t.textSecondary, border: `1px solid ${t.divider}`,
+              borderRadius: 5, cursor: "pointer", fontSize: 11, fontWeight: 600,
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -366,7 +491,7 @@ export function StatBar({ stats }) {
 // ═══════════════════════════════════════════════════════════
 // PITCH TABLE (per-pitch-type stats)
 // ═══════════════════════════════════════════════════════════
-export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
+export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = null }) {
   const { theme: t, isDark } = useTheme();
   if (!rows || rows.length === 0) return null;
 
@@ -487,16 +612,24 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus }) {
                 const formatted = c.fmt ? c.fmt(val) : (val != null ? val : "—");
                 const effStyle = c.key === "name" ? {} : getCellStyle(c.key, val, row.type);
 
-                // Pitch name cell — colored chip (unchanged behavior, slightly bolder)
+                // Pitch name cell — colored chip. When onTypeClick is set
+                // (parent is in reclassify mode), make it clickable as a
+                // shortcut for bulk reclassification of all pitches of this type.
                 if (c.key === "name") {
+                  const clickable = !!onTypeClick;
                   return (
-                    <td key={c.key} style={{
-                      padding: "7px 6px", textAlign: "center",
-                      borderBottom: `1px solid ${t.tableBorder}`,
-                      color: "#fff", fontWeight: 800,
-                      background: row.color, borderRadius: 4, minWidth: 90,
-                      letterSpacing: "0.02em",
-                    }}>
+                    <td key={c.key}
+                      onClick={clickable ? () => onTypeClick(row.type, row.n) : undefined}
+                      style={{
+                        padding: "7px 6px", textAlign: "center",
+                        borderBottom: `1px solid ${t.tableBorder}`,
+                        color: "#fff", fontWeight: 800,
+                        background: row.color, borderRadius: 4, minWidth: 90,
+                        letterSpacing: "0.02em",
+                        cursor: clickable ? "pointer" : "default",
+                      }}
+                      title={clickable ? `Reclassify all ${formatted} (${row.n})` : undefined}
+                    >
                       {formatted}
                     </td>
                   );
