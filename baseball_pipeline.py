@@ -69,7 +69,7 @@ HITTER_METRICS = [
     {"key": "xslg",              "label": "xSLG",                "lower_better": False, "fmt": ".3f"},
     {"key": "xwobacon",          "label": "xwOBACON",            "lower_better": False, "fmt": ".3f"},
     {"key": "exit_velocity_avg", "label": "Avg Exit Velocity",   "lower_better": False, "fmt": ".1f"},
-    {"key": "avg_best_speed",    "label": "Best Speed",          "lower_better": False, "fmt": ".1f"},
+    {"key": "ev_90p",            "label": "90th % EV",           "lower_better": False, "fmt": ".1f"},
     {"key": "barrel_batted_rate","label": "Barrel %",            "lower_better": False, "fmt": ".1f"},
     {"key": "blasts_contact",    "label": "Blasts/Contact",      "lower_better": False, "fmt": ".1f", "pct_stored_decimal": True},
     {"key": "sweet_spot_percent","label": "LA+SwtSpt%",          "lower_better": False, "fmt": ".1f"},
@@ -179,7 +179,7 @@ def fetch_savant_expected(year, player_type="batter"):
 def fetch_savant_statcast(year, player_type="batter"):
     """Fetch standard statcast metrics (EV, barrel%, sweet spot, K%, BB%, etc.)"""
     if player_type == "batter":
-        selections = "xwobacon,exit_velocity_avg,avg_best_speed,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,iz_contact_percent,oz_swing_percent"
+        selections = "xwobacon,exit_velocity_avg,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,iz_contact_percent,oz_swing_percent"
     else:
         selections = "exit_velocity_avg,barrel_batted_rate,whiff_percent,k_percent,bb_percent,p_oSwing_percent,release_extension"
     from datetime import date
@@ -220,6 +220,50 @@ def fetch_savant_bat_tracking(year):
     if df is not None:
         print(f"    ✓ {len(df)} rows")
     return df
+
+
+def fetch_savant_ev90(year):
+    """Pull every regular-season batted-ball event for the year via Savant's
+    statcast_search CSV, then compute each batter's 90th-percentile launch
+    speed (top 10% of balls put in play). Returns a DataFrame with columns
+    player_id, ev_90p. The CSV can be large (10-100MB depending on how deep
+    into the season we are) but it's a single round trip."""
+    url = (
+        "https://baseballsavant.mlb.com/statcast_search/csv?all=true"
+        f"&hfSea={year}%7C"
+        "&hfGT=R%7C"
+        "&player_type=batter"
+        "&type=details"
+        "&hfBBT=fly%5C.%5C.ball%7Cline%5C.%5C.drive%7Cground%5C.%5C.ball%7Cpopup%7C"
+    )
+    print(f"  Fetching Savant batted-ball events for EV90 ({year})...")
+    text = fetch_url(url)
+    if not text or len(text) < 100:
+        print("    ⚠ EV90 fetch returned no data")
+        return None
+    df = csv_to_df(text)
+    if df is None or df.empty:
+        print("    ⚠ EV90 CSV parsed to empty")
+        return None
+
+    # Required columns
+    bid_col = "batter" if "batter" in df.columns else ("batter_id" if "batter_id" in df.columns else None)
+    ev_col  = "launch_speed" if "launch_speed" in df.columns else None
+    if bid_col is None or ev_col is None:
+        print(f"    ⚠ EV90 missing required columns. Have: {list(df.columns)[:30]}…")
+        return None
+
+    df[bid_col] = pd.to_numeric(df[bid_col], errors="coerce").astype("Int64")
+    df[ev_col]  = pd.to_numeric(df[ev_col],  errors="coerce")
+    df = df.dropna(subset=[bid_col, ev_col])
+
+    ev90 = (df.groupby(bid_col)[ev_col]
+              .quantile(0.9)
+              .reset_index()
+              .rename(columns={bid_col: "player_id", ev_col: "ev_90p"}))
+    print(f"    ✓ EV90 computed for {len(ev90)} batters "
+          f"from {len(df):,} batted-ball events")
+    return ev90
 
 
 def fetch_savant_pitch_movement(year, pitch_type="FF"):
@@ -676,6 +720,8 @@ def process_hitters(year):
     df_statcast = fetch_savant_statcast(year, "batter")
     time.sleep(FETCH_DELAY)
     df_batting = fetch_savant_bat_tracking(year)
+    time.sleep(FETCH_DELAY)
+    df_ev90 = fetch_savant_ev90(year)
 
     # --- Load supplemental bat tracking CSV (more complete than API) ---
     df_bat_csv = None
@@ -748,6 +794,10 @@ def process_hitters(year):
         print(f"  Bat tracking columns present: {[c for c in bt_check if c in df_batting.columns]}")
         print(f"  Bat tracking all columns: {list(df_batting.columns)}")
         dfs_to_merge.append(("bat_tracking", df_batting))
+
+    if df_ev90 is not None and not df_ev90.empty:
+        df_ev90["player_id"] = pd.to_numeric(df_ev90["player_id"], errors="coerce").astype("Int64")
+        dfs_to_merge.append(("ev90", df_ev90))
 
     # --- Merge on player_id (preferred) or player_name ---
     merged = None
