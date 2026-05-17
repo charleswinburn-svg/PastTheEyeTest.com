@@ -22,7 +22,7 @@ function aggregateSavantToGames(rows) {
         xslg_num: 0, xslg_den: 0,
         xwoba_con_num: 0, xwoba_con_den: 0,
         bbe: 0, barrels: 0, hard_hits: 0,
-        sum_ev: 0, sum_la: 0,
+        sum_ev: 0, sum_la: 0, ev_arr: [],
         // Pitch-level
         pitches: 0, swings: 0, whiffs: 0,
         oz_pitches: 0, oz_swings: 0,
@@ -79,6 +79,17 @@ function aggregateSavantToGames(rows) {
     if ((r.pitch_type || "").toUpperCase() === "FF") {
       const v = num(r.release_speed);
       if (v != null) { g.sum_ff_velo += v; g.ff_n += 1; }
+    }
+
+    // Collect per-pitch EVs so 90th-percentile EV can be computed
+    // exactly across the rolling window (sum-based aggregation can't
+    // do percentiles).
+    if (desc === "hit_into_play") {
+      const ev = num(r.launch_speed);
+      if (ev != null) {
+        if (!g.ev_arr) g.ev_arr = [];
+        g.ev_arr.push(ev);
+      }
     }
 
     // Batted-ball metrics (terminal BIP) — counted on the BIP itself,
@@ -159,6 +170,7 @@ const STATCAST_COMPUTE = {
   "Barrel%":  { compute: w => safe(w.barrels, w.bbe) * 100, suffix: "%" },
   "Hard Hit%":{ compute: w => safe(w.hard_hits, w.bbe) * 100, suffix: "%" },
   "Avg Exit Velo":  { compute: w => safe(w.sum_ev, w.bbe), suffix: " mph", digits: 1 },
+  "90th % EV":      { compute: w => percentile(w.ev_arr || [], 0.9), suffix: " mph", digits: 1 },
   "Avg Launch Angle": { compute: w => safe(w.sum_la, w.bbe), suffix: "°", digits: 1 },
   "Whiff%":   { compute: w => safe(w.whiffs, w.swings) * 100, suffix: "%" },
   "Z-Contact%": { compute: w => (1 - safe(w.iz_whiffs, w.iz_swings)) * 100, suffix: "%" },
@@ -196,7 +208,7 @@ const PITCHER_COMPUTE = {
 const STATCAST_KEYS = [
   "xwoba_num", "xwoba_den", "xba_num", "xba_den", "xslg_num", "xslg_den",
   "xwoba_con_num", "xwoba_con_den",
-  "bbe", "barrels", "hard_hits", "sum_ev", "sum_la",
+  "bbe", "barrels", "hard_hits", "sum_ev", "sum_la", "ev_arr",
   "pitches", "swings", "whiffs", "oz_pitches", "oz_swings",
   "iz_swings", "iz_whiffs",
   "bs_n", "sum_bs", "fast_swings", "sl_n", "sum_sl", "aa_n", "sum_aa",
@@ -259,12 +271,40 @@ function gameRowPitcher(g) {
   };
 }
 
+// Add / remove a row's contribution to/from the rolling-window accumulator.
+// Array-valued keys (e.g. ev_arr — per-pitch EV samples) are concatenated /
+// sliced off the front so the window keeps an exact list of samples for
+// percentile-style metrics.
 function addRow(acc, r, keys) {
-  for (const k of keys) acc[k] = (acc[k] || 0) + (r[k] || 0);
+  for (const k of keys) {
+    const v = r[k];
+    if (Array.isArray(v)) {
+      acc[k] = (acc[k] || []).concat(v);
+    } else {
+      acc[k] = (acc[k] || 0) + (v || 0);
+    }
+  }
 }
 
 function subRow(acc, r, keys) {
-  for (const k of keys) acc[k] = (acc[k] || 0) - (r[k] || 0);
+  for (const k of keys) {
+    const v = r[k];
+    if (Array.isArray(v)) {
+      const removeN = v.length;
+      if (removeN) acc[k] = (acc[k] || []).slice(removeN);
+    } else {
+      acc[k] = (acc[k] || 0) - (v || 0);
+    }
+  }
+}
+
+function percentile(arr, p) {
+  if (!arr || !arr.length) return 0;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const idx = (sorted.length - 1) * p;
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
 }
 
 const HITTER_KEYS  = ["PA", "AB", "H", "BB", "HBP", "SF", "TB", "K", ...STATCAST_KEYS];
