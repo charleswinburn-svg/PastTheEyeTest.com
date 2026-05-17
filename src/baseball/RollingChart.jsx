@@ -63,8 +63,10 @@ function aggregateSavantToGames(rows) {
       if (inZone) g.iz_whiffs += 1;
     }
 
-    // Bat tracking
-    if (isSwing) {
+    // Bat tracking — competitive swings only (excludes bunts and any
+    // checked / non-competitive swing as recorded by Savant).
+    const isCompetitiveSwing = isSwing && desc !== "foul_bunt" && desc !== "missed_bunt";
+    if (isCompetitiveSwing) {
       const bs = num(r.bat_speed);
       if (bs != null) { g.sum_bs += bs; g.bs_n += 1; if (bs >= 75) g.fast_swings += 1; }
       const sl = num(r.swing_length);
@@ -411,32 +413,41 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
   const unitLbl = type === "pitcher" ? "IP" : "PA";
   return (
     <div>
+    {/* Metric selector lives OUTSIDE cardRef so the saved PNG only contains
+        the title + chart and renders cleanly centered. */}
+    <div style={{
+      maxWidth: 600, margin: "16px auto 4px",
+      padding: "0 16px",
+      display: "flex", alignItems: "center", gap: 8,
+    }}>
+      <span style={{ fontSize: 10, color: t.textFaint }}>Stat:</span>
+      <select
+        value={metric}
+        onChange={e => setMetric(e.target.value)}
+        style={{
+          padding: "3px 8px", background: t.inputBg, border: `1px solid ${t.inputBorder}`,
+          borderRadius: 4, color: t.textSecondary, fontSize: 11, outline: "none",
+          fontFamily: "inherit",
+        }}
+      >
+        {options.map(o => (
+          <option key={o.id} value={o.id}>{o.label}{o.supported ? "" : " (Statcast only)"}</option>
+        ))}
+      </select>
+      <span style={{ fontSize: 10, color: t.textFaintest, marginLeft: "auto" }}>
+        Trailing {target} {unitLbl}
+      </span>
+    </div>
+
     <div ref={cardRef} style={{
       background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
-      maxWidth: 600, margin: "16px auto 0", padding: "12px 0 8px",
+      maxWidth: 600, margin: "0 auto", padding: "14px 0 10px",
     }}>
-      {/* Metric selector */}
-      <div style={{ padding: "4px 16px 8px", display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 10, color: t.textFaint }}>Stat:</span>
-        <select
-          value={metric}
-          onChange={e => setMetric(e.target.value)}
-          style={{
-            padding: "3px 8px", background: t.inputBg, border: `1px solid ${t.inputBorder}`,
-            borderRadius: 4, color: t.textSecondary, fontSize: 11, outline: "none",
-            fontFamily: "inherit",
-          }}
-        >
-          {options.map(o => (
-            <option key={o.id} value={o.id}>{o.label}{o.supported ? "" : " (Statcast only)"}</option>
-          ))}
-        </select>
-        <span style={{ fontSize: 10, color: t.textFaintest, marginLeft: "auto" }}>
-          Trailing {target} {unitLbl}
-        </span>
-      </div>
-
-      <div style={{ fontSize: 11, fontWeight: 600, color: t.textMuted, textAlign: "center", marginBottom: 4 }}>
+      <div style={{
+        fontSize: 12, fontWeight: 700, color: t.text,
+        textAlign: "center", width: "100%", marginBottom: 6,
+        padding: "0 16px", boxSizing: "border-box",
+      }}>
         {playerName ? `${playerName} — ` : ""}{currentLabel} — Rolling {target} {unitLbl}
       </div>
 
