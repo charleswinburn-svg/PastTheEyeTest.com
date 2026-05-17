@@ -70,7 +70,6 @@ HITTER_METRICS = [
     {"key": "xwobacon",          "label": "xwOBACON",            "lower_better": False, "fmt": ".3f"},
     {"key": "exit_velocity_avg", "label": "Avg Exit Velocity",   "lower_better": False, "fmt": ".1f"},
     {"key": "ev_90p",            "label": "90th % EV",           "lower_better": False, "fmt": ".1f"},
-    {"key": "avg_best_speed",    "label": "Above Avg EV",        "lower_better": False, "fmt": ".1f"},
     {"key": "barrel_batted_rate","label": "Barrel %",            "lower_better": False, "fmt": ".1f"},
     {"key": "blasts_contact",    "label": "Blasts/Contact",      "lower_better": False, "fmt": ".1f", "pct_stored_decimal": True},
     {"key": "sweet_spot_percent","label": "LA+SwtSpt%",          "lower_better": False, "fmt": ".1f"},
@@ -180,7 +179,7 @@ def fetch_savant_expected(year, player_type="batter"):
 def fetch_savant_statcast(year, player_type="batter"):
     """Fetch standard statcast metrics (EV, barrel%, sweet spot, K%, BB%, etc.)"""
     if player_type == "batter":
-        selections = "xwobacon,exit_velocity_avg,ev_90p,avg_best_speed,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,iz_contact_percent,oz_swing_percent"
+        selections = "xwobacon,exit_velocity_avg,ev_90p,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,iz_contact_percent,oz_swing_percent"
     else:
         selections = "exit_velocity_avg,barrel_batted_rate,whiff_percent,k_percent,bb_percent,p_oSwing_percent,release_extension"
     from datetime import date
