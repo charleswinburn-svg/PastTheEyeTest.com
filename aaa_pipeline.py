@@ -267,49 +267,77 @@ def _fg_milb_html_to_rows(html, expected_col):
         print("    ⚠ BeautifulSoup not available")
         return None
     soup = BeautifulSoup(html, "html.parser")
-    table = soup.find("table")
+    # FG legacy page wraps the leaderboard in a <table class="rgMasterTable">.
+    # Find the largest table on the page if specific id isn't present.
+    table = soup.find("table", {"class": "rgMasterTable"}) or soup.find("table")
     if not table:
         print("    ⚠ no <table> found in HTML")
         return None
-    headers = [th.get_text(strip=True) for th in table.find_all("th")]
+    # Header row: prefer the first <tr> with <th> cells
+    header_tr = None
+    for tr in table.find_all("tr"):
+        if tr.find_all("th"):
+            header_tr = tr
+            break
+    if not header_tr:
+        print("    ⚠ no header <tr> with <th> cells")
+        return None
+    headers = [th.get_text(strip=True) for th in header_tr.find_all("th")]
     out = []
     for tr in table.find_all("tr"):
         cells = tr.find_all("td")
-        if not cells or len(cells) != len(headers):
+        if not cells:
             continue
         row = {}
-        for h, td in zip(headers, cells):
+        for i, td in enumerate(cells):
+            h = headers[i] if i < len(headers) else f"col_{i}"
             row[h] = td.get_text(strip=True)
-            # capture player_id from anchor href if present
             a = td.find("a", href=True)
-            if a and "playerid=" in a["href"]:
+            if a:
                 pid_match = _re.search(r"playerid=(\d+)", a["href"])
                 if pid_match:
                     row["_fg_playerid"] = pid_match.group(1)
-            if a and "mlbamid=" in a["href"]:
                 mlb_match = _re.search(r"mlbamid=(\d+)", a["href"])
                 if mlb_match:
                     row["xMLBAMID"] = mlb_match.group(1)
-        out.append(row)
+        # Only keep rows that look like real player rows (have a Name column)
+        if any(row.get(k) for k in ("Name", "Player", "PlayerName")):
+            out.append(row)
     print(f"    ✓ parsed {len(out)} rows from HTML <table>")
     return out
 
 
-def _fg_milb_scrape(session, year, stats, type_, lg="11,14"):
-    """Hit the FG MiLB HTML page directly; cookies in the session grant access."""
-    url = ("https://www.fangraphs.com/leaders/minor-league"
-           f"?type={type_}&lg={lg}&stats={stats}&season={year}"
-           f"&qual=0&pageitems=4000")
-    print(f"    GET {url}")
-    try:
-        r = session.get(url, timeout=45)
-    except Exception as e:
-        print(f"    ⚠ HTTP error: {e}")
-        return None
-    if r.status_code != 200:
-        print(f"    ⚠ HTTP {r.status_code}")
-        return None
-    return r.text
+def _fg_milb_scrape(session, year, stats, type_, lg="14,11"):
+    """Hit the FG MiLB leaderboard. Modern /leaders/minor-league is JS-
+    rendered (no <table> in initial HTML), so prefer the legacy aspx page
+    that ships a server-rendered table. Falls back to the modern URL."""
+    candidates = [
+        # Legacy server-rendered table — what we actually want to scrape
+        ("https://www.fangraphs.com/leaders-legacy.aspx"
+         f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}&season={year}"
+         f"&month=0&season1={year}&ind=0&team=0,ts&rost=0&age=0&filter=&players=0&page=1_4000"),
+        # Modern Next.js page (mostly empty before hydration; kept for completeness)
+        ("https://www.fangraphs.com/leaders/minor-league"
+         f"?type={type_}&lg={lg}&stats={stats}&season={year}"
+         f"&qual=0&pageitems=4000"),
+    ]
+    for url in candidates:
+        print(f"    GET {url}")
+        try:
+            r = session.get(url, timeout=45)
+        except Exception as e:
+            print(f"    ⚠ HTTP error: {e}")
+            continue
+        if r.status_code != 200:
+            print(f"    ⚠ HTTP {r.status_code}")
+            continue
+        # Heuristic: legacy page returns 100KB+ with <table> markup; if the
+        # response is small (<10KB), it's the empty Next.js shell.
+        if "<table" not in r.text.lower():
+            print(f"    ⚠ no <table> in response ({len(r.text)} chars)")
+            continue
+        return r.text
+    return None
 
 
 def fetch_fg_milb_batting_ld(year):
