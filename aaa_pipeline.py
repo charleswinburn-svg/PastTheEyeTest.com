@@ -220,95 +220,147 @@ def _fg_milb_session():
 
 
 def _fg_milb_try(session, paths_and_lgs, stats, type_, year, label):
-    """Try a chain of (api_path, lg) pairs until one returns rows; returns
-    the parsed DataFrame plus the path that worked, or (None, None)."""
-    for path, lg in paths_and_lgs:
-        url = (f"https://www.fangraphs.com/{path}"
-               f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}"
-               f"&season={year}&season1={year}&ind=0&pageitems=4000&page=1")
-        try:
-            r = session.get(url, timeout=30)
-        except Exception as e:
-            print(f"    {label} {path}?lg={lg}: request failed: {e}")
-            continue
-        if r.status_code != 200:
-            print(f"    {label} {path}?lg={lg}: HTTP {r.status_code}")
-            continue
-        try:
-            rows = r.json().get("data", [])
-        except Exception:
-            print(f"    {label} {path}?lg={lg}: JSON parse failed")
-            continue
-        if not rows:
-            print(f"    {label} {path}?lg={lg}: 0 rows")
-            continue
-        return pd.DataFrame(rows), (path, lg)
+    """Deprecated chain-based JSON fetcher — kept for ref, but FG MiLB
+    renders server-side, so we scrape HTML in fetch_fg_milb_* below."""
     return None, None
 
 
-# Known FG MiLB API path variants (the public one moves around). The lg
-# values are the codes for International League + Pacific Coast League
-# (the two AAA leagues) in their various encodings.
-FG_MILB_PATHS_LGS = [
-    ("api/leaders/minor-league/data",     "11,14"),
-    ("api/leaders/minor-league/leaders/data", "11,14"),
-    ("api/leaders/leaders/data",          "11,14"),
-    ("api/leaders/minor-league/data",     "2,4"),
-    ("api/leaders/minor-league/data",     "aaa"),
-    ("api/leaders/minor-league/data",     "milb_aaa"),
-    ("api/leaders/minor-league/leaders/data", "2,4"),
-    ("api/the-board/the-data",            "11,14"),
-]
+def _fg_milb_html_to_rows(html, expected_col):
+    """Best-effort parse of an FG MiLB leaderboard HTML page. Returns a
+    list of dicts. Two strategies:
+      1. Next.js __NEXT_DATA__ script tag (modern FG pages embed the full
+         row payload as JSON there).
+      2. Fall back to <table> scraping with BeautifulSoup.
+    """
+    if not html:
+        return None
+    # Strategy 1: Next.js JSON blob
+    import re as _re
+    m = _re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, _re.S)
+    if m:
+        try:
+            blob = _json.loads(m.group(1))
+            # Walk to find any list whose first element has the expected column
+            def _walk(obj):
+                if isinstance(obj, list) and obj and isinstance(obj[0], dict):
+                    if expected_col in obj[0] or any(expected_col in k for k in obj[0].keys()):
+                        return obj
+                    for item in obj:
+                        r = _walk(item)
+                        if r: return r
+                elif isinstance(obj, dict):
+                    for v in obj.values():
+                        r = _walk(v)
+                        if r: return r
+                return None
+            rows = _walk(blob)
+            if rows:
+                print(f"    ✓ parsed {len(rows)} rows from __NEXT_DATA__")
+                return rows
+        except Exception as e:
+            print(f"    __NEXT_DATA__ parse failed: {e}")
+
+    # Strategy 2: HTML table
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        print("    ⚠ BeautifulSoup not available")
+        return None
+    soup = BeautifulSoup(html, "html.parser")
+    table = soup.find("table")
+    if not table:
+        print("    ⚠ no <table> found in HTML")
+        return None
+    headers = [th.get_text(strip=True) for th in table.find_all("th")]
+    out = []
+    for tr in table.find_all("tr"):
+        cells = tr.find_all("td")
+        if not cells or len(cells) != len(headers):
+            continue
+        row = {}
+        for h, td in zip(headers, cells):
+            row[h] = td.get_text(strip=True)
+            # capture player_id from anchor href if present
+            a = td.find("a", href=True)
+            if a and "playerid=" in a["href"]:
+                pid_match = _re.search(r"playerid=(\d+)", a["href"])
+                if pid_match:
+                    row["_fg_playerid"] = pid_match.group(1)
+            if a and "mlbamid=" in a["href"]:
+                mlb_match = _re.search(r"mlbamid=(\d+)", a["href"])
+                if mlb_match:
+                    row["xMLBAMID"] = mlb_match.group(1)
+        out.append(row)
+    print(f"    ✓ parsed {len(out)} rows from HTML <table>")
+    return out
+
+
+def _fg_milb_scrape(session, year, stats, type_, lg="11,14"):
+    """Hit the FG MiLB HTML page directly; cookies in the session grant access."""
+    url = ("https://www.fangraphs.com/leaders/minor-league"
+           f"?type={type_}&lg={lg}&stats={stats}&season={year}"
+           f"&qual=0&pageitems=4000")
+    print(f"    GET {url}")
+    try:
+        r = session.get(url, timeout=45)
+    except Exception as e:
+        print(f"    ⚠ HTTP error: {e}")
+        return None
+    if r.status_code != 200:
+        print(f"    ⚠ HTTP {r.status_code}")
+        return None
+    return r.text
 
 
 def fetch_fg_milb_batting_ld(year):
-    """FG MiLB batting → LD%. Tries the path/lg chain until one returns rows."""
+    """FG MiLB advanced batting → LD%. Scrapes the server-rendered page."""
     s = _fg_milb_session()
     if s is None:
         return None
     print(f"  Fetching FanGraphs MiLB batting LD% ({year})...")
-    df, hit = _fg_milb_try(s, FG_MILB_PATHS_LGS, "bat", 2, year, "LD%")
-    if df is None:
-        print("    ⚠ FG MiLB LD% not found across path/lg variants — "
-              "paste the real /api URL from FG MiLB page DevTools.")
+    html = _fg_milb_scrape(s, year, stats="bat", type_=2)
+    rows = _fg_milb_html_to_rows(html, expected_col="LD%") if html else None
+    if not rows:
+        print("    ⚠ FG MiLB LD% page returned no parseable rows")
         return None
-    print(f"    ✓ {hit[0]}?lg={hit[1]}: {len(df)} rows")
-    if not any(c in df.columns for c in ("LD%", "LDpct", "ld_pct", "LD")):
-        print(f"    ⚠ no LD column; cols sample: {list(df.columns)[:30]}")
-        return None
+    df = pd.DataFrame(rows)
     if "xMLBAMID" in df.columns:
         df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
-    elif "MLBAMID" in df.columns:
-        df["player_id"] = pd.to_numeric(df["MLBAMID"], errors="coerce").astype("Int64")
-    ld_col = next((c for c in ("LD%", "LDpct", "ld_pct", "LD") if c in df.columns), None)
-    df["ld_pct"] = pd.to_numeric(df[ld_col].astype(str).str.rstrip("%"),
-                                  errors="coerce")
-    out = df[["player_id", "ld_pct"]].dropna(subset=["player_id"])
+    ld_col = next((c for c in ("LD%", "LD", "LDpct") if c in df.columns), None)
+    if ld_col is None:
+        print(f"    ⚠ no LD% in cols: {list(df.columns)[:25]}")
+        return None
+    df["ld_pct"] = pd.to_numeric(df[ld_col].astype(str).str.rstrip("%"), errors="coerce")
+    out = df.dropna(subset=["player_id"])[["player_id", "ld_pct"]] if "player_id" in df.columns else None
+    if out is None or out.empty:
+        print("    ⚠ no rows with player_id")
+        return None
     print(f"    ✓ LD% for {len(out)} AAA hitters")
     return out
 
 
 def fetch_fg_milb_pitching_fip(year):
-    """FG MiLB pitching → FIP. Tries the path/lg chain until one returns rows."""
+    """FG MiLB pitching → FIP. Scrapes the server-rendered page."""
     s = _fg_milb_session()
     if s is None:
         return None
     print(f"  Fetching FanGraphs MiLB pitching FIP ({year})...")
-    df, hit = _fg_milb_try(s, FG_MILB_PATHS_LGS, "pit", 1, year, "FIP")
-    if df is None:
-        print("    ⚠ FG MiLB FIP not found across path/lg variants — "
-              "paste the real /api URL from FG MiLB page DevTools.")
+    html = _fg_milb_scrape(s, year, stats="pit", type_=1)
+    rows = _fg_milb_html_to_rows(html, expected_col="FIP") if html else None
+    if not rows:
+        print("    ⚠ FG MiLB FIP page returned no parseable rows")
         return None
-    print(f"    ✓ {hit[0]}?lg={hit[1]}: {len(df)} rows")
-    if "FIP" not in df.columns:
-        print(f"    ⚠ no FIP column; cols sample: {list(df.columns)[:30]}")
-        return None
+    df = pd.DataFrame(rows)
     if "xMLBAMID" in df.columns:
         df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
-    elif "MLBAMID" in df.columns:
-        df["player_id"] = pd.to_numeric(df["MLBAMID"], errors="coerce").astype("Int64")
+    if "FIP" not in df.columns:
+        print(f"    ⚠ no FIP in cols: {list(df.columns)[:25]}")
+        return None
     df["fip"] = pd.to_numeric(df["FIP"], errors="coerce")
-    out = df[["player_id", "fip"]].dropna(subset=["player_id"])
+    out = df.dropna(subset=["player_id"])[["player_id", "fip"]] if "player_id" in df.columns else None
+    if out is None or out.empty:
+        print("    ⚠ no rows with player_id")
+        return None
     print(f"    ✓ FIP for {len(out)} AAA pitchers")
     return out
 
