@@ -454,19 +454,24 @@ def _norm_name(s):
 
 def _build_name_to_mlbamid(prospect_savant_df):
     """Build name → MLBAMId map from a Prospect Savant DataFrame.
-    Tries multiple name columns and IDs; logs a few samples for debugging."""
+    Prefers `name` / `player_name` (the player) over `MLB_*` columns
+    (those are the player's *team*, not the player)."""
     if prospect_savant_df is None or prospect_savant_df.empty:
         return {}
     out = {}
     samples_logged = 0
     for _, r in prospect_savant_df.iterrows():
-        # Prefer MLB_FullName (clean "First Last") over player_name (which may be
-        # "Last, First") over name (sometimes "Last, First (Age)")
-        raw_name = (r.get("MLB_FullName") or r.get("player_name") or
-                    r.get("name") or r.get("MLB_ShortName") or "")
+        raw_name = (r.get("name") or r.get("player_name") or
+                    r.get("name_age") or "")
         if not raw_name:
             continue
-        mlbamid = r.get("MLBAMId") or r.get("MLBAMID") or r.get("mlbam_id") or r.get("player_id")
+        # name_age is "Last, First (Age)" — strip parenthetical
+        if "(" in str(raw_name):
+            raw_name = str(raw_name).split("(")[0].strip()
+        mlbamid = r.get("MLBAMId") or r.get("MLBAMID") or r.get("mlbam_id")
+        # Fall back to player_id only if it's clearly an MLBAMID (6-digit int)
+        if (mlbamid is None or pd.isna(mlbamid)) and r.get("player_id"):
+            mlbamid = r.get("player_id")
         if mlbamid is None or pd.isna(mlbamid):
             continue
         try:
