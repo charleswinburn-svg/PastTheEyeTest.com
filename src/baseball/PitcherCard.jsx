@@ -39,7 +39,7 @@ function percentileRank(value, sorted) {
   return Math.round(rank * 1000) / 10; // one decimal
 }
 
-export default function PitcherCard({ player, season, allPitchers }) {
+export default function PitcherCard({ player, season, allPitchers, isAAA = false }) {
   const { theme: t } = useTheme();
   const [pitchPlusData, setPitchPlusData] = useState(null);
   const cardRef = useRef(null);
@@ -68,7 +68,10 @@ export default function PitcherCard({ player, season, allPitchers }) {
         // spring training and exhibition pitches into the modeling values.
         // Modeling vals should only reflect regular-season pitches.
         console.log("[Pitch+] fetching regular-season game log...");
-        const gameLogUrl = `/mlb-api/api/v1/people/${player.player_id}/stats?stats=gameLog&group=pitching&season=${season}&gameType=R&sportId=1`;
+        // sportId=1 for MLB, 11 for AAA — lets the same scoring path run
+        // against minor-league games for the AAA card.
+        const sportId = isAAA ? 11 : 1;
+        const gameLogUrl = `/mlb-api/api/v1/people/${player.player_id}/stats?stats=gameLog&group=pitching&season=${season}&gameType=R&sportId=${sportId}`;
         const gameLogResp = await fetch(gameLogUrl);
         if (!gameLogResp.ok) {
           console.warn("[Pitch+] gameLog fetch failed:", gameLogResp.status);

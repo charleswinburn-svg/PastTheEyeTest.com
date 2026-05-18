@@ -219,95 +219,98 @@ def _fg_milb_session():
         return None
 
 
+def _fg_milb_try(session, paths_and_lgs, stats, type_, year, label):
+    """Try a chain of (api_path, lg) pairs until one returns rows; returns
+    the parsed DataFrame plus the path that worked, or (None, None)."""
+    for path, lg in paths_and_lgs:
+        url = (f"https://www.fangraphs.com/{path}"
+               f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}"
+               f"&season={year}&season1={year}&ind=0&pageitems=4000&page=1")
+        try:
+            r = session.get(url, timeout=30)
+        except Exception as e:
+            print(f"    {label} {path}?lg={lg}: request failed: {e}")
+            continue
+        if r.status_code != 200:
+            print(f"    {label} {path}?lg={lg}: HTTP {r.status_code}")
+            continue
+        try:
+            rows = r.json().get("data", [])
+        except Exception:
+            print(f"    {label} {path}?lg={lg}: JSON parse failed")
+            continue
+        if not rows:
+            print(f"    {label} {path}?lg={lg}: 0 rows")
+            continue
+        return pd.DataFrame(rows), (path, lg)
+    return None, None
+
+
+# Known FG MiLB API path variants (the public one moves around). The lg
+# values are the codes for International League + Pacific Coast League
+# (the two AAA leagues) in their various encodings.
+FG_MILB_PATHS_LGS = [
+    ("api/leaders/minor-league/data",     "11,14"),
+    ("api/leaders/minor-league/leaders/data", "11,14"),
+    ("api/leaders/leaders/data",          "11,14"),
+    ("api/leaders/minor-league/data",     "2,4"),
+    ("api/leaders/minor-league/data",     "aaa"),
+    ("api/leaders/minor-league/data",     "milb_aaa"),
+    ("api/leaders/minor-league/leaders/data", "2,4"),
+    ("api/the-board/the-data",            "11,14"),
+]
+
+
 def fetch_fg_milb_batting_ld(year):
-    """FG MiLB batting → LD%. Returns DataFrame with player_id, ld_pct."""
+    """FG MiLB batting → LD%. Tries the path/lg chain until one returns rows."""
     s = _fg_milb_session()
     if s is None:
         return None
     print(f"  Fetching FanGraphs MiLB batting LD% ({year})...")
-    # FG MiLB API. lg=2,4 → Triple-A (International League=11 and PCL=14 in
-    # current FG IDs; we try a chain in case the codes drift).
-    for lg_value in ("2,4", "11,14", "milb_aaa", "aaa"):
-        url = ("https://www.fangraphs.com/api/leaders/minor-league/data"
-               f"?pos=all&stats=bat&lg={lg_value}&qual=0&type=2"
-               f"&season={year}&season1={year}&ind=0&pageitems=4000&page=1")
-        try:
-            r = s.get(url, timeout=30)
-        except Exception as e:
-            print(f"    lg={lg_value}: request failed: {e}")
-            continue
-        if r.status_code != 200:
-            print(f"    lg={lg_value}: HTTP {r.status_code}")
-            continue
-        try:
-            rows = r.json().get("data", [])
-        except Exception:
-            continue
-        if not rows:
-            print(f"    lg={lg_value}: 0 rows")
-            continue
-        df = pd.DataFrame(rows)
-        cols = list(df.columns)
-        print(f"    lg={lg_value}: {len(df)} rows; LD%-like cols: "
-              f"{[c for c in cols if 'LD' in c.upper() or 'line' in c.lower()][:10]}")
-        if not any(c in df.columns for c in ("LD%", "LDpct", "ld_pct", "LD")):
-            continue
-        # Normalize
-        if "xMLBAMID" in df.columns:
-            df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
-        elif "MLBAMID" in df.columns:
-            df["player_id"] = pd.to_numeric(df["MLBAMID"], errors="coerce").astype("Int64")
-        ld_col = next((c for c in ("LD%", "LDpct", "ld_pct", "LD") if c in df.columns), None)
-        df["ld_pct"] = pd.to_numeric(df[ld_col].astype(str).str.rstrip("%"),
-                                      errors="coerce")
-        keep = [c for c in ("player_id", "ld_pct") if c in df.columns]
-        out = df[keep].dropna(subset=["player_id"])
-        print(f"    ✓ LD% for {len(out)} AAA hitters")
-        return out
-    print("    ⚠ FG MiLB LD% not found across lg variants")
-    return None
+    df, hit = _fg_milb_try(s, FG_MILB_PATHS_LGS, "bat", 2, year, "LD%")
+    if df is None:
+        print("    ⚠ FG MiLB LD% not found across path/lg variants — "
+              "paste the real /api URL from FG MiLB page DevTools.")
+        return None
+    print(f"    ✓ {hit[0]}?lg={hit[1]}: {len(df)} rows")
+    if not any(c in df.columns for c in ("LD%", "LDpct", "ld_pct", "LD")):
+        print(f"    ⚠ no LD column; cols sample: {list(df.columns)[:30]}")
+        return None
+    if "xMLBAMID" in df.columns:
+        df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
+    elif "MLBAMID" in df.columns:
+        df["player_id"] = pd.to_numeric(df["MLBAMID"], errors="coerce").astype("Int64")
+    ld_col = next((c for c in ("LD%", "LDpct", "ld_pct", "LD") if c in df.columns), None)
+    df["ld_pct"] = pd.to_numeric(df[ld_col].astype(str).str.rstrip("%"),
+                                  errors="coerce")
+    out = df[["player_id", "ld_pct"]].dropna(subset=["player_id"])
+    print(f"    ✓ LD% for {len(out)} AAA hitters")
+    return out
 
 
 def fetch_fg_milb_pitching_fip(year):
-    """FG MiLB pitching → FIP. Returns DataFrame with player_id, fip."""
+    """FG MiLB pitching → FIP. Tries the path/lg chain until one returns rows."""
     s = _fg_milb_session()
     if s is None:
         return None
     print(f"  Fetching FanGraphs MiLB pitching FIP ({year})...")
-    for lg_value in ("2,4", "11,14", "milb_aaa", "aaa"):
-        url = ("https://www.fangraphs.com/api/leaders/minor-league/data"
-               f"?pos=all&stats=pit&lg={lg_value}&qual=0&type=1"
-               f"&season={year}&season1={year}&ind=0&pageitems=4000&page=1")
-        try:
-            r = s.get(url, timeout=30)
-        except Exception as e:
-            print(f"    lg={lg_value}: request failed: {e}")
-            continue
-        if r.status_code != 200:
-            print(f"    lg={lg_value}: HTTP {r.status_code}")
-            continue
-        try:
-            rows = r.json().get("data", [])
-        except Exception:
-            continue
-        if not rows:
-            print(f"    lg={lg_value}: 0 rows")
-            continue
-        df = pd.DataFrame(rows)
-        if "FIP" not in df.columns:
-            print(f"    lg={lg_value}: no FIP column in {len(df)} rows")
-            continue
-        if "xMLBAMID" in df.columns:
-            df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
-        elif "MLBAMID" in df.columns:
-            df["player_id"] = pd.to_numeric(df["MLBAMID"], errors="coerce").astype("Int64")
-        df["fip"] = pd.to_numeric(df["FIP"], errors="coerce")
-        keep = [c for c in ("player_id", "fip") if c in df.columns]
-        out = df[keep].dropna(subset=["player_id"])
-        print(f"    ✓ FIP for {len(out)} AAA pitchers")
-        return out
-    print("    ⚠ FG MiLB FIP not found across lg variants")
-    return None
+    df, hit = _fg_milb_try(s, FG_MILB_PATHS_LGS, "pit", 1, year, "FIP")
+    if df is None:
+        print("    ⚠ FG MiLB FIP not found across path/lg variants — "
+              "paste the real /api URL from FG MiLB page DevTools.")
+        return None
+    print(f"    ✓ {hit[0]}?lg={hit[1]}: {len(df)} rows")
+    if "FIP" not in df.columns:
+        print(f"    ⚠ no FIP column; cols sample: {list(df.columns)[:30]}")
+        return None
+    if "xMLBAMID" in df.columns:
+        df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
+    elif "MLBAMID" in df.columns:
+        df["player_id"] = pd.to_numeric(df["MLBAMID"], errors="coerce").astype("Int64")
+    df["fip"] = pd.to_numeric(df["FIP"], errors="coerce")
+    out = df[["player_id", "fip"]].dropna(subset=["player_id"])
+    print(f"    ✓ FIP for {len(out)} AAA pitchers")
+    return out
 
 
 # ────────────────────────────────────────────────────────────────────────────

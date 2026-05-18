@@ -480,6 +480,7 @@ function BaseballApp() {
               player={curAaaPitcher}
               season={season}
               allPitchers={aaaPitchersFull}
+              isAAA
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
