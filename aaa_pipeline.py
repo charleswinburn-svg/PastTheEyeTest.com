@@ -371,38 +371,87 @@ def _fg_milb_json(session, year, stats, type_, lg="14,11"):
 
 
 def _fg_milb_html(session, year, stats, type_, lg="14,11"):
-    """HTML fallback — scrape the legacy aspx page (server-rendered table)."""
-    candidates = [
-        ("https://www.fangraphs.com/leaders-legacy.aspx"
-         f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}&season={year}"
-         f"&month=0&season1={year}&ind=0&team=0&rost=0&age=0&filter=&players=0"),
-        ("https://www.fangraphs.com/leaders.aspx"
-         f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}&season={year}"
-         f"&month=0&season1={year}&ind=0&team=0&rost=0&age=0&filter=&players=0"),
-    ]
-    for url in candidates:
-        print(f"    HTML GET {url}")
+    """HTML fallback — scrape the legacy aspx page (server-rendered table).
+    Paginate until empty so all qualifying players are returned (the page
+    default is 30 rows)."""
+    all_rows = []
+    seen_keys = set()
+    page = 1
+    while page < 50:  # hard cap
+        base = ("https://www.fangraphs.com/leaders-legacy.aspx"
+                f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}&season={year}"
+                f"&month=0&season1={year}&ind=0&team=0&rost=0&age=0&filter=&players=0"
+                f"&page={page}_50")
+        print(f"    HTML GET {base}")
         try:
-            r = session.get(url, timeout=45)
+            r = session.get(base, timeout=45)
         except Exception as e:
             print(f"    HTML ⚠ {e}")
-            continue
+            break
         if r.status_code != 200:
             print(f"    HTML ⚠ HTTP {r.status_code}")
-            continue
+            break
         body = r.text
         if "<table" not in body.lower():
-            # Dump a snippet so we can see what FG actually sent back
             print(f"    HTML ⚠ no <table> ({len(body)} chars). First 300: {body[:300]!r}")
-            continue
+            break
         rows = _fg_milb_html_to_rows(body, expected_col=None)
         if not rows:
-            print("    HTML ⚠ <table> present but parser found 0 rows")
+            print(f"    HTML page {page}: 0 rows — end of pagination")
+            break
+        # De-dup by (Name, _fg_playerid) — FG repeats the last page if the
+        # requested page is past the end.
+        new = []
+        for r_ in rows:
+            key = (r_.get("Name"), r_.get("_fg_playerid"))
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            new.append(r_)
+        if not new:
+            print(f"    HTML page {page}: all duplicates — end of pagination")
+            break
+        all_rows.extend(new)
+        print(f"    HTML page {page}: +{len(new)} (total {len(all_rows)})")
+        if len(new) < 30:
+            break
+        page += 1
+
+    if not all_rows:
+        return None
+    df = pd.DataFrame(all_rows)
+    print(f"    HTML ✓ {len(df)} rows total; cols: {list(df.columns)[:25]}")
+    return df
+
+
+# Name → MLBAMId map built from Prospect Savant (the only source where AAA
+# players have their MLBAMId attached). FG legacy table only has FG playerid
+# in the link, so we merge FG rows back onto Prospect Savant by name.
+_NAME_TO_MLBAMID_CACHE = {}
+
+
+def _norm_name(s):
+    if not isinstance(s, str):
+        return ""
+    import unicodedata as _u
+    s = _u.normalize("NFD", s)
+    s = "".join(c for c in s if not _u.combining(c))
+    s = s.lower().replace(".", "").replace(",", "").replace("'", "")
+    s = s.replace(" jr", "").replace(" sr", "").replace(" ii", "").replace(" iii", "").replace(" iv", "")
+    return " ".join(s.split())
+
+
+def _build_name_to_mlbamid(prospect_savant_df):
+    if prospect_savant_df is None or "player_name" not in prospect_savant_df.columns:
+        return {}
+    out = {}
+    for _, r in prospect_savant_df.iterrows():
+        name = r.get("player_name") or r.get("name") or r.get("MLB_FullName")
+        mlbamid = r.get("MLBAMId") or r.get("player_id")
+        if not name or pd.isna(mlbamid):
             continue
-        df = pd.DataFrame(rows)
-        print(f"    HTML ✓ {len(df)} rows; cols: {list(df.columns)[:25]}")
-        return df
-    return None
+        out[_norm_name(str(name))] = int(mlbamid)
+    return out
 
 
 def _fg_milb_fetch(session, year, stats, type_, lg="14,11"):
@@ -423,16 +472,35 @@ def _norm_fg_player_id(df):
     return df
 
 
-def fetch_fg_milb_batting_ld(year):
-    """FG MiLB advanced batting → LD%. Same JSON path as MLB FG fetch."""
+def _attach_player_id(df, name_to_mlbamid):
+    """Add a player_id column to df using either xMLBAMID directly or by
+    name-matching against the Prospect Savant map."""
+    if df is None or df.empty:
+        return df
+    df = df.copy()
+    if "xMLBAMID" in df.columns:
+        df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
+    if "player_id" not in df.columns or df["player_id"].isna().all():
+        if name_to_mlbamid:
+            name_col = next((c for c in ("Name", "Player", "PlayerName", "player_name") if c in df.columns), None)
+            if name_col:
+                df["player_id"] = df[name_col].map(lambda s: name_to_mlbamid.get(_norm_name(str(s)))).astype("Int64")
+                hits = df["player_id"].notna().sum()
+                print(f"    name-matched {hits}/{len(df)} rows to Prospect Savant MLBAMId")
+    return df
+
+
+def fetch_fg_milb_batting_ld(year, name_to_mlbamid=None):
+    """FG MiLB advanced batting → LD%. Name-matches FG rows back to
+    Prospect Savant MLBAMIds when FG doesn't expose them directly."""
     s = _fg_milb_session()
     if s is None:
         return None
     print(f"  Fetching FanGraphs MiLB batting LD% ({year})...")
     df = _fg_milb_fetch(s, year, stats="bat", type_=2)
-    df = _norm_fg_player_id(df)
-    if df is None or "player_id" not in df.columns:
-        print("    ⚠ no player_id mapping in response")
+    df = _attach_player_id(df, name_to_mlbamid)
+    if df is None or "player_id" not in df.columns or df["player_id"].isna().all():
+        print("    ⚠ couldn't attach player_id to any FG row")
         return None
     ld_col = next((c for c in ("LD%", "LDpct", "LD", "ld_pct") if c in df.columns), None)
     if ld_col is None:
@@ -445,16 +513,16 @@ def fetch_fg_milb_batting_ld(year):
     return out
 
 
-def fetch_fg_milb_pitching_fip(year):
-    """FG MiLB pitching → FIP. Same JSON path as MLB FG fetch."""
+def fetch_fg_milb_pitching_fip(year, name_to_mlbamid=None):
+    """FG MiLB pitching → FIP."""
     s = _fg_milb_session()
     if s is None:
         return None
     print(f"  Fetching FanGraphs MiLB pitching FIP ({year})...")
     df = _fg_milb_fetch(s, year, stats="pit", type_=1)
-    df = _norm_fg_player_id(df)
-    if df is None or "player_id" not in df.columns:
-        print("    ⚠ no player_id mapping in response")
+    df = _attach_player_id(df, name_to_mlbamid)
+    if df is None or "player_id" not in df.columns or df["player_id"].isna().all():
+        print("    ⚠ couldn't attach player_id to any FG row")
         return None
     if "FIP" not in df.columns:
         print(f"    ⚠ no FIP column; cols: {list(df.columns)[:40]}")
@@ -557,20 +625,24 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
     # 1. Hitters — Prospect Savant JSON API
     hitters_df = fetch_aaa_hitters(year, fetch_url, csv_to_df)
 
-    # 1b. LD% from FanGraphs MiLB batting (cookie-jar auth)
-    fg_ld = fetch_fg_milb_batting_ld(year)
+    # 2. Pitchers — Prospect Savant JSON API
+    pitchers_df = fetch_aaa_pitchers(year, fetch_url, csv_to_df)
+
+    # Build a name → MLBAMId map from Prospect Savant for FG name-matching.
+    name_to_mlbamid = {}
+    name_to_mlbamid.update(_build_name_to_mlbamid(hitters_df))
+    name_to_mlbamid.update(_build_name_to_mlbamid(pitchers_df))
+
+    # 1b. LD% from FanGraphs MiLB batting (cookie-jar auth, name-matched)
+    fg_ld = fetch_fg_milb_batting_ld(year, name_to_mlbamid=name_to_mlbamid)
     if fg_ld is not None and hitters_df is not None and "player_id" in hitters_df.columns:
         hitters_df = hitters_df.merge(fg_ld, on="player_id", how="left", suffixes=("", "_fg"))
-        # If both have ld_pct, prefer FG's (the user explicitly asked for FG definition)
         if "ld_pct_fg" in hitters_df.columns:
             hitters_df["ld_pct"] = hitters_df["ld_pct_fg"].combine_first(hitters_df.get("ld_pct"))
             hitters_df = hitters_df.drop(columns=["ld_pct_fg"])
 
-    # 2. Pitchers — Prospect Savant JSON API
-    pitchers_df = fetch_aaa_pitchers(year, fetch_url, csv_to_df)
-
     # 2b. FIP from FanGraphs MiLB pitching
-    fg_fip = fetch_fg_milb_pitching_fip(year)
+    fg_fip = fetch_fg_milb_pitching_fip(year, name_to_mlbamid=name_to_mlbamid)
     if fg_fip is not None and pitchers_df is not None and "player_id" in pitchers_df.columns:
         pitchers_df = pitchers_df.merge(fg_fip, on="player_id", how="left")
 
