@@ -42,11 +42,10 @@ import pandas as pd
 
 AAA_HITTER_METRICS = [
     {"key": "xslg",              "label": "xSLG",                "lower_better": False, "fmt": ".3f"},
-    {"key": "xwobacon",          "label": "xwOBACON",            "lower_better": False, "fmt": ".3f"},
+    {"key": "xwoba",             "label": "xwOBA",               "lower_better": False, "fmt": ".3f"},
     {"key": "exit_velocity_avg", "label": "Avg Exit Velocity",   "lower_better": False, "fmt": ".1f"},
     {"key": "ev_90p",            "label": "90th % EV",           "lower_better": False, "fmt": ".1f"},
     {"key": "barrel_batted_rate","label": "Barrel %",            "lower_better": False, "fmt": ".1f"},
-    {"key": "ld_pct",            "label": "LD%",                 "lower_better": False, "fmt": ".1f"},
     {"key": "oz_swing_percent",  "label": "Chase %",             "lower_better": True,  "fmt": ".1f"},
     {"key": "k_percent",         "label": "K%",                  "lower_better": True,  "fmt": ".1f"},
     {"key": "iz_contact_percent","label": "Z-Contact%",          "lower_better": False, "fmt": ".1f"},
@@ -54,11 +53,13 @@ AAA_HITTER_METRICS = [
     {"key": "bb_percent",        "label": "BB%",                 "lower_better": False, "fmt": ".1f"},
 ]
 
-# Same pitcher metric set as MLB. Keys must match baseball_pipeline.PITCHER_METRICS
-# so the React card renders uniformly across levels.
+# AAA pitcher metric set is a subset of MLB — FIP and GB% aren't on the
+# Prospect Savant payload, so we drop them. Avg FB Velo is replaced with
+# Avg Velo (overall pitch velocity) since per-pitch-type velos aren't on
+# the leaderboard either.
 AAA_PITCHER_METRICS_LABELS = [
-    "FIP", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "Avg FB Velo",
-    "Whiff%", "K%", "Chase%", "BB%", "K-BB%", "GB%",
+    "Avg Velo", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA",
+    "Whiff%", "K%", "Chase%", "BB%", "K-BB%",
 ]
 
 
@@ -138,36 +139,37 @@ def _coerce_cols(df, mapping):
     return out
 
 
+# Prospect Savant ships rates as percentages already (e.g. krate=25.4),
+# so no *100 needed. Field names below are the literal columns from the
+# 2026 Prospect Savant JSON payload.
 HITTER_FIELD_MAP = {
-    "xslg":               ["xslg", "est_slg", "x_slg", "expected_slg"],
-    "xwobacon":           ["xwobacon", "x_wobacon", "expected_wobacon", "xwOBAcon"],
-    "exit_velocity_avg":  ["exit_velocity_avg", "avg_ev", "average_ev", "ev_avg", "exit_velocity"],
-    "barrel_batted_rate": ["barrel_batted_rate", "barrel_percent", "barrel_pct", "barrel_rate"],
-    "ld_pct":             ["ld_percent", "line_drive_percent", "ld_rate", "ld_pct"],
-    "oz_swing_percent":   ["oz_swing_percent", "chase_percent", "o_swing_percent", "chase_pct"],
-    "k_percent":          ["k_percent", "k_pct", "strikeout_percent"],
-    "iz_contact_percent": ["iz_contact_percent", "z_contact_percent", "in_zone_contact_pct"],
-    "whiff_percent":      ["whiff_percent", "whiff_pct", "swing_miss_percent"],
-    "bb_percent":         ["bb_percent", "bb_pct", "walk_percent"],
-    "ev_90p":             ["ev_90p", "ev_90", "evp90", "ev_top10", "ev_max_50"],
-    "pa":                 ["pa", "plate_appearances"],
-    "player_name":        ["player_name", "name", "full_name"],
+    "xslg":               ["xslg"],
+    "xwoba":              ["xwoba"],
+    "exit_velocity_avg":  ["ev"],
+    "ev_90p":             ["ev90"],
+    "barrel_batted_rate": ["barrelbbe"],   # barrels per BBE
+    "oz_swing_percent":   ["chaserate"],
+    "k_percent":          ["krate"],
+    "iz_contact_percent": ["zcontact"],
+    "whiff_percent":      ["whiffrate"],
+    "bb_percent":         ["bbrate"],
+    "pa":                 ["pa"],
+    "player_name":        ["player_name", "name", "MLB_FullName"],
 }
 
 PITCHER_FIELD_MAP = {
-    "fip":                ["fip", "FIP"],
-    "exit_velocity_avg":  ["exit_velocity_avg", "avg_ev", "ev_avg"],
-    "barrel_batted_rate": ["barrel_batted_rate", "barrel_percent", "barrel_pct"],
-    "xba":                ["xba", "est_ba", "x_ba"],
-    "xslg":               ["xslg", "est_slg", "x_slg"],
-    "xwoba":              ["xwoba", "est_woba", "x_woba"],
-    "avg_fb_velo":        ["avg_fb_velo", "fb_velo", "fastball_velocity", "ff_velo"],
-    "whiff_percent":      ["whiff_percent", "whiff_pct"],
-    "k_percent":          ["k_percent", "k_pct"],
-    "p_oSwing_percent":   ["p_oSwing_percent", "chase_percent", "o_swing_percent"],
-    "bb_percent":         ["bb_percent", "bb_pct"],
-    "gb_percent":         ["gb_percent", "ground_ball_percent", "gb_pct"],
-    "player_name":        ["player_name", "name", "full_name"],
+    "avg_velo":           ["velocity"],     # overall avg pitch velo (no per-type breakdown)
+    "exit_velocity_avg":  ["ev"],
+    "barrel_batted_rate": ["barrelbbe"],
+    "xba":                ["xba"],
+    "xslg":               ["xslg"],
+    "xwoba":              ["xwoba"],
+    "whiff_percent":      ["whiffrate"],
+    "k_percent":          ["krate"],
+    "p_oSwing_percent":   ["chaserate"],
+    "bb_percent":         ["bbrate"],
+    "k_bb_percent":       ["kbb_rate"],
+    "player_name":        ["player_name", "name", "MLB_FullName"],
 }
 
 
@@ -331,33 +333,24 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
     # 4. Build pitcher percentiles (mirror MLB metric set; values come from
     # AAA pools so percentile rank is within AAA only)
     pitcher_rows = []
-    # Map MLB label → AAA column key
+    # Map AAA pitcher label → canonical column key (already renamed by
+    # _coerce_cols from Prospect Savant field names).
     p_label_to_col = {
-        "FIP":          "fip",            # may not be available — leave blank if so
+        "Avg Velo":      "avg_velo",
         "Avg Exit Velo": "exit_velocity_avg",
-        "Barrel%":      "barrel_batted_rate",
-        "xBA":          "xba",
-        "xSLG":         "xslg",
-        "xwOBA":        "xwoba",
-        "Avg FB Velo":  "avg_fb_velo",
-        "Whiff%":       "whiff_percent",
-        "K%":           "k_percent",
-        "Chase%":       "p_oSwing_percent",
-        "BB%":          "bb_percent",
-        "K-BB%":        None,  # derived below
-        "GB%":          None,  # not in this fetch set; leave blank
+        "Barrel%":       "barrel_batted_rate",
+        "xBA":           "xba",
+        "xSLG":          "xslg",
+        "xwOBA":         "xwoba",
+        "Whiff%":        "whiff_percent",
+        "K%":            "k_percent",
+        "Chase%":        "p_oSwing_percent",
+        "BB%":           "bb_percent",
+        "K-BB%":         "k_bb_percent",
     }
     if pitchers_df is not None and not pitchers_df.empty:
-        # Derive K-BB%
-        if "k_percent" in pitchers_df.columns and "bb_percent" in pitchers_df.columns:
-            pitchers_df["k_bb_percent"] = (
-                pd.to_numeric(pitchers_df["k_percent"], errors="coerce") -
-                pd.to_numeric(pitchers_df["bb_percent"], errors="coerce")
-            )
-            p_label_to_col["K-BB%"] = "k_bb_percent"
-
-        # lower_better mirrors MLB defaults
-        p_lower = {"FIP", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "BB%"}
+        # lower_better mirrors MLB conventions
+        p_lower = {"Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "BB%"}
 
         pools = {}
         for label, col in p_label_to_col.items():
@@ -403,7 +396,7 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
         ],
         "pitcher_metrics": [
             {"key": lbl, "label": lbl, "lower_better": lbl in
-             {"FIP", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "BB%"}}
+             {"Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "BB%"}}
             for lbl in AAA_PITCHER_METRICS_LABELS
         ],
         "meta": {
