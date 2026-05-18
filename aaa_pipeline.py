@@ -431,26 +431,56 @@ _NAME_TO_MLBAMID_CACHE = {}
 
 
 def _norm_name(s):
+    """Lowercase, strip diacritics/punctuation, flip 'Last, First' → 'First Last',
+    drop common suffixes. Used as the join key when matching FG rows back to
+    Prospect Savant MLBAMIds by name."""
     if not isinstance(s, str):
         return ""
     import unicodedata as _u
     s = _u.normalize("NFD", s)
     s = "".join(c for c in s if not _u.combining(c))
-    s = s.lower().replace(".", "").replace(",", "").replace("'", "")
-    s = s.replace(" jr", "").replace(" sr", "").replace(" ii", "").replace(" iii", "").replace(" iv", "")
+    s = s.strip()
+    # "Doe, John" → "John Doe"
+    if "," in s:
+        parts = [p.strip() for p in s.split(",", 1)]
+        if len(parts) == 2 and parts[0] and parts[1]:
+            s = f"{parts[1]} {parts[0]}"
+    s = s.lower().replace(".", "").replace(",", "").replace("'", "").replace("-", " ")
+    for suf in (" jr", " sr", " ii", " iii", " iv"):
+        if s.endswith(suf):
+            s = s[: -len(suf)]
     return " ".join(s.split())
 
 
 def _build_name_to_mlbamid(prospect_savant_df):
-    if prospect_savant_df is None or "player_name" not in prospect_savant_df.columns:
+    """Build name → MLBAMId map from a Prospect Savant DataFrame.
+    Tries multiple name columns and IDs; logs a few samples for debugging."""
+    if prospect_savant_df is None or prospect_savant_df.empty:
         return {}
     out = {}
+    samples_logged = 0
     for _, r in prospect_savant_df.iterrows():
-        name = r.get("player_name") or r.get("name") or r.get("MLB_FullName")
-        mlbamid = r.get("MLBAMId") or r.get("player_id")
-        if not name or pd.isna(mlbamid):
+        # Prefer MLB_FullName (clean "First Last") over player_name (which may be
+        # "Last, First") over name (sometimes "Last, First (Age)")
+        raw_name = (r.get("MLB_FullName") or r.get("player_name") or
+                    r.get("name") or r.get("MLB_ShortName") or "")
+        if not raw_name:
             continue
-        out[_norm_name(str(name))] = int(mlbamid)
+        mlbamid = r.get("MLBAMId") or r.get("MLBAMID") or r.get("mlbam_id") or r.get("player_id")
+        if mlbamid is None or pd.isna(mlbamid):
+            continue
+        try:
+            mlbamid = int(mlbamid)
+        except (TypeError, ValueError):
+            continue
+        norm = _norm_name(str(raw_name))
+        if not norm:
+            continue
+        out[norm] = mlbamid
+        if samples_logged < 3:
+            print(f"    name-map sample: {raw_name!r} → {norm!r} → {mlbamid}")
+            samples_logged += 1
+    print(f"    name-map built: {len(out)} unique names from {len(prospect_savant_df)} rows")
     return out
 
 
@@ -484,7 +514,16 @@ def _attach_player_id(df, name_to_mlbamid):
         if name_to_mlbamid:
             name_col = next((c for c in ("Name", "Player", "PlayerName", "player_name") if c in df.columns), None)
             if name_col:
-                df["player_id"] = df[name_col].map(lambda s: name_to_mlbamid.get(_norm_name(str(s)))).astype("Int64")
+                # Log a few FG names + their normalized forms so any
+                # remaining mismatch is debuggable.
+                for raw in df[name_col].dropna().head(3).tolist():
+                    norm = _norm_name(str(raw))
+                    hit = name_to_mlbamid.get(norm)
+                    print(f"    fg-name sample: {raw!r} → {norm!r} → "
+                          f"{'MATCH ' + str(hit) if hit else 'no match'}")
+                df["player_id"] = df[name_col].map(
+                    lambda s: name_to_mlbamid.get(_norm_name(str(s)))
+                ).astype("Int64")
                 hits = df["player_id"].notna().sum()
                 print(f"    name-matched {hits}/{len(df)} rows to Prospect Savant MLBAMId")
     return df
