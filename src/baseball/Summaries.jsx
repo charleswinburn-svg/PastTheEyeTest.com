@@ -11,7 +11,7 @@ import {
   PitcherCountTool, HitterCountTool, LocationZonePanel,
   RollingVeloChart, PlatoonUsageBars, ReclassifyModal,
 } from "./SummaryComponents.jsx";
-import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance } from "./SharedComponents.jsx";
+import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance, SearchableSelect } from "./SharedComponents.jsx";
 
 const SEASON_TYPES = [
   { id: "S", label: "Spring Training" },
@@ -839,10 +839,19 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           </div>
           {selectedGame && boxscoreData && (
             <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-              <select value={selectedPlayer?.id || ""} onChange={e => { const p = gamePlayers.find(x => x.id === parseInt(e.target.value)); setSelectedPlayer(p || null); }} style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, fontFamily: "inherit", minWidth: 240 }}>
-                <option value="">Select {isPitcher ? "Pitcher" : "Hitter"}...</option>
-                {gamePlayers.map(p => (<option key={p.id} value={p.id}>{p.name} ({p.team}){isPitcher ? ` — ${p.ip} IP` : ` — ${p.hits}/${p.abs}`}</option>))}
-              </select>
+              <SearchableSelect
+                value={selectedPlayer?.id || ""}
+                options={gamePlayers.map(p => ({
+                  value: p.id,
+                  label: `${p.name} (${p.team})${isPitcher ? ` — ${p.ip} IP` : ` — ${p.hits}/${p.abs}`}`,
+                }))}
+                onChange={(_, opt) => {
+                  const p = gamePlayers.find(x => x.id === opt?.value);
+                  setSelectedPlayer(p || null);
+                }}
+                placeholder={`Search ${isPitcher ? "pitcher" : "hitter"}…`}
+                style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, minWidth: 280 }}
+              />
             </div>
           )}
           {!selectedGame && !loadingGames && <div style={{ color: t.textMuted, textAlign: "center", padding: 40 }}>Select a game</div>}
@@ -854,10 +863,16 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       {!isGame && (
         <div>
           <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "center" }}>
-            <select value={selectedPlayer?.id || ""} onChange={e => { const p = playerList.find(x => x.id === parseInt(e.target.value)); setSelectedPlayer(p || null); }} style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, fontFamily: "inherit", minWidth: 240 }}>
-              <option value="">Select {isPitcher ? "Pitcher" : "Hitter"}...</option>
-              {playerList.map(p => (<option key={p.id} value={p.id}>{p.name} ({p.team})</option>))}
-            </select>
+            <SearchableSelect
+              value={selectedPlayer?.id || ""}
+              options={playerList.map(p => ({ value: p.id, label: `${p.name} (${p.team})` }))}
+              onChange={(_, opt) => {
+                const p = playerList.find(x => x.id === opt?.value);
+                setSelectedPlayer(p || null);
+              }}
+              placeholder={`Search ${isPitcher ? "pitcher" : "hitter"}…`}
+              style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, minWidth: 280 }}
+            />
             {loadingPlayers && <span style={{ fontSize: 11, color: t.textMuted }}>Loading players...</span>}
             {loadingSeason && <span style={{ fontSize: 11, color: t.textMuted }}>{seasonProgress}</span>}
           </div>

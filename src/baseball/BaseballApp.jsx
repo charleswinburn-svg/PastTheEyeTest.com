@@ -6,7 +6,7 @@ import Summaries from "./Summaries.jsx";
 import RaceToTwoStrikes from "./RaceToTwoStrikes.jsx";
 import EVLAChart from "./EVLAChart.jsx";
 import TeamScatter from "./TeamScatter.jsx";
-import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin } from "./SharedComponents.jsx";
+import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
 // ── Shared constants ──
@@ -381,13 +381,19 @@ function BaseballApp() {
 
           {/* Player Selector (for card views) */}
           {(isHitterTab(tab) || isPitcherTab(tab) || tab === "fielder") && (
-            <select
+            <SearchableSelect
               value={isPitcherTab(tab) ? (selectedPitcher || "") : tab === "fielder" ? (selectedFielder || "") : (selectedHitter || "")}
-              onChange={e => {
-                if (isPitcherTab(tab)) setSelectedPitcher(e.target.value);
-                else if (tab === "fielder") setSelectedFielder(e.target.value);
-                else setSelectedHitter(e.target.value);
+              options={(tab === "pitcher" ? pitcherNames
+                : tab === "pitcher_aaa" ? aaaPitcherNames
+                : tab === "hitter_aaa"  ? aaaHitterNames
+                : tab === "fielder"     ? fielderNames
+                : hitterNames)}
+              onChange={name => {
+                if (isPitcherTab(tab)) setSelectedPitcher(name);
+                else if (tab === "fielder") setSelectedFielder(name);
+                else setSelectedHitter(name);
               }}
+              placeholder="Search player…"
               style={{
                 padding: "6px 12px",
                 background: t.inputBg,
@@ -395,20 +401,10 @@ function BaseballApp() {
                 borderRadius: 6,
                 color: t.text,
                 fontSize: 12,
-                outline: "none",
-                minWidth: 180,
-                maxWidth: 260,
-                fontFamily: "inherit",
+                minWidth: 200,
+                maxWidth: 280,
               }}
-            >
-              {(tab === "pitcher" ? pitcherNames
-                 : tab === "pitcher_aaa" ? aaaPitcherNames
-                 : tab === "hitter_aaa"  ? aaaHitterNames
-                 : tab === "fielder"     ? fielderNames
-                 : hitterNames).map(n => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
+            />
           )}
 
           <ThemeToggle />
