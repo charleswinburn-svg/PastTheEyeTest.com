@@ -102,8 +102,8 @@ def _fetch_prospect_savant(player_kind, year, level="AAA"):
               f"{list(data.keys()) if isinstance(data, dict) else type(data).__name__})")
         return None
     df = pd.DataFrame(rows)
-    print(f"    ✓ {len(df)} rows, sample columns: {list(df.columns)[:18]}"
-          f"{' …' if len(df.columns) > 18 else ''}")
+    print(f"    ✓ {len(df)} rows; total columns: {len(df.columns)}")
+    print(f"    ALL columns: {sorted(df.columns)}")
 
     # Canonical id / name
     for c in ("player_id", "id", "mlbam_id", "MLBAMID", "playerid"):
