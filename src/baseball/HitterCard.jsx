@@ -65,7 +65,7 @@ export default function HitterCard({ player, season, isAAA = false }) {
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{season} Season | Min 100 PA</span>
+          <span>{season} Season</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
