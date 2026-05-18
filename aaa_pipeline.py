@@ -63,89 +63,129 @@ AAA_PITCHER_METRICS_LABELS = [
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# SAVANT MiLB FETCHERS
+# PROSPECT SAVANT JSON API
 # ────────────────────────────────────────────────────────────────────────────
-# Savant's minor-league leaderboards live at
-#   /leaderboard/minor-league?typ=<view>&lvl=aaa&year=<y>&csv=true
-# `sportId=11` is NOT how AAA is selected — it's `lvl=aaa`. `typ` selects the
-# stat view; each view returns a different column set. We pull a few views
-# and merge by player_id.
+# Public endpoint behind prospectsavant.com — no auth needed. Pattern:
+#   /leaders/{hitters|pitchers}/{level}/{year}/{min_pitches}/{age_min}/{age_max}
+# Returns a JSON list of rows, one per qualified player at the level.
+import json as _json
+import requests as _requests
 
-MILB_BASE = "https://baseballsavant.mlb.com/leaderboard/minor-league"
-
-
-def _milb_url(typ, lvl, year, **extras):
-    parts = [f"typ={typ}", f"lvl={lvl}", f"year={year}", "csv=true"]
-    parts += [f"{k}={v}" for k, v in extras.items()]
-    return f"{MILB_BASE}?{'&'.join(parts)}"
+PROSPECT_SAVANT_API = "https://oriolebird.pythonanywhere.com"
+PROSPECT_MIN_PITCHES = 100  # broad bar so part-time players show up
+PROSPECT_AGE_MIN = 18
+PROSPECT_AGE_MAX = 45
 
 
-def _safe_milb(typ, year, fetch_url, csv_to_df, lvl="aaa", **extras):
-    url = _milb_url(typ, lvl, year, **extras)
-    print(f"  Fetching MiLB {typ} ({lvl} {year})...")
-    text = fetch_url(url)
-    df = csv_to_df(text)
-    if df is None or df.empty:
-        print(f"    ⚠ {typ} returned no rows")
+def _fetch_prospect_savant(player_kind, year, level="AAA"):
+    """Returns a DataFrame of rows from Prospect Savant (or None)."""
+    url = (f"{PROSPECT_SAVANT_API}/leaders/{player_kind}/{level}/"
+           f"{year}/{PROSPECT_MIN_PITCHES}/{PROSPECT_AGE_MIN}/{PROSPECT_AGE_MAX}")
+    print(f"  Fetching Prospect Savant ({player_kind}, {level} {year})...")
+    try:
+        r = _requests.get(url, timeout=60)
+        r.raise_for_status()
+    except Exception as e:
+        print(f"    ⚠ HTTP error: {e}")
         return None
-    print(f"    ✓ {len(df)} rows, columns: {list(df.columns)[:14]}{' …' if len(df.columns) > 14 else ''}")
-    # Normalize player_id
-    for c in ("player_id", "id", "playerid", "MLBAMID"):
+    try:
+        data = r.json()
+    except Exception as e:
+        print(f"    ⚠ JSON parse error: {e}; first 200 chars: {r.text[:200]!r}")
+        return None
+    rows = data if isinstance(data, list) else (
+        data.get("data") or data.get("leaders") or data.get("hitters") or
+        data.get("pitchers") or data.get("players") or data.get("rows") or []
+    )
+    if not rows:
+        print(f"    ⚠ empty rows in response (top-level keys: "
+              f"{list(data.keys()) if isinstance(data, dict) else type(data).__name__})")
+        return None
+    df = pd.DataFrame(rows)
+    print(f"    ✓ {len(df)} rows, sample columns: {list(df.columns)[:18]}"
+          f"{' …' if len(df.columns) > 18 else ''}")
+
+    # Canonical id / name
+    for c in ("player_id", "id", "mlbam_id", "MLBAMID", "playerid"):
         if c in df.columns:
             df["player_id"] = pd.to_numeric(df[c], errors="coerce").astype("Int64")
             break
+    if "player_name" not in df.columns:
+        for c in ("name", "Name", "full_name", "player"):
+            if c in df.columns:
+                df["player_name"] = df[c].astype(str)
+                break
     return df
 
 
-def fetch_savant_expected_aaa(year, fetch_url, csv_to_df, player_type="batter"):
-    typ = "expected_statistics_batter" if player_type == "batter" else "expected_statistics_pitcher"
-    # Some Savant deployments use plain `expected_statistics` with a player_type
-    # filter, others use the suffixed form. Try the canonical first, then the
-    # suffixed name.
-    for t in ("expected_statistics", typ):
-        df = _safe_milb(t, year, fetch_url, csv_to_df, player_type=player_type)
-        if df is not None:
-            ren = {"est_slg": "xslg", "est_ba": "xba", "est_woba": "xwoba"}
-            df = df.rename(columns={k: v for k, v in ren.items() if k in df.columns})
-            return df
-    return None
+# ── Hitters / pitchers each get one fetch; we extract the metrics we need
+# from the returned columns. Names below are best-guesses based on the
+# Prospect Savant payload — _safe column lookups handle drift.
+
+def _coerce_cols(df, mapping):
+    """Rename / coerce columns. `mapping` is canonical -> list of candidate
+    column names. First match wins."""
+    if df is None:
+        return df
+    out = df.copy()
+    for canon, cands in mapping.items():
+        if canon in out.columns:
+            continue
+        for c in cands:
+            if c in out.columns:
+                out[canon] = pd.to_numeric(out[c], errors="coerce") if canon != "player_name" else out[c]
+                break
+    return out
 
 
-def fetch_savant_ev_barrels_aaa(year, fetch_url, csv_to_df, player_type="batter"):
-    return _safe_milb("exit_velocity_barrels", year, fetch_url, csv_to_df, player_type=player_type)
+HITTER_FIELD_MAP = {
+    "xslg":               ["xslg", "est_slg", "x_slg", "expected_slg"],
+    "xwobacon":           ["xwobacon", "x_wobacon", "expected_wobacon", "xwOBAcon"],
+    "exit_velocity_avg":  ["exit_velocity_avg", "avg_ev", "average_ev", "ev_avg", "exit_velocity"],
+    "barrel_batted_rate": ["barrel_batted_rate", "barrel_percent", "barrel_pct", "barrel_rate"],
+    "ld_pct":             ["ld_percent", "line_drive_percent", "ld_rate", "ld_pct"],
+    "oz_swing_percent":   ["oz_swing_percent", "chase_percent", "o_swing_percent", "chase_pct"],
+    "k_percent":          ["k_percent", "k_pct", "strikeout_percent"],
+    "iz_contact_percent": ["iz_contact_percent", "z_contact_percent", "in_zone_contact_pct"],
+    "whiff_percent":      ["whiff_percent", "whiff_pct", "swing_miss_percent"],
+    "bb_percent":         ["bb_percent", "bb_pct", "walk_percent"],
+    "ev_90p":             ["ev_90p", "ev_90", "evp90", "ev_top10", "ev_max_50"],
+    "pa":                 ["pa", "plate_appearances"],
+    "player_name":        ["player_name", "name", "full_name"],
+}
+
+PITCHER_FIELD_MAP = {
+    "fip":                ["fip", "FIP"],
+    "exit_velocity_avg":  ["exit_velocity_avg", "avg_ev", "ev_avg"],
+    "barrel_batted_rate": ["barrel_batted_rate", "barrel_percent", "barrel_pct"],
+    "xba":                ["xba", "est_ba", "x_ba"],
+    "xslg":               ["xslg", "est_slg", "x_slg"],
+    "xwoba":              ["xwoba", "est_woba", "x_woba"],
+    "avg_fb_velo":        ["avg_fb_velo", "fb_velo", "fastball_velocity", "ff_velo"],
+    "whiff_percent":      ["whiff_percent", "whiff_pct"],
+    "k_percent":          ["k_percent", "k_pct"],
+    "p_oSwing_percent":   ["p_oSwing_percent", "chase_percent", "o_swing_percent"],
+    "bb_percent":         ["bb_percent", "bb_pct"],
+    "gb_percent":         ["gb_percent", "ground_ball_percent", "gb_pct"],
+    "player_name":        ["player_name", "name", "full_name"],
+}
 
 
-def fetch_savant_batted_ball_aaa(year, fetch_url, csv_to_df, player_type="batter"):
-    """Batted-ball profile: LD% / FB% / GB% etc."""
-    return _safe_milb("batted_ball", year, fetch_url, csv_to_df, player_type=player_type)
+def fetch_aaa_hitters(year, fetch_url, csv_to_df):
+    df = _fetch_prospect_savant("hitters", year)
+    return _coerce_cols(df, HITTER_FIELD_MAP)
 
 
-def fetch_savant_plate_discipline_aaa(year, fetch_url, csv_to_df, player_type="batter"):
-    return _safe_milb("plate_discipline", year, fetch_url, csv_to_df, player_type=player_type)
-
-
-def fetch_savant_standard_aaa(year, fetch_url, csv_to_df, player_type="batter"):
-    """Standard hitting/pitching stats — includes FIP for pitchers, AB/H/BB
-    for batters."""
-    typ = "hitting" if player_type == "batter" else "pitching"
-    return _safe_milb(typ, year, fetch_url, csv_to_df, player_type=player_type)
+def fetch_aaa_pitchers(year, fetch_url, csv_to_df):
+    df = _fetch_prospect_savant("pitchers", year)
+    return _coerce_cols(df, PITCHER_FIELD_MAP)
 
 
 def fetch_aaa_pitch_movement(year, fetch_url, csv_to_df, pitch_type="FF"):
-    """AAA pitch movement leaderboard for FB velo. Same MLB URL but with
-    lvl=aaa appended; if Savant rejects, we'll fall back to no data."""
-    url = (
-        f"https://baseballsavant.mlb.com/leaderboard/pitch-movement"
-        f"?year={year}&team=&pitchType={pitch_type}&min=q&sort=7&sortDir=asc&lvl=aaa&csv=true"
-    )
-    print(f"  Fetching MiLB pitch movement ({pitch_type}, AAA {year})...")
-    text = fetch_url(url)
-    df = csv_to_df(text)
-    if df is None or df.empty:
-        print(f"    ⚠ no rows for {pitch_type}")
-        return None
-    print(f"    ✓ {len(df)} rows")
-    return df
+    """No-op (Savant pitch movement page doesn't expose AAA cleanly). Avg FB
+    Velo comes from the Prospect Savant pitcher payload's avg_fb_velo field
+    when it exists; otherwise the bubble stays blank."""
+    return None
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -237,67 +277,20 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
     """End-to-end AAA pipeline; returns the JSON-serializable dict."""
     print(f"\n  ─── AAA pipeline ({year}) ───")
 
-    # 1. Hitters — pull each MiLB leaderboard view and merge on player_id
-    expected_h = fetch_savant_expected_aaa(year, fetch_url, csv_to_df, "batter")
-    time.sleep(1.0)
-    ev_h = fetch_savant_ev_barrels_aaa(year, fetch_url, csv_to_df, "batter")
-    time.sleep(1.0)
-    bb_h = fetch_savant_batted_ball_aaa(year, fetch_url, csv_to_df, "batter")
-    time.sleep(1.0)
-    pd_h = fetch_savant_plate_discipline_aaa(year, fetch_url, csv_to_df, "batter")
-    time.sleep(1.0)
+    # 1. Hitters — Prospect Savant JSON API
+    hitters_df = fetch_aaa_hitters(year, fetch_url, csv_to_df)
 
-    # Normalize LD column from the batted-ball view if present.
-    if bb_h is not None:
-        for cand in ("ld_percent", "line_drive_percent", "ld_rate", "ld_pct"):
-            if cand in bb_h.columns:
-                bb_h = bb_h.rename(columns={cand: "ld_pct"})
-                break
+    # 2. Pitchers — Prospect Savant JSON API
+    pitchers_df = fetch_aaa_pitchers(year, fetch_url, csv_to_df)
 
-    h_frames = []
-    for d in (expected_h, ev_h, bb_h, pd_h):
-        if d is None or d.empty:
-            continue
-        if "player_id" in d.columns:
-            d = d.copy()
-            d["player_id"] = pd.to_numeric(d["player_id"], errors="coerce").astype("Int64")
-        h_frames.append(d)
-    hitters_df = None
-    for d in h_frames:
-        if hitters_df is None:
-            hitters_df = d
-        else:
-            hitters_df = hitters_df.merge(d, on="player_id", how="outer", suffixes=("", "_drop"))
-            hitters_df = hitters_df.loc[:, ~hitters_df.columns.str.endswith("_drop")]
-
-    # 2. Pitchers — same MiLB views, pitcher side
-    expected_p = fetch_savant_expected_aaa(year, fetch_url, csv_to_df, "pitcher")
-    time.sleep(1.0)
-    ev_p = fetch_savant_ev_barrels_aaa(year, fetch_url, csv_to_df, "pitcher")
-    time.sleep(1.0)
-    pd_p = fetch_savant_plate_discipline_aaa(year, fetch_url, csv_to_df, "pitcher")
-    time.sleep(1.0)
-    std_p = fetch_savant_standard_aaa(year, fetch_url, csv_to_df, "pitcher")
-    time.sleep(1.0)
-    fb_velo = aggregate_fb_velo(year, fetch_url, csv_to_df)
-
-    p_frames = []
-    for d in (expected_p, ev_p, pd_p, std_p):
-        if d is None or d.empty:
-            continue
-        d = d.copy()
-        if "player_id" in d.columns:
-            d["player_id"] = pd.to_numeric(d["player_id"], errors="coerce").astype("Int64")
-        p_frames.append(d)
-    pitchers_df = None
-    for d in p_frames:
-        if pitchers_df is None:
-            pitchers_df = d
-        else:
-            pitchers_df = pitchers_df.merge(d, on="player_id", how="outer", suffixes=("", "_drop"))
-            pitchers_df = pitchers_df.loc[:, ~pitchers_df.columns.str.endswith("_drop")]
-    if pitchers_df is not None:
-        pitchers_df["avg_fb_velo"] = pitchers_df["player_id"].map(fb_velo)
+    if pitchers_df is None:
+        pass
+    elif "avg_fb_velo" in pitchers_df.columns:
+        print(f"  Avg FB Velo (from Prospect Savant): "
+              f"{pitchers_df['avg_fb_velo'].notna().sum()} pitchers")
+    else:
+        print("  Avg FB Velo not in Prospect Savant payload — bubble will be blank")
+    fb_velo = {}  # legacy hook, no longer used
 
     # 3. Build hitter percentiles
     hitter_rows = []
