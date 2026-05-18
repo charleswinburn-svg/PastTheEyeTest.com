@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ReferenceLine } from "recharts";
+import { SearchableSelect } from "../baseball/SharedComponents.jsx";
 
 const BIN_COLORS={"0-10":"#08306B","10-25":"#2171B5","25-45":"#6BAED6","45-55":"#D9D9D9","55-75":"#FC9272","75-90":"#FB6A4A","90-100":"#CB181D"};
 const pctToBin=p=>{if(p==null||!isFinite(p))return"NA";if(p>=90)return"90-100";if(p>=75)return"75-90";if(p>=55)return"55-75";if(p>=45)return"45-55";if(p>=25)return"25-45";if(p>=10)return"10-25";return"0-10"};
@@ -418,11 +419,13 @@ export default function HockeyApp(){
         {/* Right: player selector + stats */}
         <div style={{display:"flex",alignItems:"center",gap:16,padding:"12px 0",marginLeft:"auto"}}>
           {(tab==="skater"||tab==="goalie")&&(
-            <select value={tab==="goalie"?selectedGoalie||"":selectedSkater||""}
-              onChange={e=>tab==="goalie"?setSelectedGoalie(e.target.value):setSelectedSkater(e.target.value)}
-              style={{padding:"8px 12px",background:"#0f172a",border:"1px solid #1e3a5f",borderRadius:6,color:"#f8fafc",fontSize:13,outline:"none",minWidth:200,maxWidth:280}}>
-              {(tab==="goalie"?goalieNames:skaterNames).map(n=><option key={n} value={n}>{n}</option>)}
-            </select>
+            <SearchableSelect
+              value={tab==="goalie"?selectedGoalie||"":selectedSkater||""}
+              options={tab==="goalie"?goalieNames:skaterNames}
+              onChange={name=>tab==="goalie"?setSelectedGoalie(name):setSelectedSkater(name)}
+              placeholder={`Search ${tab==="goalie"?"goalie":"skater"}…`}
+              style={{padding:"8px 12px",background:"#0f172a",border:"1px solid #1e3a5f",borderRadius:6,color:"#f8fafc",fontSize:13,minWidth:200,maxWidth:280}}
+            />
           )}
           {tab==="skater_lb"&&(
             <div style={{display:"flex",gap:4}}>

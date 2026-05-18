@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId, useMemo } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
 
@@ -458,4 +458,78 @@ export async function saveCardAsPng(cardRef, filename) {
     console.error("Save failed:", e);
   }
   restoreImages(originals);
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// SEARCHABLE PLAYER SELECT — input + datalist combo
+// Works with either a plain string[] of labels OR {label, value}[]
+// pairs. The current `value` is matched against option values (or
+// labels, if options are strings). Typing filters via the native
+// browser datalist; picking from the dropdown commits, hitting Enter
+// commits the best prefix match, and blur reverts to the last
+// committed value if the draft is invalid.
+// ═══════════════════════════════════════════════════════════
+
+export function SearchableSelect({
+  value, options = [], onChange, style, placeholder = "Search…",
+}) {
+  const isObjOpts = options.length > 0 && typeof options[0] === "object";
+  const labels = useMemo(
+    () => isObjOpts ? options.map(o => String(o.label)) : options.map(String),
+    [options, isObjOpts],
+  );
+  const labelByValue = useMemo(() => {
+    if (!isObjOpts) return null;
+    const m = new Map();
+    for (const o of options) m.set(o.value, String(o.label));
+    return m;
+  }, [options, isObjOpts]);
+
+  const currentLabel = isObjOpts ? (labelByValue.get(value) || "") : (value || "");
+  const [draft, setDraft] = useState(currentLabel);
+  useEffect(() => { setDraft(currentLabel); }, [currentLabel]);
+  const listId = useId();
+
+  const commit = (label) => {
+    if (!labels.includes(label)) return false;
+    if (isObjOpts) {
+      const opt = options.find(o => String(o.label) === label);
+      onChange?.(opt?.value, opt);
+    } else {
+      onChange?.(label);
+    }
+    return true;
+  };
+
+  return (
+    <>
+      <input
+        list={listId}
+        value={draft}
+        onChange={e => {
+          const v = e.target.value;
+          setDraft(v);
+          if (labels.includes(v)) commit(v);
+        }}
+        onBlur={() => {
+          if (!labels.includes(draft)) setDraft(currentLabel);
+        }}
+        onKeyDown={e => {
+          if (e.key === "Enter") {
+            if (commit(draft)) return;
+            const lower = draft.toLowerCase();
+            const hit = labels.find(l => l.toLowerCase().startsWith(lower))
+                     || labels.find(l => l.toLowerCase().includes(lower));
+            if (hit) { setDraft(hit); commit(hit); }
+          }
+        }}
+        placeholder={placeholder}
+        style={{ fontFamily: "inherit", outline: "none", ...style }}
+      />
+      <datalist id={listId}>
+        {labels.map(l => <option key={l} value={l} />)}
+      </datalist>
+    </>
+  );
 }
