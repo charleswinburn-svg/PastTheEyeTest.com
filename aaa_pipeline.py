@@ -73,7 +73,7 @@ import json as _json
 import requests as _requests
 
 PROSPECT_SAVANT_API = "https://oriolebird.pythonanywhere.com"
-PROSPECT_MIN_PITCHES = 100  # broad bar so part-time players show up
+PROSPECT_MIN_PITCHES = 1   # pull everyone — we filter for usable rates downstream
 PROSPECT_AGE_MIN = 18
 PROSPECT_AGE_MAX = 45
 
@@ -727,10 +727,28 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
                 parts = [p.strip() for p in str(name).split(",", 1)]
                 if len(parts) == 2 and parts[0] and parts[1]:
                     name = f"{parts[1]} {parts[0]}"
+            # Prospect Savant carries the player's MLB parent org in
+            # MLB_AbbName / MLB_FullName. team_info (when present) is a dict
+            # with the AAA affiliate.
+            parent_abbr = r.get("MLB_AbbName") if "MLB_AbbName" in r else None
+            parent_name = r.get("MLB_FullName") if "MLB_FullName" in r else None
+            aaa_team_info = r.get("team_info") if "team_info" in r else None
+            aaa_team_name = None
+            aaa_team_id = None
+            if isinstance(aaa_team_info, dict):
+                aaa_team_name = aaa_team_info.get("abbreviation") or aaa_team_info.get("name")
+                aaa_team_id = aaa_team_info.get("id")
             hitter_rows.append({
                 "name": str(name),
                 "player_id": pid,
-                "team": (team_map or {}).get(pid),
+                # Keep MLB parent abbr as `team` so the React header lookups
+                # (logo + color) hit known MLB values until we ship an AAA
+                # team color table.
+                "team": str(parent_abbr) if isinstance(parent_abbr, str) else (team_map or {}).get(pid),
+                "aaa_team": str(aaa_team_name) if isinstance(aaa_team_name, str) else None,
+                "aaa_team_id": int(aaa_team_id) if aaa_team_id else None,
+                "parent_org_abbr": str(parent_abbr) if isinstance(parent_abbr, str) else None,
+                "parent_org_name": str(parent_name) if isinstance(parent_name, str) else None,
                 "pa": int(r["pa"]) if "pa" in r and pd.notna(r.get("pa")) else None,
                 "categories": cats,
             })
@@ -784,10 +802,22 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
                 parts = [p.strip() for p in str(name).split(",", 1)]
                 if len(parts) == 2 and parts[0] and parts[1]:
                     name = f"{parts[1]} {parts[0]}"
+            parent_abbr = r.get("MLB_AbbName") if "MLB_AbbName" in r else None
+            parent_name = r.get("MLB_FullName") if "MLB_FullName" in r else None
+            aaa_team_info = r.get("team_info") if "team_info" in r else None
+            aaa_team_name = None
+            aaa_team_id = None
+            if isinstance(aaa_team_info, dict):
+                aaa_team_name = aaa_team_info.get("abbreviation") or aaa_team_info.get("name")
+                aaa_team_id = aaa_team_info.get("id")
             pitcher_rows.append({
                 "name": str(name),
                 "player_id": pid,
-                "team": (team_map or {}).get(pid),
+                "team": str(parent_abbr) if isinstance(parent_abbr, str) else (team_map or {}).get(pid),
+                "aaa_team": str(aaa_team_name) if isinstance(aaa_team_name, str) else None,
+                "aaa_team_id": int(aaa_team_id) if aaa_team_id else None,
+                "parent_org_abbr": str(parent_abbr) if isinstance(parent_abbr, str) else None,
+                "parent_org_name": str(parent_name) if isinstance(parent_name, str) else None,
                 "categories": cats,
             })
 
