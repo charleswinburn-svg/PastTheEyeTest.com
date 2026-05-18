@@ -46,6 +46,7 @@ AAA_HITTER_METRICS = [
     {"key": "exit_velocity_avg", "label": "Avg Exit Velocity",   "lower_better": False, "fmt": ".1f"},
     {"key": "ev_90p",            "label": "90th % EV",           "lower_better": False, "fmt": ".1f"},
     {"key": "barrel_batted_rate","label": "Barrel %",            "lower_better": False, "fmt": ".1f"},
+    {"key": "ld_pct",            "label": "LD%",                 "lower_better": False, "fmt": ".1f"},
     {"key": "oz_swing_percent",  "label": "Chase %",             "lower_better": True,  "fmt": ".1f"},
     {"key": "k_percent",         "label": "K%",                  "lower_better": True,  "fmt": ".1f"},
     {"key": "iz_contact_percent","label": "Z-Contact%",          "lower_better": False, "fmt": ".1f"},
@@ -53,12 +54,11 @@ AAA_HITTER_METRICS = [
     {"key": "bb_percent",        "label": "BB%",                 "lower_better": False, "fmt": ".1f"},
 ]
 
-# AAA pitcher metric set is a subset of MLB — FIP and GB% aren't on the
-# Prospect Savant payload, so we drop them. Avg FB Velo is replaced with
-# Avg Velo (overall pitch velocity) since per-pitch-type velos aren't on
-# the leaderboard either.
+# AAA pitcher metric set — FIP comes from FG MiLB. Avg Velo replaces Avg FB
+# Velo since Prospect Savant doesn't expose per-pitch-type velo. GB% isn't
+# in the payload either, so it's dropped.
 AAA_PITCHER_METRICS_LABELS = [
-    "Avg Velo", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA",
+    "FIP", "Avg Velo", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA",
     "Whiff%", "K%", "Chase%", "BB%", "K-BB%",
 ]
 
@@ -184,9 +184,129 @@ def fetch_aaa_pitchers(year, fetch_url, csv_to_df):
 
 
 def fetch_aaa_pitch_movement(year, fetch_url, csv_to_df, pitch_type="FF"):
-    """No-op (Savant pitch movement page doesn't expose AAA cleanly). Avg FB
-    Velo comes from the Prospect Savant pitcher payload's avg_fb_velo field
-    when it exists; otherwise the bubble stays blank."""
+    """No-op — overall pitch velocity comes from Prospect Savant."""
+    return None
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# FANGRAPHS MiLB FETCHERS  (cookie-jar path; reuses fangraphs_cookies.txt)
+# ────────────────────────────────────────────────────────────────────────────
+
+def _fg_milb_session():
+    """Return an authenticated requests.Session for FG MiLB, or None."""
+    cookie_paths = [
+        "fangraphs_cookies.txt",
+        os.path.join(os.path.dirname(__file__), "fangraphs_cookies.txt"),
+        os.path.expanduser("~/project/fangraphs_cookies.txt"),
+        "www.fangraphs.com_cookies.txt",
+    ]
+    cp = next((p for p in cookie_paths if os.path.exists(p)), None)
+    if not cp:
+        print("    ⚠ No FG cookies file found")
+        return None
+    try:
+        from http.cookiejar import MozillaCookieJar
+        jar = MozillaCookieJar(cp)
+        jar.load(ignore_discard=True, ignore_expires=True)
+        s = _requests.Session()
+        s.cookies = jar
+        s.headers.update({"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) "
+                                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                          "Chrome/120.0.0.0 Safari/537.36"})
+        return s
+    except Exception as e:
+        print(f"    ⚠ FG cookie load failed: {e}")
+        return None
+
+
+def fetch_fg_milb_batting_ld(year):
+    """FG MiLB batting → LD%. Returns DataFrame with player_id, ld_pct."""
+    s = _fg_milb_session()
+    if s is None:
+        return None
+    print(f"  Fetching FanGraphs MiLB batting LD% ({year})...")
+    # FG MiLB API. lg=2,4 → Triple-A (International League=11 and PCL=14 in
+    # current FG IDs; we try a chain in case the codes drift).
+    for lg_value in ("2,4", "11,14", "milb_aaa", "aaa"):
+        url = ("https://www.fangraphs.com/api/leaders/minor-league/data"
+               f"?pos=all&stats=bat&lg={lg_value}&qual=0&type=2"
+               f"&season={year}&season1={year}&ind=0&pageitems=4000&page=1")
+        try:
+            r = s.get(url, timeout=30)
+        except Exception as e:
+            print(f"    lg={lg_value}: request failed: {e}")
+            continue
+        if r.status_code != 200:
+            print(f"    lg={lg_value}: HTTP {r.status_code}")
+            continue
+        try:
+            rows = r.json().get("data", [])
+        except Exception:
+            continue
+        if not rows:
+            print(f"    lg={lg_value}: 0 rows")
+            continue
+        df = pd.DataFrame(rows)
+        cols = list(df.columns)
+        print(f"    lg={lg_value}: {len(df)} rows; LD%-like cols: "
+              f"{[c for c in cols if 'LD' in c.upper() or 'line' in c.lower()][:10]}")
+        if not any(c in df.columns for c in ("LD%", "LDpct", "ld_pct", "LD")):
+            continue
+        # Normalize
+        if "xMLBAMID" in df.columns:
+            df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
+        elif "MLBAMID" in df.columns:
+            df["player_id"] = pd.to_numeric(df["MLBAMID"], errors="coerce").astype("Int64")
+        ld_col = next((c for c in ("LD%", "LDpct", "ld_pct", "LD") if c in df.columns), None)
+        df["ld_pct"] = pd.to_numeric(df[ld_col].astype(str).str.rstrip("%"),
+                                      errors="coerce")
+        keep = [c for c in ("player_id", "ld_pct") if c in df.columns]
+        out = df[keep].dropna(subset=["player_id"])
+        print(f"    ✓ LD% for {len(out)} AAA hitters")
+        return out
+    print("    ⚠ FG MiLB LD% not found across lg variants")
+    return None
+
+
+def fetch_fg_milb_pitching_fip(year):
+    """FG MiLB pitching → FIP. Returns DataFrame with player_id, fip."""
+    s = _fg_milb_session()
+    if s is None:
+        return None
+    print(f"  Fetching FanGraphs MiLB pitching FIP ({year})...")
+    for lg_value in ("2,4", "11,14", "milb_aaa", "aaa"):
+        url = ("https://www.fangraphs.com/api/leaders/minor-league/data"
+               f"?pos=all&stats=pit&lg={lg_value}&qual=0&type=1"
+               f"&season={year}&season1={year}&ind=0&pageitems=4000&page=1")
+        try:
+            r = s.get(url, timeout=30)
+        except Exception as e:
+            print(f"    lg={lg_value}: request failed: {e}")
+            continue
+        if r.status_code != 200:
+            print(f"    lg={lg_value}: HTTP {r.status_code}")
+            continue
+        try:
+            rows = r.json().get("data", [])
+        except Exception:
+            continue
+        if not rows:
+            print(f"    lg={lg_value}: 0 rows")
+            continue
+        df = pd.DataFrame(rows)
+        if "FIP" not in df.columns:
+            print(f"    lg={lg_value}: no FIP column in {len(df)} rows")
+            continue
+        if "xMLBAMID" in df.columns:
+            df["player_id"] = pd.to_numeric(df["xMLBAMID"], errors="coerce").astype("Int64")
+        elif "MLBAMID" in df.columns:
+            df["player_id"] = pd.to_numeric(df["MLBAMID"], errors="coerce").astype("Int64")
+        df["fip"] = pd.to_numeric(df["FIP"], errors="coerce")
+        keep = [c for c in ("player_id", "fip") if c in df.columns]
+        out = df[keep].dropna(subset=["player_id"])
+        print(f"    ✓ FIP for {len(out)} AAA pitchers")
+        return out
+    print("    ⚠ FG MiLB FIP not found across lg variants")
     return None
 
 
@@ -282,8 +402,22 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
     # 1. Hitters — Prospect Savant JSON API
     hitters_df = fetch_aaa_hitters(year, fetch_url, csv_to_df)
 
+    # 1b. LD% from FanGraphs MiLB batting (cookie-jar auth)
+    fg_ld = fetch_fg_milb_batting_ld(year)
+    if fg_ld is not None and hitters_df is not None and "player_id" in hitters_df.columns:
+        hitters_df = hitters_df.merge(fg_ld, on="player_id", how="left", suffixes=("", "_fg"))
+        # If both have ld_pct, prefer FG's (the user explicitly asked for FG definition)
+        if "ld_pct_fg" in hitters_df.columns:
+            hitters_df["ld_pct"] = hitters_df["ld_pct_fg"].combine_first(hitters_df.get("ld_pct"))
+            hitters_df = hitters_df.drop(columns=["ld_pct_fg"])
+
     # 2. Pitchers — Prospect Savant JSON API
     pitchers_df = fetch_aaa_pitchers(year, fetch_url, csv_to_df)
+
+    # 2b. FIP from FanGraphs MiLB pitching
+    fg_fip = fetch_fg_milb_pitching_fip(year)
+    if fg_fip is not None and pitchers_df is not None and "player_id" in pitchers_df.columns:
+        pitchers_df = pitchers_df.merge(fg_fip, on="player_id", how="left")
 
     if pitchers_df is None:
         pass
@@ -336,6 +470,7 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
     # Map AAA pitcher label → canonical column key (already renamed by
     # _coerce_cols from Prospect Savant field names).
     p_label_to_col = {
+        "FIP":           "fip",
         "Avg Velo":      "avg_velo",
         "Avg Exit Velo": "exit_velocity_avg",
         "Barrel%":       "barrel_batted_rate",
@@ -350,7 +485,7 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
     }
     if pitchers_df is not None and not pitchers_df.empty:
         # lower_better mirrors MLB conventions
-        p_lower = {"Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "BB%"}
+        p_lower = {"FIP", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "BB%"}
 
         pools = {}
         for label, col in p_label_to_col.items():
@@ -396,7 +531,7 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
         ],
         "pitcher_metrics": [
             {"key": lbl, "label": lbl, "lower_better": lbl in
-             {"Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "BB%"}}
+             {"FIP", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA", "BB%"}}
             for lbl in AAA_PITCHER_METRICS_LABELS
         ],
         "meta": {
