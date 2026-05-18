@@ -58,7 +58,7 @@ AAA_HITTER_METRICS = [
 # Velo since Prospect Savant doesn't expose per-pitch-type velo. GB% isn't
 # in the payload either, so it's dropped.
 AAA_PITCHER_METRICS_LABELS = [
-    "FIP", "Avg Velo", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA",
+    "FIP", "Avg Exit Velo", "Barrel%", "xBA", "xSLG", "xwOBA",
     "Whiff%", "K%", "Chase%", "BB%", "K-BB%",
 ]
 
@@ -760,7 +760,6 @@ def build_aaa(year, fetch_url, csv_to_df, http_headers, team_map=None):
     # _coerce_cols from Prospect Savant field names).
     p_label_to_col = {
         "FIP":           "fip",
-        "Avg Velo":      "avg_velo",
         "Avg Exit Velo": "exit_velocity_avg",
         "Barrel%":       "barrel_batted_rate",
         "xBA":           "xba",

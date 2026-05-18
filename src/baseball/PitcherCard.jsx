@@ -302,7 +302,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{season} Season | Min 10 IP</span>
+          <span>{season} Season</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
