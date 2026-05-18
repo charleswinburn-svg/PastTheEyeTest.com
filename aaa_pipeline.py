@@ -310,9 +310,7 @@ def fetch_fg_milb_pitching_fip(year):
     df["fip"] = pd.to_numeric(df["FIP"], errors="coerce")
     out = df[["player_id", "fip"]].dropna(subset=["player_id"])
     print(f"    ✓ FIP for {len(out)} AAA pitchers")
-        return out
-    print("    ⚠ FG MiLB FIP not found across lg variants")
-    return None
+    return out
 
 
 # ────────────────────────────────────────────────────────────────────────────
