@@ -3,7 +3,7 @@ import { useRef, useCallback } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 
-export default function HitterCard({ player, season }) {
+export default function HitterCard({ player, season, isAAA = false }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
@@ -44,7 +44,11 @@ export default function HitterCard({ player, season }) {
           team={player.team}
           season={season}
           playerId={player.player_id}
-          subtitle={buildBioSubtitle(bio, "bats") || `${season} | ${player.pa || "—"} PA`}
+          subtitle={
+            isAAA
+              ? `Parent Org: ${player.parent_org_name || player.parent_org_abbr || "—"} | ${season} | ${player.pa || "—"} PA`
+              : (buildBioSubtitle(bio, "bats") || `${season} | ${player.pa || "—"} PA`)
+          }
         />
         <div style={{ padding: "8px 12px 4px" }}>
           {cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (

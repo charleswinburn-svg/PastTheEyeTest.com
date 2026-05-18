@@ -259,7 +259,9 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   }
 
   const cats = Object.entries(player.categories);
-  const subtitle = buildBioSubtitle(bio, "throws") || `${season}${player.ip ? ` | ${player.ip} IP` : ""}`;
+  const subtitle = isAAA
+    ? `Parent Org: ${player?.parent_org_name || player?.parent_org_abbr || "—"} | ${season}${player?.ip ? ` | ${player.ip} IP` : ""}`
+    : (buildBioSubtitle(bio, "throws") || `${season}${player.ip ? ` | ${player.ip} IP` : ""}`);
 
   return (
     <div>
