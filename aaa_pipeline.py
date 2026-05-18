@@ -341,33 +341,75 @@ def _fg_milb_scrape(session, year, stats, type_, lg="14,11"):
 
 
 def _fg_milb_json(session, year, stats, type_, lg="14,11"):
-    """Mirror the working MLB endpoint, just swap major-league → minor-league.
-    The MLB call is /api/leaders/major-league/data with a specific full param
-    set; FG's router seems to need the full set or it 404s."""
+    """Try the FG /api/leaders/minor-league/data JSON endpoint (mirrors the
+    working MLB call). Returns parsed DF or None."""
     url = ("https://www.fangraphs.com/api/leaders/minor-league/data"
            f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}"
            f"&season={year}&month=0&season1={year}&ind=0"
            f"&team=0&rost=0&age=0&filter=&players=0"
            f"&startdate=&enddate=&pageitems=4000&page=1")
-    print(f"    GET {url}")
+    print(f"    JSON GET {url}")
     try:
         r = session.get(url, timeout=30)
     except Exception as e:
-        print(f"    ⚠ HTTP error: {e}")
+        print(f"    JSON ⚠ HTTP error: {e}")
         return None
     if r.status_code != 200:
-        print(f"    ⚠ HTTP {r.status_code}")
+        print(f"    JSON ⚠ HTTP {r.status_code}")
         return None
     try:
         rows = r.json().get("data", [])
     except Exception as e:
-        print(f"    ⚠ JSON parse: {e}; first 200: {r.text[:200]!r}")
+        print(f"    JSON ⚠ parse: {e}; first 200: {r.text[:200]!r}")
         return None
     if not rows:
-        print("    ⚠ 0 rows in response")
+        print("    JSON ⚠ 0 rows")
         return None
     df = pd.DataFrame(rows)
-    print(f"    ✓ {len(df)} rows; cols sample: {list(df.columns)[:25]}")
+    print(f"    JSON ✓ {len(df)} rows; cols: {list(df.columns)[:25]}")
+    return df
+
+
+def _fg_milb_html(session, year, stats, type_, lg="14,11"):
+    """HTML fallback — scrape the legacy aspx page (server-rendered table)."""
+    candidates = [
+        ("https://www.fangraphs.com/leaders-legacy.aspx"
+         f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}&season={year}"
+         f"&month=0&season1={year}&ind=0&team=0&rost=0&age=0&filter=&players=0"),
+        ("https://www.fangraphs.com/leaders.aspx"
+         f"?pos=all&stats={stats}&lg={lg}&qual=0&type={type_}&season={year}"
+         f"&month=0&season1={year}&ind=0&team=0&rost=0&age=0&filter=&players=0"),
+    ]
+    for url in candidates:
+        print(f"    HTML GET {url}")
+        try:
+            r = session.get(url, timeout=45)
+        except Exception as e:
+            print(f"    HTML ⚠ {e}")
+            continue
+        if r.status_code != 200:
+            print(f"    HTML ⚠ HTTP {r.status_code}")
+            continue
+        body = r.text
+        if "<table" not in body.lower():
+            # Dump a snippet so we can see what FG actually sent back
+            print(f"    HTML ⚠ no <table> ({len(body)} chars). First 300: {body[:300]!r}")
+            continue
+        rows = _fg_milb_html_to_rows(body, expected_col=None)
+        if not rows:
+            print("    HTML ⚠ <table> present but parser found 0 rows")
+            continue
+        df = pd.DataFrame(rows)
+        print(f"    HTML ✓ {len(df)} rows; cols: {list(df.columns)[:25]}")
+        return df
+    return None
+
+
+def _fg_milb_fetch(session, year, stats, type_, lg="14,11"):
+    """Try JSON API first, then fall back to the legacy HTML page."""
+    df = _fg_milb_json(session, year, stats, type_, lg)
+    if df is None or df.empty:
+        df = _fg_milb_html(session, year, stats, type_, lg)
     return df
 
 
@@ -387,7 +429,7 @@ def fetch_fg_milb_batting_ld(year):
     if s is None:
         return None
     print(f"  Fetching FanGraphs MiLB batting LD% ({year})...")
-    df = _fg_milb_json(s, year, stats="bat", type_=2)
+    df = _fg_milb_fetch(s, year, stats="bat", type_=2)
     df = _norm_fg_player_id(df)
     if df is None or "player_id" not in df.columns:
         print("    ⚠ no player_id mapping in response")
@@ -409,7 +451,7 @@ def fetch_fg_milb_pitching_fip(year):
     if s is None:
         return None
     print(f"  Fetching FanGraphs MiLB pitching FIP ({year})...")
-    df = _fg_milb_json(s, year, stats="pit", type_=1)
+    df = _fg_milb_fetch(s, year, stats="pit", type_=1)
     df = _norm_fg_player_id(df)
     if df is None or "player_id" not in df.columns:
         print("    ⚠ no player_id mapping in response")
