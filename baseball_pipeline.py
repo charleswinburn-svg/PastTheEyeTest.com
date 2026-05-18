@@ -1329,6 +1329,18 @@ def run_pipeline(seasons, output_dir):
         except Exception as e:
             print(f"  ⚠ Fielding pipeline failed: {e}")
 
+        # ── AAA sub-pipeline ──
+        try:
+            from aaa_pipeline import build_aaa
+            aaa_out = build_aaa(year, fetch_url, csv_to_df, HTTP_HEADERS,
+                                 team_map=fetch_mlb_team_map())
+            a_path = os.path.join(output_dir, f"aaa_data_{year}.json")
+            with open(a_path, "w") as f:
+                json.dump(aaa_out, f, indent=2, default=str)
+            print(f"  → Wrote {a_path} ({len(aaa_out.get('hitters', []))} AAA hitters, {len(aaa_out.get('pitchers', []))} AAA pitchers)")
+        except Exception as e:
+            print(f"  ⚠ AAA pipeline failed: {e}")
+
     # --- Build trend data across seasons ---
     hitter_trends = {}
     pitcher_trends = {}

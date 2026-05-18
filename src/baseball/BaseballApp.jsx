@@ -39,8 +39,22 @@ function deduplicatePlayers(players) {
 }
 
 const TABS = [
-  { id: "hitter",     label: "HITTER CARD" },
-  { id: "pitcher",    label: "PITCHER CARD" },
+  {
+    id: "hitter",
+    label: "HITTER CARD",
+    dropdown: [
+      { id: "hitter",     label: "MLB" },
+      { id: "hitter_aaa", label: "AAA" },
+    ],
+  },
+  {
+    id: "pitcher",
+    label: "PITCHER CARD",
+    dropdown: [
+      { id: "pitcher",     label: "MLB" },
+      { id: "pitcher_aaa", label: "AAA" },
+    ],
+  },
   { id: "fielder",    label: "FIELDER CARD" },
   {
     id: "summaries",
@@ -93,6 +107,7 @@ function BaseballApp() {
   const [iswingData, setIswingData] = useState(null);
   const [fieldingData, setFieldingData] = useState(null);
   const [selectedFielder, setSelectedFielder] = useState(null);
+  const [aaaData, setAaaData] = useState(null);
 
   useEffect(() => {
     setFieldingData(null);
@@ -100,6 +115,14 @@ function BaseballApp() {
       .then(r => r.ok ? r.json() : null)
       .then(d => setFieldingData(d))
       .catch(() => setFieldingData(null));
+  }, [season]);
+
+  useEffect(() => {
+    setAaaData(null);
+    fetch(`/aaa_data_${season}.json`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setAaaData(d))
+      .catch(() => setAaaData(null));
   }, [season]);
 
   useEffect(() => {
@@ -180,14 +203,28 @@ function BaseballApp() {
   const curHitter = useMemo(() => hittersFull.find(h => h.displayName === selectedHitter), [hittersFull, selectedHitter]);
   const curPitcher = useMemo(() => pitchersFull.find(p => p.displayName === selectedPitcher), [pitchersFull, selectedPitcher]);
 
+  // ── AAA-equivalent derived views, sourced from aaa_data_<season>.json. The
+  // shape mirrors baseball_data so HitterCard / PitcherCard render identically.
+  const aaaHittersFull = useMemo(() => disambiguate(aaaData?.hitters || []), [aaaData]);
+  const aaaPitchersFull = useMemo(() => disambiguate(aaaData?.pitchers || []), [aaaData]);
+  const aaaHitterNames = useMemo(() => aaaHittersFull.map(h => h.displayName).sort(), [aaaHittersFull]);
+  const aaaPitcherNames = useMemo(() => aaaPitchersFull.map(p => p.displayName).sort(), [aaaPitchersFull]);
+  const curAaaHitter  = useMemo(() => aaaHittersFull.find(h => h.displayName === selectedHitter)  || null, [aaaHittersFull, selectedHitter]);
+  const curAaaPitcher = useMemo(() => aaaPitchersFull.find(p => p.displayName === selectedPitcher) || null, [aaaPitchersFull, selectedPitcher]);
+
   const pipelineReady = data && !loading && !error;
+  const aaaReady = !!aaaData;
 
   // Helper to check if tab is active (handles dropdown sub-items)
   const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_counts", "hitter_game", "hitter_season", "hitter_counts"].includes(id);
+  const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
+  const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
   const isLeaderboardTab = (id) => ["hitter_lb", "pitcher_lb"].includes(id);
   const isTabActive = (tabId) => {
     if (tabId === "summaries") return isSummaryTab(tab);
     if (tabId === "leaderboard") return isLeaderboardTab(tab);
+    if (tabId === "hitter") return isHitterTab(tab);
+    if (tabId === "pitcher") return isPitcherTab(tab);
     return tab === tabId;
   };
 
@@ -343,11 +380,11 @@ function BaseballApp() {
           </select>
 
           {/* Player Selector (for card views) */}
-          {(tab === "hitter" || tab === "pitcher" || tab === "fielder") && (
+          {(isHitterTab(tab) || isPitcherTab(tab) || tab === "fielder") && (
             <select
-              value={tab === "pitcher" ? (selectedPitcher || "") : tab === "fielder" ? (selectedFielder || "") : (selectedHitter || "")}
+              value={isPitcherTab(tab) ? (selectedPitcher || "") : tab === "fielder" ? (selectedFielder || "") : (selectedHitter || "")}
               onChange={e => {
-                if (tab === "pitcher") setSelectedPitcher(e.target.value);
+                if (isPitcherTab(tab)) setSelectedPitcher(e.target.value);
                 else if (tab === "fielder") setSelectedFielder(e.target.value);
                 else setSelectedHitter(e.target.value);
               }}
@@ -364,7 +401,11 @@ function BaseballApp() {
                 fontFamily: "inherit",
               }}
             >
-              {(tab === "pitcher" ? pitcherNames : tab === "fielder" ? fielderNames : hitterNames).map(n => (
+              {(tab === "pitcher" ? pitcherNames
+                 : tab === "pitcher_aaa" ? aaaPitcherNames
+                 : tab === "hitter_aaa"  ? aaaHitterNames
+                 : tab === "fielder"     ? fielderNames
+                 : hitterNames).map(n => (
                 <option key={n} value={n}>{n}</option>
               ))}
             </select>
@@ -372,7 +413,7 @@ function BaseballApp() {
 
           <ThemeToggle />
 
-          {tab !== "hitter" && tab !== "pitcher" && tab !== "fielder" && (
+          {!isHitterTab(tab) && !isPitcherTab(tab) && tab !== "fielder" && (
             <div style={{
               fontSize: 10,
               color: t.textFaint,
@@ -417,6 +458,32 @@ function BaseballApp() {
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
               {loading ? `Loading ${season} data...` : `No pipeline data for ${season}. Run: python3 baseball_pipeline.py ./public ${season}`}
+            </div>
+          )
+        )}
+        {tab === "hitter_aaa" && (
+          aaaReady ? (
+            <HitterCard
+              player={curAaaHitter}
+              season={season}
+              allHitters={aaaHittersFull}
+            />
+          ) : (
+            <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
+              No AAA data for {season}. Run: python3 baseball_pipeline.py ./public {season}
+            </div>
+          )
+        )}
+        {tab === "pitcher_aaa" && (
+          aaaReady ? (
+            <PitcherCard
+              player={curAaaPitcher}
+              season={season}
+              allPitchers={aaaPitchersFull}
+            />
+          ) : (
+            <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
+              No AAA data for {season}. Run: python3 baseball_pipeline.py ./public {season}
             </div>
           )
         )}
