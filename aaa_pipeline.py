@@ -507,6 +507,30 @@ def _norm_fg_player_id(df):
     return df
 
 
+# MLB team abbreviations as they appear in FanGraphs' Team column. Used to
+# strip MLB-only rows from the AAA FG MiLB scrape — fg's lg=14,11 filter
+# doesn't reliably exclude a player's MLB row when they've split levels.
+_MLB_TEAM_ABBRS = {
+    "ARI", "ATL", "BAL", "BOS", "CHC", "CHW", "CIN", "CLE", "COL", "DET",
+    "HOU", "KCR", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", "NYY", "OAK",
+    "ATH", "PHI", "PIT", "SDP", "SEA", "SFG", "STL", "TBR", "TEX", "TOR",
+    "WSN", "WSH", "KC", "TB", "SD", "SF", "CWS", "AZ",
+}
+
+
+def _strip_mlb_rows(df, label):
+    """FG MiLB scrape can include MLB rows for players who split levels.
+    Drop any row whose Team value is a known MLB team abbreviation."""
+    if df is None or df.empty or "Team" not in df.columns:
+        return df
+    before = len(df)
+    df = df[~df["Team"].astype(str).str.strip().isin(_MLB_TEAM_ABBRS)].reset_index(drop=True)
+    dropped = before - len(df)
+    if dropped:
+        print(f"    {label}: stripped {dropped} MLB-team rows ({before} → {len(df)})")
+    return df
+
+
 def _attach_player_id(df, name_to_mlbamid):
     """Add a player_id column to df using either xMLBAMID directly or by
     name-matching against the Prospect Savant map."""
@@ -542,6 +566,7 @@ def fetch_fg_milb_batting_ld(year, name_to_mlbamid=None):
         return None
     print(f"  Fetching FanGraphs MiLB batting LD% ({year})...")
     df = _fg_milb_fetch(s, year, stats="bat", type_=2)
+    df = _strip_mlb_rows(df, "LD%")
     df = _attach_player_id(df, name_to_mlbamid)
     if df is None or "player_id" not in df.columns or df["player_id"].isna().all():
         print("    ⚠ couldn't attach player_id to any FG row")
@@ -564,6 +589,7 @@ def fetch_fg_milb_pitching_fip(year, name_to_mlbamid=None):
         return None
     print(f"  Fetching FanGraphs MiLB pitching FIP ({year})...")
     df = _fg_milb_fetch(s, year, stats="pit", type_=1)
+    df = _strip_mlb_rows(df, "FIP")
     df = _attach_player_id(df, name_to_mlbamid)
     if df is None or "player_id" not in df.columns or df["player_id"].isna().all():
         print("    ⚠ couldn't attach player_id to any FG row")
