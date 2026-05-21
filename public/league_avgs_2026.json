@@ -34,11 +34,11 @@
       "extension": 6.52
     },
     "FS": {
-      "count": 752,
+      "count": 751,
       "velo": 86.5,
-      "spin": 1428,
-      "zone_pct": 30.7,
-      "whiff_pct": 36.5,
+      "spin": 1429,
+      "zone_pct": 30.8,
+      "whiff_pct": 36.6,
       "extension": 6.57
     },
     "SI": {
@@ -58,13 +58,13 @@
       "extension": 6.4
     },
     "ST": {
-      "count": 1933,
+      "count": 1934,
       "velo": 83.1,
       "spin": 2597,
       "zone_pct": 37.1,
-      "whiff_pct": 29.1,
+      "whiff_pct": 29.0,
       "extension": 6.26
     }
   },
-  "generated_at": "2026-05-20 12:36:55 UTC"
+  "generated_at": "2026-05-21 12:55:56 UTC"
 }
