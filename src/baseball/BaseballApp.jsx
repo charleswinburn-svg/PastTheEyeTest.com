@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import HitterCard from "./HitterCard.jsx";
 import PitcherCard from "./PitcherCard.jsx";
 import FielderCard from "./FielderCard.jsx";
+import PitchModelingLeaderboard from "./PitchModelingLeaderboard.jsx";
 import Summaries from "./Summaries.jsx";
 import RaceToTwoStrikes from "./RaceToTwoStrikes.jsx";
 import EVLAChart from "./EVLAChart.jsx";
@@ -74,6 +75,7 @@ const TABS = [
     dropdown: [
       { id: "hitter_lb",  label: "Hitter" },
       { id: "pitcher_lb", label: "Pitcher" },
+      { id: "pitch_modeling_lb", label: "Pitch Modeling" },
     ]
   },
   { id: "team_plots", label: "TEAM PLOTS" },
@@ -219,7 +221,7 @@ function BaseballApp() {
   const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_counts", "hitter_game", "hitter_season", "hitter_counts"].includes(id);
   const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
   const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
-  const isLeaderboardTab = (id) => ["hitter_lb", "pitcher_lb"].includes(id);
+  const isLeaderboardTab = (id) => ["hitter_lb", "pitcher_lb", "pitch_modeling_lb"].includes(id);
   const isTabActive = (tabId) => {
     if (tabId === "summaries") return isSummaryTab(tab);
     if (tabId === "leaderboard") return isLeaderboardTab(tab);
@@ -526,6 +528,9 @@ function BaseballApp() {
               {loading ? `Loading ${season} data...` : `No pipeline data for ${season}.`}
             </div>
           )
+        )}
+        {tab === "pitch_modeling_lb" && (
+          <PitchModelingLeaderboard season={season} pitchers={pitchersFull} />
         )}
         {tab === "team_plots" && (
           <TeamScatter season={season} hitters={hittersFull} iswingData={iswingData} />
