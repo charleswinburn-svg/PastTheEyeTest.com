@@ -683,10 +683,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
   // Live Pitch+ scoring: send loaded pitches to /score_aggregate, which normalizes
   // at the pitcher×pitch-type level (same scale as /leaderboard pre-computed values).
-  // Pitches are grouped by ORIGINAL pitch type before sending so the server's
-  // model-input aliasing (FO→FS, CS→CU) doesn't collapse distinct types into one
-  // response bucket. Each group is sent three times (all / vs-LHB / vs-RHB) to
-  // feed PlatoonUsageBars per-handedness Pitch+.
+  // Three parallel requests: all pitches (pitch table), vs-LHB only, vs-RHB only
+  // (the latter two feed PlatoonUsageBars per-handedness Pitch+).
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -716,11 +714,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           strikeZoneTop: p.szTop,
           strikeZoneBottom: p.szBot,
           coordinates: {
-            // MLB Stats API returns pfxX/pfxZ in INCHES; model trained on
-            // Statcast feet — divide by 12. (pX, pZ, x0, z0, vX0, etc. are
-            // already in feet in the same payload.)
-            pfxX: p.pfxX_raw != null ? p.pfxX_raw / 12 : null,
-            pfxZ: p.pfxZ_raw != null ? p.pfxZ_raw / 12 : null,
+            pfxX: p.pfxX_raw ?? null,
+            pfxZ: p.pfxZ_raw ?? null,
             pX: p.pX, pZ: p.pZ,
             x0: p.relX, z0: p.relHeight,
             vX0: p.vX0, vY0: p.vY0, vZ0: p.vZ0,
@@ -735,16 +730,15 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       );
       if (!eligible.length) { setPitchPlus(null); return; }
 
-      // Group by ORIGINAL pitch type so FO and FS (or CS and CU) stay in
-      // separate response buckets. Each group is one /score_aggregate call.
-      const groups = {};
-      for (const p of eligible) {
-        const origPt = p.pitchType;
-        if (!groups[origPt]) groups[origPt] = { all: [], L: [], R: [] };
-        const mp = makePitch(p);
-        groups[origPt].all.push(mp);
-        if (p.batSide === "L") groups[origPt].L.push(mp);
-        else if (p.batSide === "R") groups[origPt].R.push(mp);
+      const allPitches = eligible.map(makePitch);
+      const lPitches   = eligible.filter(p => p.batSide === "L").map(makePitch);
+      const rPitches   = eligible.filter(p => p.batSide === "R").map(makePitch);
+
+      // Map API-aliased codes (FO→FS, CS→CU) back to original pitch codes for output keys
+      const aliasedToOrig = {};
+      for (const p of allPitches) {
+        const apiCode = p.details.type.code;
+        if (!aliasedToOrig[apiCode]) aliasedToOrig[apiCode] = p._pitchType;
       }
 
       const post = (pitches) => {
@@ -756,41 +750,32 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         }).then(r => r.ok ? r.json() : null).catch(() => null);
       };
 
-      const groupEntries = Object.entries(groups);
-      const results = await Promise.all(
-        groupEntries.flatMap(([, g]) => [post(g.all), post(g.L), post(g.R)])
-      );
+      const [allData, lData, rData] = await Promise.all([
+        post(allPitches),
+        post(lPitches),
+        post(rPitches),
+      ]);
 
       if (cancelled) return;
 
-      // Each request contains exactly one ORIGINAL pitch type, so the response's
-      // by_pitch_type map has at most one bucket — grab it regardless of which
-      // aliased key the server used.
-      const firstBucket = (res) => {
-        const m = res?.by_pitch_type;
-        if (!m) return null;
-        const vals = Object.values(m);
-        return vals.length ? vals[0] : null;
-      };
+      const byType  = allData?.by_pitch_type || {};
+      const byTypeL = lData?.by_pitch_type   || {};
+      const byTypeR = rData?.by_pitch_type   || {};
 
       const round = (v) => v != null ? Math.round(v * 10) / 10 : null;
       const out = {};
-      for (let i = 0; i < groupEntries.length; i++) {
-        const [origPt] = groupEntries[i];
-        const allBucket = firstBucket(results[i * 3]);
-        const lBucket   = firstBucket(results[i * 3 + 1]);
-        const rBucket   = firstBucket(results[i * 3 + 2]);
-        if (!allBucket) continue;
+      for (const [apiPt, v] of Object.entries(byType)) {
+        const origPt = aliasedToOrig[apiPt] || apiPt;
         out[origPt] = {
-          stuffPlus:  round(allBucket.stuff),
-          locPlus:    round(allBucket.loc),
-          tunnelPlus: round(allBucket.tun),
-          pitchPlus:  round(allBucket.pitch),
-          L: { pitchPlus: round(lBucket?.pitch) },
-          R: { pitchPlus: round(rBucket?.pitch) },
+          stuffPlus:  round(v.stuff),
+          locPlus:    round(v.loc),
+          tunnelPlus: round(v.tun),
+          pitchPlus:  round(v.pitch),
+          L: { pitchPlus: round(byTypeL[apiPt]?.pitch) },
+          R: { pitchPlus: round(byTypeR[apiPt]?.pitch) },
         };
       }
-      console.log(`[Pitch+] Scored ${eligible.length} pitches across ${groupEntries.length} types via /score_aggregate:`, out);
+      console.log(`[Pitch+] Scored ${allPitches.length} pitches via /score_aggregate:`, out);
       setPitchPlus(out);
     })();
     return () => { cancelled = true; };
