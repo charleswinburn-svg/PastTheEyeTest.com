@@ -52,6 +52,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const [leagueAvgs, setLeagueAvgs] = useState(null);
   const [baselineAvgs, setBaselineAvgs] = useState(null);
   const [pitchPlus, setPitchPlus] = useState(null);
+  const [leaderboardPlus, setLeaderboardPlus] = useState(null);
 
   // ── Reclassification (session-only) ────────────────────────────────────
   // Two parallel maps: one for single-pitch overrides, one for bulk overrides
@@ -791,6 +792,49 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     return () => { cancelled = true; };
   }, [enrichedData, selectedPlayer, isPitcher, isAAA]);
 
+  // For Regular Season MLB season view, override per-type Plus values with
+  // pre-computed season aggregates from /leaderboard. Averaging per-pitch
+  // /score outputs uses per-pitch normalization (different mu/sd than the
+  // per-pitcher×type pool), so the averaged values are on the wrong scale.
+  // Pre-computed values from score_pitches.py use the correct scale.
+  // L/R per-handedness Pitch+ (platoon splits) are preserved from /score.
+  useEffect(() => {
+    if (seasonType !== "R" || isAAA || isGame || !selectedPlayer?.id) {
+      setLeaderboardPlus(null);
+      return;
+    }
+    let cancelled = false;
+    fetch(`https://pitch-plus-api.onrender.com/leaderboard?season=${currentSeason}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (cancelled || !data?.pitchers) return;
+        const entry = data.pitchers.find(p => p.player_id === Number(selectedPlayer.id));
+        if (!entry?.by_pitch_type) { setLeaderboardPlus(null); return; }
+        setLeaderboardPlus(entry.by_pitch_type);
+      })
+      .catch(() => setLeaderboardPlus(null));
+    return () => { cancelled = true; };
+  }, [seasonType, isAAA, isGame, selectedPlayer?.id, currentSeason]);
+
+  // Merge pre-computed Plus values over /score-averaged values.
+  // Precomputed wins on stuffPlus/locPlus/tunnelPlus/pitchPlus.
+  // /score wins on L/R splits (not in season aggregates).
+  const effectivePitchPlus = useMemo(() => {
+    if (!pitchPlus) return pitchPlus;
+    if (!leaderboardPlus) return pitchPlus;
+    const merged = { ...pitchPlus };
+    for (const [pt, pg] of Object.entries(leaderboardPlus)) {
+      merged[pt] = {
+        ...(merged[pt] || {}),
+        stuffPlus:  pg.stuff  ?? merged[pt]?.stuffPlus,
+        locPlus:    pg.loc    ?? merged[pt]?.locPlus,
+        tunnelPlus: pg.tun    ?? merged[pt]?.tunnelPlus,
+        pitchPlus:  pg.pitch  ?? merged[pt]?.pitchPlus,
+      };
+    }
+    return merged;
+  }, [pitchPlus, leaderboardPlus]);
+
   return (
     <div style={{ padding: "16px 20px" }}>
       <div style={{ display: "flex", gap: 2, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
@@ -926,7 +970,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           game={isGame ? selectedGame : null}
           season={currentSeason} seasonType={seasonType}
           isGame={isGame} isAAA={isAAA}
-          leagueAvgs={effectiveLeagueAvgs} pitchPlus={pitchPlus}
+          leagueAvgs={effectiveLeagueAvgs} pitchPlus={effectivePitchPlus}
           reclassifyMode={reclassifyMode}
           onPitchClick={(p) => setReclassifyTarget({ kind: "single", pitch: p })}
           onTypeClick={(type, count) => setReclassifyTarget({ kind: "bulk", type, count })}
