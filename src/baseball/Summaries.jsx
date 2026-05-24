@@ -681,37 +681,33 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
   const hasData = enrichedData && (isPitcher ? enrichedData.totalPitches > 0 : enrichedData.pas > 0);
 
-  // Live Pitch+ scoring: send loaded pitches to API, get back per-pitch grades
+  // Live Pitch+ scoring: send loaded pitches to /score_aggregate, which normalizes
+  // at the pitcher×pitch-type level (same scale as /leaderboard pre-computed values).
+  // Pitches are grouped by ORIGINAL pitch type before sending so the server's
+  // model-input aliasing (FO→FS, CS→CU) doesn't collapse distinct types into one
+  // response bucket. Each group is sent three times (all / vs-LHB / vs-RHB) to
+  // feed PlatoonUsageBars per-handedness Pitch+.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-    if (!isPitcher || !enrichedData?.pitches?.length || !selectedPlayer) {
-      setPitchPlus(null);
-      return;
-    }
-    let cancelled = false;
-    // Resolve pitcher hand. selectedPlayer.pitchHand is undefined for most
-    // pitchers (only set when loaded via WBC roster fetch), so we hit
-    // /people/{id} as a fallback. This used to default to R for everyone,
-    // which inflated Stuff+ for left-handed pitchers (the model treats
-    // matchup handedness asymmetrically).
-    let pitcherHand = selectedPlayer.pitchHand?.code;
-    if (pitcherHand !== "L" && pitcherHand !== "R") {
-      try {
-        const r = await fetch(`/mlb-api/api/v1/people/${selectedPlayer.id}`);
-        const j = await r.json();
-        pitcherHand = j?.people?.[0]?.pitchHand?.code || "R";
-      } catch { pitcherHand = "R"; }
-    }
-    const payload = enrichedData.pitches
-      .filter(p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN")
-      .map(p => ({
+      if (!isPitcher || !enrichedData?.pitches?.length || !selectedPlayer) {
+        setPitchPlus(null);
+        return;
+      }
+
+      let pitcherHand = selectedPlayer.pitchHand?.code;
+      if (pitcherHand !== "L" && pitcherHand !== "R") {
+        try {
+          const r = await fetch(`/mlb-api/api/v1/people/${selectedPlayer.id}`);
+          const j = await r.json();
+          pitcherHand = j?.people?.[0]?.pitchHand?.code || "R";
+        } catch { pitcherHand = "R"; }
+      }
+
+      const makePitch = (p) => ({
         pitcher_id: selectedPlayer.id,
         _stand: p.batSide || "R",
         _p_throws: pitcherHand,
-        // _pitchType preserves the original code so we can bucket FO and FS
-        // (or CS and CU) separately on the way back, even though the scoring
-        // API gets the family-aliased code in details.type.code below.
         _pitchType: p.pitchType,
         details: { type: { code: scorePitchCode(p.pitchType) } },
         pitchData: {
@@ -730,74 +726,78 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           },
           breaks: { spinRate: p.spin, spinDirection: p.spinDirection },
         },
-      }));
-    if (!payload.length) { setPitchPlus(null); return; }
+      });
 
-    fetch("https://pitch-plus-api.onrender.com/score", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // Score every pitch against MLB norms regardless of level — we deliberately
-      // don't pass `is_aaa` so AAA pitchers get the same Stuff+/Loc+/Tun+/Pitch+
-      // scale as MLB pitchers (directly comparable). AAA players still live
-      // outside baseball_data_<year>.json — only Summaries shows them, by
-      // fetching live from the MLB Stats API.
-      body: JSON.stringify({ pitches: payload }),
-    })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (cancelled || !data?.scores) return;
-        // Per-pitch scores come back in the same order as we sent them, so we
-        // can read each pitch's batter side from `payload[i]._stand` to bucket
-        // by handedness in addition to the overall aggregation.
-        const byType = {};
-        for (let i = 0; i < data.scores.length; i++) {
-          const s = data.scores[i];
-          const stand = (payload[i]?._stand === "L" || payload[i]?._stand === "R")
-            ? payload[i]._stand : null;
-          // Bucket by the original pitch code (FO stays FO, CS stays CS),
-          // not the aliased code the API echoes back.
-          const pt = payload[i]?._pitchType || s.pitch_type;
-          if (!byType[pt]) byType[pt] = {
-            stuff: { sum: 0, n: 0 }, loc: { sum: 0, n: 0 },
-            tunnel: { sum: 0, n: 0 }, pitch: { sum: 0, n: 0 },
-            L: { sum: 0, n: 0 }, R: { sum: 0, n: 0 },
-          };
-          const b = byType[pt];
-          if (s.stuff_plus != null) { b.stuff.sum += s.stuff_plus; b.stuff.n++; }
-          if (s.loc_plus != null) { b.loc.sum += s.loc_plus; b.loc.n++; }
-          if (s.tunnel_plus != null) { b.tunnel.sum += s.tunnel_plus; b.tunnel.n++; }
-          if (s.pitch_plus != null) {
-            b.pitch.sum += s.pitch_plus; b.pitch.n++;
-            if (stand) { b[stand].sum += s.pitch_plus; b[stand].n++; }
-          }
-        }
-        const round = (v) => Math.round(v * 10) / 10;
-        const out = {};
-        for (const [pt, v] of Object.entries(byType)) {
-          out[pt] = {
-            stuffPlus: v.stuff.n > 0 ? round(v.stuff.sum / v.stuff.n) : null,
-            locPlus: v.loc.n > 0 ? round(v.loc.sum / v.loc.n) : null,
-            tunnelPlus: v.tunnel.n > 0 ? round(v.tunnel.sum / v.tunnel.n) : null,
-            pitchPlus: v.pitch.n > 0 ? round(v.pitch.sum / v.pitch.n) : null,
-            // Per-handedness Pitch+ for platoon splits (PlatoonUsageBars uses these)
-            L: { pitchPlus: v.L.n > 0 ? round(v.L.sum / v.L.n) : null },
-            R: { pitchPlus: v.R.n > 0 ? round(v.R.sum / v.R.n) : null },
-          };
-        }
-        console.log(`[Pitch+] Scored ${data.scores.length} pitches:`, out);
-        setPitchPlus(out);
-      })
-      .catch(err => { console.warn("[Pitch+] API failed:", err); setPitchPlus(null); });
+      const eligible = enrichedData.pitches.filter(
+        p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN"
+      );
+      if (!eligible.length) { setPitchPlus(null); return; }
+
+      // Group by ORIGINAL pitch type so FO and FS (or CS and CU) stay in
+      // separate response buckets. Each group is one /score_aggregate call.
+      const groups = {};
+      for (const p of eligible) {
+        const origPt = p.pitchType;
+        if (!groups[origPt]) groups[origPt] = { all: [], L: [], R: [] };
+        const mp = makePitch(p);
+        groups[origPt].all.push(mp);
+        if (p.batSide === "L") groups[origPt].L.push(mp);
+        else if (p.batSide === "R") groups[origPt].R.push(mp);
+      }
+
+      const post = (pitches) => {
+        if (!pitches.length) return Promise.resolve(null);
+        return fetch("https://pitch-plus-api.onrender.com/score_aggregate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pitches }),
+        }).then(r => r.ok ? r.json() : null).catch(() => null);
+      };
+
+      const groupEntries = Object.entries(groups);
+      const results = await Promise.all(
+        groupEntries.flatMap(([, g]) => [post(g.all), post(g.L), post(g.R)])
+      );
+
+      if (cancelled) return;
+
+      // Each request contains exactly one ORIGINAL pitch type, so the response's
+      // by_pitch_type map has at most one bucket — grab it regardless of which
+      // aliased key the server used.
+      const firstBucket = (res) => {
+        const m = res?.by_pitch_type;
+        if (!m) return null;
+        const vals = Object.values(m);
+        return vals.length ? vals[0] : null;
+      };
+
+      const round = (v) => v != null ? Math.round(v * 10) / 10 : null;
+      const out = {};
+      for (let i = 0; i < groupEntries.length; i++) {
+        const [origPt] = groupEntries[i];
+        const allBucket = firstBucket(results[i * 3]);
+        const lBucket   = firstBucket(results[i * 3 + 1]);
+        const rBucket   = firstBucket(results[i * 3 + 2]);
+        if (!allBucket) continue;
+        out[origPt] = {
+          stuffPlus:  round(allBucket.stuff),
+          locPlus:    round(allBucket.loc),
+          tunnelPlus: round(allBucket.tun),
+          pitchPlus:  round(allBucket.pitch),
+          L: { pitchPlus: round(lBucket?.pitch) },
+          R: { pitchPlus: round(rBucket?.pitch) },
+        };
+      }
+      console.log(`[Pitch+] Scored ${eligible.length} pitches across ${groupEntries.length} types via /score_aggregate:`, out);
+      setPitchPlus(out);
     })();
     return () => { cancelled = true; };
   }, [enrichedData, selectedPlayer, isPitcher, isAAA]);
 
   // For Regular Season MLB season view, override per-type Plus values with
-  // pre-computed season aggregates from /leaderboard. Averaging per-pitch
-  // /score outputs uses per-pitch normalization (different mu/sd than the
-  // per-pitcher×type pool), so the averaged values are on the wrong scale.
-  // Pre-computed values from score_pitches.py use the correct scale.
-  // L/R per-handedness Pitch+ (platoon splits) are preserved from /score.
+  // pre-computed season aggregates from /leaderboard. These cover the full
+  // season corpus and are the authoritative source for RS pitcher grades.
+  // L/R per-handedness Pitch+ (platoon splits) are preserved from /score_aggregate.
   useEffect(() => {
     if (seasonType !== "R" || isAAA || isGame || !selectedPlayer?.id) {
       setLeaderboardPlus(null);
@@ -816,9 +816,9 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     return () => { cancelled = true; };
   }, [seasonType, isAAA, isGame, selectedPlayer?.id, currentSeason]);
 
-  // Merge pre-computed Plus values over /score-averaged values.
-  // Precomputed wins on stuffPlus/locPlus/tunnelPlus/pitchPlus.
-  // /score wins on L/R splits (not in season aggregates).
+  // Merge pre-computed Plus values over /score_aggregate values.
+  // Leaderboard wins on stuffPlus/locPlus/tunnelPlus/pitchPlus (full season corpus).
+  // /score_aggregate wins on L/R splits (not in season aggregates).
   const effectivePitchPlus = useMemo(() => {
     if (!pitchPlus) return pitchPlus;
     if (!leaderboardPlus) return pitchPlus;
