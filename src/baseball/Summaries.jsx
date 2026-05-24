@@ -745,18 +745,32 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         else if (p.batSide === "R") groups[origPt].R.push(mp);
       }
 
-      const post = (pitches) => {
+      // DEBUG: log sent codes vs response keys to verify server-side bucketing.
+      // Temporary diagnostic — see /root/.claude/plans/how-would-i-go-stateful-sundae.md.
+      const post = (label, pitches) => {
         if (!pitches.length) return Promise.resolve(null);
         return fetch("https://pitch-plus-api.onrender.com/score_aggregate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pitches }),
-        }).then(r => r.ok ? r.json() : null).catch(() => null);
+        }).then(async r => {
+          const j = r.ok ? await r.json() : null;
+          console.log("[score_aggregate]", label,
+            "sent codes:", [...new Set(pitches.map(p => p.details.type.code))],
+            "n:", pitches.length,
+            "response keys:", Object.keys(j?.by_pitch_type || {}),
+            "values:", j?.by_pitch_type);
+          return j;
+        }).catch(() => null);
       };
 
       const groupEntries = Object.entries(groups);
       const results = await Promise.all(
-        groupEntries.flatMap(([, g]) => [post(g.all), post(g.L), post(g.R)])
+        groupEntries.flatMap(([origPt, g]) => [
+          post(`${origPt}/all`, g.all),
+          post(`${origPt}/L`, g.L),
+          post(`${origPt}/R`, g.R),
+        ])
       );
 
       if (cancelled) return;
