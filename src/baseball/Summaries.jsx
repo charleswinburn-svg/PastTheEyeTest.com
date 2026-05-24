@@ -720,9 +720,9 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           strikeZoneTop: p.szTop,
           strikeZoneBottom: p.szBot,
           coordinates: {
-            // MLB Stats API returns pfxX/pfxZ in INCHES; model trained in feet
-            pfxX: p.pfxX_raw != null ? p.pfxX_raw / 12 : null,
-            pfxZ: p.pfxZ_raw != null ? p.pfxZ_raw / 12 : null,
+            // pitchData.coordinates uses feet throughout (same as pX, pZ, x0, z0, vX0, etc.)
+            pfxX: p.pfxX_raw ?? null,
+            pfxZ: p.pfxZ_raw ?? null,
             pX: p.pX, pZ: p.pZ,
             x0: p.relX, z0: p.relHeight,
             vX0: p.vX0, vY0: p.vY0, vZ0: p.vZ0,
