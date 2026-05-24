@@ -1,43 +1,9 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
-import { fetchPlayByPlay, extractPitcherData, scorePitchCode } from "./mlbApi.js";
 import RollingChart from "./RollingChart.jsx";
 
 const PITCH_PLUS_API = "https://pitch-plus-api.onrender.com";
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-// Run promises in batches so we don't fire 30+ MLB Stats API requests at once
-// (which gets us throttled). 6 in flight is a good balance: ~5x faster than
-// serial, no 429s observed.
-async function batchedAll(items, fn, concurrency = 6) {
-  const out = new Array(items.length);
-  let i = 0;
-  async function worker() {
-    while (i < items.length) {
-      const idx = i++;
-      try { out[idx] = await fn(items[idx], idx); }
-      catch { out[idx] = null; }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
-  return out;
-}
-
-// Linear-interpolation percentile of `value` within a sorted ascending array.
-function percentileRank(value, sorted) {
-  if (value == null || !sorted?.length) return null;
-  let lo = 0, hi = sorted.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (sorted[mid] < value) lo = mid + 1;
-    else hi = mid;
-  }
-  let countEq = 0;
-  while (lo + countEq < sorted.length && sorted[lo + countEq] === value) countEq++;
-  const rank = (lo + countEq / 2) / sorted.length;
-  return Math.round(rank * 1000) / 10; // one decimal
-}
 
 export default function PitcherCard({ player, season, allPitchers, isAAA = false }) {
   const { theme: t } = useTheme();
@@ -45,204 +11,31 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
 
-  // Compute Stuff+/Loc+/Tun+/Pitch+ live from MLB Stats API to guarantee an
-  // exact match with the Summary card. Same data path: game log → per-game
-  // PBP → extractPitcherData → POST /score → average per pitch type → weight-
-  // average by usage. Then rank against the cached pitcher_grades distribution,
-  // filtered to percentile-card-eligible pitchers (allPitchers prop).
-  //
-  // This is slow (~30-60s) because we're fetching every game's PBP. The user
-  // explicitly preferred accuracy over speed, so we just show a spinner.
+  // Read pre-computed Stuff+/Loc+/Tun+/Pitch+ from the season summaries via
+  // pitch-plus-api's /pitcher_percentiles endpoint. One network call; the
+  // server has already aggregated and ranked against qualified pitchers using
+  // the same pitch_plus_norm.json the summary cards use, so the values match
+  // by construction.
   useEffect(() => {
     setPitchPlusData(null);
     if (!player?.player_id) return;
     let cancelled = false;
-
-    async function compute() {
-      try {
-        console.log("[Pitch+] effect fired", { player_id: player.player_id, name: player.name, season, type: typeof season });
-
-        // ── 1. Game log for the season — REGULAR SEASON ONLY ──
-        // We fetch directly (rather than reusing fetchGameLog from mlbApi.js)
-        // because that helper hardcodes gameType=S,E,R,P,W which would mix
-        // spring training and exhibition pitches into the modeling values.
-        // Modeling vals should only reflect regular-season pitches.
-        console.log("[Pitch+] fetching regular-season game log...");
-        // sportId=1 for MLB, 11 for AAA — lets the same scoring path run
-        // against minor-league games for the AAA card.
-        const sportId = isAAA ? 11 : 1;
-        const gameLogUrl = `/mlb-api/api/v1/people/${player.player_id}/stats?stats=gameLog&group=pitching&season=${season}&gameType=R&sportId=${sportId}`;
-        const gameLogResp = await fetch(gameLogUrl);
-        if (!gameLogResp.ok) {
-          console.warn("[Pitch+] gameLog fetch failed:", gameLogResp.status);
-          return;
-        }
-        const gameLogJson = await gameLogResp.json();
-        const games = gameLogJson.stats?.[0]?.splits || [];
-        console.log("[Pitch+] got games:", games.length, "first:", games[0]);
-        if (cancelled || !games.length) {
-          console.warn("[Pitch+] No regular-season games for", player.name);
-          return;
-        }
-
-        // ── 2. Pull PBP for every game in parallel batches ──
-        // splits from fetchGameLog have shape { game: { gamePk, ... }, stat: {...} }
-        // — the gamePk lives one level deeper, not on the split itself.
-        const gamePks = games.map(g => g.game?.gamePk).filter(Boolean);
-        console.log("[Pitch+] gamePks:", gamePks.length);
-        if (cancelled || !gamePks.length) return;
-        const pbps = await batchedAll(
-          gamePks,
-          pk => fetchPlayByPlay(pk).catch(() => null),
-          6,
-        );
-        console.log("[Pitch+] pbps fetched:", pbps.filter(Boolean).length);
-        if (cancelled) return;
-
-        // ── 3. Extract pitches for this pitcher across every game ──
-        // Also capture pitcher hand from matchup info (needed for /score and
-        // not available on the baseball_data player object).
-        const allPitches = [];
-        let pitcherHand = "R";
-        for (const pbp of pbps) {
-          if (!pbp) continue;
-          const data = extractPitcherData(pbp, player.player_id);
-          if (data?.pitches?.length) allPitches.push(...data.pitches);
-          // Pull pitcher hand from any play that matches this pitcher.
-          for (const pl of (pbp.allPlays || [])) {
-            if (pl.matchup?.pitcher?.id === player.player_id) {
-              const code = pl.matchup?.pitchHand?.code;
-              if (code === "L" || code === "R") { pitcherHand = code; break; }
-            }
-          }
-        }
-        console.log("[Pitch+] total pitches extracted:", allPitches.length, "throws:", pitcherHand);
-        if (!allPitches.length) {
-          console.warn("[Pitch+] No pitches found for", player.name);
-          return;
-        }
-
-        // ── 4. Build the /score payload — same nested MLB Stats API shape that
-        // server.py's map_pitch() expects. Critical bits:
-        //   * pitch_type goes inside details.type.code (NOT a top-level field)
-        //   * release/movement/location lives under pitchData.coordinates.* with
-        //     camelCase keys (pX, pZ, vX0, aX, …)
-        //   * pfxX/pfxZ are in INCHES from MLB Stats API; the model trains in
-        //     FEET, so divide by 12 here (matches what Summaries does)
-        //   * spin lives under pitchData.breaks
-        const scorePayload = allPitches
-          .filter(p =>
-            p.pitchType && p.pitchType !== "UN" &&
-            p.velo != null && p.pX != null && p.pZ != null,
-          )
-          .map(p => ({
-            pitcher_id: player.player_id,
-            _stand: p.batSide || "R",
-            _p_throws: pitcherHand,
-            details: { type: { code: scorePitchCode(p.pitchType) } },
-            pitchData: {
-              startSpeed: p.velo,
-              extension: p.extension,
-              strikeZoneTop: p.szTop,
-              strikeZoneBottom: p.szBot,
-              coordinates: {
-                pfxX: p.pfxX_raw != null ? p.pfxX_raw / 12 : null,
-                pfxZ: p.pfxZ_raw != null ? p.pfxZ_raw / 12 : null,
-                pX: p.pX, pZ: p.pZ,
-                x0: p.relX, z0: p.relHeight,
-                vX0: p.vX0, vY0: p.vY0, vZ0: p.vZ0,
-                aX: p.aX, aY: p.aY, aZ: p.aZ,
-              },
-              breaks: { spinRate: p.spin, spinDirection: p.spinDirection },
-            },
-          }));
-
-        if (!scorePayload.length) {
-          console.warn("[Pitch+] empty score payload after filtering");
-          return;
-        }
-        console.log("[Pitch+] POST /score with", scorePayload.length, "pitches");
-
-        // ── 5. Score every pitch ──
-        const r = await fetch(`${PITCH_PLUS_API}/score`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pitches: scorePayload }),
-        });
-        console.log("[Pitch+] /score response:", r.status);
-        if (cancelled || !r.ok) {
-          console.warn("[Pitch+] /score failed:", r.status, await r.text().catch(() => ""));
-          return;
-        }
-        const { scores } = await r.json();
-        console.log("[Pitch+] got scores:", scores?.length);
-        if (!scores?.length) return;
-
-        // ── 6. Aggregate ──
-        // For each pitch type: average the per-pitch Plus values.
-        // For pitcher overall: weight-average those per-type means by usage.
-        // Algebraically equivalent to averaging directly across all pitches.
-        const overallSums = { stuff: 0, loc: 0, tun: 0, pitch: 0 };
-        const overallCounts = { stuff: 0, loc: 0, tun: 0, pitch: 0 };
-        for (const s of scores) {
-          if (s.stuff_plus  != null) { overallSums.stuff += s.stuff_plus;  overallCounts.stuff++; }
-          if (s.loc_plus    != null) { overallSums.loc   += s.loc_plus;    overallCounts.loc++;   }
-          if (s.tunnel_plus != null) { overallSums.tun   += s.tunnel_plus; overallCounts.tun++;   }
-          if (s.pitch_plus  != null) { overallSums.pitch += s.pitch_plus;  overallCounts.pitch++; }
-        }
-        const live = {
-          stuff_plus: overallCounts.stuff ? overallSums.stuff / overallCounts.stuff : null,
-          loc_plus:   overallCounts.loc   ? overallSums.loc   / overallCounts.loc   : null,
-          tun_plus:   overallCounts.tun   ? overallSums.tun   / overallCounts.tun   : null,
-          pitch_plus: overallCounts.pitch ? overallSums.pitch / overallCounts.pitch : null,
-        };
-
-        // ── 7. Pull cached distribution and rank against eligible set ──
-        // We only need population values to rank; the live value is what we display.
-        console.log("[Pitch+] live overall:", live);
-        console.log("[Pitch+] fetching distribution...");
-        const distR = await fetch(`${PITCH_PLUS_API}/pitcher_grades_distribution?season=${season}`);
-        console.log("[Pitch+] distribution response:", distR.status);
-        if (cancelled) return;
-        const distJson = distR.ok ? await distR.json() : null;
-        const grades = distJson?.grades || {};
-        console.log("[Pitch+] grades loaded:", Object.keys(grades).length, "pitchers");
-
-        const eligibleIds = new Set(
-          (allPitchers || []).map(p => String(p.player_id)).filter(Boolean),
-        );
-        const filtered = Object.entries(grades).filter(([pid]) => eligibleIds.has(pid));
-        console.log("[Pitch+] eligible filtered:", filtered.length);
-
-        const percentilesAgainst = (key) => {
-          const vals = filtered
-            .map(([, g]) => g[key])
-            .filter(v => v != null)
-            .sort((a, b) => a - b);
-          return vals;
-        };
-
-        const out = {
+    fetch(`${PITCH_PLUS_API}/pitcher_percentiles/${player.player_id}?season=${season}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        if (cancelled || !j || j.error) return;
+        setPitchPlusData({
           pitcher_id: player.player_id,
           season,
-          n_pitches: scores.length,
-          pool_size: filtered.length,
-          stuff_plus: { value: live.stuff_plus, percentile: percentileRank(live.stuff_plus, percentilesAgainst("stuff_plus")) },
-          loc_plus:   { value: live.loc_plus,   percentile: percentileRank(live.loc_plus,   percentilesAgainst("loc_plus")) },
-          tun_plus:   { value: live.tun_plus,   percentile: percentileRank(live.tun_plus,   percentilesAgainst("tun_plus")) },
-          pitch_plus: { value: live.pitch_plus, percentile: percentileRank(live.pitch_plus, percentilesAgainst("pitch_plus")) },
-        };
-        console.log("[Pitch+] final:", out);
-
-        if (!cancelled) setPitchPlusData(out);
-      } catch (err) {
-        console.warn("[Pitch+] Live fetch failed:", err);
-      }
-    }
-
-    compute();
+          stuff_plus: { value: j.stuff_plus?.value, percentile: j.stuff_plus?.percentile },
+          loc_plus:   { value: j.loc_plus?.value,   percentile: j.loc_plus?.percentile },
+          tun_plus:   { value: j.tun_plus?.value,   percentile: j.tun_plus?.percentile },
+          pitch_plus: { value: j.pitch_plus?.value, percentile: j.pitch_plus?.percentile },
+        });
+      })
+      .catch(() => {});
     return () => { cancelled = true; };
-  }, [player?.player_id, season, allPitchers]);
+  }, [player?.player_id, season, isAAA]);
 
   const saveCard = useCallback(async () => {
     if (!player) return;
