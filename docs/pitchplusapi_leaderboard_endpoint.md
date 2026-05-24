@@ -35,13 +35,15 @@ and returns one record per pitcher with overall + per-pitch-type values.
 
 ## Drop-in handler
 
-Paste this into `pitchplusapi/server.py`. Adjust `SEASON_DIR` to point at the
-directory where `score_pitches.py --output-dir` wrote the season aggregates.
+`score_pitches.py write_season_aggregates()` already computes
+`stuff_plus / loc_plus / tun_plus / pitch_plus` per pitcher AND per
+(pitcher, pitch_type) using `pitch_plus_norm.json` — the same norms the
+summary cards use. The endpoint just reads those fields directly. Do NOT
+re-z-score against a pitcher-level pool — that produces different stds
+and the leaderboard numbers won't match the summary cards.
 
 ```python
 import json
-import math
-import statistics
 from pathlib import Path
 from functools import lru_cache
 from flask import jsonify, request  # adapt to fastapi if needed
@@ -49,21 +51,6 @@ from flask import jsonify, request  # adapt to fastapi if needed
 SEASON_DIR = Path("./output/season")   # ← where score_pitches.py writes
 MIN_N_OVERALL = 200                    # pitches needed to appear in overall pool
 MIN_N_PER_PITCH_TYPE = 30              # pitches needed to be ranked within a type
-
-
-def _to_plus_pool(per100_values):
-    """Return (mu, sd) for converting per-100 xRV to + scale.
-    + value = 100 - z*10 (lower xRV is better, so invert)."""
-    if len(per100_values) < 2:
-        return 0.0, 1.0
-    mu = statistics.mean(per100_values)
-    sd = statistics.pstdev(per100_values)
-    return mu, (sd if sd > 0 else 1.0)
-
-
-def _z_to_plus(v, mu, sd):
-    z = (v - mu) / sd if sd else 0
-    return round(100 - z * 10, 1)
 
 
 @lru_cache(maxsize=8)
@@ -77,44 +64,30 @@ def _build_leaderboard(season: int) -> dict:
     overall_raw = json.loads(overall_path.read_text())
     pt_raw      = json.loads(pt_path.read_text())
 
-    # ── Overall + scale: pool across qualified pitchers, per metric.
-    overall_qualified = {
-        pid: g for pid, g in overall_raw.items() if g.get("n", 0) >= MIN_N_OVERALL
-    }
-    overall_pools = {}
-    for metric in ("xRV", "stuff", "loc", "tun"):
-        vals = [g[metric] for g in overall_qualified.values()]
-        overall_pools[metric] = _to_plus_pool(vals)
-
+    # ── Overall: read pre-computed *_plus fields straight from the JSON.
     overall_plus = {}
-    for pid, g in overall_qualified.items():
+    for pid, g in overall_raw.items():
+        if g.get("n", 0) < MIN_N_OVERALL:
+            continue
         overall_plus[pid] = {
-            "stuff": _z_to_plus(g["stuff"], *overall_pools["stuff"]),
-            "loc":   _z_to_plus(g["loc"],   *overall_pools["loc"]),
-            "tun":   _z_to_plus(g["tun"],   *overall_pools["tun"]),
-            "pitch": _z_to_plus(g["xRV"],   *overall_pools["xRV"]),
+            "stuff": g.get("stuff_plus"),
+            "loc":   g.get("loc_plus"),
+            "tun":   g.get("tun_plus"),
+            "pitch": g.get("pitch_plus"),
             "n":     int(g["n"]),
         }
 
-    # ── Per-pitch-type + scale: separate pool for each pitch type.
-    by_pt_groups = {}
+    # ── Per-pitch-type: same — read pre-computed *_plus per (pitcher, pt).
+    by_pt_plus = {}      # {pid: {pt: { stuff, loc, tun, pitch, n }}}
     for pid, types in pt_raw.items():
         for pt, g in types.items():
             if g.get("n", 0) < MIN_N_PER_PITCH_TYPE:
                 continue
-            by_pt_groups.setdefault(pt, []).append((pid, g))
-
-    by_pt_plus = {}      # {pid: {pt: { stuff, loc, tun, pitch, n }}}
-    for pt, rows in by_pt_groups.items():
-        pools = {}
-        for metric in ("xRV", "stuff", "loc", "tun"):
-            pools[metric] = _to_plus_pool([g[metric] for _, g in rows])
-        for pid, g in rows:
             by_pt_plus.setdefault(pid, {})[pt] = {
-                "stuff": _z_to_plus(g["stuff"], *pools["stuff"]),
-                "loc":   _z_to_plus(g["loc"],   *pools["loc"]),
-                "tun":   _z_to_plus(g["tun"],   *pools["tun"]),
-                "pitch": _z_to_plus(g["xRV"],   *pools["xRV"]),
+                "stuff": g.get("stuff_plus"),
+                "loc":   g.get("loc_plus"),
+                "tun":   g.get("tun_plus"),
+                "pitch": g.get("pitch_plus"),
                 "n":     int(g["n"]),
             }
 
@@ -139,6 +112,14 @@ def leaderboard():
         return jsonify({"error": f"season out of range: {season}"}), 400
     return jsonify(_build_leaderboard(season))
 ```
+
+## Debugging blank pitch-type cells
+
+If `Overall` is populated but FF/SL/CH/etc. are all blanks:
+
+1. `curl 'https://pitch-plus-api.onrender.com/leaderboard?season=2026' | python3 -m json.tool | head -50` — confirm `by_pitch_type` is empty `{}` for every pitcher (server-side bug) vs. populated with values the React app fails to render (client-side bug).
+2. If `by_pitch_type` is empty: open `pitcher_pitch_type_grades_2026.json` and confirm each entry has `stuff_plus / loc_plus / tun_plus / pitch_plus`. If they're missing, the file was written by an older `score_pitches.py` that didn't compute per-type plus values — rerun the pipeline.
+3. If the file has the fields but the endpoint still returns `{}`: the server is still using the old `_to_plus_pool`/`_z_to_plus` path with a `MIN_N_PER_PITCH_TYPE` that filtered everything out, OR the pid keys in `pt_raw` don't match `overall_raw` (string vs. int). Use the version above which reads directly and matches pids as strings.
 
 ## CORS
 
