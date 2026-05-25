@@ -795,29 +795,26 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         setPitchPlus(out);
       };
 
-      // Game view: prefer Savant CSV data (same source as leaderboard batch pipeline)
-      if (isGame) {
-        if (savantData?.length > 0) {
-          const pitcherRows = savantData.filter(
-            r => String(r.pitcher) === String(selectedPlayer.id) &&
-                 r.pitch_type && r.pitch_type !== "UN" && r.pitch_type !== "PO" &&
-                 r.release_speed && r.plate_x && r.plate_z
+      // Game view: prefer Savant CSV data (same source as leaderboard batch pipeline).
+      // If Savant is not yet published (live/very recent game), fall through to MLB Stats API path.
+      if (isGame && savantData?.length > 0) {
+        const pitcherRows = savantData.filter(
+          r => String(r.pitcher) === String(selectedPlayer.id) &&
+               r.pitch_type && r.pitch_type !== "UN" && r.pitch_type !== "PO" &&
+               r.release_speed && r.plate_x && r.plate_z
+        );
+        if (pitcherRows.length > 0) {
+          await runScoring(
+            pitcherRows.map(makePitchSavant),
+            pitcherRows.filter(r => r.stand === "L").map(makePitchSavant),
+            pitcherRows.filter(r => r.stand === "R").map(makePitchSavant),
           );
-          if (pitcherRows.length > 0) {
-            await runScoring(
-              pitcherRows.map(makePitchSavant),
-              pitcherRows.filter(r => r.stand === "L").map(makePitchSavant),
-              pitcherRows.filter(r => r.stand === "R").map(makePitchSavant),
-            );
-            return;
-          }
+          return;
         }
-        // Savant data not yet available — leaderboard grades will show via effectivePitchPlus
-        setPitchPlus(null);
-        return;
       }
 
-      // Season/non-game view: MLB Stats API data (overridden by leaderboard in effectivePitchPlus)
+      // Season view, AAA, or game with no Savant yet (live/recent) → MLB Stats API.
+      // pfx is derived from kinematics server-side (sign-correct vs Statcast convention).
       const eligible = enrichedData.pitches.filter(
         p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN"
       );
