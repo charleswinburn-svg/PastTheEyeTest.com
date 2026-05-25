@@ -181,7 +181,7 @@ def fetch_savant_statcast(year, player_type="batter"):
     if player_type == "batter":
         selections = "xwobacon,exit_velocity_avg,barrel_batted_rate,sweet_spot_percent,k_percent,bb_percent,whiff_percent,iz_contact_percent,oz_swing_percent"
     else:
-        selections = "exit_velocity_avg,barrel_batted_rate,whiff_percent,k_percent,bb_percent,p_oSwing_percent,release_extension"
+        selections = "exit_velocity_avg,barrel_batted_rate,whiff_percent,k_percent,bb_percent,p_oSwing_percent,release_extension,gb_percent"
     from datetime import date
     today = date.today()
     batter_min = MIN_PA_EARLY if (today.year == year and today.month < 6) else MIN_PA
@@ -1184,10 +1184,30 @@ def process_pitchers(year):
         print(f"  Pitcher metric columns MISSING: {missing}")
 
     # --- Use Savant chase% if FG chase% missing ---
+    # p_oSwing_percent is already in decimal (0-1) format, matches FG's pct_stored_decimal
     if "chase_pct" not in merged.columns and "chase_pct_sv" in merged.columns:
         merged["chase_pct"] = merged["chase_pct_sv"]
     elif "chase_pct" in merged.columns and "chase_pct_sv" in merged.columns:
         merged["chase_pct"] = merged["chase_pct"].fillna(merged["chase_pct_sv"])
+
+    # --- Savant fallbacks for FG-only rate stats (Savant k_percent/bb_percent/gb_percent
+    #     are stored as 0-100; FG pct_stored_decimal expects 0-1, so divide by 100) ---
+    for fg_col, sv_col in [("k_pct", "k_percent"), ("bb_pct", "bb_percent"), ("gb_pct", "gb_percent")]:
+        if sv_col not in merged.columns:
+            continue
+        sv_vals = pd.to_numeric(merged[sv_col], errors="coerce") / 100
+        if fg_col not in merged.columns or merged[fg_col].isna().all():
+            merged[fg_col] = sv_vals
+        else:
+            merged[fg_col] = merged[fg_col].fillna(sv_vals)
+
+    # --- Derive K-BB% from components if FG didn't provide it ---
+    if "k_pct" in merged.columns and "bb_pct" in merged.columns:
+        computed_kbb = merged["k_pct"] - merged["bb_pct"]
+        if "k_bb_pct" not in merged.columns or merged["k_bb_pct"].isna().all():
+            merged["k_bb_pct"] = computed_kbb
+        else:
+            merged["k_bb_pct"] = merged["k_bb_pct"].fillna(computed_kbb)
 
     # --- Filter to minimum IP ---
     if "ip" in merged.columns:
