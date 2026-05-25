@@ -796,23 +796,28 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       };
 
       // Game view: prefer Savant CSV data (same source as leaderboard batch pipeline)
-      if (isGame && savantData?.length > 0) {
-        const pitcherRows = savantData.filter(
-          r => String(r.pitcher) === String(selectedPlayer.id) &&
-               r.pitch_type && r.pitch_type !== "UN" && r.pitch_type !== "PO" &&
-               r.release_speed && r.plate_x && r.plate_z
-        );
-        if (pitcherRows.length > 0) {
-          await runScoring(
-            pitcherRows.map(makePitchSavant),
-            pitcherRows.filter(r => r.stand === "L").map(makePitchSavant),
-            pitcherRows.filter(r => r.stand === "R").map(makePitchSavant),
+      if (isGame) {
+        if (savantData?.length > 0) {
+          const pitcherRows = savantData.filter(
+            r => String(r.pitcher) === String(selectedPlayer.id) &&
+                 r.pitch_type && r.pitch_type !== "UN" && r.pitch_type !== "PO" &&
+                 r.release_speed && r.plate_x && r.plate_z
           );
-          return;
+          if (pitcherRows.length > 0) {
+            await runScoring(
+              pitcherRows.map(makePitchSavant),
+              pitcherRows.filter(r => r.stand === "L").map(makePitchSavant),
+              pitcherRows.filter(r => r.stand === "R").map(makePitchSavant),
+            );
+            return;
+          }
         }
+        // Savant data not yet available — leaderboard grades will show via effectivePitchPlus
+        setPitchPlus(null);
+        return;
       }
 
-      // Fallback: MLB Stats API data (season view, AAA, or Savant unavailable for game)
+      // Season/non-game view: MLB Stats API data (overridden by leaderboard in effectivePitchPlus)
       const eligible = enrichedData.pitches.filter(
         p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN"
       );
@@ -827,12 +832,11 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     return () => { cancelled = true; };
   }, [enrichedData, selectedPlayer, isPitcher, isAAA, savantData, isGame]);
 
-  // For Regular Season MLB season view, override per-type Plus values with
-  // pre-computed season aggregates from /leaderboard. These cover the full
-  // season corpus and are the authoritative source for RS pitcher grades.
-  // L/R per-handedness Pitch+ (platoon splits) are preserved from /score_aggregate.
+  // For Regular Season MLB, fetch pre-computed per-pitch-type Plus grades from /leaderboard.
+  // Season view: these override live /score_aggregate values (leaderboard is authoritative).
+  // Game view: these serve as fallback when Savant data is not yet available for the game.
   useEffect(() => {
-    if (seasonType !== "R" || isAAA || isGame || !selectedPlayer?.id) {
+    if (seasonType !== "R" || isAAA || !selectedPlayer?.id) {
       setLeaderboardPlus(null);
       return;
     }
@@ -847,12 +851,30 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       })
       .catch(() => setLeaderboardPlus(null));
     return () => { cancelled = true; };
-  }, [seasonType, isAAA, isGame, selectedPlayer?.id, currentSeason]);
+  }, [seasonType, isAAA, selectedPlayer?.id, currentSeason]);
 
-  // Merge pre-computed Plus values over /score_aggregate values.
-  // Leaderboard wins on stuffPlus/locPlus/tunnelPlus/pitchPlus (full season corpus).
-  // /score_aggregate wins on L/R splits (not in season aggregates).
+  // Compute effective Pitch+ depending on view:
+  //  Game view + Savant scores:  use per-game Savant scores as-is (model trained on Statcast).
+  //  Game view + no scores yet:  use leaderboard full-season grades as fallback.
+  //  Season view:                leaderboard overrides live scores (authoritative full-season data).
   const effectivePitchPlus = useMemo(() => {
+    if (isGame) {
+      // Per-game Savant scores available — keep them; no leaderboard override in game view.
+      if (pitchPlus) return pitchPlus;
+      // Savant data not yet published for this game — use leaderboard grades as coherent fallback.
+      if (!leaderboardPlus) return null;
+      const fromLeaderboard = {};
+      for (const [pt, pg] of Object.entries(leaderboardPlus)) {
+        fromLeaderboard[pt] = {
+          stuffPlus:  pg.stuff  ?? null,
+          locPlus:    pg.loc    ?? null,
+          tunnelPlus: pg.tun    ?? null,
+          pitchPlus:  pg.pitch  ?? null,
+        };
+      }
+      return fromLeaderboard;
+    }
+    // Season view: leaderboard wins over live scores (full-season corpus is authoritative).
     if (!pitchPlus) return pitchPlus;
     if (!leaderboardPlus) return pitchPlus;
     const merged = { ...pitchPlus };
@@ -866,7 +888,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       };
     }
     return merged;
-  }, [pitchPlus, leaderboardPlus]);
+  }, [pitchPlus, leaderboardPlus, isGame]);
 
   return (
     <div style={{ padding: "16px 20px" }}>
