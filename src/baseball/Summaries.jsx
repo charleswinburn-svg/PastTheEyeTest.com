@@ -759,7 +759,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
       const post = (pitches) => {
         if (!pitches.length) return Promise.resolve(null);
-        return fetch("https://pitch-plus-api.onrender.com/score_aggregate", {
+        return fetch("https://api.pasttheeyetest.com/score_aggregate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pitches }),
@@ -839,7 +839,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       return;
     }
     let cancelled = false;
-    fetch(`https://pitch-plus-api.onrender.com/leaderboard?season=${currentSeason}`)
+    fetch(`https://api.pasttheeyetest.com/leaderboard?season=${currentSeason}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (cancelled || !data?.pitchers) return;

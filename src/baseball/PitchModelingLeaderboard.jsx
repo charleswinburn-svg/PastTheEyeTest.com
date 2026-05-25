@@ -18,7 +18,7 @@ import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
 // Names + teams come from baseball_data_<year>.json via the `pitchers` prop.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const PITCH_PLUS_API = "https://pitch-plus-api.onrender.com";
+const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 
 const METRICS = [
   { id: "stuff", label: "Stuff+", key: "stuff" },

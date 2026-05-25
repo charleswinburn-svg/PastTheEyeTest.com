@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 
-const PITCH_PLUS_API = "https://pitch-plus-api.onrender.com";
+const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 
 export default function PitcherCard({ player, season, allPitchers, isAAA = false }) {
   const { theme: t } = useTheme();
