@@ -426,20 +426,25 @@ function effColor(val, metricKey, pitchType, avgSet) {
     : `rgba(200,35,35,${alpha})`;
 }
 
-// Empirical pitcher-level stdevs by pitch type (2026, n≥30 per pitch type).
-// Stuff+ varies substantially by pitch type; Loc+/Tun+/Pitch+ are tighter and
-// relatively uniform, so a single fallback is fine for those.
-const PLUS_STDEV_BY_PT = {
-  stuffPlus: { FF: 8, SI: 6, FC: 7, SL: 8, ST: 7, CU: 9, CH: 8, FS: 7, KC: 8, SV: 6, DEFAULT: 8 },
-  locPlus:   { DEFAULT: 2 },
-  tunnelPlus: { DEFAULT: 2.3 },
-  pitchPlus:  { FF: 2.6, SI: 2.1, FC: 1.7, SL: 2.3, ST: 2.3, CU: 2.5, CH: 2.7, FS: 2.3, KC: 3, SV: 3, DEFAULT: 2.3 },
+// Empirical pitcher-level means and stdevs by pitch type (2026, n≥30 per pitch type).
+// Stuff+ means vary widely: FF ~89, sweepers ~110. Loc+/Tun+/Pitch+ are close to 100.
+const PLUS_STATS_BY_PT = {
+  stuffPlus: {
+    mean: { FF: 89, SI: 93, FC: 94, SL: 106, ST: 110, CU: 102, CH: 99, FS: 100, KC: 104, SV: 107, DEFAULT: 100 },
+    stdev: { FF: 8, SI: 6, FC: 7, SL: 8, ST: 7, CU: 9, CH: 8, FS: 7, KC: 8, SV: 6, DEFAULT: 8 },
+  },
+  locPlus:   { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2 } },
+  tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.3 } },
+  pitchPlus: {
+    mean: { FF: 98, SI: 99, FC: 99, SL: 101, ST: 102, CU: 100, CH: 99, FS: 100, KC: 101, SV: 100, DEFAULT: 100 },
+    stdev: { FF: 2.6, SI: 2.1, FC: 1.7, SL: 2.3, ST: 2.3, CU: 2.5, CH: 2.7, FS: 2.3, KC: 3, SV: 3, DEFAULT: 2.3 },
+  },
 };
 
-// Plus-scale color: dark green at ≥100+2σ, dark red at ≤100-2σ, 5 discrete shades each side.
-function plusColorRaw(v, stdev) {
+// Plus-scale color: dark green at ≥mean+2σ, dark red at ≤mean-2σ, 5 discrete shades each side.
+function plusColorRaw(v, mean, stdev) {
   if (v == null || !isFinite(v) || !stdev) return null;
-  const z = (v - 100) / (2 * stdev);   // ±1 at ±2σ
+  const z = (v - mean) / (2 * stdev);   // ±1 at ±2σ from pitch-type mean
   const t = Math.max(0, Math.min(1, Math.abs(z)));
   if (t < 0.05) return null;
   const step = Math.min(4, Math.floor(t * 5));   // 5 shades per direction = 10 total
@@ -578,11 +583,12 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
     if (value == null || !EFF_KEYS[key]) return {};
     let rawBg = null;
 
-    // Pitch+/Stuff+/Location+/Tunnel+: calibrated per-pitch-type stdev, 5 shades each side
+    // Pitch+/Stuff+/Location+/Tunnel+: color relative to each pitch type's own mean/stdev
     if (key === "pitchPlus" || key === "stuffPlus" || key === "locPlus" || key === "tunnelPlus") {
-      const ptStdevs = PLUS_STDEV_BY_PT[key] || {};
-      const stdev = ptStdevs[pitchType] ?? ptStdevs.DEFAULT ?? 5;
-      return presentBg(plusColorRaw(value, stdev));
+      const s = PLUS_STATS_BY_PT[key] || {};
+      const mean  = (s.mean?.[pitchType]  ?? s.mean?.DEFAULT  ?? 100);
+      const stdev = (s.stdev?.[pitchType] ?? s.stdev?.DEFAULT ?? 5);
+      return presentBg(plusColorRaw(value, mean, stdev));
     }
 
     // Use live league avgs when available

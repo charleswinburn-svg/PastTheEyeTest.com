@@ -31,10 +31,10 @@ const METRICS = [
 // from the table to keep it scannable.
 const PITCH_COLS = ["FF", "SI", "FC", "SL", "ST", "SV", "CU", "KC", "CH", "FS"];
 
-// Plus-scale cell color calibrated to a given stdev (computed from loaded data).
-const plusCellStyle = (v, stdev) => {
+// Plus-scale cell color relative to each column's own mean and stdev (computed from loaded data).
+const plusCellStyle = (v, mean, stdev) => {
   if (v == null || !isFinite(v) || !stdev) return {};
-  const z = (v - 100) / (2 * stdev);                 // ±1 at ±2σ
+  const z = (v - mean) / (2 * stdev);                // ±1 at ±2σ from column mean
   const t = Math.max(0, Math.min(1, Math.abs(z)));
   if (t < 0.05) return {};
   const step = Math.min(4, Math.floor(t * 5));        // 5 shades per direction = 10 total
@@ -122,16 +122,17 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
     return arr;
   }, [rows, sortCol, sortDir, search]);
 
-  // Compute stdev per column from actual data so color scale self-calibrates.
-  const colStdev = useMemo(() => {
-    const sd = (vals) => {
-      if (vals.length < 2) return null;
+  // Compute mean + stdev per column from actual data so coloring is relative to each pitch type.
+  const colStats = useMemo(() => {
+    const calc = (vals) => {
+      if (vals.length < 2) return { mean: 100, stdev: null };
       const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
-      return Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / (vals.length - 1));
+      const stdev = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / (vals.length - 1));
+      return { mean, stdev };
     };
-    const result = { Overall: sd(rows.map(r => r.overall).filter(v => v != null)) };
+    const result = { Overall: calc(rows.map(r => r.overall).filter(v => v != null)) };
     for (const pt of PITCH_COLS) {
-      result[pt] = sd(rows.map(r => r.types[pt]).filter(v => v != null));
+      result[pt] = calc(rows.map(r => r.types[pt]).filter(v => v != null));
     }
     return result;
   }, [rows]);
@@ -221,8 +222,8 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
               {filtered.map((r, i) => {
                 const cell = (key, v) => {
                   if (v == null) return <td key={key} style={{ ...tdS, color: t.textFaintest }}>—</td>;
-                  const sd = key === "overall" ? colStdev.Overall : colStdev[key];
-                  const cs = plusCellStyle(v, sd);
+                  const { mean, stdev } = (key === "overall" ? colStats.Overall : colStats[key]) || {};
+                  const cs = plusCellStyle(v, mean ?? 100, stdev);
                   return (
                     <td key={key} style={{ ...tdS, ...cs, fontWeight: 600 }}>
                       {Math.round(v)}
