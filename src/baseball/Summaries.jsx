@@ -685,6 +685,9 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   // at the pitcher×pitch-type level (same scale as /leaderboard pre-computed values).
   // Three parallel requests: all pitches (pitch table), vs-LHB only, vs-RHB only
   // (the latter two feed PlatoonUsageBars per-handedness Pitch+).
+  // Game view uses Savant (Statcast) CSV data — same source as the leaderboard batch
+  // pipeline — so grades are coherent with season/leaderboard values. Season view and
+  // AAA fall back to MLB Stats API data (season view is overridden by leaderboard anyway).
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -702,6 +705,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         } catch { pitcherHand = "R"; }
       }
 
+      // Build payload from MLB Stats API pitch (enrichedData source)
       const makePitch = (p) => ({
         pitcher_id: selectedPlayer.id,
         _stand: p.batSide || "R",
@@ -725,21 +729,32 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         },
       });
 
-      const eligible = enrichedData.pitches.filter(
-        p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN"
-      );
-      if (!eligible.length) { setPitchPlus(null); return; }
-
-      const allPitches = eligible.map(makePitch);
-      const lPitches   = eligible.filter(p => p.batSide === "L").map(makePitch);
-      const rPitches   = eligible.filter(p => p.batSide === "R").map(makePitch);
-
-      // Map API-aliased codes (FO→FS, CS→CU) back to original pitch codes for output keys
-      const aliasedToOrig = {};
-      for (const p of allPitches) {
-        const apiCode = p.details.type.code;
-        if (!aliasedToOrig[apiCode]) aliasedToOrig[apiCode] = p._pitchType;
-      }
+      // Build payload from Statcast (Savant) CSV row — same data source as batch scoring
+      const sv = (v) => { const f = parseFloat(v); return isNaN(f) ? null : f; };
+      const makePitchSavant = (r) => {
+        const pt = r.pitch_type || "UN";
+        return {
+          pitcher_id: selectedPlayer.id,
+          _stand: r.stand || "R",
+          _p_throws: r.p_throws || pitcherHand,
+          _pitchType: pt,
+          details: { type: { code: scorePitchCode(pt) } },
+          pitchData: {
+            startSpeed: sv(r.release_speed),
+            extension:  sv(r.release_extension),
+            strikeZoneTop:    sv(r.sz_top),
+            strikeZoneBottom: sv(r.sz_bot),
+            coordinates: {
+              pfxX: sv(r.pfx_x), pfxZ: sv(r.pfx_z),
+              pX: sv(r.plate_x), pZ: sv(r.plate_z),
+              x0: sv(r.release_pos_x), z0: sv(r.release_pos_z),
+              vX0: sv(r.vx0),  vY0: sv(r.vy0),  vZ0: sv(r.vz0),
+              aX:  sv(r.ax),   aY:  sv(r.ay),   aZ:  sv(r.az),
+            },
+            breaks: { spinRate: sv(r.release_spin_rate), spinDirection: sv(r.spin_axis) },
+          },
+        };
+      };
 
       const post = (pitches) => {
         if (!pitches.length) return Promise.resolve(null);
@@ -750,36 +765,67 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         }).then(r => r.ok ? r.json() : null).catch(() => null);
       };
 
-      const [allData, lData, rData] = await Promise.all([
-        post(allPitches),
-        post(lPitches),
-        post(rPitches),
-      ]);
+      const runScoring = async (allPitches, lPitches, rPitches) => {
+        const aliasedToOrig = {};
+        for (const p of allPitches) {
+          const apiCode = p.details.type.code;
+          if (!aliasedToOrig[apiCode]) aliasedToOrig[apiCode] = p._pitchType;
+        }
+        const [allData, lData, rData] = await Promise.all([
+          post(allPitches), post(lPitches), post(rPitches),
+        ]);
+        if (cancelled) return;
+        const byType  = allData?.by_pitch_type || {};
+        const byTypeL = lData?.by_pitch_type   || {};
+        const byTypeR = rData?.by_pitch_type   || {};
+        const round = (v) => v != null ? Math.round(v * 10) / 10 : null;
+        const out = {};
+        for (const [apiPt, v] of Object.entries(byType)) {
+          const origPt = aliasedToOrig[apiPt] || apiPt;
+          out[origPt] = {
+            stuffPlus:  round(v.stuff),
+            locPlus:    round(v.loc),
+            tunnelPlus: round(v.tun),
+            pitchPlus:  round(v.pitch),
+            L: { pitchPlus: round(byTypeL[apiPt]?.pitch) },
+            R: { pitchPlus: round(byTypeR[apiPt]?.pitch) },
+          };
+        }
+        console.log(`[Pitch+] Scored ${allPitches.length} pitches via /score_aggregate:`, out);
+        setPitchPlus(out);
+      };
 
-      if (cancelled) return;
-
-      const byType  = allData?.by_pitch_type || {};
-      const byTypeL = lData?.by_pitch_type   || {};
-      const byTypeR = rData?.by_pitch_type   || {};
-
-      const round = (v) => v != null ? Math.round(v * 10) / 10 : null;
-      const out = {};
-      for (const [apiPt, v] of Object.entries(byType)) {
-        const origPt = aliasedToOrig[apiPt] || apiPt;
-        out[origPt] = {
-          stuffPlus:  round(v.stuff),
-          locPlus:    round(v.loc),
-          tunnelPlus: round(v.tun),
-          pitchPlus:  round(v.pitch),
-          L: { pitchPlus: round(byTypeL[apiPt]?.pitch) },
-          R: { pitchPlus: round(byTypeR[apiPt]?.pitch) },
-        };
+      // Game view: prefer Savant CSV data (same source as leaderboard batch pipeline)
+      if (isGame && savantData?.length > 0) {
+        const pitcherRows = savantData.filter(
+          r => String(r.pitcher) === String(selectedPlayer.id) &&
+               r.pitch_type && r.pitch_type !== "UN" && r.pitch_type !== "PO" &&
+               r.release_speed && r.plate_x && r.plate_z
+        );
+        if (pitcherRows.length > 0) {
+          await runScoring(
+            pitcherRows.map(makePitchSavant),
+            pitcherRows.filter(r => r.stand === "L").map(makePitchSavant),
+            pitcherRows.filter(r => r.stand === "R").map(makePitchSavant),
+          );
+          return;
+        }
       }
-      console.log(`[Pitch+] Scored ${allPitches.length} pitches via /score_aggregate:`, out);
-      setPitchPlus(out);
+
+      // Fallback: MLB Stats API data (season view, AAA, or Savant unavailable for game)
+      const eligible = enrichedData.pitches.filter(
+        p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN"
+      );
+      if (!eligible.length) { setPitchPlus(null); return; }
+
+      await runScoring(
+        eligible.map(makePitch),
+        eligible.filter(p => p.batSide === "L").map(makePitch),
+        eligible.filter(p => p.batSide === "R").map(makePitch),
+      );
     })();
     return () => { cancelled = true; };
-  }, [enrichedData, selectedPlayer, isPitcher, isAAA]);
+  }, [enrichedData, selectedPlayer, isPitcher, isAAA, savantData, isGame]);
 
   // For Regular Season MLB season view, override per-type Plus values with
   // pre-computed season aggregates from /leaderboard. These cover the full
