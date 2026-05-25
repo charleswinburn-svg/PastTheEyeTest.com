@@ -1193,6 +1193,10 @@ def process_pitchers(year):
 
     # --- Savant fallbacks for FG-only rate stats (Savant k_percent/bb_percent/gb_percent
     #     are stored as 0-100; FG pct_stored_decimal expects 0-1, so divide by 100) ---
+    print(f"  [debug] merged cols with k/bb/gb: {[c for c in merged.columns if any(x in c for x in ['k_pct','bb_pct','gb_pct','k_percent','bb_percent','gb_percent'])]}")
+    if "k_percent" in merged.columns:
+        non_null = merged["k_percent"].notna().sum()
+        print(f"  [debug] k_percent non-null rows: {non_null}/{len(merged)}, sample: {merged['k_percent'].dropna().head(3).tolist()}")
     for fg_col, sv_col in [("k_pct", "k_percent"), ("bb_pct", "bb_percent"), ("gb_pct", "gb_percent")]:
         if sv_col not in merged.columns:
             continue
