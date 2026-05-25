@@ -354,31 +354,111 @@ def merge_results(acc_r2k, acc_gs, acc_outs, acc_teams, acc_gapp, partial_r2k, p
 # MLB API: ROSTER (team info) + IP
 # ============================================================
 
+def _fetch_fangraphs_pitching(season):
+    """
+    Fetch FanGraphs standard pitching stats (G, GS, IP, Name, Team) for a season.
+    Tries: cookies → cloudscraper → direct API → pybaseball.
+    Returns a DataFrame or None.
+    """
+    api_url = (
+        "https://www.fangraphs.com/api/leaders/major-league/data"
+        f"?pos=all&stats=pit&lg=all&qual=0&type=8"
+        f"&season={season}&month=0&season1={season}&ind=0"
+        f"&team=0&rost=0&age=0&filter=&players=0"
+        f"&startdate=&enddate=&pageitems=2000&page=1"
+    )
+
+    def _parse(r):
+        data = r.json()
+        rows = data.get("data", [])
+        return pd.DataFrame(rows) if rows else None
+
+    # 1. Cookie file
+    cookie_paths = [
+        "fangraphs_cookies.txt",
+        os.path.join(os.path.dirname(__file__), "fangraphs_cookies.txt"),
+        os.path.expanduser("~/project/fangraphs_cookies.txt"),
+        "www.fangraphs.com_cookies.txt",
+    ]
+    for cp in cookie_paths:
+        if not os.path.exists(cp):
+            continue
+        try:
+            from http.cookiejar import MozillaCookieJar
+            jar = MozillaCookieJar(cp)
+            jar.load(ignore_discard=True, ignore_expires=True)
+            s = requests.Session()
+            s.cookies = jar
+            s.headers.update(HTTP_HEADERS)
+            r = s.get(api_url, timeout=30)
+            if r.status_code == 200:
+                df = _parse(r)
+                if df is not None:
+                    print(f"    ✓ {len(df)} rows via cookies ({os.path.basename(cp)})")
+                    return df
+            print(f"    Cookies ({os.path.basename(cp)}) returned {r.status_code}")
+        except Exception as e:
+            print(f"    Cookies failed ({os.path.basename(cp)}): {e}")
+
+    # 2. cloudscraper
+    try:
+        import cloudscraper
+        r = cloudscraper.create_scraper().get(api_url, timeout=30)
+        if r.status_code == 200:
+            df = _parse(r)
+            if df is not None:
+                print(f"    ✓ {len(df)} rows via cloudscraper")
+                return df
+    except Exception as e:
+        print(f"    cloudscraper failed: {e}")
+
+    # 3. Direct request
+    try:
+        r = requests.get(api_url, headers=HTTP_HEADERS, timeout=30)
+        if r.status_code == 200:
+            df = _parse(r)
+            if df is not None:
+                print(f"    ✓ {len(df)} rows via direct API")
+                return df
+    except Exception as e:
+        print(f"    Direct API failed: {e}")
+
+    # 4. pybaseball fallback
+    if HAS_PYBASEBALL:
+        try:
+            df = pitching_stats(season, season, qual=0)
+            print(f"    ✓ {len(df)} rows via pybaseball")
+            return df
+        except Exception as e:
+            print(f"    pybaseball failed: {e}")
+
+    return None
+
+
 def fetch_pitcher_info(season, sport_id=1):
     """
-    Fetch pitcher IP, GS, team via pybaseball (FanGraphs).
-    Falls back to MLB API roster hydration if pybaseball unavailable.
-    
+    Fetch pitcher IP, GS, G, team via FanGraphs (cookies → direct API → pybaseball).
+    Falls back to MLB API roster hydration if FanGraphs unavailable.
+
     Returns TWO dicts:
-      by_id:   mlbam_id -> {name, team, ip, gs}  (from MLB API roster)
-      by_name: normalized_name -> {ip, gs, team}  (from FanGraphs)
+      by_id:   mlbam_id -> {name, team, ip, gs, g}  (from MLB API roster)
+      by_name: normalized_name -> {ip, gs, g, team}  (from FanGraphs)
     """
     by_id = {}
     by_name = {}
 
-    # ── pybaseball (FanGraphs) — keyed by name since FG uses IDfg not MLBAM ──
-    if HAS_PYBASEBALL and sport_id == 1:
-        print(f"  Fetching FanGraphs pitching stats ({season}) via pybaseball...")
-        try:
-            df = pitching_stats(season, season, qual=0)
-            print(f"    ✓ {len(df)} pitchers from FanGraphs")
+    # ── FanGraphs — keyed by name since FG uses IDfg not MLBAM ──
+    if sport_id == 1:
+        print(f"  Fetching FanGraphs pitching stats ({season})...")
+        df = _fetch_fangraphs_pitching(season)
+        if df is not None and len(df) > 0:
             print(f"    Columns: {list(df.columns)[:20]}...")
 
             name_col = "Name" if "Name" in df.columns else "PlayerName" if "PlayerName" in df.columns else None
             ip_col = "IP" if "IP" in df.columns else None
             gs_col = "GS" if "GS" in df.columns else None
             g_col = "G" if "G" in df.columns else None
-            team_col = "Team" if "Team" in df.columns else None
+            team_col = "Team" if "Team" in df.columns else "TeamName" if "TeamName" in df.columns else None
 
             if name_col and ip_col:
                 for _, row in df.iterrows():
@@ -390,7 +470,6 @@ def fetch_pitcher_info(season, sport_id=1):
                     g = int(row.get(g_col, 0)) if g_col and pd.notna(row.get(g_col)) else 0
                     team = str(row.get(team_col, "")).strip() if team_col and pd.notna(row.get(team_col)) else ""
                     nname = norm_name(name)
-                    # Keep the entry with more IP if name collision
                     if nname not in by_name or ip > by_name[nname]["ip"]:
                         by_name[nname] = {"ip": ip, "gs": gs, "g": g, "team": team, "name": name}
 
@@ -399,8 +478,8 @@ def fetch_pitcher_info(season, sport_id=1):
                 print(f"    ✓ {ip_count} with {MIN_IP}+ IP, {sp_count} starters (>50% GS)")
             else:
                 print(f"    ⚠ Missing columns. name={name_col} ip={ip_col}")
-        except Exception as e:
-            print(f"    ⚠ pybaseball failed: {e}")
+        else:
+            print(f"    ⚠ FanGraphs fetch failed — role classification will use Savant game detection")
 
     # ── MLB API rosters — for MLBAM ID → name/team mapping ──
     print("  Fetching MLB API rosters for ID mapping...")
