@@ -738,6 +738,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           _stand: r.stand || "R",
           _p_throws: r.p_throws || pitcherHand,
           _pitchType: pt,
+          _pfx_direct: true,
           details: { type: { code: scorePitchCode(pt) } },
           pitchData: {
             startSpeed: sv(r.release_speed),
