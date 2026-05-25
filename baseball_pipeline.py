@@ -1039,6 +1039,7 @@ def process_pitchers(year):
             "fastball_avg_speed": "avg_fb_velo",
         }
         sv_statcast = sv_statcast.rename(columns={k: v for k, v in sv_rename.items() if k in sv_statcast.columns})
+        print(f"  sv_statcast pitcher cols: {[c for c in sv_statcast.columns if any(x in c for x in ['k_', 'bb_', 'gb_', 'whiff', 'chase', 'swing'])]}")
         sv_dfs.append(sv_statcast)
 
     sv_merged = None
