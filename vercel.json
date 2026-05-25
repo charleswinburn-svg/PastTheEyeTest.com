@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { "source": "/mlb-api/:path*",    "destination": "https://statsapi.mlb.com/:path*" },
+    { "source": "/mlb-photos/:path*", "destination": "https://img.mlbstatic.com/:path*" },
+    { "source": "/mlb-logos/:path*",  "destination": "https://midfield.mlbstatic.com/:path*" },
+    { "source": "/savant-api/:path*", "destination": "https://baseballsavant.mlb.com/:path*" },
+    { "source": "/nhl-api/:path*",    "destination": "https://api-web.nhle.com/:path*" },
+    { "source": "/nhl-assets/:path*", "destination": "https://assets.nhle.com/:path*" },
+    { "source": "/flag-assets/:path*","destination": "https://flagcdn.com/:path*" },
+    { "source": "/(.*)",              "destination": "/index.html" }
+  ]
+}
