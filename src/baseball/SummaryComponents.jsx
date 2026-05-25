@@ -426,10 +426,15 @@ function effColor(val, metricKey, pitchType, avgSet) {
     : `rgba(200,35,35,${alpha})`;
 }
 
-// Empirical pitcher-level stdevs (2026 season, n≥100 pitches).
-// Stuff+ spreads ~6 pts; Loc+/Tun+ are very tight (~1–1.5 pts); Pitch+ is ~2 pts.
-// Game-level views get a small upward nudge (+0.5) to account for within-game noise.
-const PLUS_STDEV = { stuffPlus: 6, locPlus: 1.5, tunnelPlus: 1.5, pitchPlus: 2 };
+// Empirical pitcher-level stdevs by pitch type (2026, n≥30 per pitch type).
+// Stuff+ varies substantially by pitch type; Loc+/Tun+/Pitch+ are tighter and
+// relatively uniform, so a single fallback is fine for those.
+const PLUS_STDEV_BY_PT = {
+  stuffPlus: { FF: 8, SI: 6, FC: 7, SL: 8, ST: 7, CU: 9, CH: 8, FS: 7, KC: 8, SV: 6, DEFAULT: 8 },
+  locPlus:   { DEFAULT: 2 },
+  tunnelPlus: { DEFAULT: 2.3 },
+  pitchPlus:  { FF: 2.6, SI: 2.1, FC: 1.7, SL: 2.3, ST: 2.3, CU: 2.5, CH: 2.7, FS: 2.3, KC: 3, SV: 3, DEFAULT: 2.3 },
+};
 
 // Plus-scale color: dark green at ≥100+2σ, dark red at ≤100-2σ, 5 discrete shades each side.
 function plusColorRaw(v, stdev) {
@@ -573,9 +578,11 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
     if (value == null || !EFF_KEYS[key]) return {};
     let rawBg = null;
 
-    // Pitch+/Stuff+/Location+/Tunnel+: calibrated per-metric stdev, 5 shades each side
+    // Pitch+/Stuff+/Location+/Tunnel+: calibrated per-pitch-type stdev, 5 shades each side
     if (key === "pitchPlus" || key === "stuffPlus" || key === "locPlus" || key === "tunnelPlus") {
-      return presentBg(plusColorRaw(value, PLUS_STDEV[key]));
+      const ptStdevs = PLUS_STDEV_BY_PT[key] || {};
+      const stdev = ptStdevs[pitchType] ?? ptStdevs.DEFAULT ?? 5;
+      return presentBg(plusColorRaw(value, stdev));
     }
 
     // Use live league avgs when available
