@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
-import { binColor, textOnBin } from "./SharedComponents.jsx";
+// binColor / textOnBin removed — Plus cells use plusCellStyle instead
 import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -31,13 +31,19 @@ const METRICS = [
 // from the table to keep it scannable.
 const PITCH_COLS = ["FF", "SI", "FC", "SL", "ST", "SV", "CU", "KC", "CH", "FS"];
 
-// Plus values are calibrated so 100=mean, ±10≈1σ. Convert to a 0–100 percentile
-// proxy for the binColor heatmap so cells get the same red→blue palette as
-// the existing leaderboard tables.
-const plusToPct = (v) => {
-  if (v == null || !isFinite(v)) return null;
-  // Map roughly: 80→0, 100→50, 120→100. Clamp.
-  return Math.max(0, Math.min(100, Math.round((v - 80) * 2.5)));
+// Plus-scale cell color: dark green ≥120, dark red ≤80, 5 discrete shades each side.
+const plusCellStyle = (v) => {
+  if (v == null || !isFinite(v)) return {};
+  const z = (v - 100) / 20;                          // ±1 at ±2σ (80–120)
+  const t = Math.max(0, Math.min(1, Math.abs(z)));
+  if (t < 0.05) return {};                            // neutral zone: ≈ ±1 pt
+  const step = Math.min(4, Math.floor(t * 5));        // 5 shades per direction = 10 total
+  const alphas = [0.22, 0.38, 0.54, 0.70, 0.86];
+  const alpha = alphas[step];
+  const isGreen = z > 0;
+  const bg = isGreen ? `rgba(30,160,30,${alpha})` : `rgba(200,35,35,${alpha})`;
+  const textLight = isGreen ? "rgb(140,235,160)" : "rgb(255,150,160)";
+  return { background: bg, color: alpha > 0.55 ? "#ffffff" : textLight };
 };
 
 export default function PitchModelingLeaderboard({ season, pitchers }) {
@@ -201,14 +207,11 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
               {filtered.map((r, i) => {
                 const cell = (key, v) => {
                   if (v == null) return <td key={key} style={{ ...tdS, color: t.textFaintest }}>—</td>;
-                  const pct = plusToPct(v);
+                  const cs = plusCellStyle(v);
                   return (
-                    <td key={key} style={{
-                      ...tdS,
-                      background: binColor(pct),
-                      color: textOnBin(pct),
-                      fontWeight: 600,
-                    }}>{Math.round(v)}</td>
+                    <td key={key} style={{ ...tdS, ...cs, fontWeight: 600 }}>
+                      {Math.round(v)}
+                    </td>
                   );
                 };
                 const nameCell = {

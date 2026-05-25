@@ -426,6 +426,20 @@ function effColor(val, metricKey, pitchType, avgSet) {
     : `rgba(200,35,35,${alpha})`;
 }
 
+// Plus-scale color: dark green at ≥100+2σ, dark red at ≤100-2σ, 5 discrete shades each side.
+// stdev defaults to 10 (all Pitch+/Stuff+/Loc+/Tun+ metrics share this calibration).
+function plusColorRaw(v, stdev = 10) {
+  if (v == null || !isFinite(v)) return null;
+  const z = (v - 100) / (2 * stdev);   // ±1 at ±2σ (80–120 for σ=10)
+  const t = Math.max(0, Math.min(1, Math.abs(z)));
+  if (t < 0.05) return null;            // dead zone: ±1 pt from 100
+  const step = Math.min(4, Math.floor(t * 5));   // 5 shades per direction = 10 total
+  const alphas = [0.22, 0.38, 0.54, 0.70, 0.86];
+  return z > 0
+    ? `rgba(30,160,30,${alphas[step]})`
+    : `rgba(200,35,35,${alphas[step]})`;
+}
+
 function statBarColor(val, avg, scale, higherBetter) {
   if (val == null || avg == null) return { bg: "#2a2a2a", border: "#444" };
   let diff = (val - avg) / scale;
@@ -555,16 +569,9 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
     if (value == null || !EFF_KEYS[key]) return {};
     let rawBg = null;
 
-    // Pitch+/Stuff+/Location+/Tunnel+ use the same scale: 100 = neutral, ±10 per std
+    // Pitch+/Stuff+/Location+/Tunnel+: dark green ≥120, dark red ≤80, 5 shades each side
     if (key === "pitchPlus" || key === "stuffPlus" || key === "locPlus" || key === "tunnelPlus") {
-      let diff = (value - 100) / 10;
-      diff = Math.max(-1, Math.min(1, diff));
-      if (Math.abs(diff) >= 0.08) {
-        const s = (Math.abs(diff) - 0.08) / 0.92;
-        const alpha = (0.25 + s * 0.65).toFixed(2);
-        rawBg = diff > 0 ? `rgba(30,160,30,${alpha})` : `rgba(200,35,35,${alpha})`;
-      }
-      return presentBg(rawBg);
+      return presentBg(plusColorRaw(value, 10));
     }
 
     // Use live league avgs when available
