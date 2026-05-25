@@ -45,7 +45,6 @@ except ImportError:
 MIN_IP = 20              # minimum innings pitched
 FETCH_DELAY = 3.0        # seconds between Savant requests
 MAX_RETRIES = 3
-GS_THRESHOLD = 10        # games started threshold for SP classification
 
 HTTP_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -305,10 +304,27 @@ def compute_race2k_and_starts(all_pitches_df):
             if team:
                 teams_by_pitcher[pid_int] = team
 
-    return results, dict(game_starts), dict(outs_by_pitcher), teams_by_pitcher
+    games_appeared_counts = _count_game_appearances(df)
+    return results, dict(game_starts), dict(outs_by_pitcher), teams_by_pitcher, games_appeared_counts
 
 
-def merge_results(acc_r2k, acc_gs, acc_outs, acc_teams, partial_r2k, partial_gs, partial_outs, partial_teams):
+def _count_game_appearances(df):
+    """Count unique game_pk appearances per pitcher from a pitch DataFrame."""
+    if "pitcher" not in df.columns or "game_pk" not in df.columns:
+        return {}
+    counts = {}
+    for pid, grp in df.groupby("pitcher"):
+        try:
+            pid_int = int(pid)
+        except (ValueError, TypeError):
+            continue
+        unique_games = grp["game_pk"].dropna().nunique()
+        if unique_games:
+            counts[pid_int] = unique_games
+    return counts
+
+
+def merge_results(acc_r2k, acc_gs, acc_outs, acc_teams, acc_gapp, partial_r2k, partial_gs, partial_outs, partial_teams, partial_gapp):
     """Merge partial chunk results into accumulators."""
     for pid, data in partial_r2k.items():
         if pid not in acc_r2k:
@@ -324,6 +340,10 @@ def merge_results(acc_r2k, acc_gs, acc_outs, acc_teams, partial_r2k, partial_gs,
 
     for pid, outs in partial_outs.items():
         acc_outs[pid] = acc_outs.get(pid, 0) + outs
+
+    # Game appearances: chunks are non-overlapping date windows, so counts sum cleanly
+    for pid, cnt in partial_gapp.items():
+        acc_gapp[pid] = acc_gapp.get(pid, 0) + cnt
 
     # Teams: always overwrite with latest (most recent chunk = most current team)
     for pid, team in partial_teams.items():
@@ -357,6 +377,7 @@ def fetch_pitcher_info(season, sport_id=1):
             name_col = "Name" if "Name" in df.columns else "PlayerName" if "PlayerName" in df.columns else None
             ip_col = "IP" if "IP" in df.columns else None
             gs_col = "GS" if "GS" in df.columns else None
+            g_col = "G" if "G" in df.columns else None
             team_col = "Team" if "Team" in df.columns else None
 
             if name_col and ip_col:
@@ -366,15 +387,16 @@ def fetch_pitcher_info(season, sport_id=1):
                         continue
                     ip = float(row.get(ip_col, 0)) if pd.notna(row.get(ip_col)) else 0
                     gs = int(row.get(gs_col, 0)) if gs_col and pd.notna(row.get(gs_col)) else 0
+                    g = int(row.get(g_col, 0)) if g_col and pd.notna(row.get(g_col)) else 0
                     team = str(row.get(team_col, "")).strip() if team_col and pd.notna(row.get(team_col)) else ""
                     nname = norm_name(name)
                     # Keep the entry with more IP if name collision
                     if nname not in by_name or ip > by_name[nname]["ip"]:
-                        by_name[nname] = {"ip": ip, "gs": gs, "team": team, "name": name}
+                        by_name[nname] = {"ip": ip, "gs": gs, "g": g, "team": team, "name": name}
 
                 ip_count = sum(1 for p in by_name.values() if p["ip"] >= MIN_IP)
-                gs_count = sum(1 for p in by_name.values() if p["gs"] >= GS_THRESHOLD)
-                print(f"    ✓ {ip_count} with {MIN_IP}+ IP, {gs_count} starters ({GS_THRESHOLD}+ GS)")
+                sp_count = sum(1 for p in by_name.values() if p["g"] > 0 and p["gs"] * 2 > p["g"])
+                print(f"    ✓ {ip_count} with {MIN_IP}+ IP, {sp_count} starters (>50% GS)")
             else:
                 print(f"    ⚠ Missing columns. name={name_col} ip={ip_col}")
         except Exception as e:
@@ -412,6 +434,7 @@ def fetch_pitcher_info(season, sport_id=1):
                         "team": fg.get("team", abbr) or abbr,
                         "ip": fg.get("ip", 0),
                         "gs": fg.get("gs", 0),
+                        "g": fg.get("g", 0),
                     }
                 time.sleep(0.05)
             except Exception:
@@ -420,9 +443,9 @@ def fetch_pitcher_info(season, sport_id=1):
         print(f"    ⚠ Roster fetch failed: {e}")
 
     ip_count = sum(1 for p in by_id.values() if p["ip"] >= MIN_IP)
-    gs_count = sum(1 for p in by_id.values() if p["gs"] >= GS_THRESHOLD)
+    sp_count = sum(1 for p in by_id.values() if p["g"] > 0 and p["gs"] * 2 > p["g"])
     print(f"    ✓ {len(by_id)} pitchers mapped (ID→name→FG stats)")
-    print(f"    ✓ {ip_count} with {MIN_IP}+ IP, {gs_count} starters ({GS_THRESHOLD}+ GS)")
+    print(f"    ✓ {ip_count} with {MIN_IP}+ IP, {sp_count} starters (>50% GS)")
     return by_id, by_name
 
 
@@ -473,6 +496,7 @@ def run_pipeline(season, output_dir, sport_id=1):
     acc_gs = {}
     acc_outs = {}
     acc_teams = {}
+    acc_gapp = {}
     total_pitches = 0
 
     for i, (start, end) in enumerate(date_ranges):
@@ -481,8 +505,8 @@ def run_pipeline(season, output_dir, sport_id=1):
         if df is not None and len(df) > 0:
             print(f"    ✓ {len(df):,} pitches")
             total_pitches += len(df)
-            partial_r2k, partial_gs, partial_outs, partial_teams = compute_race2k_and_starts(df)
-            merge_results(acc_r2k, acc_gs, acc_outs, acc_teams, partial_r2k, partial_gs, partial_outs, partial_teams)
+            partial_r2k, partial_gs, partial_outs, partial_teams, partial_gapp = compute_race2k_and_starts(df)
+            merge_results(acc_r2k, acc_gs, acc_outs, acc_teams, acc_gapp, partial_r2k, partial_gs, partial_outs, partial_teams, partial_gapp)
         else:
             print(f"    — No data")
         time.sleep(FETCH_DELAY)
@@ -491,10 +515,12 @@ def run_pipeline(season, output_dir, sport_id=1):
     print(f"  Pitchers with data: {len(acc_r2k)}")
 
     # Game start summary
-    gs_counts = sorted(acc_gs.values(), reverse=True)
-    sp_from_savant = sum(1 for gs in gs_counts if gs >= GS_THRESHOLD)
-    print(f"  Game starts detected from Savant data: {sum(gs_counts)} total across {len(acc_gs)} pitchers")
-    print(f"  Starters (>= {GS_THRESHOLD} GS): {sp_from_savant}")
+    sp_from_savant = sum(
+        1 for pid, gs in acc_gs.items()
+        if acc_gapp.get(pid, 0) > 0 and gs * 2 > acc_gapp[pid]
+    )
+    print(f"  Game starts detected from Savant data: {sum(acc_gs.values())} total across {len(acc_gs)} pitchers")
+    print(f"  Starters (>50% appearances as starter): {sp_from_savant}")
 
     # 3. Build final leaderboard
     print(f"\n{'='*50}")
@@ -509,6 +535,7 @@ def run_pipeline(season, output_dir, sport_id=1):
         info = pitcher_info.get(pid, {})
         ip = info.get("ip", 0)
         gs = info.get("gs", 0)
+        g = info.get("g", 0)
         team = info.get("team", "")
         name = info.get("name") or metrics["name"] or ""
 
@@ -519,6 +546,7 @@ def run_pipeline(season, output_dir, sport_id=1):
             if fg.get("ip", 0) > 0:
                 ip = fg["ip"]
                 gs = fg.get("gs", gs)
+                g = fg.get("g", g)
                 team = fg.get("team", team) or team
                 name = fg.get("name", name) or name
 
@@ -537,10 +565,13 @@ def run_pipeline(season, output_dir, sport_id=1):
         if ip < MIN_IP:
             continue
 
-        # SP/RP: prefer FG GS, fallback to Savant game start detection
+        # SP/RP: prefer FG GS+G, fallback to Savant game appearance detection.
+        # Starter = more than 50% of appearances were starts.
         if gs == 0:
             gs = acc_gs.get(pid, 0)
-        is_sp = gs >= GS_THRESHOLD
+        if g == 0:
+            g = acc_gapp.get(pid, 0)
+        is_sp = g > 0 and gs * 2 > g
 
         avg = metrics["pitches_to_2k_sum"] / metrics["qualifying_pas"]
         reach_pct = round(metrics["qualifying_pas"] / metrics["total_pas"] * 100, 1) if metrics["total_pas"] > 0 else 0
@@ -551,6 +582,7 @@ def run_pipeline(season, output_dir, sport_id=1):
             "team": team,
             "ip": round(ip, 1),
             "gs": gs,
+            "g": g,
             "is_sp": is_sp,
             "avg_pitches_to_2k": round(avg, 3),
             "qualifying_pas": metrics["qualifying_pas"],
@@ -589,7 +621,7 @@ def run_pipeline(season, output_dir, sport_id=1):
         "relievers": rp_list,
         "meta": {
             "min_ip": MIN_IP,
-            "gs_threshold": GS_THRESHOLD,
+            "role_method": "starter_pct_gt_50",
             "total_pitches_analyzed": total_pitches,
             "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
         },
