@@ -43,8 +43,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Reuse the feature engineering + scoring from score_pitches.py
-sys.path.insert(0, str(Path(__file__).parent))
+# Reuse the feature engineering + scoring from the api (new split FB/offspeed model)
+_API_DIR = Path(__file__).parent.parent / 'pitch-plus-api'
+sys.path.insert(0, str(_API_DIR))
 from score_pitches import load_models, score_dataframe
 
 
@@ -54,7 +55,7 @@ def load_weights(config_path: Path) -> dict:
 
 
 REPO = Path(__file__).parent
-MODELS_DIR = REPO / 'models'
+MODELS_DIR = _API_DIR / 'models'
 CONFIG_PATH = MODELS_DIR / 'final_model_config.json'
 
 
@@ -245,11 +246,11 @@ def build(parquet_path: Path, year: int, out_path: Path):
     print(f'  {len(df):,} pitches')
 
     print('Loading models ...')
-    stuff, stuff_features, tunnel, location_models = load_models(MODELS_DIR)
+    stuff_fb, stuff_fb_features, stuff_offspeed, stuff_offspeed_features, stuff_family, tunnel, location_models = load_models(MODELS_DIR)
     weights = load_weights(CONFIG_PATH)
 
     print('Scoring pitches ...')
-    df = score_dataframe(df, stuff, stuff_features, tunnel, location_models, weights)
+    df = score_dataframe(df, stuff_fb, stuff_fb_features, stuff_offspeed, stuff_offspeed_features, stuff_family, tunnel, location_models, weights)
 
     print('Classifying roles ...')
     df = classify_roles(df)
