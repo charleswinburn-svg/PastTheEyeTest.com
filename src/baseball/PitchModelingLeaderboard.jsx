@@ -31,12 +31,12 @@ const METRICS = [
 // from the table to keep it scannable.
 const PITCH_COLS = ["FF", "SI", "FC", "SL", "ST", "SV", "CU", "KC", "CH", "FS"];
 
-// Plus-scale cell color: dark green ≥120, dark red ≤80, 5 discrete shades each side.
-const plusCellStyle = (v) => {
-  if (v == null || !isFinite(v)) return {};
-  const z = (v - 100) / 20;                          // ±1 at ±2σ (80–120)
+// Plus-scale cell color calibrated to a given stdev (computed from loaded data).
+const plusCellStyle = (v, stdev) => {
+  if (v == null || !isFinite(v) || !stdev) return {};
+  const z = (v - 100) / (2 * stdev);                 // ±1 at ±2σ
   const t = Math.max(0, Math.min(1, Math.abs(z)));
-  if (t < 0.05) return {};                            // neutral zone: ≈ ±1 pt
+  if (t < 0.05) return {};
   const step = Math.min(4, Math.floor(t * 5));        // 5 shades per direction = 10 total
   const alphas = [0.22, 0.38, 0.54, 0.70, 0.86];
   const alpha = alphas[step];
@@ -121,6 +121,20 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
     arr.sort(cmp);
     return arr;
   }, [rows, sortCol, sortDir, search]);
+
+  // Compute stdev per column from actual data so color scale self-calibrates.
+  const colStdev = useMemo(() => {
+    const sd = (vals) => {
+      if (vals.length < 2) return null;
+      const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+      return Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / (vals.length - 1));
+    };
+    const result = { Overall: sd(rows.map(r => r.overall).filter(v => v != null)) };
+    for (const pt of PITCH_COLS) {
+      result[pt] = sd(rows.map(r => r.types[pt]).filter(v => v != null));
+    }
+    return result;
+  }, [rows]);
 
   const toggle = (col) => {
     if (sortCol === col) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -207,7 +221,8 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
               {filtered.map((r, i) => {
                 const cell = (key, v) => {
                   if (v == null) return <td key={key} style={{ ...tdS, color: t.textFaintest }}>—</td>;
-                  const cs = plusCellStyle(v);
+                  const sd = key === "overall" ? colStdev.Overall : colStdev[key];
+                  const cs = plusCellStyle(v, sd);
                   return (
                     <td key={key} style={{ ...tdS, ...cs, fontWeight: 600 }}>
                       {Math.round(v)}
@@ -234,7 +249,7 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
         </div>
       )}
       <div style={{ fontSize: 10, color: t.textFaint, marginTop: 6 }}>
-        {filtered.length} pitchers · {currentMetricLabel} · 100 = MLB average · ±10 ≈ 1σ
+        {filtered.length} pitchers · {currentMetricLabel} · 100 = MLB average · color scale = ±2σ of this metric
       </div>
     </div>
   );
