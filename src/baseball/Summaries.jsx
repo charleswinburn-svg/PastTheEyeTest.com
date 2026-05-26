@@ -20,6 +20,19 @@ const SEASON_TYPES = [
   { id: "P", label: "Postseason" },
 ];
 
+const fmtDate = (s) => {
+  if (!s) return "";
+  const [y, m, d] = s.split("-");
+  return y && m && d ? `${m}/${d}/${y}` : s;
+};
+
+const dateRangeSuffix = (from, to) => {
+  if (!from && !to) return "";
+  if (from && to) return ` — ${fmtDate(from)}–${fmtDate(to)}`;
+  if (from)       return ` — from ${fmtDate(from)}`;
+  return ` — through ${fmtDate(to)}`;
+};
+
 export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const { theme: t } = useTheme();
   
@@ -1083,18 +1096,19 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           isGame={isGame} isAAA={isAAA}
           leagueAvgs={effectiveLeagueAvgs} pitchPlus={effectivePitchPlus}
           reclassifyMode={reclassifyMode}
+          dateFrom={dateFrom} dateTo={dateTo}
           onPitchClick={(p) => setReclassifyTarget({ kind: "single", pitch: p })}
           onTypeClick={(type, count) => setReclassifyTarget({ kind: "bulk", type, count })}
         />
       )}
-      {hasData && !isPitcher && !isCounts && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isAAA} leagueAvgs={effectiveLeagueAvgs} />}
+      {hasData && !isPitcher && !isCounts && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isAAA} leagueAvgs={effectiveLeagueAvgs} dateFrom={dateFrom} dateTo={dateTo} />}
       {hasData && isPitcher && isCounts && (
-        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={true}>
+        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={true} dateFrom={dateFrom} dateTo={dateTo}>
           <PitcherCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isAAA} />
         </CountsCard>
       )}
       {hasData && !isPitcher && isCounts && (
-        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={false}>
+        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={false} dateFrom={dateFrom} dateTo={dateTo}>
           <HitterCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isAAA} />
         </CountsCard>
       )}
@@ -1144,10 +1158,10 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   );
 }
 
-function CountsCard({ player, season, seasonType, isAAA, isPitcher, children }) {
+function CountsCard({ player, season, seasonType, isAAA, isPitcher, children, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
-  const subtitle = `${season} ${GAME_TYPE_LABELS[seasonType]} Counts`;
+  const subtitle = `${season} ${GAME_TYPE_LABELS[seasonType]} Counts${dateRangeSuffix(dateFrom, dateTo)}`;
   const saveCard = async () => {
     await saveCardAsPng(cardRef, `${player.name.replace(/\s+/g, "_")}_${isPitcher ? "pitching" : "hitting"}_counts.png`);
   };
@@ -1168,7 +1182,7 @@ function CountsCard({ player, season, seasonType, isAAA, isPitcher, children }) 
   );
 }
 
-function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, reclassifyMode = false, onPitchClick = null, onTypeClick = null }) {
+function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, reclassifyMode = false, onPitchClick = null, onTypeClick = null, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const pitchRows = useMemo(() => aggregateByPitchType(data.pitches), [data.pitches]);
@@ -1186,7 +1200,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
       const dateStr = y && m && d ? `${m}/${d}/${y}` : (game.date || "");
       return `${home} vs. ${away} — ${dateStr}`;
     }
-    return `${season} ${GAME_TYPE_LABELS[seasonType]}`;
+    return `${season} ${GAME_TYPE_LABELS[seasonType]}${dateRangeSuffix(dateFrom, dateTo)}`;
   })();
   const stats = isGame ? [
     { label: "IP", value: data.ip, format: ".1f" },
@@ -1306,7 +1320,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
   );
 }
 
-function HitterView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs }) {
+function HitterView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const subtitle = (() => {
@@ -1317,7 +1331,7 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
       const dateStr = y && m && d ? `${m}/${d}/${y}` : (game.date || "");
       return `${home} vs. ${away} — ${dateStr}`;
     }
-    return `${season} ${GAME_TYPE_LABELS[seasonType]}`;
+    return `${season} ${GAME_TYPE_LABELS[seasonType]}${dateRangeSuffix(dateFrom, dateTo)}`;
   })();
 
   const stats = [
