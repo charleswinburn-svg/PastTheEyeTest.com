@@ -2,6 +2,16 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ReferenceLine } from "recharts";
 import { SearchableSelect } from "../baseball/SharedComponents.jsx";
 
+function useWindowWidth() {
+  const [w, setW] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1024));
+  useEffect(() => {
+    const h = () => setW(window.innerWidth);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
+  return w;
+}
+
 const BIN_COLORS={"0-10":"#08306B","10-25":"#2171B5","25-45":"#6BAED6","45-55":"#D9D9D9","55-75":"#FC9272","75-90":"#FB6A4A","90-100":"#CB181D"};
 const pctToBin=p=>{if(p==null||!isFinite(p))return"NA";if(p>=90)return"90-100";if(p>=75)return"75-90";if(p>=55)return"55-75";if(p>=45)return"45-55";if(p>=25)return"25-45";if(p>=10)return"10-25";return"0-10"};
 const binColor=p=>BIN_COLORS[pctToBin(p)]||"#444";
@@ -376,28 +386,38 @@ export default function HockeyApp(){
   const isLbTab=(id)=>id==="skater_lb"||id==="goalie_lb";
   const isTabActive=(id)=>id==="leaderboard"?isLbTab(tab):tab===id;
 
+  const winWidth = useWindowWidth();
+  const isMobile = winWidth < 640;
+
   return(
     <div style={{minHeight:"100vh",background:"#0a0f1a"}} onClick={()=>setOpenDropdown(null)}>
-      <div style={{background:"#111827",borderBottom:"2px solid #f59e0b",padding:"0 20px",display:"flex",alignItems:"stretch",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 12px rgba(0,0,0,0.4)"}}>
-        {/* Left: brand + mode selector */}
+      <div style={{background:"#111827",borderBottom:"2px solid #f59e0b",padding:isMobile?"0 8px":"0 20px",display:"flex",alignItems:"stretch",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 12px rgba(0,0,0,0.4)",flexWrap:isMobile?"wrap":"nowrap"}}>
+        {/* Left: brand (desktop only) + mode selector */}
         <div style={{display:"flex",alignItems:"stretch",gap:0,flexShrink:0}}>
-          <div style={{display:"flex",alignItems:"center",padding:"12px 20px 12px 0",borderRight:"1px solid #1e3a5f",marginRight:8}}>
-            <div style={{fontSize:16,fontWeight:700,color:"#f8fafc",letterSpacing:"-0.02em",fontStyle:"italic"}}><span style={{color:"#3b82f6"}}>NHL</span> <span style={{color:"#f59e0b"}}>Player Cards</span></div>
-          </div>
-          <div style={{display:"flex",alignItems:"center",padding:"0 16px",borderRight:"1px solid #1e3a5f"}}>
+          {!isMobile&&(
+            <div style={{display:"flex",alignItems:"center",padding:"12px 20px 12px 0",borderRight:"1px solid #1e3a5f",marginRight:8}}>
+              <div style={{fontSize:16,fontWeight:700,color:"#f8fafc",letterSpacing:"-0.02em",fontStyle:"italic"}}><span style={{color:"#3b82f6"}}>NHL</span> <span style={{color:"#f59e0b"}}>Player Cards</span></div>
+            </div>
+          )}
+          <div style={{display:"flex",alignItems:"center",padding:isMobile?"0 6px 0 0":"0 16px",borderRight:isMobile?"none":"1px solid #1e3a5f"}}>
             <select value={modeId} onChange={e=>setModeId(e.target.value)}
-              style={{padding:"8px 14px",background:"linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%)",color:"#fff",border:"none",borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer",outline:"none",boxShadow:"0 2px 8px rgba(0,0,0,0.2)"}}>
+              style={{padding:isMobile?"6px 10px":"8px 14px",background:"linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%)",color:"#fff",border:"none",borderRadius:8,fontSize:isMobile?11:12,fontWeight:700,cursor:"pointer",outline:"none",boxShadow:"0 2px 8px rgba(0,0,0,0.2)"}}>
               {MODES.map(m=><option key={m.id} value={m.id} style={{background:"#0f172a",color:"#f8fafc"}}>{m.label}</option>)}
             </select>
           </div>
         </div>
-        {/* Center: tabs — absolutely centered on full page */}
-        <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"stretch",height:"100%"}}>
+        {/* Tabs: absolutely centered on desktop, scrollable flex on mobile */}
+        <div style={isMobile?{
+          display:"flex",alignItems:"stretch",overflowX:"auto",flex:1,
+          msOverflowStyle:"none",scrollbarWidth:"none",
+        }:{
+          position:"absolute",left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"stretch",height:"100%",
+        }}>
           {TABS.map(t=>(
             <div key={t.id} style={{position:"relative",display:"flex",alignItems:"stretch"}} onClick={e=>e.stopPropagation()}>
               <button
                 onClick={()=>t.dropdown?setOpenDropdown(openDropdown===t.id?null:t.id):setTab(t.id)&&setOpenDropdown(null)}
-                style={{padding:"16px 18px",fontSize:12,fontWeight:isTabActive(t.id)?700:600,letterSpacing:"0.04em",background:isTabActive(t.id)?"rgba(245,158,11,0.1)":"transparent",color:isTabActive(t.id)?"#f59e0b":"#94a3b8",border:"none",borderBottom:isTabActive(t.id)?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,fontFamily:"inherit"}}
+                style={{padding:isMobile?"10px 10px":"16px 18px",fontSize:isMobile?11:12,fontWeight:isTabActive(t.id)?700:600,letterSpacing:"0.04em",whiteSpace:"nowrap",background:isTabActive(t.id)?"rgba(245,158,11,0.1)":"transparent",color:isTabActive(t.id)?"#f59e0b":"#94a3b8",border:"none",borderBottom:isTabActive(t.id)?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,fontFamily:"inherit"}}
               >
                 {t.label.toUpperCase()}
                 {t.dropdown&&<span style={{fontSize:8,marginLeft:2,display:"inline-block",transform:openDropdown===t.id?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>▼</span>}
@@ -416,25 +436,25 @@ export default function HockeyApp(){
             </div>
           ))}
         </div>
-        {/* Right: player selector + stats */}
-        <div style={{display:"flex",alignItems:"center",gap:16,padding:"12px 0",marginLeft:"auto"}}>
+        {/* Right: player selector + position filter + stats */}
+        <div style={{display:"flex",alignItems:"center",gap:isMobile?8:16,padding:isMobile?"6px 4px":"12px 0",marginLeft:isMobile?0:"auto",width:isMobile?"100%":"auto",borderTop:isMobile?"1px solid #1e3a5f":"none",flexWrap:"wrap"}}>
           {(tab==="skater"||tab==="goalie")&&(
             <SearchableSelect
               value={tab==="goalie"?selectedGoalie||"":selectedSkater||""}
               options={tab==="goalie"?goalieNames:skaterNames}
               onChange={name=>tab==="goalie"?setSelectedGoalie(name):setSelectedSkater(name)}
               placeholder={`Search ${tab==="goalie"?"goalie":"skater"}…`}
-              style={{padding:"8px 12px",background:"#0f172a",border:"1px solid #1e3a5f",borderRadius:6,color:"#f8fafc",fontSize:13,minWidth:200,maxWidth:280}}
+              style={{padding:"8px 12px",background:"#0f172a",border:"1px solid #1e3a5f",borderRadius:6,color:"#f8fafc",fontSize:13,minWidth:isMobile?0:200,maxWidth:isMobile?"100%":280,width:isMobile?"100%":"auto",flexShrink:1}}
             />
           )}
           {tab==="skater_lb"&&(
             <div style={{display:"flex",gap:4}}>
-              {[["F","Forwards"],["D","Defensemen"],["","All"]].map(([v,l])=>(
-                <button key={v} onClick={()=>setPosFilter(v)} style={{padding:"6px 14px",fontSize:11,fontWeight:posFilter===v?700:500,background:posFilter===v?"rgba(245,158,11,0.15)":"transparent",color:posFilter===v?"#f59e0b":"#94a3b8",border:"1px solid #1e3a5f",borderRadius:6,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
+              {[["F","Fwd"],["D","Def"],["","All"]].map(([v,l])=>(
+                <button key={v} onClick={()=>setPosFilter(v)} style={{padding:isMobile?"6px 10px":"6px 14px",fontSize:11,fontWeight:posFilter===v?700:500,background:posFilter===v?"rgba(245,158,11,0.15)":"transparent",color:posFilter===v?"#f59e0b":"#94a3b8",border:"1px solid #1e3a5f",borderRadius:6,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
               ))}
             </div>
           )}
-          <div style={{fontSize:10,color:"#64748b",letterSpacing:"0.03em",borderLeft:"1px solid #1e3a5f",paddingLeft:16}}>{mode} | {skaters.length} skaters | {goalies.length} goalies</div>
+          {!isMobile&&<div style={{fontSize:10,color:"#64748b",letterSpacing:"0.03em",borderLeft:"1px solid #1e3a5f",paddingLeft:16}}>{mode} | {skaters.length} skaters | {goalies.length} goalies</div>}
         </div>
       </div>
 
@@ -446,7 +466,7 @@ export default function HockeyApp(){
       ) : (!data||loading) ? (
         <div style={{color:"#64748b",padding:60,textAlign:"center",fontSize:14}}>Loading {curMode.label}...</div>
       ) : (
-        <div style={{padding:24,maxWidth:tab.includes("lb")?1200:640,margin:"0 auto"}}>
+        <div style={{padding:isMobile?"12px 8px":24,maxWidth:tab.includes("lb")?1200:640,margin:"0 auto"}}>
           {tab==="skater"&&<><Card player={curSkater} type="skater" trends={data.skater_trends} mode={mode} headshots={headshots} logos={logos}/><WeightTable player={curSkater} type="skater"/></>}
           {tab==="goalie"&&<><Card player={curGoalie} type="goalie" trends={data.goalie_trends} mode={mode} headshots={headshots} logos={logos}/><WeightTable player={curGoalie} type="goalie"/></>}
           {tab==="skater_lb"&&<HockeyLeaderboard players={filteredSkaters} columns={SK_COLS} sortDefault="overall_pctile"/>}
