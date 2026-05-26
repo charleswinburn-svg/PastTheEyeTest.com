@@ -28,8 +28,9 @@ const METRICS = [
 ];
 
 // Display order for pitch-type columns. Anything outside this list is dropped
-// from the table to keep it scannable.
-const PITCH_COLS = ["FF", "SI", "FC", "SL", "ST", "SV", "CU", "KC", "CH", "FS"];
+// from the table to keep it scannable. Exotic types (FO/CS/SC/KN) follow
+// their scoring proxies so they appear near their movement family.
+const PITCH_COLS = ["FF", "SI", "FC", "SL", "ST", "SV", "CU", "KC", "CS", "CH", "SC", "FS", "FO", "KN"];
 
 // Plus-scale cell color relative to each column's own mean and stdev (computed from loaded data).
 const plusCellStyle = (v, mean, stdev) => {
