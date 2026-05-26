@@ -1016,6 +1016,8 @@ def process_pitchers(year):
             # Velo and extension from FanGraphs
             "FBv": "avg_fb_velo", "vFA (pi)": "avg_fb_velo",
             "Ext": "extension", "Extension": "extension",
+            # ID column — must be renamed so the merge uses ID join not name join
+            "xMLBAMID": "player_id",
         }
         fg_merged = fg_merged.rename(columns={k: v for k, v in fg_col_map.items() if k in fg_merged.columns})
         if "team" in fg_merged.columns:
