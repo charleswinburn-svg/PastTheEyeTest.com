@@ -283,99 +283,154 @@ function BaseballApp() {
         boxShadow: `0 2px 12px ${t.shadow}`,
         flexWrap: isMobile ? "wrap" : "nowrap",
       }}>
-        {/* Tab Navigation — absolutely centered on desktop, scrollable row on mobile */}
-        <div style={isMobile ? {
-          display: "flex", alignItems: "stretch", overflowX: "auto", width: "100%",
-          msOverflowStyle: "none", scrollbarWidth: "none",
-        } : {
-          position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "stretch", height: "100%",
-        }}>
-          {TABS.map(tb => (
-            <div
-              key={tb.id}
-              style={{ position: "relative", display: "flex", alignItems: "stretch" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={(e) => handleTabClick(tb, e)}
-                style={{
-                  padding: isMobile ? "10px 10px" : "16px 18px",
-                  fontSize: isMobile ? 11 : 12,
-                  fontWeight: isTabActive(tb.id) ? 700 : 600,
-                  letterSpacing: "0.05em",
-                  whiteSpace: "nowrap",
-                  color: isTabActive(tb.id) ? t.accent : t.textMuted,
-                  background: isTabActive(tb.id) ? (t.id === "dark" ? "rgba(245,158,11,0.1)" : "rgba(234,88,12,0.08)") : "transparent",
-                  border: "none",
-                  borderBottom: isTabActive(tb.id) ? `3px solid ${t.accent}` : "3px solid transparent",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  fontFamily: "inherit",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                {tb.label}
-                {tb.dropdown && (
-                  <span style={{
-                    fontSize: 8,
-                    marginLeft: 2,
-                    transform: openDropdown === tb.id ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s",
-                  }}>
-                    ▼
-                  </span>
-                )}
-              </button>
-
-              {/* Dropdown Menu */}
-              {tb.dropdown && openDropdown === tb.id && (
+        {/* Tab Navigation */}
+        {isMobile ? (
+          // On mobile: wrap scroll container + dropdown as siblings so overflowX
+          // doesn't clip the dropdown (overflow:auto implicitly clips cross-axis).
+          <div style={{ position: "relative", flex: 1, overflow: "visible" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "stretch", overflowX: "auto", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+              {TABS.map(tb => (
+                <button
+                  key={tb.id}
+                  onClick={(e) => handleTabClick(tb, e)}
+                  style={{
+                    padding: "10px 10px",
+                    fontSize: 11,
+                    fontWeight: isTabActive(tb.id) ? 700 : 600,
+                    letterSpacing: "0.05em",
+                    whiteSpace: "nowrap",
+                    color: isTabActive(tb.id) ? t.accent : t.textMuted,
+                    background: isTabActive(tb.id) ? (t.id === "dark" ? "rgba(245,158,11,0.1)" : "rgba(234,88,12,0.08)") : "transparent",
+                    border: "none",
+                    borderBottom: isTabActive(tb.id) ? `3px solid ${t.accent}` : "3px solid transparent",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    fontFamily: "inherit",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    flexShrink: 0,
+                  }}
+                >
+                  {tb.label}
+                  {tb.dropdown && (
+                    <span style={{ fontSize: 8, marginLeft: 2, display: "inline-block", transform: openDropdown === tb.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>▼</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            {/* Mobile dropdown lives outside the scroll container — not clipped */}
+            {openDropdown && (() => {
+              const activeTb = TABS.find(tb => tb.id === openDropdown);
+              if (!activeTb?.dropdown) return null;
+              return (
                 <div style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
+                  position: "absolute", top: "100%", left: 0, right: 0,
                   background: t.cardBg,
                   border: `1px solid ${t.accent}`,
-                  borderRadius: 10,
+                  borderTop: "none",
+                  borderRadius: "0 0 10px 10px",
                   boxShadow: `0 12px 32px ${t.shadow}`,
-                  minWidth: 160,
                   overflow: "hidden",
-                  zIndex: 200,
+                  zIndex: 300,
                 }}>
-                  {tb.dropdown.map((sub, idx) => (
+                  {activeTb.dropdown.map((sub, idx) => (
                     <button
                       key={sub.id}
                       onClick={() => handleDropdownSelect(sub)}
                       style={{
                         width: "100%",
-                        padding: isMobile ? "16px 20px" : "12px 18px",
-                        fontSize: isMobile ? 15 : 13,
+                        padding: "16px 20px",
+                        fontSize: 15,
                         fontWeight: tab === sub.id ? 700 : 500,
                         color: tab === sub.id ? t.accent : t.textSecondary,
                         background: tab === sub.id ? (t.id === "dark" ? "rgba(245,158,11,0.15)" : "rgba(234,88,12,0.1)") : "transparent",
                         border: "none",
-                        borderBottom: idx < tb.dropdown.length - 1 ? `1px solid ${t.tableBorder}` : "none",
+                        borderBottom: idx < activeTb.dropdown.length - 1 ? `1px solid ${t.tableBorder}` : "none",
                         cursor: "pointer",
                         textAlign: "left",
                         fontFamily: "inherit",
-                        transition: "all 0.15s",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (tab !== sub.id) e.target.style.background = t.id === "dark" ? "rgba(59,130,246,0.1)" : "rgba(37,99,235,0.05)";
-                      }}
-                      onMouseLeave={(e) => {
-                        if (tab !== sub.id) e.target.style.background = "transparent";
+                        display: "block",
                       }}
                     >
                       {sub.label}
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              );
+            })()}
+          </div>
+        ) : (
+          // Desktop: absolutely centered, dropdown inside each tab's relative container
+          <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "stretch", height: "100%" }}>
+            {TABS.map(tb => (
+              <div key={tb.id} style={{ position: "relative", display: "flex", alignItems: "stretch" }} onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={(e) => handleTabClick(tb, e)}
+                  style={{
+                    padding: "16px 18px",
+                    fontSize: 12,
+                    fontWeight: isTabActive(tb.id) ? 700 : 600,
+                    letterSpacing: "0.05em",
+                    whiteSpace: "nowrap",
+                    color: isTabActive(tb.id) ? t.accent : t.textMuted,
+                    background: isTabActive(tb.id) ? (t.id === "dark" ? "rgba(245,158,11,0.1)" : "rgba(234,88,12,0.08)") : "transparent",
+                    border: "none",
+                    borderBottom: isTabActive(tb.id) ? `3px solid ${t.accent}` : "3px solid transparent",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    fontFamily: "inherit",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  {tb.label}
+                  {tb.dropdown && (
+                    <span style={{ fontSize: 8, marginLeft: 2, transform: openDropdown === tb.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>▼</span>
+                  )}
+                </button>
+                {tb.dropdown && openDropdown === tb.id && (
+                  <div style={{
+                    position: "absolute", top: "100%", left: 0,
+                    background: t.cardBg,
+                    border: `1px solid ${t.accent}`,
+                    borderRadius: 10,
+                    boxShadow: `0 12px 32px ${t.shadow}`,
+                    minWidth: 160,
+                    overflow: "hidden",
+                    zIndex: 200,
+                  }}>
+                    {tb.dropdown.map((sub, idx) => (
+                      <button
+                        key={sub.id}
+                        onClick={() => handleDropdownSelect(sub)}
+                        style={{
+                          width: "100%",
+                          padding: "12px 18px",
+                          fontSize: 13,
+                          fontWeight: tab === sub.id ? 700 : 500,
+                          color: tab === sub.id ? t.accent : t.textSecondary,
+                          background: tab === sub.id ? (t.id === "dark" ? "rgba(245,158,11,0.15)" : "rgba(234,88,12,0.1)") : "transparent",
+                          border: "none",
+                          borderBottom: idx < tb.dropdown.length - 1 ? `1px solid ${t.tableBorder}` : "none",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          fontFamily: "inherit",
+                          transition: "all 0.15s",
+                        }}
+                        onMouseEnter={(e) => { if (tab !== sub.id) e.target.style.background = t.id === "dark" ? "rgba(59,130,246,0.1)" : "rgba(37,99,235,0.05)"; }}
+                        onMouseLeave={(e) => { if (tab !== sub.id) e.target.style.background = "transparent"; }}
+                      >
+                        {sub.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Right: Season selector, player selector, theme toggle, stats */}
         <div style={{

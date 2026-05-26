@@ -406,36 +406,62 @@ export default function HockeyApp(){
             </select>
           </div>
         </div>
-        {/* Tabs: absolutely centered on desktop, scrollable flex on mobile */}
-        <div style={isMobile?{
-          display:"flex",alignItems:"stretch",overflowX:"auto",flex:1,
-          msOverflowStyle:"none",scrollbarWidth:"none",
-        }:{
-          position:"absolute",left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"stretch",height:"100%",
-        }}>
-          {TABS.map(t=>(
-            <div key={t.id} style={{position:"relative",display:"flex",alignItems:"stretch"}} onClick={e=>e.stopPropagation()}>
-              <button
-                onClick={()=>t.dropdown?setOpenDropdown(openDropdown===t.id?null:t.id):setTab(t.id)&&setOpenDropdown(null)}
-                style={{padding:isMobile?"10px 10px":"16px 18px",fontSize:isMobile?11:12,fontWeight:isTabActive(t.id)?700:600,letterSpacing:"0.04em",whiteSpace:"nowrap",background:isTabActive(t.id)?"rgba(245,158,11,0.1)":"transparent",color:isTabActive(t.id)?"#f59e0b":"#94a3b8",border:"none",borderBottom:isTabActive(t.id)?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,fontFamily:"inherit"}}
-              >
-                {t.label.toUpperCase()}
-                {t.dropdown&&<span style={{fontSize:8,marginLeft:2,display:"inline-block",transform:openDropdown===t.id?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>▼</span>}
-              </button>
-              {t.dropdown&&openDropdown===t.id&&(
-                <div style={{position:"absolute",top:"100%",left:0,background:"#1e293b",border:"1px solid #f59e0b",borderRadius:10,boxShadow:"0 12px 32px rgba(0,0,0,0.5)",minWidth:140,overflow:"hidden",zIndex:200}}>
-                  {t.dropdown.map((sub,idx)=>(
+        {/* Tabs */}
+        {isMobile?(
+          // Mobile: scroll container + dropdown as siblings so overflowX doesn't clip dropdown
+          <div style={{position:"relative",flex:1,overflow:"visible"}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",alignItems:"stretch",overflowX:"auto",msOverflowStyle:"none",scrollbarWidth:"none"}}>
+              {TABS.map(t=>(
+                <button key={t.id}
+                  onClick={()=>t.dropdown?setOpenDropdown(openDropdown===t.id?null:t.id):setTab(t.id)&&setOpenDropdown(null)}
+                  style={{padding:"10px 10px",fontSize:11,fontWeight:isTabActive(t.id)?700:600,letterSpacing:"0.04em",whiteSpace:"nowrap",background:isTabActive(t.id)?"rgba(245,158,11,0.1)":"transparent",color:isTabActive(t.id)?"#f59e0b":"#94a3b8",border:"none",borderBottom:isTabActive(t.id)?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,fontFamily:"inherit",flexShrink:0}}
+                >
+                  {t.label.toUpperCase()}
+                  {t.dropdown&&<span style={{fontSize:8,marginLeft:2,display:"inline-block",transform:openDropdown===t.id?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>▼</span>}
+                </button>
+              ))}
+            </div>
+            {openDropdown&&(()=>{
+              const activeTb=TABS.find(t=>t.id===openDropdown);
+              if(!activeTb?.dropdown)return null;
+              return(
+                <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#1e293b",border:"1px solid #f59e0b",borderTop:"none",borderRadius:"0 0 10px 10px",boxShadow:"0 12px 32px rgba(0,0,0,0.5)",overflow:"hidden",zIndex:300}}>
+                  {activeTb.dropdown.map((sub,idx)=>(
                     <button key={sub.id} onClick={()=>{setTab(sub.id);setOpenDropdown(null);}}
-                      style={{width:"100%",padding:isMobile?"16px 20px":"12px 18px",fontSize:isMobile?15:13,fontWeight:tab===sub.id?700:500,color:tab===sub.id?"#f59e0b":"#cbd5e1",background:tab===sub.id?"rgba(245,158,11,0.15)":"transparent",border:"none",borderBottom:idx<t.dropdown.length-1?"1px solid #334155":"none",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all 0.15s"}}
-                      onMouseEnter={e=>{if(tab!==sub.id)e.target.style.background="rgba(59,130,246,0.1)"}}
-                      onMouseLeave={e=>{if(tab!==sub.id)e.target.style.background="transparent"}}
+                      style={{width:"100%",padding:"16px 20px",fontSize:15,fontWeight:tab===sub.id?700:500,color:tab===sub.id?"#f59e0b":"#cbd5e1",background:tab===sub.id?"rgba(245,158,11,0.15)":"transparent",border:"none",borderBottom:idx<activeTb.dropdown.length-1?"1px solid #334155":"none",cursor:"pointer",textAlign:"left",fontFamily:"inherit",display:"block"}}
                     >{sub.label}</button>
                   ))}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              );
+            })()}
+          </div>
+        ):(
+          // Desktop: absolutely centered, dropdown inside each tab
+          <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"stretch",height:"100%"}}>
+            {TABS.map(t=>(
+              <div key={t.id} style={{position:"relative",display:"flex",alignItems:"stretch"}} onClick={e=>e.stopPropagation()}>
+                <button
+                  onClick={()=>t.dropdown?setOpenDropdown(openDropdown===t.id?null:t.id):setTab(t.id)&&setOpenDropdown(null)}
+                  style={{padding:"16px 18px",fontSize:12,fontWeight:isTabActive(t.id)?700:600,letterSpacing:"0.04em",whiteSpace:"nowrap",background:isTabActive(t.id)?"rgba(245,158,11,0.1)":"transparent",color:isTabActive(t.id)?"#f59e0b":"#94a3b8",border:"none",borderBottom:isTabActive(t.id)?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,fontFamily:"inherit"}}
+                >
+                  {t.label.toUpperCase()}
+                  {t.dropdown&&<span style={{fontSize:8,marginLeft:2,display:"inline-block",transform:openDropdown===t.id?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>▼</span>}
+                </button>
+                {t.dropdown&&openDropdown===t.id&&(
+                  <div style={{position:"absolute",top:"100%",left:0,background:"#1e293b",border:"1px solid #f59e0b",borderRadius:10,boxShadow:"0 12px 32px rgba(0,0,0,0.5)",minWidth:140,overflow:"hidden",zIndex:200}}>
+                    {t.dropdown.map((sub,idx)=>(
+                      <button key={sub.id} onClick={()=>{setTab(sub.id);setOpenDropdown(null);}}
+                        style={{width:"100%",padding:"12px 18px",fontSize:13,fontWeight:tab===sub.id?700:500,color:tab===sub.id?"#f59e0b":"#cbd5e1",background:tab===sub.id?"rgba(245,158,11,0.15)":"transparent",border:"none",borderBottom:idx<t.dropdown.length-1?"1px solid #334155":"none",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all 0.15s"}}
+                        onMouseEnter={e=>{if(tab!==sub.id)e.target.style.background="rgba(59,130,246,0.1)"}}
+                        onMouseLeave={e=>{if(tab!==sub.id)e.target.style.background="transparent"}}
+                      >{sub.label}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         {/* Right: player selector + position filter + stats */}
         <div style={{display:"flex",alignItems:"center",gap:isMobile?8:16,padding:isMobile?"6px 4px":"12px 0",marginLeft:isMobile?0:"auto",width:isMobile?"100%":"auto",borderTop:isMobile?"1px solid #1e3a5f":"none",flexWrap:"wrap"}}>
           {(tab==="skater"||tab==="goalie")&&(
