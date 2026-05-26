@@ -349,8 +349,8 @@ function BaseballApp() {
                       onClick={() => handleDropdownSelect(sub)}
                       style={{
                         width: "100%",
-                        padding: "12px 18px",
-                        fontSize: 13,
+                        padding: isMobile ? "16px 20px" : "12px 18px",
+                        fontSize: isMobile ? 15 : 13,
                         fontWeight: tab === sub.id ? 700 : 500,
                         color: tab === sub.id ? t.accent : t.textSecondary,
                         background: tab === sub.id ? (t.id === "dark" ? "rgba(245,158,11,0.15)" : "rgba(234,88,12,0.1)") : "transparent",
@@ -457,7 +457,7 @@ function BaseballApp() {
 
       {/* ── Content ── */}
       <div style={{
-        padding: isSummaryTab(tab) ? 0 : isMobile ? "12px 8px" : 24,
+        padding: isSummaryTab(tab) ? 0 : isMobile ? "12px 24px" : 24,
         maxWidth: tab.includes("lb") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : 640,
         margin: "0 auto",
       }}>

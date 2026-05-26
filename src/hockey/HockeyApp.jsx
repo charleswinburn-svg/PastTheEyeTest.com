@@ -426,7 +426,7 @@ export default function HockeyApp(){
                 <div style={{position:"absolute",top:"100%",left:0,background:"#1e293b",border:"1px solid #f59e0b",borderRadius:10,boxShadow:"0 12px 32px rgba(0,0,0,0.5)",minWidth:140,overflow:"hidden",zIndex:200}}>
                   {t.dropdown.map((sub,idx)=>(
                     <button key={sub.id} onClick={()=>{setTab(sub.id);setOpenDropdown(null);}}
-                      style={{width:"100%",padding:"12px 18px",fontSize:13,fontWeight:tab===sub.id?700:500,color:tab===sub.id?"#f59e0b":"#cbd5e1",background:tab===sub.id?"rgba(245,158,11,0.15)":"transparent",border:"none",borderBottom:idx<t.dropdown.length-1?"1px solid #334155":"none",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all 0.15s"}}
+                      style={{width:"100%",padding:isMobile?"16px 20px":"12px 18px",fontSize:isMobile?15:13,fontWeight:tab===sub.id?700:500,color:tab===sub.id?"#f59e0b":"#cbd5e1",background:tab===sub.id?"rgba(245,158,11,0.15)":"transparent",border:"none",borderBottom:idx<t.dropdown.length-1?"1px solid #334155":"none",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all 0.15s"}}
                       onMouseEnter={e=>{if(tab!==sub.id)e.target.style.background="rgba(59,130,246,0.1)"}}
                       onMouseLeave={e=>{if(tab!==sub.id)e.target.style.background="transparent"}}
                     >{sub.label}</button>
@@ -466,7 +466,7 @@ export default function HockeyApp(){
       ) : (!data||loading) ? (
         <div style={{color:"#64748b",padding:60,textAlign:"center",fontSize:14}}>Loading {curMode.label}...</div>
       ) : (
-        <div style={{padding:isMobile?"12px 8px":24,maxWidth:tab.includes("lb")?1200:640,margin:"0 auto"}}>
+        <div style={{padding:isMobile?"12px 24px":24,maxWidth:tab.includes("lb")?1200:640,margin:"0 auto"}}>
           {tab==="skater"&&<><Card player={curSkater} type="skater" trends={data.skater_trends} mode={mode} headshots={headshots} logos={logos}/><WeightTable player={curSkater} type="skater"/></>}
           {tab==="goalie"&&<><Card player={curGoalie} type="goalie" trends={data.goalie_trends} mode={mode} headshots={headshots} logos={logos}/><WeightTable player={curGoalie} type="goalie"/></>}
           {tab==="skater_lb"&&<HockeyLeaderboard players={filteredSkaters} columns={SK_COLS} sortDefault="overall_pctile"/>}
