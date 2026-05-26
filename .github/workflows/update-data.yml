@@ -1,13 +1,7 @@
 name: Update Data
 
 on:
-  schedule:
-    - cron: '0 10 * * *'
   workflow_dispatch:
-
-concurrency:
-  group: update-data
-  cancel-in-progress: false
 
 jobs:
   update:
