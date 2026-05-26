@@ -15,11 +15,11 @@ export const PITCH_COLORS = {
   EP: "#999999", FA: "#D22D49",
 };
 
-// Scoring API alias: FO is scored against the splitter model, CS against
-// the curveball model. Display and color stay distinct, but the API only
-// understands the canonical family code, so we substitute when sending.
-export const PITCH_SCORE_ALIAS = { FO: "FS", CS: "CU" };
-export const scorePitchCode = (code) => PITCH_SCORE_ALIAS[code] || code;
+// No client-side alias needed — the server's PITCH_ALIASES handles exotic types
+// (FO→FS, CS→CU, SC→CH, KN→FS) internally while preserving the original type
+// as the output key, so FO and FS get separate by_pitch_type entries.
+export const PITCH_SCORE_ALIAS = {};
+export const scorePitchCode = (code) => code;
 export const PITCH_NAMES = {
   FF: "4-Seam", SI: "Sinker", FC: "Cutter", SL: "Slider",
   CU: "Curveball", CH: "Changeup", FS: "Splitter", ST: "Sweeper",
