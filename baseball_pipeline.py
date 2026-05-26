@@ -1116,6 +1116,8 @@ def process_pitchers(year):
             sv_merged["_nname"] = sv_merged["player_name"].apply(norm_name)
 
         if "player_id" in fg_merged.columns and "player_id" in sv_merged.columns:
+            # Deduplicate columns (xMLBAMID rename can produce a second player_id).
+            fg_merged = fg_merged.loc[:, ~fg_merged.columns.duplicated()]
             # Coerce both sides to the same dtype so the merge actually matches.
             # FG normalizes to Int64 (nullable); Savant uses int64 — the merge
             # silently produces NaN rows when these don't align.
