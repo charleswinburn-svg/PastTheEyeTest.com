@@ -53,6 +53,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const [baselineAvgs, setBaselineAvgs] = useState(null);
   const [pitchPlus, setPitchPlus] = useState(null);
   const [leaderboardPlus, setLeaderboardPlus] = useState(null);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo,   setDateTo]   = useState("");
 
   // ── Reclassification (session-only) ────────────────────────────────────
   // Two parallel maps: one for single-pitch overrides, one for bulk overrides
@@ -282,6 +284,9 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const playerList = isPitcher ? (players?.pitchers || []) : (players?.hitters || []);
 
   const [playerGamePks, setPlayerGamePks] = useState(null);
+
+  // Reset date filter when player or season type changes
+  useEffect(() => { setDateFrom(""); setDateTo(""); }, [selectedPlayer?.id, seasonType]);
 
   // Fetch game log when player changes (for season view)
   // Skip for WBC — game log API doesn't cover sportId=51
@@ -681,6 +686,17 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
   const hasData = enrichedData && (isPitcher ? enrichedData.totalPitches > 0 : enrichedData.pas > 0);
 
+  const filteredPitches = useMemo(() => {
+    if (!enrichedData?.pitches) return [];
+    if (!dateFrom && !dateTo) return enrichedData.pitches;
+    return enrichedData.pitches.filter(p => {
+      const d = p.gameDate || "";
+      if (dateFrom && d < dateFrom) return false;
+      if (dateTo   && d > dateTo)   return false;
+      return true;
+    });
+  }, [enrichedData?.pitches, dateFrom, dateTo]);
+
   // Live Pitch+ scoring: send loaded pitches to /score_aggregate, which normalizes
   // at the pitcher×pitch-type level (same scale as /leaderboard pre-computed values).
   // Three parallel requests: all pitches (pitch table), vs-LHB only, vs-RHB only
@@ -825,7 +841,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
       // Season view, AAA, or game with no Savant yet (live/recent) → MLB Stats API.
       // pfx is derived from kinematics server-side (sign-correct vs Statcast convention).
-      const eligible = enrichedData.pitches.filter(
+      // Use filteredPitches here so a date-range selection re-triggers scoring.
+      const eligible = filteredPitches.filter(
         p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN"
       );
       if (!eligible.length) { setPitchPlus(null); return; }
@@ -837,7 +854,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       );
     })();
     return () => { cancelled = true; };
-  }, [enrichedData, selectedPlayer, isPitcher, isAAA, savantData, isGame]);
+  }, [enrichedData, filteredPitches, selectedPlayer, isPitcher, isAAA, savantData, isGame]);
 
   // For Regular Season MLB, fetch pre-computed per-pitch-type Plus grades from /leaderboard.
   // Season view: these override live /score_aggregate values (leaderboard is authoritative).
@@ -884,6 +901,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     // Season view: when reclassifications are active the leaderboard reflects
     // original pitch type assignments and must not stomp freshly-scored reclassified results.
     if (pitchOverrides.size > 0 || typeOverrides.size > 0) return pitchPlus;
+    // Date filter active → live scores only (leaderboard is full-season, not the filtered window).
+    if (dateFrom || dateTo) return pitchPlus;
     // No overrides: leaderboard wins over live scores (full-season corpus is authoritative).
     if (!pitchPlus) return pitchPlus;
     if (!leaderboardPlus) return pitchPlus;
@@ -898,7 +917,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       };
     }
     return merged;
-  }, [pitchPlus, leaderboardPlus, isGame, pitchOverrides, typeOverrides]);
+  }, [pitchPlus, leaderboardPlus, isGame, pitchOverrides, typeOverrides, dateFrom, dateTo]);
 
   return (
     <div style={{ padding: "16px 20px" }}>
@@ -985,6 +1004,33 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
             {loadingPlayers && <span style={{ fontSize: 11, color: t.textMuted }}>Loading players...</span>}
             {loadingSeason && <span style={{ fontSize: 11, color: t.textMuted }}>{seasonProgress}</span>}
           </div>
+          {selectedPlayer && !loadingSeason && (
+            <div style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: 11, color: t.textMuted }}>Date range:</span>
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                style={{ fontSize: 11, padding: "3px 6px", background: t.inputBg, color: t.text,
+                         border: `1px solid ${t.inputBorder}`, borderRadius: 4, fontFamily: "inherit" }} />
+              <span style={{ fontSize: 11, color: t.textMuted }}>–</span>
+              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                style={{ fontSize: 11, padding: "3px 6px", background: t.inputBg, color: t.text,
+                         border: `1px solid ${t.inputBorder}`, borderRadius: 4, fontFamily: "inherit" }} />
+              {(dateFrom || dateTo) && (
+                <>
+                  <button onClick={() => { setDateFrom(""); setDateTo(""); }}
+                    style={{ fontSize: 10, padding: "3px 8px", background: "transparent",
+                             color: t.textMuted, border: `1px solid ${t.divider}`,
+                             borderRadius: 4, cursor: "pointer", fontFamily: "inherit" }}>
+                    Clear
+                  </button>
+                  {enrichedData?.pitches && (
+                    <span style={{ fontSize: 10, color: t.textMuted }}>
+                      {filteredPitches.length} / {enrichedData.pitches.length} pitches
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          )}
           {!selectedPlayer && <div style={{ color: t.textMuted, textAlign: "center", padding: 40 }}>Select a {isPitcher ? "pitcher" : "hitter"}</div>}
         </div>
       )}
