@@ -10,6 +10,17 @@ import TeamScatter from "./TeamScatter.jsx";
 import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
+// ── Mobile breakpoint ──
+function useWindowWidth() {
+  const [w, setW] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1024));
+  useEffect(() => {
+    const h = () => setW(window.innerWidth);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
+  return w;
+}
+
 // ── Shared constants ──
 const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 const nameKey = s => norm(s).replace(/[.\-,]/g, "").replace(/\b(jr|sr|ii|iii|iv)\b/g, "").replace(/\s+/g, " ").trim();
@@ -253,13 +264,16 @@ function BaseballApp() {
     setOpenDropdown(null);
   };
 
+  const winWidth = useWindowWidth();
+  const isMobile = winWidth < 640;
+
   return (
     <div style={{ minHeight: "100vh", background: t.bg, transition: "background 0.3s" }} onClick={handleBackdropClick}>
       {/* ── Full-Width Navigation Bar ── */}
       <div style={{
         background: t.headerBgSolid || t.headerBg,
         borderBottom: `2px solid ${t.accent}`,
-        padding: "0 24px",
+        padding: isMobile ? "0 8px" : "0 24px",
         display: "flex",
         alignItems: "stretch",
         position: "sticky",
@@ -267,9 +281,15 @@ function BaseballApp() {
         zIndex: 100,
         transition: "background 0.3s",
         boxShadow: `0 2px 12px ${t.shadow}`,
+        flexWrap: isMobile ? "wrap" : "nowrap",
       }}>
-        {/* Center: Tab Navigation — absolutely centered on the full page */}
-        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "stretch", height: "100%" }}>
+        {/* Tab Navigation — absolutely centered on desktop, scrollable row on mobile */}
+        <div style={isMobile ? {
+          display: "flex", alignItems: "stretch", overflowX: "auto", width: "100%",
+          msOverflowStyle: "none", scrollbarWidth: "none",
+        } : {
+          position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "stretch", height: "100%",
+        }}>
           {TABS.map(tb => (
             <div
               key={tb.id}
@@ -279,10 +299,11 @@ function BaseballApp() {
               <button
                 onClick={(e) => handleTabClick(tb, e)}
                 style={{
-                  padding: "16px 18px",
-                  fontSize: 12,
+                  padding: isMobile ? "10px 10px" : "16px 18px",
+                  fontSize: isMobile ? 11 : 12,
                   fontWeight: isTabActive(tb.id) ? 700 : 600,
                   letterSpacing: "0.05em",
+                  whiteSpace: "nowrap",
                   color: isTabActive(tb.id) ? t.accent : t.textMuted,
                   background: isTabActive(tb.id) ? (t.id === "dark" ? "rgba(245,158,11,0.1)" : "rgba(234,88,12,0.08)") : "transparent",
                   border: "none",
@@ -357,7 +378,14 @@ function BaseballApp() {
         </div>
 
         {/* Right: Season selector, player selector, theme toggle, stats */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginLeft: "auto" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: isMobile ? 8 : 16,
+          marginLeft: isMobile ? 0 : "auto",
+          width: isMobile ? "100%" : "auto",
+          padding: isMobile ? "6px 4px" : 0,
+          borderTop: isMobile ? `1px solid ${t.divider}` : "none",
+          flexWrap: "wrap",
+        }}>
           {/* Season Selector */}
           <select
             value={season}
@@ -403,8 +431,10 @@ function BaseballApp() {
                 borderRadius: 6,
                 color: t.text,
                 fontSize: 12,
-                minWidth: 200,
-                maxWidth: 280,
+                minWidth: isMobile ? 0 : 200,
+                maxWidth: isMobile ? "100%" : 280,
+                width: isMobile ? "100%" : "auto",
+                flexShrink: 1,
               }}
             />
           )}
@@ -427,7 +457,7 @@ function BaseballApp() {
 
       {/* ── Content ── */}
       <div style={{
-        padding: isSummaryTab(tab) ? 0 : 24,
+        padding: isSummaryTab(tab) ? 0 : isMobile ? "12px 8px" : 24,
         maxWidth: tab.includes("lb") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : 640,
         margin: "0 auto",
       }}>
