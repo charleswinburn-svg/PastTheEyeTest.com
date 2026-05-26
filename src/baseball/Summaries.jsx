@@ -475,10 +475,18 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       return isPitcher ? extractPitcherData(pbpData, selectedPlayer.id) : extractBatterData(pbpData, selectedPlayer.id);
     } else {
       if (!seasonPbps.length || !selectedPlayer) return null;
+      const inRange = (dateFrom || dateTo)
+        ? seasonPbps.filter(({ game }) => {
+            const d = game?.date || "";
+            if (dateFrom && d < dateFrom) return false;
+            if (dateTo   && d > dateTo)   return false;
+            return true;
+          })
+        : seasonPbps;
       if (isPitcher) {
         const allPitches = [];
         let totalOuts = 0, totalH = 0, totalR = 0, totalER = 0, totalK = 0, totalBB = 0, totalHBP = 0, totalHR = 0, totalBF = 0;
-        for (const { pbp, box, game } of seasonPbps) {
+        for (const { pbp, box, game } of inRange) {
           // Pitches from PBP (for charts, pitch table) — tag with game metadata
           // for season-level rolling charts that need to group by outing.
           const d = extractPitcherData(pbp, selectedPlayer.id);
@@ -520,7 +528,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       } else {
         const allPitches = [], allAtBats = [], allBB = [];
         let totalPA = 0, boxH = 0, boxAB = 0, boxBB = 0, boxHBP = 0, boxSF = 0, boxTB = 0, usedBoxCount = 0;
-        for (const { pbp, box } of seasonPbps) {
+        for (const { pbp, box } of inRange) {
           const d = extractBatterData(pbp, selectedPlayer.id);
           allPitches.push(...d.pitches);
           allAtBats.push(...d.atBats); allBB.push(...d.battedBalls);
@@ -590,7 +598,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         return { pitches: allPitches, pas: totalPA, obp, slg, avgEV: avgEV ? Math.round(avgEV*10)/10 : null, maxEV: maxEV ? Math.round(maxEV*10)/10 : null, kPct, bbPct, chasePct: outside.length > 0 ? Math.round(chased/outside.length*1000)/10 : 0, whiffPct: totalSwings > 0 ? Math.round(whiffs/totalSwings*1000)/10 : 0, xwoba: xwobaApprox, atBats: allAtBats, battedBalls: allBB };
       }
     }
-  }, [isGame, isPitcher, pbpData, seasonPbps, selectedPlayer]);
+  }, [isGame, isPitcher, pbpData, seasonPbps, selectedPlayer, dateFrom, dateTo]);
 
   // Enrich with Savant xwOBA and VAA
   const enrichedData = useMemo(() => {
@@ -698,17 +706,6 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   }, [extractedData, savantData, seasonSavant, selectedPlayer, isGame, isPitcher, isAAA, boxscoreData, bulkXwoba, prospectXwoba, currentSeason, pitchOverrides, typeOverrides]);
 
   const hasData = enrichedData && (isPitcher ? enrichedData.totalPitches > 0 : enrichedData.pas > 0);
-
-  const filteredPitches = useMemo(() => {
-    if (!enrichedData?.pitches) return [];
-    if (!dateFrom && !dateTo) return enrichedData.pitches;
-    return enrichedData.pitches.filter(p => {
-      const d = p.gameDate || "";
-      if (dateFrom && d < dateFrom) return false;
-      if (dateTo   && d > dateTo)   return false;
-      return true;
-    });
-  }, [enrichedData?.pitches, dateFrom, dateTo]);
 
   // Live Pitch+ scoring: send loaded pitches to /score_aggregate, which normalizes
   // at the pitcher×pitch-type level (same scale as /leaderboard pre-computed values).
@@ -854,8 +851,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
       // Season view, AAA, or game with no Savant yet (live/recent) → MLB Stats API.
       // pfx is derived from kinematics server-side (sign-correct vs Statcast convention).
-      // Use filteredPitches here so a date-range selection re-triggers scoring.
-      const eligible = filteredPitches.filter(
+      // enrichedData.pitches is already date-filtered upstream via extractedData.
+      const eligible = enrichedData.pitches.filter(
         p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN"
       );
       if (!eligible.length) { setPitchPlus(null); return; }
@@ -867,7 +864,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       );
     })();
     return () => { cancelled = true; };
-  }, [enrichedData, filteredPitches, selectedPlayer, isPitcher, isAAA, savantData, isGame]);
+  }, [enrichedData, selectedPlayer, isPitcher, isAAA, savantData, isGame]);
 
   // For Regular Season MLB, fetch pre-computed per-pitch-type Plus grades from /leaderboard.
   // Season view: these override live /score_aggregate values (leaderboard is authoritative).
@@ -1035,9 +1032,14 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
                              borderRadius: 4, cursor: "pointer", fontFamily: "inherit" }}>
                     Clear
                   </button>
-                  {enrichedData?.pitches && (
+                  {seasonPbps.length > 0 && (
                     <span style={{ fontSize: 10, color: t.textMuted }}>
-                      {filteredPitches.length} / {enrichedData.pitches.length} pitches
+                      {seasonPbps.filter(({ game }) => {
+                        const d = game?.date || "";
+                        if (dateFrom && d < dateFrom) return false;
+                        if (dateTo   && d > dateTo)   return false;
+                        return true;
+                      }).length} / {seasonPbps.length} games
                     </span>
                   )}
                 </>
