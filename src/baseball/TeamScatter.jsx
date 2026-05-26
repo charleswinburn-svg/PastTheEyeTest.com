@@ -44,9 +44,11 @@ export default function TeamScatter({ season, hitters, iswingData }) {
     setData(null);
     setErr(null);
     fetch(`/team_plus_${season}.json`)
-      .then(r => {
-        if (!r.ok) throw new Error(`team_plus_${season}.json not found. Run: python3 build_team_plus.py --year ${season}`);
-        return r.json();
+      .then(r => r.text())
+      .then(text => {
+        if (text.trimStart().startsWith('<'))
+          throw new Error(`Team plot data for ${season} not yet generated. Run: python3 build_team_plus.py --year ${season}`);
+        return JSON.parse(text);
       })
       .then(setData)
       .catch(e => setErr(e.message));
