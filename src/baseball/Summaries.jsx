@@ -799,11 +799,20 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       // Game view: prefer Savant CSV data (same source as leaderboard batch pipeline).
       // If Savant is not yet published (live/very recent game), fall through to MLB Stats API path.
       if (isGame && savantData?.length > 0) {
+        // Apply session reclassifications to the raw Savant rows before scoring.
+        // typeOverrides: bulk by pitch_type; pitchOverrides: single pitch by game/ab/pitch key.
+        const applyReclass = (r) => {
+          const key = `${r.game_pk ?? ""}_${r.at_bat_number ?? ""}_${r.pitch_number ?? ""}`;
+          if (pitchOverrides.has(key)) return { ...r, pitch_type: pitchOverrides.get(key) };
+          if (typeOverrides.size > 0 && r.pitch_type && typeOverrides.has(r.pitch_type))
+            return { ...r, pitch_type: typeOverrides.get(r.pitch_type) };
+          return r;
+        };
         const pitcherRows = savantData.filter(
           r => String(r.pitcher) === String(selectedPlayer.id) &&
                r.pitch_type && r.pitch_type !== "UN" && r.pitch_type !== "PO" &&
                r.release_speed && r.plate_x && r.plate_z
-        );
+        ).map(applyReclass);
         if (pitcherRows.length > 0) {
           await runScoring(
             pitcherRows.map(makePitchSavant),
@@ -872,7 +881,10 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       }
       return fromLeaderboard;
     }
-    // Season view: leaderboard wins over live scores (full-season corpus is authoritative).
+    // Season view: when reclassifications are active the leaderboard reflects
+    // original pitch type assignments and must not stomp freshly-scored reclassified results.
+    if (pitchOverrides.size > 0 || typeOverrides.size > 0) return pitchPlus;
+    // No overrides: leaderboard wins over live scores (full-season corpus is authoritative).
     if (!pitchPlus) return pitchPlus;
     if (!leaderboardPlus) return pitchPlus;
     const merged = { ...pitchPlus };
@@ -886,7 +898,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       };
     }
     return merged;
-  }, [pitchPlus, leaderboardPlus, isGame]);
+  }, [pitchPlus, leaderboardPlus, isGame, pitchOverrides, typeOverrides]);
 
   return (
     <div style={{ padding: "16px 20px" }}>
