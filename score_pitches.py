@@ -338,6 +338,17 @@ def load_models(model_dir: Path):
 # SCORING
 # ═══════════════════════════════════════════════════════════════════════════
 
+# Pitch types not seen in training are remapped to the nearest equivalent so
+# every pitch receives Stuff+/Loc+/Tun+/Pitch+ values. The original pitch_type
+# is preserved for display; only scoring internals (pitch_type_cat, slot
+# regression, location model routing) see the remapped value.
+PITCH_TYPE_REMAP = {
+    'FO': 'FS',  # Forkball  → Splitter
+    'CS': 'CU',  # Slow Curve → Curveball
+    'SC': 'CH',  # Screwball → Changeup
+    'KN': 'FS',  # Knuckleball → Splitter
+}
+
 TUNNEL_FEATURES = [
     'tunnel_diff_x', 'tunnel_diff_z', 'tunnel_distance',
     'time_after_tunnel', 'late_break', 'plate_distance',
@@ -353,6 +364,11 @@ LOCATION_FEATURES = [
 
 def score_dataframe(df, stuff, stuff_features, tunnel, location_models, weights):
     """Run all three model stages on a dataframe, return df with prediction cols."""
+    # Remap exotic pitch types to scoring equivalents; restore originals at the end
+    _orig_pitch_type = df['pitch_type'].copy()
+    df = df.copy()
+    df['pitch_type'] = df['pitch_type'].replace(PITCH_TYPE_REMAP)
+
     df = engineer_stuff_features(df)
     df = engineer_tunnel_features(df)
     df = engineer_location_features(df)
@@ -384,6 +400,9 @@ def score_dataframe(df, stuff, stuff_features, tunnel, location_models, weights)
         w['tunnel']   * df['xRV_tunnel'] +
         weights['intercept']
     ).astype('float32')
+
+    # Restore original pitch type for display / downstream grouping
+    df['pitch_type'] = _orig_pitch_type.values
 
     return df
 
