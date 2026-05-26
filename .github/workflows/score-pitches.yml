@@ -32,6 +32,7 @@ jobs:
         run: |
           python3 build_pitcher_heights.py \
             --parquet tmp/pitch_xrv_2026.parquet \
+            --sport-ids 1 11 51 \
             --out models/pitcher_heights.json
 
       - name: Score pitches with 3-stage model
