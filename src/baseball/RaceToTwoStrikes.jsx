@@ -441,7 +441,6 @@ export default function RaceToTwoStrikes({ season }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [league, setLeague] = useState("MLB");
-  const [role, setRole] = useState("SP");
   const [raceP1, setRaceP1] = useState(null);
   const [raceP2, setRaceP2] = useState(null);
   const [search, setSearch] = useState("");
@@ -471,13 +470,14 @@ export default function RaceToTwoStrikes({ season }) {
 
   const leaderboard = useMemo(() => {
     if (!activeData) return [];
-    const list = role === "SP" ? (activeData.starters || []) : (activeData.relievers || []);
+    const list = [...(activeData.starters || []), ...(activeData.relievers || [])];
+    list.sort((a, b) => a.avg_pitches_to_2k - b.avg_pitches_to_2k);
     if (!search) return list;
     const q = search.toLowerCase();
     return list.filter(p =>
       p.name.toLowerCase().includes(q) || (p.team || "").toLowerCase().includes(q)
     );
-  }, [activeData, role, search]);
+  }, [activeData, search]);
 
   const maxVal = useMemo(() => {
     if (leaderboard.length === 0) return 4;
@@ -498,7 +498,7 @@ export default function RaceToTwoStrikes({ season }) {
       setRaceP1(null);
       setRaceP2(null);
     }
-  }, [activeData, role]);
+  }, [activeData]);
 
   const raceOptions = leaderboard;
 
@@ -537,21 +537,6 @@ export default function RaceToTwoStrikes({ season }) {
           ))}
         </div>
 
-        {/* Role toggle */}
-        <div style={{ display: "flex", gap: 2, background: t.inputBg, borderRadius: 6, padding: 2 }}>
-          {[["SP", "Starters"], ["RP", "Relievers"]].map(([v, label]) => (
-            <button key={v} onClick={() => setRole(v)}
-              style={{
-                padding: "5px 14px", fontSize: 11, fontWeight: role === v ? 700 : 500,
-                background: role === v ? "#333" : "transparent",
-                color: role === v ? "#fff" : "#888",
-                border: "none", borderRadius: 4, cursor: "pointer",
-                transition: "all 0.15s", fontFamily: "inherit",
-              }}
-            >{label}</button>
-          ))}
-        </div>
-
         {/* Search */}
         <input
           type="text" value={search} onChange={e => setSearch(e.target.value)}
@@ -565,7 +550,7 @@ export default function RaceToTwoStrikes({ season }) {
 
         {/* Stats */}
         <div style={{ fontSize: 10, color: t.textFaint, marginLeft: "auto" }}>
-          {leaderboard.length} {role === "SP" ? "starters" : "relievers"} | Min {activeData?.meta?.min_ip || 20} IP | {season}
+          {leaderboard.length} pitchers | Min {activeData?.meta?.min_ip || 20} IP | {season}
         </div>
       </div>
 
@@ -610,7 +595,7 @@ export default function RaceToTwoStrikes({ season }) {
             padding: "6px 16px", fontSize: 10, color: t.textFaint,
             borderTop: "1px solid #222", display: "flex", justifyContent: "space-between",
           }}>
-            <span>{season} Regular Season | Min {activeData?.meta?.min_ip || 20} IP | {role === "SP" ? (activeData?.meta?.gs_threshold || 10) + "+ GS" : "< " + (activeData?.meta?.gs_threshold || 10) + " GS"}</span>
+            <span>{season} Regular Season | Min {activeData?.meta?.min_ip || 20} IP</span>
             <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant Pitch Data</span>
           </div>
         </div>
@@ -618,7 +603,7 @@ export default function RaceToTwoStrikes({ season }) {
 
       {leaderboard.length === 0 && !loading && (
         <div style={{ color: t.textMuted, textAlign: "center", padding: 40, fontSize: 13 }}>
-          No qualifying {role === "SP" ? "starters" : "relievers"} found.
+          No qualifying pitchers found.
           {league === "AAA" && " Run: python3 race2k_pipeline.py ./public " + season + " --aaa"}
         </div>
       )}
