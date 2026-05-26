@@ -150,7 +150,7 @@ def process_chunk(df, acc_players, acc_league):
             return 0
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    bbe = df[df["launch_speed"].notna() & df["launch_angle"].notna()].copy()
+    bbe = df[df["launch_speed"].notna() & df["launch_angle"].notna() & df["batter"].notna()].copy()
     if len(bbe) == 0:
         return 0
 
