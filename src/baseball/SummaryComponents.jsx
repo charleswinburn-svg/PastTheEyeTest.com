@@ -426,18 +426,19 @@ function effColor(val, metricKey, pitchType, avgSet) {
     : `rgba(200,35,35,${alpha})`;
 }
 
-// Empirical pitcher-level means and stdevs by pitch type (2026, n≥30 per pitch type).
-// Stuff+ means vary widely: FF ~89, sweepers ~110. Loc+/Tun+/Pitch+ are close to 100.
+// Empirical pitcher-level means and stdevs by pitch type (2026 recalibrated, n≥50 per pitch type).
+// Stuff+ means vary widely by pitch family (FF ~89, ST ~110) — color is relative to each type's own mean.
+// Loc+/Tun+ are nearly uniform at 100 across types. Pitch+ has small per-type variance.
 const PLUS_STATS_BY_PT = {
   stuffPlus: {
-    mean: { FF: 89, SI: 93, FC: 94, SL: 106, ST: 110, CU: 102, CH: 99, FS: 100, KC: 104, SV: 107, DEFAULT: 100 },
-    stdev: { FF: 8, SI: 6, FC: 7, SL: 8, ST: 7, CU: 9, CH: 8, FS: 7, KC: 8, SV: 6, DEFAULT: 8 },
+    mean:  { FF: 89, SI: 93, FC: 94, SL: 106, ST: 110, CU: 103, CH: 99, FS: 100, KC: 104, SV: 109, DEFAULT: 100 },
+    stdev: { FF: 8,  SI: 6,  FC: 7,  SL: 8,   ST: 7,   CU: 8,   CH: 7,  FS: 7,   KC: 8,   SV: 6,   DEFAULT: 8 },
   },
-  locPlus:   { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2 } },
-  tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.3 } },
+  locPlus:    { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 1.7 } },
+  tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.0 } },
   pitchPlus: {
-    mean: { FF: 98, SI: 99, FC: 99, SL: 101, ST: 102, CU: 100, CH: 99, FS: 100, KC: 101, SV: 100, DEFAULT: 100 },
-    stdev: { FF: 2.6, SI: 2.1, FC: 1.7, SL: 2.3, ST: 2.3, CU: 2.5, CH: 2.7, FS: 2.3, KC: 3, SV: 3, DEFAULT: 2.3 },
+    mean:  { FF: 98, SI: 99, FC: 99, SL: 101, ST: 102, CU: 100, CH: 100, FS: 101, KC: 101, SV: 100, DEFAULT: 100 },
+    stdev: { FF: 2.3, SI: 2.0, FC: 1.6, SL: 2.1, ST: 2.2, CU: 2.4, CH: 2.4, FS: 2.2, KC: 2.8, SV: 2.6, DEFAULT: 2.3 },
   },
 };
 
@@ -485,7 +486,7 @@ export function StatBar({ stats }) {
     const boosted = Math.min(1, parseFloat(alpha) + 0.3).toFixed(2);
     return {
       bg: t.cardBg, border: t.inputBorder,
-      text: isGood ? `rgba(20,140,20,${boosted})` : `rgba(190,30,30,${boosted})`,
+      text: isGood ? `rgba(5,120,40,${boosted})` : `rgba(180,15,15,${boosted})`,
     };
   };
 
@@ -548,34 +549,37 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
 
   const EFF_KEYS = { velo: "velo", spin: "spin", whiffPct: "whiffPct", zonePct: "zonePct", extension: "extension", pitchPlus: "pitchPlus", stuffPlus: "stuffPlus", locPlus: "locPlus", tunnelPlus: "tunnelPlus" };
 
-  // Convert raw rgba bg from the scoring logic into a renderable style.
-  // Both modes use PILL style — tinted background + readable text.
-  // Text auto-flips to white once tint saturates so contrast holds at any value.
-  // Dark mode uses brighter green/red text on subtle tints; light mode uses deeper hues.
-  // ── No scoring math here. Same alpha, same colors, same thresholds as before.
+  // Convert raw rgba bg (green = good, red = bad) into a rendered pill style.
+  // plusColorRaw produces alphas [0.22,0.38,0.54,0.70,0.86] for 5 intensity steps.
+  // Dark mode: subtle tint + light text. Light mode: boosted solid fill + white text so
+  // pills are clearly readable on a white/light background (original +0.10 boost was too faint).
   const presentBg = (rawBg) => {
     if (!rawBg) return {};
     const isGreen = rawBg.includes("30,160,30");
     const alpha = parseFloat(rawBg.match(/[\d.]+(?=\))/)?.[0] || "0.5");
-    const bgAlpha = Math.min(0.92, alpha + 0.10).toFixed(2);
-    const useWhite = parseFloat(bgAlpha) > 0.55;
 
     if (isDark) {
+      const bgAlpha = Math.min(0.92, alpha + 0.10).toFixed(2);
+      const useWhite = parseFloat(bgAlpha) > 0.52;
       const tint = isGreen
-        ? `rgba(40,170,60,${bgAlpha})`
-        : `rgba(220,55,65,${bgAlpha})`;
+        ? `rgba(40,185,65,${bgAlpha})`
+        : `rgba(225,55,60,${bgAlpha})`;
       const textColor = useWhite
         ? "#ffffff"
-        : (isGreen ? "rgb(140,235,160)" : "rgb(255,150,160)");
+        : (isGreen ? "rgb(130,245,155)" : "rgb(255,145,155)");
       return { background: tint, color: textColor, isPill: true };
     }
 
+    // Light mode: add 0.30 so even the weakest step is clearly visible on white.
+    // White text above alpha 0.58 (steps 2-4); deep-colored text for the two lightest steps.
+    const bgAlpha = Math.min(0.96, alpha + 0.30).toFixed(2);
+    const useWhite = parseFloat(bgAlpha) > 0.58;
     const tint = isGreen
-      ? `rgba(34,160,60,${bgAlpha})`
-      : `rgba(210,45,55,${bgAlpha})`;
+      ? `rgba(22,163,74,${bgAlpha})`
+      : `rgba(220,38,38,${bgAlpha})`;
     const textColor = useWhite
       ? "#ffffff"
-      : (isGreen ? "rgb(20,110,40)" : "rgb(165,25,35)");
+      : (isGreen ? "rgb(5,80,35)" : "rgb(130,10,10)");
     return { background: tint, color: textColor, isPill: true };
   };
 
