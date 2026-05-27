@@ -431,7 +431,7 @@ function effColor(val, metricKey, pitchType, avgSet) {
 // Loc+/Tun+ are nearly uniform at 100 across all types. Pitch+ has small per-type variance.
 const PLUS_STATS_BY_PT = {
   stuffPlus: {
-    mean:  { FF: 92, SI: 96, FC: 97, SL: 109, ST: 113, CU: 106, KC: 109, CH: 102, FS: 103, SV: 114, FO: 114, DEFAULT: 100 },
+    mean:  { DEFAULT: 100 },
     stdev: { DEFAULT: 10 },
   },
   locPlus:    { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 1.7 } },
