@@ -426,20 +426,13 @@ function effColor(val, metricKey, pitchType, avgSet) {
     : `rgba(200,35,35,${alpha})`;
 }
 
-// Empirical pitcher-level means and stdevs by pitch type (2026 recalibrated, n≥50 per pitch type).
-// Stuff+ means vary by pitch family (FF ~94, ST ~112) — color is relative to each type's own mean.
-// Loc+/Tun+ are nearly uniform at 100 across all types. Pitch+ has small per-type variance.
+// Uniform coloring: all pitch types graded relative to global mean=100.
+// Stuff+ stdev=10 (global distribution). Pitch+/Loc+/Tun+ use empirical global stdevs.
 const PLUS_STATS_BY_PT = {
-  stuffPlus: {
-    mean:  { DEFAULT: 100 },
-    stdev: { DEFAULT: 10 },
-  },
+  stuffPlus:  { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10  } },
   locPlus:    { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 1.7 } },
   tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.0 } },
-  pitchPlus: {
-    mean:  { FF: 99, SI: 99, FC: 100, SL: 102, ST: 102, CU: 101, KC: 102, CH: 100, FS: 101, SV: 101, DEFAULT: 100 },
-    stdev: { FF: 2.4, SI: 1.9, FC: 1.5, SL: 2.0, ST: 2.1, CU: 2.2, KC: 2.6, CH: 2.4, FS: 2.1, SV: 2.6, DEFAULT: 2.2 },
-  },
+  pitchPlus:  { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.2 } },
 };
 
 // Plus-scale color: dark green at ≥mean+2σ, dark red at ≤mean-2σ, 5 discrete shades each side.
