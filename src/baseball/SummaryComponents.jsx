@@ -849,11 +849,12 @@ const HITTER_COL_LABELS = { all: "Overall", first: "First Pitch", behind: "Ahead
 const BUCKET_KEYS = PITCHER_COL_KEYS;
 
 function bucketPitches(pitches) {
+  const known = pitches.filter(p => p.pitchType !== "UN");
   const result = {};
   for (const bucket of COUNT_BUCKETS) {
-    result[bucket.id] = pitches.filter(p => p.balls != null && p.strikes != null && bucket.test(p.balls, p.strikes));
+    result[bucket.id] = known.filter(p => p.balls != null && p.strikes != null && bucket.test(p.balls, p.strikes));
   }
-  result.all = pitches.filter(p => p.balls != null && p.strikes != null);
+  result.all = known.filter(p => p.balls != null && p.strikes != null);
   return result;
 }
 
