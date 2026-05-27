@@ -34,6 +34,12 @@ jobs:
             --parquet tmp/pitch_xrv_2026.parquet \
             --out models/pitcher_heights.json
 
+      - name: Rebuild component norms (keeps league-average Plus = 100)
+        run: |
+          python3 build_component_norms.py \
+            --parquet tmp/pitch_xrv_2026.parquet \
+            --norm models/pitch_plus_norm.json
+
       - name: Score pitches with 3-stage model
         run: |
           python3 score_pitches.py \
@@ -59,7 +65,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/pitch_plus_*.json public/team_plus_*.json models/pitcher_heights.json
+          git add public/pitch_plus_*.json public/team_plus_*.json models/pitcher_heights.json models/pitch_plus_norm.json
           git diff --staged --quiet || git commit -m "Auto-update Pitch+ $(date -u +%Y-%m-%d)"
           git pull --rebase origin main
           git push
