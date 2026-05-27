@@ -10993,11 +10993,11 @@
     {
       "name": "Sergio Alc\u00e1ntara",
       "player_id": 642727,
-      "team": "PHI",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "PHI",
-      "parent_org_name": "Philadelphia Phillies",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "pa": 144,
       "categories": {
         "xSLG": {
@@ -16554,11 +16554,11 @@
     {
       "name": "Paul DeJong",
       "player_id": 657557,
-      "team": "DET",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "DET",
-      "parent_org_name": "Detroit Tigers",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "pa": 109,
       "categories": {
         "xSLG": {
@@ -17023,11 +17023,11 @@
     {
       "name": "Jos\u00e9 Az\u00f3car",
       "player_id": 640492,
-      "team": null,
+      "team": "ATL",
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": null,
-      "parent_org_name": "Free Agent",
+      "parent_org_abbr": "ATL",
+      "parent_org_name": "Atlanta Braves",
       "pa": 112,
       "categories": {
         "xSLG": {
@@ -21717,7 +21717,7 @@
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
-      "parent_org_name": "Free Agent",
+      "parent_org_name": null,
       "pa": 82,
       "categories": {
         "xSLG": {
@@ -46403,8 +46403,8 @@
       "categories": {
         "FIP": {
           "pctile": 88,
-          "value": 5.27,
-          "display": "5.27"
+          "value": 5.28,
+          "display": "5.28"
         },
         "Avg Exit Velo": {
           "pctile": 32,
@@ -53655,11 +53655,11 @@
     {
       "name": "Matt Bowman",
       "player_id": 621199,
-      "team": null,
+      "team": "TOR",
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": null,
-      "parent_org_name": "Free Agent",
+      "parent_org_abbr": "TOR",
+      "parent_org_name": "Toronto Blue Jays",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -54645,11 +54645,11 @@
     {
       "name": "Dan Altavilla",
       "player_id": 656186,
-      "team": "MIN",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "MIN",
-      "parent_org_name": "Minnesota Twins",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -57483,11 +57483,11 @@
     {
       "name": "Ty Blach",
       "player_id": 621389,
-      "team": null,
+      "team": "CHC",
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": null,
-      "parent_org_name": "Free Agent",
+      "parent_org_abbr": "CHC",
+      "parent_org_name": "Chicago Cubs",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -89097,16 +89097,16 @@
     {
       "name": "Luis Garc\u00eda",
       "player_id": 472610,
-      "team": "MIN",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "MIN",
-      "parent_org_name": "Minnesota Twins",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "categories": {
         "FIP": {
           "pctile": 62,
-          "value": 5.4,
-          "display": "5.40"
+          "value": 5.41,
+          "display": "5.41"
         },
         "Avg Exit Velo": {
           "pctile": 11,
@@ -90728,6 +90728,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-05-26 21:05:36 UTC"
+    "generated_at": "2026-05-27 15:35:26 UTC"
   }
 }
