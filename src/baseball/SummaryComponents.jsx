@@ -432,7 +432,7 @@ function effColor(val, metricKey, pitchType, avgSet) {
 const PLUS_STATS_BY_PT = {
   stuffPlus: {
     mean:  { FF: 94, SI: 97, FC: 98, SL: 108, ST: 112, CU: 106, KC: 109, CH: 103, FS: 104, SV: 113, FO: 113, DEFAULT: 100 },
-    stdev: { FF: 7,  SI: 5,  FC: 6,  SL: 6,   ST: 6,   CU: 6,   KC: 7,   CH: 6,   FS: 6,   SV: 6,   DEFAULT: 6 },
+    stdev: { DEFAULT: 10 },
   },
   locPlus:    { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 1.7 } },
   tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.0 } },
