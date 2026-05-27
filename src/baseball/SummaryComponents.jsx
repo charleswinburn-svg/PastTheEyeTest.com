@@ -427,18 +427,18 @@ function effColor(val, metricKey, pitchType, avgSet) {
 }
 
 // Empirical pitcher-level means and stdevs by pitch type (2026 recalibrated, n≥50 per pitch type).
-// Stuff+ means vary widely by pitch family (FF ~89, ST ~110) — color is relative to each type's own mean.
-// Loc+/Tun+ are nearly uniform at 100 across types. Pitch+ has small per-type variance.
+// Stuff+ means vary by pitch family (FF ~94, ST ~112) — color is relative to each type's own mean.
+// Loc+/Tun+ are nearly uniform at 100 across all types. Pitch+ has small per-type variance.
 const PLUS_STATS_BY_PT = {
   stuffPlus: {
-    mean:  { FF: 89, SI: 93, FC: 94, SL: 106, ST: 110, CU: 103, CH: 99, FS: 100, KC: 104, SV: 109, DEFAULT: 100 },
-    stdev: { FF: 8,  SI: 6,  FC: 7,  SL: 8,   ST: 7,   CU: 8,   CH: 7,  FS: 7,   KC: 8,   SV: 6,   DEFAULT: 8 },
+    mean:  { FF: 94, SI: 97, FC: 98, SL: 108, ST: 112, CU: 106, KC: 109, CH: 103, FS: 104, SV: 113, FO: 113, DEFAULT: 100 },
+    stdev: { DEFAULT: 10 },
   },
   locPlus:    { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 1.7 } },
   tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.0 } },
   pitchPlus: {
-    mean:  { FF: 98, SI: 99, FC: 99, SL: 101, ST: 102, CU: 100, CH: 100, FS: 101, KC: 101, SV: 100, DEFAULT: 100 },
-    stdev: { FF: 2.3, SI: 2.0, FC: 1.6, SL: 2.1, ST: 2.2, CU: 2.4, CH: 2.4, FS: 2.2, KC: 2.8, SV: 2.6, DEFAULT: 2.3 },
+    mean:  { FF: 99, SI: 99, FC: 100, SL: 102, ST: 102, CU: 101, KC: 102, CH: 100, FS: 101, SV: 101, DEFAULT: 100 },
+    stdev: { FF: 2.4, SI: 1.9, FC: 1.5, SL: 2.0, ST: 2.1, CU: 2.2, KC: 2.6, CH: 2.4, FS: 2.1, SV: 2.6, DEFAULT: 2.2 },
   },
 };
 
