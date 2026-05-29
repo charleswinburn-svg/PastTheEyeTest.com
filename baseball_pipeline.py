@@ -1148,13 +1148,16 @@ def process_pitchers(year):
         fg_merged = fg_merged.rename(columns={k: v for k, v in fg_col_map.items() if k in fg_merged.columns})
         if "team" in fg_merged.columns:
             fg_merged["team"] = fg_merged["team"].apply(_clean_team_abbr)
-        # Merge SIERA from Advanced leaderboard (type=8) — not in type=36
+        # Map SIERA from Advanced leaderboard (type=8) — not in type=36
         if fg_siera is not None and not fg_siera.empty and "player_id" in fg_merged.columns:
-            fg_merged = fg_merged.loc[:, ~fg_merged.columns.duplicated()]  # drop any dupe player_id
-            fg_merged["player_id"] = pd.to_numeric(fg_merged["player_id"], errors="coerce").astype("Int64")
-            fg_merged = fg_merged.merge(fg_siera, on="player_id", how="left")
+            siera_map = dict(zip(
+                pd.to_numeric(fg_siera["player_id"], errors="coerce"),
+                fg_siera["siera"]
+            ))
+            pid_num = pd.to_numeric(fg_merged["player_id"], errors="coerce")
+            fg_merged["siera"] = pid_num.map(siera_map)
             n_siera = fg_merged["siera"].notna().sum()
-            print(f"  SIERA joined for {n_siera}/{len(fg_merged)} pitchers")
+            print(f"  SIERA mapped for {n_siera}/{len(fg_merged)} pitchers")
     else:
         fg_merged = pd.DataFrame()
 
