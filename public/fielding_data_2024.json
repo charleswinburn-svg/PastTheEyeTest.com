@@ -30853,7 +30853,7 @@
     {
       "player_id": 677870,
       "name": "Leo Jim\u00e9nez",
-      "team": "",
+      "team": "MIA",
       "positions": {
         "2B": {
           "innings": 166.7,
@@ -37078,7 +37078,7 @@
     {
       "player_id": 676369,
       "name": "Nelson Vel\u00e1zquez",
-      "team": "",
+      "team": "STL",
       "positions": {
         "LF": {
           "innings": 58.0,
@@ -44647,7 +44647,7 @@
     {
       "player_id": 672642,
       "name": "Steward Berroa",
-      "team": "",
+      "team": "PHI",
       "positions": {
         "RF": {
           "innings": 76.0,
@@ -44714,7 +44714,7 @@
     {
       "player_id": 656413,
       "name": "Stuart Fairchild",
-      "team": "",
+      "team": "CLE",
       "positions": {
         "CF": {
           "innings": 373.7,
@@ -51496,6 +51496,6 @@
   ],
   "meta": {
     "min_innings": 50,
-    "generated_at": "2026-05-29 15:44:19 UTC"
+    "generated_at": "2026-05-29 21:11:20 UTC"
   }
 }

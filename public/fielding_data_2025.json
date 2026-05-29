@@ -4491,7 +4491,7 @@
     {
       "player_id": 810938,
       "name": "Ben Williamson",
-      "team": "",
+      "team": "TB",
       "positions": {
         "3B": {
           "innings": 703.0,
@@ -8433,7 +8433,7 @@
     {
       "player_id": 700246,
       "name": "Carson Williams",
-      "team": "TB",
+      "team": "",
       "positions": {
         "SS": {
           "innings": 255.7,
@@ -18284,7 +18284,7 @@
     {
       "player_id": 688363,
       "name": "Graham Pauley",
-      "team": "MIA",
+      "team": "",
       "positions": {
         "3B": {
           "innings": 390.0,
@@ -24984,7 +24984,7 @@
     {
       "player_id": 699625,
       "name": "Jimmy Crooks",
-      "team": "",
+      "team": "STL",
       "positions": {
         "C": {
           "innings": 105.3,
@@ -32171,7 +32171,7 @@
     {
       "player_id": 677870,
       "name": "Leo Jim\u00e9nez",
-      "team": "",
+      "team": "MIA",
       "positions": {
         "2B": {
           "innings": 77.0,
@@ -46335,7 +46335,7 @@
     {
       "player_id": 656413,
       "name": "Stuart Fairchild",
-      "team": "",
+      "team": "CLE",
       "positions": {
         "RF": {
           "innings": 78.7,
@@ -52043,7 +52043,7 @@
     {
       "player_id": 650968,
       "name": "Yohel Pozo",
-      "team": "STL",
+      "team": "",
       "positions": {
         "C": {
           "innings": 324.0,
@@ -52779,6 +52779,6 @@
   ],
   "meta": {
     "min_innings": 50,
-    "generated_at": "2026-05-29 15:47:14 UTC"
+    "generated_at": "2026-05-29 21:13:24 UTC"
   }
 }

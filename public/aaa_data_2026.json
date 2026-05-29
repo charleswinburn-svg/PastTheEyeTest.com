@@ -78681,7 +78681,7 @@
     {
       "name": "Albert Su\u00e1rez",
       "player_id": 544150,
-      "team": null,
+      "team": "BAL",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -92060,6 +92060,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-05-29 15:50:43 UTC"
+    "generated_at": "2026-05-29 21:16:05 UTC"
   }
 }

@@ -38085,7 +38085,7 @@
     {
       "player_id": 676369,
       "name": "Nelson Vel\u00e1zquez",
-      "team": "",
+      "team": "STL",
       "positions": {
         "RF": {
           "innings": 201.0,
@@ -46320,7 +46320,7 @@
     {
       "player_id": 656413,
       "name": "Stuart Fairchild",
-      "team": "",
+      "team": "CLE",
       "positions": {
         "LF": {
           "innings": 251.0,
@@ -53347,6 +53347,6 @@
   ],
   "meta": {
     "min_innings": 50,
-    "generated_at": "2026-05-29 15:41:29 UTC"
+    "generated_at": "2026-05-29 21:08:48 UTC"
   }
 }
