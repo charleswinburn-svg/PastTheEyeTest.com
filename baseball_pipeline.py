@@ -222,48 +222,91 @@ def fetch_savant_bat_tracking(year):
     return df
 
 
-def fetch_savant_ev90(year):
-    """Pull every regular-season batted-ball event for the year via Savant's
-    statcast_search CSV, then compute each batter's 90th-percentile launch
-    speed (top 10% of balls put in play). Returns a DataFrame with columns
-    player_id, ev_90p. The CSV can be large (10-100MB depending on how deep
-    into the season we are) but it's a single round trip."""
-    url = (
-        "https://baseballsavant.mlb.com/statcast_search/csv?all=true"
-        f"&hfSea={year}%7C"
-        "&hfGT=R%7C"
-        "&player_type=batter"
-        "&type=details"
-        "&hfBBT=fly%5C.%5C.ball%7Cline%5C.%5C.drive%7Cground%5C.%5C.ball%7Cpopup%7C"
+def fetch_fangraphs_ev90(year):
+    """Fetch EV90 (90th-percentile exit velocity) from FanGraphs Statcast batting
+    leaderboard (type=24).  Returns a DataFrame with columns player_id (MLBAM), ev_90p.
+    Uses the same multi-attempt auth strategy as fetch_fangraphs_pitching."""
+    print(f"  Fetching FanGraphs EV90 ({year})...")
+    api_url = (
+        "https://www.fangraphs.com/api/leaders/major-league/data"
+        f"?pos=all&stats=bat&lg=all&qual=0&type=24"
+        f"&season={year}&month=0&season1={year}&ind=0"
+        f"&team=0&rost=0&age=0&filter=&players=0"
+        f"&startdate=&enddate=&pageitems=2000&page=1"
     )
-    print(f"  Fetching Savant batted-ball events for EV90 ({year})...")
-    text = fetch_url(url)
-    if not text or len(text) < 100:
-        print("    ⚠ EV90 fetch returned no data")
-        return None
-    df = csv_to_df(text)
-    if df is None or df.empty:
-        print("    ⚠ EV90 CSV parsed to empty")
-        return None
 
-    # Required columns
-    bid_col = "batter" if "batter" in df.columns else ("batter_id" if "batter_id" in df.columns else None)
-    ev_col  = "launch_speed" if "launch_speed" in df.columns else None
-    if bid_col is None or ev_col is None:
-        print(f"    ⚠ EV90 missing required columns. Have: {list(df.columns)[:30]}…")
-        return None
+    def _parse(rows):
+        df = pd.DataFrame(rows)
+        # FanGraphs may name it EV90 or ev90
+        ev90_col  = next((c for c in df.columns if c.lower() == "ev90"), None)
+        # MLBAM ID comes back as xMLBAMID / MLBAMID / mlbamid
+        mlbam_col = next((c for c in df.columns
+                          if c.lower() in ("xmlbamid", "mlbamid")), None)
+        if ev90_col is None or mlbam_col is None:
+            print(f"    ⚠ Missing EV90 or MLBAM column. Available: {list(df.columns)[:40]}")
+            return None
+        out = df[[mlbam_col, ev90_col]].copy()
+        out = out.rename(columns={mlbam_col: "player_id", ev90_col: "ev_90p"})
+        out["player_id"] = pd.to_numeric(out["player_id"], errors="coerce").astype("Int64")
+        out["ev_90p"]    = pd.to_numeric(out["ev_90p"],    errors="coerce")
+        out = out.dropna(subset=["player_id", "ev_90p"])
+        return out if not out.empty else None
 
-    df[bid_col] = pd.to_numeric(df[bid_col], errors="coerce").astype("Int64")
-    df[ev_col]  = pd.to_numeric(df[ev_col],  errors="coerce")
-    df = df.dropna(subset=[bid_col, ev_col])
+    # --- Attempt 1: Cookie-authenticated session ---
+    cookie_paths = [
+        "fangraphs_cookies.txt",
+        os.path.join(os.path.dirname(__file__), "fangraphs_cookies.txt"),
+        os.path.expanduser("~/project/fangraphs_cookies.txt"),
+        "www.fangraphs.com_cookies.txt",
+    ]
+    for cp in cookie_paths:
+        if not os.path.exists(cp):
+            continue
+        try:
+            from http.cookiejar import MozillaCookieJar
+            jar = MozillaCookieJar(cp)
+            jar.load(ignore_discard=True, ignore_expires=True)
+            s = requests.Session(); s.cookies = jar; s.headers.update(HTTP_HEADERS)
+            r = s.get(api_url, timeout=30)
+            if r.status_code == 200:
+                rows = r.json().get("data", [])
+                if rows:
+                    result = _parse(rows)
+                    if result is not None:
+                        print(f"    ✓ {len(result)} batters via cookies")
+                        return result
+        except Exception as e:
+            print(f"    Cookies failed ({os.path.basename(cp)}): {e}")
 
-    ev90 = (df.groupby(bid_col)[ev_col]
-              .quantile(0.9)
-              .reset_index()
-              .rename(columns={bid_col: "player_id", ev_col: "ev_90p"}))
-    print(f"    ✓ EV90 computed for {len(ev90)} batters "
-          f"from {len(df):,} batted-ball events")
-    return ev90
+    # --- Attempt 2: cloudscraper ---
+    try:
+        import cloudscraper
+        r = cloudscraper.create_scraper().get(api_url, timeout=30)
+        if r.status_code == 200:
+            rows = r.json().get("data", [])
+            if rows:
+                result = _parse(rows)
+                if result is not None:
+                    print(f"    ✓ {len(result)} batters via cloudscraper")
+                    return result
+    except Exception as e:
+        print(f"    cloudscraper failed: {e}")
+
+    # --- Attempt 3: Direct requests ---
+    try:
+        r = requests.get(api_url, headers=HTTP_HEADERS, timeout=30)
+        if r.status_code == 200:
+            rows = r.json().get("data", [])
+            if rows:
+                result = _parse(rows)
+                if result is not None:
+                    print(f"    ✓ {len(result)} batters via direct API")
+                    return result
+    except Exception as e:
+        print(f"    Direct API failed: {e}")
+
+    print("    ⚠ FanGraphs EV90 unavailable — skipping")
+    return None
 
 
 def fetch_savant_pitch_movement(year, pitch_type="FF"):
@@ -721,7 +764,7 @@ def process_hitters(year):
     time.sleep(FETCH_DELAY)
     df_batting = fetch_savant_bat_tracking(year)
     time.sleep(FETCH_DELAY)
-    df_ev90 = fetch_savant_ev90(year)
+    df_ev90 = fetch_fangraphs_ev90(year)
 
     # --- Load supplemental bat tracking CSV (more complete than API) ---
     df_bat_csv = None
