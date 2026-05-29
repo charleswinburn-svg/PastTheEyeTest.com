@@ -1149,6 +1149,7 @@ def process_pitchers(year):
         if "team" in fg_merged.columns:
             fg_merged["team"] = fg_merged["team"].apply(_clean_team_abbr)
         # Map SIERA from Advanced leaderboard (type=8) — not in type=36
+        fg_merged = fg_merged.loc[:, ~fg_merged.columns.duplicated()]
         if fg_siera is not None and not fg_siera.empty and "player_id" in fg_merged.columns:
             siera_map = dict(zip(
                 pd.to_numeric(fg_siera["player_id"], errors="coerce"),
