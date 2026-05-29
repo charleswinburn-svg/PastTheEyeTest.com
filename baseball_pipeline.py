@@ -90,7 +90,8 @@ HITTER_METRICS = [
 PITCHER_METRICS = [
 #     {"key": "stuff_plus",     "label": "Stuff+ (FG)",    "lower_better": False, "fmt": ".0f",  "src": "fg"},
 #     {"key": "location_plus",  "label": "Location+ (FG)", "lower_better": False, "fmt": ".0f",  "src": "fg"},
-    {"key": "fip",            "label": "FIP",             "lower_better": True,  "fmt": ".2f",  "src": "fg"},
+    {"key": "siera",           "label": "SIERA",           "lower_better": True,  "fmt": ".2f",  "src": "fg"},
+    {"key": "fip",             "label": "FIP",             "lower_better": True,  "fmt": ".2f",  "src": "fg"},
     {"key": "avg_ev",         "label": "Avg Exit Velo",   "lower_better": True,  "fmt": ".1f",  "src": "savant"},
     {"key": "barrel_pct",     "label": "Barrel%",         "lower_better": True,  "fmt": ".1f",  "src": "savant"},
     {"key": "xba",            "label": "xBA",             "lower_better": True,  "fmt": ".3f",  "src": "savant"},
@@ -1051,7 +1052,7 @@ def process_pitchers(year):
     if fg_merged is not None:
         fg_col_map = {
             # pybaseball pitching_stats column names
-            "FIP": "fip", "IP": "ip", "Team": "team",
+            "SIERA": "siera", "FIP": "fip", "IP": "ip", "Team": "team",
             "K%": "k_pct", "BB%": "bb_pct", "K-BB%": "k_bb_pct", "GB%": "gb_pct",
             "O-Swing%": "chase_pct", "SwStr%": "whiff_pct",
             "Stuff+": "stuff_plus", "Location+": "location_plus",
