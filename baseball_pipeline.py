@@ -449,6 +449,86 @@ def _normalize_fg_api_columns(df):
     return df
 
 
+def fetch_fangraphs_siera(year):
+    """Fetch SIERA from FanGraphs Advanced pitching leaderboard (type=8).
+    Returns DataFrame with columns player_id (MLBAM) and siera, or None."""
+    print(f"  Fetching FanGraphs SIERA ({year})...")
+    api_url = (
+        "https://www.fangraphs.com/api/leaders/major-league/data"
+        f"?pos=all&stats=pit&lg=all&qual=1&type=8"
+        f"&season={year}&month=0&season1={year}&ind=0"
+        f"&team=0&rost=0&age=0&filter=&players=0"
+        f"&startdate=&enddate=&pageitems=2000&page=1"
+    )
+
+    def _parse(rows):
+        df = pd.DataFrame(rows)
+        siera_col  = next((c for c in df.columns if c.upper() == "SIERA"), None)
+        mlbam_col  = next((c for c in df.columns if c.lower() in ("xmlbamid", "mlbamid")), None)
+        if siera_col is None or mlbam_col is None:
+            print(f"    ⚠ Missing SIERA or MLBAM column. Available: {list(df.columns)[:40]}")
+            return None
+        out = df[[mlbam_col, siera_col]].copy()
+        out = out.rename(columns={mlbam_col: "player_id", siera_col: "siera"})
+        out["player_id"] = pd.to_numeric(out["player_id"], errors="coerce").astype("Int64")
+        out["siera"]     = pd.to_numeric(out["siera"],     errors="coerce")
+        out = out.dropna(subset=["player_id", "siera"])
+        return out if not out.empty else None
+
+    cookie_paths = [
+        "fangraphs_cookies.txt",
+        os.path.join(os.path.dirname(__file__), "fangraphs_cookies.txt"),
+        os.path.expanduser("~/project/fangraphs_cookies.txt"),
+        "www.fangraphs.com_cookies.txt",
+    ]
+    for cp in cookie_paths:
+        if not os.path.exists(cp):
+            continue
+        try:
+            from http.cookiejar import MozillaCookieJar
+            jar = MozillaCookieJar(cp)
+            jar.load(ignore_discard=True, ignore_expires=True)
+            s = requests.Session(); s.cookies = jar; s.headers.update(HTTP_HEADERS)
+            r = s.get(api_url, timeout=30)
+            if r.status_code == 200:
+                rows = r.json().get("data", [])
+                if rows:
+                    result = _parse(rows)
+                    if result is not None:
+                        print(f"    ✓ {len(result)} pitchers via cookies")
+                        return result
+        except Exception as e:
+            print(f"    Cookies failed ({os.path.basename(cp)}): {e}")
+
+    try:
+        import cloudscraper
+        r = cloudscraper.create_scraper().get(api_url, timeout=30)
+        if r.status_code == 200:
+            rows = r.json().get("data", [])
+            if rows:
+                result = _parse(rows)
+                if result is not None:
+                    print(f"    ✓ {len(result)} pitchers via cloudscraper")
+                    return result
+    except Exception as e:
+        print(f"    cloudscraper failed: {e}")
+
+    try:
+        r = requests.get(api_url, headers=HTTP_HEADERS, timeout=30)
+        if r.status_code == 200:
+            rows = r.json().get("data", [])
+            if rows:
+                result = _parse(rows)
+                if result is not None:
+                    print(f"    ✓ {len(result)} pitchers via direct API")
+                    return result
+    except Exception as e:
+        print(f"    Direct API failed: {e}")
+
+    print("    ⚠ FanGraphs SIERA unavailable — skipping")
+    return None
+
+
 def _fetch_fg_selenium(year):
     """Use Selenium with system chromium/chromedriver to scrape FanGraphs."""
     try:
@@ -1022,8 +1102,10 @@ def process_pitchers(year):
     print(f"PITCHERS — {year}")
     print(f"{'='*50}")
 
-    # --- Fetch FanGraphs data (single call via pybaseball) ---
+    # --- Fetch FanGraphs data ---
     fg_data = fetch_fangraphs_pitching(year)
+    time.sleep(FETCH_DELAY)
+    fg_siera = fetch_fangraphs_siera(year)
     time.sleep(FETCH_DELAY)
 
     # --- Fetch Savant data ---
@@ -1066,6 +1148,12 @@ def process_pitchers(year):
         fg_merged = fg_merged.rename(columns={k: v for k, v in fg_col_map.items() if k in fg_merged.columns})
         if "team" in fg_merged.columns:
             fg_merged["team"] = fg_merged["team"].apply(_clean_team_abbr)
+        # Merge SIERA from Advanced leaderboard (type=8) — not in type=36
+        if fg_siera is not None and not fg_siera.empty and "player_id" in fg_merged.columns:
+            fg_merged["player_id"] = pd.to_numeric(fg_merged["player_id"], errors="coerce").astype("Int64")
+            fg_merged = fg_merged.merge(fg_siera, on="player_id", how="left")
+            n_siera = fg_merged["siera"].notna().sum()
+            print(f"  SIERA joined for {n_siera}/{len(fg_merged)} pitchers")
     else:
         fg_merged = pd.DataFrame()
 
