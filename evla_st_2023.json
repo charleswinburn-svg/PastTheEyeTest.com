@@ -1,0 +1,99 @@
+{
+  "season": 2023,
+  "season_type": "spring",
+  "league": "MLB",
+  "league_avg": [
+    {
+      "label": "\u2264 -10",
+      "avg_ev": 77.8,
+      "hard_hit_pct": 18.5,
+      "count": 200
+    },
+    {
+      "label": "-10 to -5",
+      "avg_ev": 92.0,
+      "hard_hit_pct": 48.1,
+      "count": 27
+    },
+    {
+      "label": "-5 to 0",
+      "avg_ev": 88.8,
+      "hard_hit_pct": 42.9,
+      "count": 28
+    },
+    {
+      "label": "0 to 5",
+      "avg_ev": 87.3,
+      "hard_hit_pct": 35.6,
+      "count": 45
+    },
+    {
+      "label": "5 to 10",
+      "avg_ev": 91.2,
+      "hard_hit_pct": 44.7,
+      "count": 38
+    },
+    {
+      "label": "10 to 15",
+      "avg_ev": 90.0,
+      "hard_hit_pct": 41.9,
+      "count": 43
+    },
+    {
+      "label": "15 to 20",
+      "avg_ev": 87.2,
+      "hard_hit_pct": 37.5,
+      "count": 48
+    },
+    {
+      "label": "20 to 25",
+      "avg_ev": 86.8,
+      "hard_hit_pct": 31.1,
+      "count": 45
+    },
+    {
+      "label": "25 to 30",
+      "avg_ev": 84.0,
+      "hard_hit_pct": 29.8,
+      "count": 57
+    },
+    {
+      "label": "30 to 35",
+      "avg_ev": 81.2,
+      "hard_hit_pct": 14.3,
+      "count": 35
+    },
+    {
+      "label": "35 to 40",
+      "avg_ev": 81.9,
+      "hard_hit_pct": 19.5,
+      "count": 41
+    },
+    {
+      "label": "> 40",
+      "avg_ev": 76.1,
+      "hard_hit_pct": 3.3,
+      "count": 215
+    }
+  ],
+  "players": [],
+  "meta": {
+    "min_bbe": 10,
+    "total_bbe": 822,
+    "bucket_labels": [
+      "\u2264 -10",
+      "-10 to -5",
+      "-5 to 0",
+      "0 to 5",
+      "5 to 10",
+      "10 to 15",
+      "15 to 20",
+      "20 to 25",
+      "25 to 30",
+      "30 to 35",
+      "35 to 40",
+      "> 40"
+    ],
+    "generated_at": "2026-03-25 21:00:21 UTC"
+  }
+}

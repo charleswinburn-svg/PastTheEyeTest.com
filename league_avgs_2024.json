@@ -1,0 +1,78 @@
+{
+  "season": 2024,
+  "pitch_types": {
+    "CH": {
+      "count": 7366,
+      "velo": 85.5,
+      "spin": 1805,
+      "zone_pct": 34.6,
+      "whiff_pct": 29.2,
+      "extension": 6.44
+    },
+    "CU": {
+      "count": 4644,
+      "velo": 79.5,
+      "spin": 2561,
+      "zone_pct": 40.8,
+      "whiff_pct": 29.6,
+      "extension": 6.41
+    },
+    "FC": {
+      "count": 6248,
+      "velo": 89.4,
+      "spin": 2388,
+      "zone_pct": 48.5,
+      "whiff_pct": 21.7,
+      "extension": 6.41
+    },
+    "FF": {
+      "count": 23987,
+      "velo": 94.3,
+      "spin": 2293,
+      "zone_pct": 50.7,
+      "whiff_pct": 22.1,
+      "extension": 6.53
+    },
+    "FS": {
+      "count": 2290,
+      "velo": 86.3,
+      "spin": 1261,
+      "zone_pct": 32.8,
+      "whiff_pct": 36.1,
+      "extension": 6.54
+    },
+    "KC": {
+      "count": 1356,
+      "velo": 81.6,
+      "spin": 2489,
+      "zone_pct": 37.3,
+      "whiff_pct": 35.3,
+      "extension": 6.39
+    },
+    "SI": {
+      "count": 11770,
+      "velo": 93.4,
+      "spin": 2148,
+      "zone_pct": 53.1,
+      "whiff_pct": 13.8,
+      "extension": 6.44
+    },
+    "SL": {
+      "count": 11074,
+      "velo": 85.9,
+      "spin": 2429,
+      "zone_pct": 42.1,
+      "whiff_pct": 32.7,
+      "extension": 6.45
+    },
+    "ST": {
+      "count": 5443,
+      "velo": 82.0,
+      "spin": 2575,
+      "zone_pct": 40.3,
+      "whiff_pct": 31.2,
+      "extension": 6.39
+    }
+  },
+  "generated_at": "2026-03-28 19:26:13 UTC"
+}
