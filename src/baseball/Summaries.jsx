@@ -814,8 +814,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
             locPlus:    round(v.loc),
             tunnelPlus: round(v.tun),
             pitchPlus:  round(v.pitch),
-            L: { pitchPlus: round(byTypeL[apiPt]?.pitch) },
-            R: { pitchPlus: round(byTypeR[apiPt]?.pitch) },
+            L: { pitchPlus: round(byTypeL[apiPt]?.pitch), stuffPlus: round(byTypeL[apiPt]?.stuff) },
+            R: { pitchPlus: round(byTypeR[apiPt]?.pitch), stuffPlus: round(byTypeR[apiPt]?.stuff) },
           };
         }
         console.log(`[Pitch+] Scored ${allPitches.length} pitches via /score_aggregate:`, out);

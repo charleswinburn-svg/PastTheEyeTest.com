@@ -1570,7 +1570,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
         <line
           x1={sideW + centerW / 2} x2={sideW + centerW / 2}
           y1={headerH + 4} y2={height - 4}
-          stroke={t.divider} strokeWidth={1}
+          stroke={t.textMuted} strokeWidth={2}
         />
 
         {/* Rows */}
@@ -1585,9 +1585,9 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
           const barH = rowH - 10;
           const midY = y + barH / 2;
 
-          // Per-handedness Pitch+
-          const lPp = pitchPlus?.[pt]?.L?.pitchPlus;
-          const rPp = pitchPlus?.[pt]?.R?.pitchPlus;
+          // Per-handedness Stuff+
+          const lPp = pitchPlus?.[pt]?.L?.stuffPlus;
+          const rPp = pitchPlus?.[pt]?.R?.stuffPlus;
 
           return (
             <g key={pt}>
@@ -1613,7 +1613,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                       fontSize={8} fontWeight={700}
                       fill={t.textSecondary}
                       fontFamily="'DM Mono', monospace"
-                    >{Math.round(lPp)} Pitch+</text>
+                    >{Math.round(lPp)} Stuff+</text>
                   )}
                 </>
               )}
@@ -1640,7 +1640,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                       fontSize={8} fontWeight={700}
                       fill={t.textSecondary}
                       fontFamily="'DM Mono', monospace"
-                    >{Math.round(rPp)} Pitch+</text>
+                    >{Math.round(rPp)} Stuff+</text>
                   )}
                 </>
               )}
