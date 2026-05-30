@@ -14,7 +14,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests pandas pybaseball
+        run: pip install requests pandas pybaseball xgboost scikit-learn joblib cloudscraper
 
       - name: Run baseball pipeline
         run: python3 baseball_pipeline.py ./public 2026
@@ -31,11 +31,14 @@ jobs:
       - name: Fetch AAA xwOBA
         run: python3 fetch_aaa_xwoba.py 2026 --output-dir ./public
 
+      - name: Update iSwing+
+        run: python3 iswing_update.py
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/*.json
+          git add public/*.json competitive_swings_2023_2026.csv
           git diff --staged --quiet || git commit -m "Auto-update data $(date -u +%Y-%m-%d)"
           git pull --rebase origin main
           git push
