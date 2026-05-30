@@ -34,15 +34,29 @@
       "player_id": 607259,
       "name": "Nick Martinez",
       "team": "TB",
-      "ip": 22.0,
+      "ip": 23.9,
       "gs": 4,
       "g": 4,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.622,
-      "qualifying_pas": 37,
-      "total_pas": 95,
-      "reach_pct": 38.9,
+      "avg_pitches_to_2k": 2.615,
+      "qualifying_pas": 39,
+      "total_pas": 99,
+      "reach_pct": 39.4,
       "pctile": 98.0
+    },
+    {
+      "player_id": 543135,
+      "name": "Nathan Eovaldi",
+      "team": "TEX",
+      "ip": 31.4,
+      "gs": 3,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.649,
+      "qualifying_pas": 57,
+      "total_pas": 119,
+      "reach_pct": 47.9,
+      "pctile": 97.0
     },
     {
       "player_id": 641778,
@@ -56,34 +70,20 @@
       "qualifying_pas": 41,
       "total_pas": 88,
       "reach_pct": 46.6,
-      "pctile": 97.0
-    },
-    {
-      "player_id": 543135,
-      "name": "Nathan Eovaldi",
-      "team": "TEX",
-      "ip": 32.9,
-      "gs": 4,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.683,
-      "qualifying_pas": 60,
-      "total_pas": 125,
-      "reach_pct": 48.0,
       "pctile": 96.0
     },
     {
-      "player_id": 680736,
-      "name": "Justin Wrobleski",
-      "team": "LAD",
-      "ip": 27.4,
+      "player_id": 696149,
+      "name": "Bubba Chandler",
+      "team": "PIT",
+      "ip": 20.4,
       "gs": 4,
       "g": 4,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.688,
-      "qualifying_pas": 48,
-      "total_pas": 106,
-      "reach_pct": 45.3,
+      "avg_pitches_to_2k": 2.696,
+      "qualifying_pas": 46,
+      "total_pas": 90,
+      "reach_pct": 51.1,
       "pctile": 95.0
     },
     {
@@ -98,7 +98,7 @@
       "qualifying_pas": 50,
       "total_pas": 83,
       "reach_pct": 60.2,
-      "pctile": 94.1
+      "pctile": 94.0
     },
     {
       "player_id": 669387,
@@ -112,21 +112,21 @@
       "qualifying_pas": 51,
       "total_pas": 107,
       "reach_pct": 47.7,
-      "pctile": 93.1
+      "pctile": 93.0
     },
     {
-      "player_id": 668909,
-      "name": "Gavin Williams",
-      "team": "CLE",
-      "ip": 37.4,
+      "player_id": 669923,
+      "name": "George Kirby",
+      "team": "SEA",
+      "ip": 32.9,
       "gs": 4,
       "g": 6,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.718,
-      "qualifying_pas": 85,
-      "total_pas": 148,
-      "reach_pct": 57.4,
-      "pctile": 92.1
+      "avg_pitches_to_2k": 2.726,
+      "qualifying_pas": 73,
+      "total_pas": 136,
+      "reach_pct": 53.7,
+      "pctile": 92.0
     },
     {
       "player_id": 641927,
@@ -140,21 +140,7 @@
       "qualifying_pas": 59,
       "total_pas": 124,
       "reach_pct": 47.6,
-      "pctile": 91.1
-    },
-    {
-      "player_id": 669923,
-      "name": "George Kirby",
-      "team": "SEA",
-      "ip": 28.9,
-      "gs": 4,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.733,
-      "qualifying_pas": 60,
-      "total_pas": 121,
-      "reach_pct": 49.6,
-      "pctile": 90.1
+      "pctile": 91.0
     },
     {
       "player_id": 664285,
@@ -168,7 +154,7 @@
       "qualifying_pas": 64,
       "total_pas": 115,
       "reach_pct": 55.7,
-      "pctile": 89.1
+      "pctile": 90.0
     },
     {
       "player_id": 694819,
@@ -182,7 +168,21 @@
       "qualifying_pas": 64,
       "total_pas": 96,
       "reach_pct": 66.7,
-      "pctile": 89.1
+      "pctile": 90.0
+    },
+    {
+      "player_id": 592332,
+      "name": "Kevin Gausman",
+      "team": "TOR",
+      "ip": 26.9,
+      "gs": 5,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.739,
+      "qualifying_pas": 69,
+      "total_pas": 119,
+      "reach_pct": 58.0,
+      "pctile": 88.0
     },
     {
       "player_id": 677952,
@@ -196,35 +196,21 @@
       "qualifying_pas": 71,
       "total_pas": 120,
       "reach_pct": 59.2,
-      "pctile": 87.1
+      "pctile": 87.0
     },
     {
-      "player_id": 691587,
-      "name": "Eury P\u00e9rez",
-      "team": "MIA",
-      "ip": 25.0,
-      "gs": 5,
+      "player_id": 668909,
+      "name": "Gavin Williams",
+      "team": "CLE",
+      "ip": 30.4,
+      "gs": 4,
       "g": 5,
       "is_sp": true,
       "avg_pitches_to_2k": 2.75,
-      "qualifying_pas": 56,
-      "total_pas": 101,
-      "reach_pct": 55.4,
-      "pctile": 86.1
-    },
-    {
-      "player_id": 696149,
-      "name": "Bubba Chandler",
-      "team": "PIT",
-      "ip": 26.0,
-      "gs": 5,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.754,
-      "qualifying_pas": 61,
-      "total_pas": 111,
-      "reach_pct": 55.0,
-      "pctile": 85.1
+      "qualifying_pas": 72,
+      "total_pas": 125,
+      "reach_pct": 57.6,
+      "pctile": 86.0
     },
     {
       "player_id": 672456,
@@ -238,7 +224,7 @@
       "qualifying_pas": 46,
       "total_pas": 89,
       "reach_pct": 51.7,
-      "pctile": 84.2
+      "pctile": 85.0
     },
     {
       "player_id": 686218,
@@ -252,7 +238,21 @@
       "qualifying_pas": 53,
       "total_pas": 88,
       "reach_pct": 60.2,
-      "pctile": 83.2
+      "pctile": 84.0
+    },
+    {
+      "player_id": 680736,
+      "name": "Justin Wrobleski",
+      "team": "LAD",
+      "ip": 30.0,
+      "gs": 4,
+      "g": 4,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.788,
+      "qualifying_pas": 52,
+      "total_pas": 109,
+      "reach_pct": 47.7,
+      "pctile": 83.0
     },
     {
       "player_id": 622491,
@@ -262,39 +262,39 @@
       "gs": 5,
       "g": 5,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.78,
+      "avg_pitches_to_2k": 2.797,
       "qualifying_pas": 59,
       "total_pas": 102,
       "reach_pct": 57.8,
-      "pctile": 82.2
+      "pctile": 82.0
     },
     {
-      "player_id": 650911,
-      "name": "Cristopher S\u00e1nchez",
-      "team": "PHI",
+      "player_id": 694973,
+      "name": "Paul Skenes",
+      "team": "PIT",
       "ip": 33.9,
-      "gs": 4,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.79,
-      "qualifying_pas": 62,
-      "total_pas": 131,
-      "reach_pct": 47.3,
-      "pctile": 81.2
-    },
-    {
-      "player_id": 592332,
-      "name": "Kevin Gausman",
-      "team": "TOR",
-      "ip": 32.9,
-      "gs": 6,
+      "gs": 5,
       "g": 6,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.802,
-      "qualifying_pas": 81,
-      "total_pas": 142,
-      "reach_pct": 57.0,
-      "pctile": 80.2
+      "avg_pitches_to_2k": 2.805,
+      "qualifying_pas": 77,
+      "total_pas": 129,
+      "reach_pct": 59.7,
+      "pctile": 81.0
+    },
+    {
+      "player_id": 663436,
+      "name": "Davis Martin",
+      "team": "CWS",
+      "ip": 24.0,
+      "gs": 4,
+      "g": 4,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.81,
+      "qualifying_pas": 58,
+      "total_pas": 97,
+      "reach_pct": 59.8,
+      "pctile": 80.0
     },
     {
       "player_id": 672282,
@@ -308,21 +308,21 @@
       "qualifying_pas": 60,
       "total_pas": 96,
       "reach_pct": 62.5,
-      "pctile": 79.2
+      "pctile": 79.0
     },
     {
-      "player_id": 663436,
-      "name": "Davis Martin",
-      "team": "CWS",
-      "ip": 29.0,
+      "player_id": 663978,
+      "name": "Chris Paddack",
+      "team": "CIN",
+      "ip": 22.9,
       "gs": 4,
       "g": 5,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.826,
-      "qualifying_pas": 69,
-      "total_pas": 119,
-      "reach_pct": 58.0,
-      "pctile": 78.2
+      "avg_pitches_to_2k": 2.827,
+      "qualifying_pas": 52,
+      "total_pas": 102,
+      "reach_pct": 51.0,
+      "pctile": 78.0
     },
     {
       "player_id": 808967,
@@ -336,7 +336,7 @@
       "qualifying_pas": 52,
       "total_pas": 104,
       "reach_pct": 50.0,
-      "pctile": 77.2
+      "pctile": 78.0
     },
     {
       "player_id": 608379,
@@ -350,7 +350,7 @@
       "qualifying_pas": 65,
       "total_pas": 125,
       "reach_pct": 52.0,
-      "pctile": 76.2
+      "pctile": 76.0
     },
     {
       "player_id": 660271,
@@ -364,7 +364,7 @@
       "qualifying_pas": 60,
       "total_pas": 98,
       "reach_pct": 61.2,
-      "pctile": 75.2
+      "pctile": 75.0
     },
     {
       "player_id": 702056,
@@ -378,21 +378,21 @@
       "qualifying_pas": 48,
       "total_pas": 85,
       "reach_pct": 56.5,
-      "pctile": 75.2
+      "pctile": 75.0
     },
     {
-      "player_id": 642547,
-      "name": "Freddy Peralta",
-      "team": "NYM",
-      "ip": 29.0,
+      "player_id": 690986,
+      "name": "Kyle Harrison",
+      "team": "MIL",
+      "ip": 24.4,
       "gs": 4,
       "g": 5,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.838,
-      "qualifying_pas": 68,
-      "total_pas": 127,
-      "reach_pct": 53.5,
-      "pctile": 73.3
+      "avg_pitches_to_2k": 2.841,
+      "qualifying_pas": 63,
+      "total_pas": 98,
+      "reach_pct": 64.3,
+      "pctile": 73.0
     },
     {
       "player_id": 605280,
@@ -406,7 +406,7 @@
       "qualifying_pas": 64,
       "total_pas": 108,
       "reach_pct": 59.3,
-      "pctile": 72.3
+      "pctile": 72.0
     },
     {
       "player_id": 645261,
@@ -420,7 +420,7 @@
       "qualifying_pas": 64,
       "total_pas": 131,
       "reach_pct": 48.9,
-      "pctile": 72.3
+      "pctile": 72.0
     },
     {
       "player_id": 695505,
@@ -434,7 +434,7 @@
       "qualifying_pas": 59,
       "total_pas": 116,
       "reach_pct": 50.9,
-      "pctile": 70.3
+      "pctile": 70.0
     },
     {
       "player_id": 671096,
@@ -448,35 +448,21 @@
       "qualifying_pas": 66,
       "total_pas": 125,
       "reach_pct": 52.8,
-      "pctile": 69.3
+      "pctile": 69.0
     },
     {
-      "player_id": 694973,
-      "name": "Paul Skenes",
-      "team": "PIT",
-      "ip": 34.4,
-      "gs": 5,
+      "player_id": 642547,
+      "name": "Freddy Peralta",
+      "team": "NYM",
+      "ip": 32.4,
+      "gs": 4,
       "g": 6,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.848,
-      "qualifying_pas": 79,
-      "total_pas": 133,
-      "reach_pct": 59.4,
-      "pctile": 69.3
-    },
-    {
-      "player_id": 690986,
-      "name": "Kyle Harrison",
-      "team": "MIL",
-      "ip": 24.4,
-      "gs": 4,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.857,
-      "qualifying_pas": 63,
-      "total_pas": 98,
-      "reach_pct": 64.3,
-      "pctile": 67.3
+      "avg_pitches_to_2k": 2.859,
+      "qualifying_pas": 78,
+      "total_pas": 142,
+      "reach_pct": 54.9,
+      "pctile": 68.0
     },
     {
       "player_id": 693645,
@@ -490,7 +476,49 @@
       "qualifying_pas": 71,
       "total_pas": 109,
       "reach_pct": 65.1,
-      "pctile": 66.3
+      "pctile": 68.0
+    },
+    {
+      "player_id": 571578,
+      "name": "Patrick Corbin",
+      "team": "TOR",
+      "ip": 23.0,
+      "gs": 4,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.863,
+      "qualifying_pas": 51,
+      "total_pas": 103,
+      "reach_pct": 49.5,
+      "pctile": 66.0
+    },
+    {
+      "player_id": 650911,
+      "name": "Cristopher S\u00e1nchez",
+      "team": "PHI",
+      "ip": 27.0,
+      "gs": 4,
+      "g": 4,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.868,
+      "qualifying_pas": 53,
+      "total_pas": 107,
+      "reach_pct": 49.5,
+      "pctile": 65.0
+    },
+    {
+      "player_id": 676974,
+      "name": "Max Meyer",
+      "team": "MIA",
+      "ip": 28.0,
+      "gs": 4,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.871,
+      "qualifying_pas": 62,
+      "total_pas": 117,
+      "reach_pct": 53.0,
+      "pctile": 64.0
     },
     {
       "player_id": 687064,
@@ -504,35 +532,35 @@
       "qualifying_pas": 41,
       "total_pas": 94,
       "reach_pct": 43.6,
-      "pctile": 65.3
+      "pctile": 63.0
+    },
+    {
+      "player_id": 702070,
+      "name": "Noah Cameron",
+      "team": "KC",
+      "ip": 24.0,
+      "gs": 4,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.879,
+      "qualifying_pas": 58,
+      "total_pas": 112,
+      "reach_pct": 51.8,
+      "pctile": 62.0
     },
     {
       "player_id": 676083,
       "name": "Janson Junk",
       "team": "MIA",
-      "ip": 27.9,
+      "ip": 28.0,
       "gs": 5,
       "g": 5,
       "is_sp": true,
       "avg_pitches_to_2k": 2.881,
       "qualifying_pas": 59,
-      "total_pas": 117,
-      "reach_pct": 50.4,
-      "pctile": 64.4
-    },
-    {
-      "player_id": 607200,
-      "name": "Erick Fedde",
-      "team": "CWS",
-      "ip": 24.9,
-      "gs": 3,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.882,
-      "qualifying_pas": 51,
-      "total_pas": 108,
-      "reach_pct": 47.2,
-      "pctile": 63.4
+      "total_pas": 118,
+      "reach_pct": 50.0,
+      "pctile": 61.0
     },
     {
       "player_id": 650644,
@@ -546,35 +574,7 @@
       "qualifying_pas": 52,
       "total_pas": 105,
       "reach_pct": 49.5,
-      "pctile": 62.4
-    },
-    {
-      "player_id": 671737,
-      "name": "Taj Bradley",
-      "team": "MIN",
-      "ip": 21.4,
-      "gs": 3,
-      "g": 4,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.886,
-      "qualifying_pas": 44,
-      "total_pas": 91,
-      "reach_pct": 48.4,
-      "pctile": 61.4
-    },
-    {
-      "player_id": 605288,
-      "name": "Adrian Houser",
-      "team": "SF",
-      "ip": 23.4,
-      "gs": 5,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.896,
-      "qualifying_pas": 48,
-      "total_pas": 103,
-      "reach_pct": 46.6,
-      "pctile": 60.4
+      "pctile": 60.0
     },
     {
       "player_id": 681190,
@@ -588,21 +588,7 @@
       "qualifying_pas": 58,
       "total_pas": 107,
       "reach_pct": 54.2,
-      "pctile": 59.4
-    },
-    {
-      "player_id": 669302,
-      "name": "Logan Gilbert",
-      "team": "SEA",
-      "ip": 29.0,
-      "gs": 5,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.9,
-      "qualifying_pas": 60,
-      "total_pas": 110,
-      "reach_pct": 54.5,
-      "pctile": 58.4
+      "pctile": 59.0
     },
     {
       "player_id": 690997,
@@ -616,21 +602,7 @@
       "qualifying_pas": 51,
       "total_pas": 93,
       "reach_pct": 54.8,
-      "pctile": 57.4
-    },
-    {
-      "player_id": 669022,
-      "name": "MacKenzie Gore",
-      "team": "TEX",
-      "ip": 24.0,
-      "gs": 4,
-      "g": 4,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.907,
-      "qualifying_pas": 54,
-      "total_pas": 96,
-      "reach_pct": 56.2,
-      "pctile": 56.4
+      "pctile": 58.0
     },
     {
       "player_id": 669160,
@@ -644,7 +616,7 @@
       "qualifying_pas": 75,
       "total_pas": 141,
       "reach_pct": 53.2,
-      "pctile": 56.4
+      "pctile": 57.0
     },
     {
       "player_id": 518876,
@@ -658,21 +630,49 @@
       "qualifying_pas": 55,
       "total_pas": 128,
       "reach_pct": 43.0,
-      "pctile": 54.5
+      "pctile": 56.0
+    },
+    {
+      "player_id": 554430,
+      "name": "Zack Wheeler",
+      "team": "PHI",
+      "ip": 23.0,
+      "gs": 3,
+      "g": 4,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.911,
+      "qualifying_pas": 45,
+      "total_pas": 87,
+      "reach_pct": 51.7,
+      "pctile": 55.0
     },
     {
       "player_id": 622663,
       "name": "Luis Severino",
       "team": "ATH",
-      "ip": 21.9,
-      "gs": 3,
+      "ip": 23.0,
+      "gs": 4,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.912,
+      "qualifying_pas": 57,
+      "total_pas": 103,
+      "reach_pct": 55.3,
+      "pctile": 54.0
+    },
+    {
+      "player_id": 647336,
+      "name": "Michael Soroka",
+      "team": "AZ",
+      "ip": 20.9,
+      "gs": 4,
       "g": 4,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.926,
-      "qualifying_pas": 54,
-      "total_pas": 96,
-      "reach_pct": 56.2,
-      "pctile": 53.5
+      "avg_pitches_to_2k": 2.92,
+      "qualifying_pas": 50,
+      "total_pas": 91,
+      "reach_pct": 54.9,
+      "pctile": 53.0
     },
     {
       "player_id": 680573,
@@ -686,7 +686,7 @@
       "qualifying_pas": 56,
       "total_pas": 113,
       "reach_pct": 49.6,
-      "pctile": 52.5
+      "pctile": 52.0
     },
     {
       "player_id": 680732,
@@ -700,7 +700,7 @@
       "qualifying_pas": 56,
       "total_pas": 98,
       "reach_pct": 57.1,
-      "pctile": 52.5
+      "pctile": 52.0
     },
     {
       "player_id": 656876,
@@ -714,7 +714,49 @@
       "qualifying_pas": 58,
       "total_pas": 108,
       "reach_pct": 53.7,
-      "pctile": 50.5
+      "pctile": 50.0
+    },
+    {
+      "player_id": 605288,
+      "name": "Adrian Houser",
+      "team": "SF",
+      "ip": 22.0,
+      "gs": 4,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.932,
+      "qualifying_pas": 44,
+      "total_pas": 99,
+      "reach_pct": 44.4,
+      "pctile": 49.0
+    },
+    {
+      "player_id": 607067,
+      "name": "Colin Rea",
+      "team": "CHC",
+      "ip": 24.0,
+      "gs": 3,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.932,
+      "qualifying_pas": 59,
+      "total_pas": 107,
+      "reach_pct": 55.1,
+      "pctile": 49.0
+    },
+    {
+      "player_id": 677944,
+      "name": "Slade Cecconi",
+      "team": "CLE",
+      "ip": 27.0,
+      "gs": 5,
+      "g": 6,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.934,
+      "qualifying_pas": 76,
+      "total_pas": 122,
+      "reach_pct": 62.3,
+      "pctile": 47.0
     },
     {
       "player_id": 607625,
@@ -728,7 +770,7 @@
       "qualifying_pas": 47,
       "total_pas": 108,
       "reach_pct": 43.5,
-      "pctile": 49.5
+      "pctile": 46.0
     },
     {
       "player_id": 669194,
@@ -742,49 +784,7 @@
       "qualifying_pas": 48,
       "total_pas": 103,
       "reach_pct": 46.6,
-      "pctile": 48.5
-    },
-    {
-      "player_id": 678394,
-      "name": "Brayan Bello",
-      "team": "BOS",
-      "ip": 23.9,
-      "gs": 3,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.938,
-      "qualifying_pas": 48,
-      "total_pas": 109,
-      "reach_pct": 44.0,
-      "pctile": 48.5
-    },
-    {
-      "player_id": 571578,
-      "name": "Patrick Corbin",
-      "team": "TOR",
-      "ip": 24.0,
-      "gs": 5,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.942,
-      "qualifying_pas": 52,
-      "total_pas": 109,
-      "reach_pct": 47.7,
-      "pctile": 46.5
-    },
-    {
-      "player_id": 702070,
-      "name": "Noah Cameron",
-      "team": "KC",
-      "ip": 29.4,
-      "gs": 5,
-      "g": 6,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.942,
-      "qualifying_pas": 69,
-      "total_pas": 131,
-      "reach_pct": 52.7,
-      "pctile": 46.5
+      "pctile": 45.0
     },
     {
       "player_id": 676440,
@@ -798,35 +798,21 @@
       "qualifying_pas": 55,
       "total_pas": 108,
       "reach_pct": 50.9,
-      "pctile": 44.6
+      "pctile": 44.0
     },
     {
-      "player_id": 647336,
-      "name": "Michael Soroka",
-      "team": "AZ",
-      "ip": 25.9,
-      "gs": 4,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.948,
-      "qualifying_pas": 58,
-      "total_pas": 111,
-      "reach_pct": 52.3,
-      "pctile": 43.6
-    },
-    {
-      "player_id": 605135,
-      "name": "Chris Bassitt",
-      "team": "BAL",
-      "ip": 26.4,
-      "gs": 3,
+      "player_id": 669022,
+      "name": "MacKenzie Gore",
+      "team": "TEX",
+      "ip": 30.4,
+      "gs": 5,
       "g": 5,
       "is_sp": true,
       "avg_pitches_to_2k": 2.956,
-      "qualifying_pas": 45,
-      "total_pas": 111,
-      "reach_pct": 40.5,
-      "pctile": 42.6
+      "qualifying_pas": 68,
+      "total_pas": 120,
+      "reach_pct": 56.7,
+      "pctile": 43.0
     },
     {
       "player_id": 641743,
@@ -840,7 +826,21 @@
       "qualifying_pas": 45,
       "total_pas": 90,
       "reach_pct": 50.0,
-      "pctile": 42.6
+      "pctile": 43.0
+    },
+    {
+      "player_id": 669302,
+      "name": "Logan Gilbert",
+      "team": "SEA",
+      "ip": 24.0,
+      "gs": 4,
+      "g": 4,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.959,
+      "qualifying_pas": 49,
+      "total_pas": 91,
+      "reach_pct": 53.8,
+      "pctile": 41.0
     },
     {
       "player_id": 656605,
@@ -854,21 +854,7 @@
       "qualifying_pas": 51,
       "total_pas": 92,
       "reach_pct": 55.4,
-      "pctile": 40.6
-    },
-    {
-      "player_id": 676974,
-      "name": "Max Meyer",
-      "team": "MIA",
-      "ip": 23.0,
-      "gs": 4,
-      "g": 4,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.961,
-      "qualifying_pas": 51,
-      "total_pas": 94,
-      "reach_pct": 54.3,
-      "pctile": 40.6
+      "pctile": 40.0
     },
     {
       "player_id": 677960,
@@ -882,7 +868,21 @@
       "qualifying_pas": 52,
       "total_pas": 92,
       "reach_pct": 56.5,
-      "pctile": 38.6
+      "pctile": 39.0
+    },
+    {
+      "player_id": 671737,
+      "name": "Taj Bradley",
+      "team": "MIN",
+      "ip": 24.4,
+      "gs": 3,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 2.963,
+      "qualifying_pas": 54,
+      "total_pas": 106,
+      "reach_pct": 50.9,
+      "pctile": 38.0
     },
     {
       "player_id": 681347,
@@ -896,49 +896,21 @@
       "qualifying_pas": 56,
       "total_pas": 105,
       "reach_pct": 53.3,
-      "pctile": 37.6
-    },
-    {
-      "player_id": 547179,
-      "name": "Michael Lorenzen",
-      "team": "COL",
-      "ip": 24.9,
-      "gs": 4,
-      "g": 6,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.982,
-      "qualifying_pas": 56,
-      "total_pas": 107,
-      "reach_pct": 52.3,
-      "pctile": 36.6
-    },
-    {
-      "player_id": 607067,
-      "name": "Colin Rea",
-      "team": "CHC",
-      "ip": 25.0,
-      "gs": 4,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 2.984,
-      "qualifying_pas": 62,
-      "total_pas": 112,
-      "reach_pct": 55.4,
-      "pctile": 35.6
+      "pctile": 37.0
     },
     {
       "player_id": 663623,
       "name": "Jake Irvin",
       "team": "WSH",
-      "ip": 24.0,
+      "ip": 23.4,
       "gs": 5,
       "g": 5,
       "is_sp": true,
-      "avg_pitches_to_2k": 2.984,
-      "qualifying_pas": 62,
-      "total_pas": 102,
-      "reach_pct": 60.8,
-      "pctile": 35.6
+      "avg_pitches_to_2k": 2.966,
+      "qualifying_pas": 59,
+      "total_pas": 99,
+      "reach_pct": 59.6,
+      "pctile": 36.0
     },
     {
       "player_id": 666200,
@@ -952,35 +924,35 @@
       "qualifying_pas": 65,
       "total_pas": 119,
       "reach_pct": 54.6,
-      "pctile": 33.7
+      "pctile": 35.0
     },
     {
-      "player_id": 605488,
-      "name": "Jeffrey Springs",
-      "team": "ATH",
-      "ip": 31.4,
-      "gs": 6,
-      "g": 6,
+      "player_id": 547179,
+      "name": "Michael Lorenzen",
+      "team": "COL",
+      "ip": 27.4,
+      "gs": 4,
+      "g": 7,
       "is_sp": true,
       "avg_pitches_to_2k": 3.0,
-      "qualifying_pas": 71,
-      "total_pas": 133,
-      "reach_pct": 53.4,
-      "pctile": 32.7
+      "qualifying_pas": 62,
+      "total_pas": 120,
+      "reach_pct": 51.7,
+      "pctile": 34.0
     },
     {
       "player_id": 621111,
       "name": "Walker Buehler",
       "team": "SD",
-      "ip": 26.0,
-      "gs": 5,
-      "g": 5,
+      "ip": 22.4,
+      "gs": 4,
+      "g": 4,
       "is_sp": true,
       "avg_pitches_to_2k": 3.0,
-      "qualifying_pas": 45,
-      "total_pas": 99,
-      "reach_pct": 45.5,
-      "pctile": 32.7
+      "qualifying_pas": 35,
+      "total_pas": 81,
+      "reach_pct": 43.2,
+      "pctile": 34.0
     },
     {
       "player_id": 624133,
@@ -994,7 +966,7 @@
       "qualifying_pas": 55,
       "total_pas": 93,
       "reach_pct": 59.1,
-      "pctile": 32.7
+      "pctile": 34.0
     },
     {
       "player_id": 656492,
@@ -1008,35 +980,21 @@
       "qualifying_pas": 57,
       "total_pas": 91,
       "reach_pct": 62.6,
-      "pctile": 32.7
-    },
-    {
-      "player_id": 669372,
-      "name": "J.T. Ginn",
-      "team": "ATH",
-      "ip": 20.4,
-      "gs": 5,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 3.0,
-      "qualifying_pas": 51,
-      "total_pas": 90,
-      "reach_pct": 56.7,
-      "pctile": 32.7
+      "pctile": 34.0
     },
     {
       "player_id": 686799,
       "name": "Jack Kochanowicz",
       "team": "LAA",
-      "ip": 32.4,
+      "ip": 32.9,
       "gs": 5,
       "g": 6,
       "is_sp": true,
       "avg_pitches_to_2k": 3.0,
       "qualifying_pas": 56,
-      "total_pas": 145,
-      "reach_pct": 38.6,
-      "pctile": 32.7
+      "total_pas": 146,
+      "reach_pct": 38.4,
+      "pctile": 34.0
     },
     {
       "player_id": 813349,
@@ -1050,35 +1008,7 @@
       "qualifying_pas": 60,
       "total_pas": 118,
       "reach_pct": 50.8,
-      "pctile": 32.7
-    },
-    {
-      "player_id": 693821,
-      "name": "Bryce Elder",
-      "team": "ATL",
-      "ip": 37.4,
-      "gs": 7,
-      "g": 7,
-      "is_sp": true,
-      "avg_pitches_to_2k": 3.014,
-      "qualifying_pas": 69,
-      "total_pas": 161,
-      "reach_pct": 42.9,
-      "pctile": 25.7
-    },
-    {
-      "player_id": 677944,
-      "name": "Slade Cecconi",
-      "team": "CLE",
-      "ip": 24.0,
-      "gs": 5,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 3.015,
-      "qualifying_pas": 68,
-      "total_pas": 107,
-      "reach_pct": 63.6,
-      "pctile": 24.8
+      "pctile": 34.0
     },
     {
       "player_id": 605400,
@@ -1092,21 +1022,35 @@
       "qualifying_pas": 59,
       "total_pas": 106,
       "reach_pct": 55.7,
-      "pctile": 23.8
+      "pctile": 28.0
     },
     {
-      "player_id": 684007,
-      "name": "Shota Imanaga",
-      "team": "CHC",
-      "ip": 30.0,
+      "player_id": 605488,
+      "name": "Jeffrey Springs",
+      "team": "ATH",
+      "ip": 25.9,
       "gs": 5,
       "g": 5,
       "is_sp": true,
-      "avg_pitches_to_2k": 3.028,
-      "qualifying_pas": 72,
-      "total_pas": 116,
-      "reach_pct": 62.1,
-      "pctile": 22.8
+      "avg_pitches_to_2k": 3.017,
+      "qualifying_pas": 60,
+      "total_pas": 113,
+      "reach_pct": 53.1,
+      "pctile": 28.0
+    },
+    {
+      "player_id": 669432,
+      "name": "Trevor Rogers",
+      "team": "BAL",
+      "ip": 20.9,
+      "gs": 5,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.019,
+      "qualifying_pas": 53,
+      "total_pas": 99,
+      "reach_pct": 53.5,
+      "pctile": 26.0
     },
     {
       "player_id": 667755,
@@ -1120,7 +1064,7 @@
       "qualifying_pas": 57,
       "total_pas": 103,
       "reach_pct": 55.3,
-      "pctile": 21.8
+      "pctile": 25.0
     },
     {
       "player_id": 641816,
@@ -1134,7 +1078,7 @@
       "qualifying_pas": 56,
       "total_pas": 115,
       "reach_pct": 48.7,
-      "pctile": 20.8
+      "pctile": 24.0
     },
     {
       "player_id": 800048,
@@ -1148,7 +1092,49 @@
       "qualifying_pas": 53,
       "total_pas": 97,
       "reach_pct": 54.6,
-      "pctile": 19.8
+      "pctile": 23.0
+    },
+    {
+      "player_id": 668678,
+      "name": "Zac Gallen",
+      "team": "AZ",
+      "ip": 21.0,
+      "gs": 4,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.043,
+      "qualifying_pas": 46,
+      "total_pas": 94,
+      "reach_pct": 48.9,
+      "pctile": 22.0
+    },
+    {
+      "player_id": 605135,
+      "name": "Chris Bassitt",
+      "team": "BAL",
+      "ip": 22.9,
+      "gs": 3,
+      "g": 4,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.049,
+      "qualifying_pas": 41,
+      "total_pas": 96,
+      "reach_pct": 42.7,
+      "pctile": 21.0
+    },
+    {
+      "player_id": 684007,
+      "name": "Shota Imanaga",
+      "team": "CHC",
+      "ip": 35.4,
+      "gs": 6,
+      "g": 6,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.051,
+      "qualifying_pas": 79,
+      "total_pas": 139,
+      "reach_pct": 56.8,
+      "pctile": 20.0
     },
     {
       "player_id": 519242,
@@ -1162,21 +1148,7 @@
       "qualifying_pas": 57,
       "total_pas": 99,
       "reach_pct": 57.6,
-      "pctile": 18.8
-    },
-    {
-      "player_id": 681293,
-      "name": "Spencer Arrighetti",
-      "team": "HOU",
-      "ip": 35.4,
-      "gs": 5,
-      "g": 6,
-      "is_sp": true,
-      "avg_pitches_to_2k": 3.056,
-      "qualifying_pas": 72,
-      "total_pas": 144,
-      "reach_pct": 50.0,
-      "pctile": 17.8
+      "pctile": 19.0
     },
     {
       "player_id": 676106,
@@ -1190,21 +1162,7 @@
       "qualifying_pas": 61,
       "total_pas": 113,
       "reach_pct": 54.0,
-      "pctile": 16.8
-    },
-    {
-      "player_id": 656427,
-      "name": "Jack Flaherty",
-      "team": "DET",
-      "ip": 20.4,
-      "gs": 5,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 3.068,
-      "qualifying_pas": 59,
-      "total_pas": 96,
-      "reach_pct": 61.5,
-      "pctile": 15.8
+      "pctile": 18.0
     },
     {
       "player_id": 669358,
@@ -1218,21 +1176,21 @@
       "qualifying_pas": 59,
       "total_pas": 126,
       "reach_pct": 46.8,
-      "pctile": 15.8
+      "pctile": 17.0
     },
     {
-      "player_id": 594798,
-      "name": "Jacob deGrom",
-      "team": "TEX",
-      "ip": 27.9,
-      "gs": 5,
+      "player_id": 681293,
+      "name": "Spencer Arrighetti",
+      "team": "HOU",
+      "ip": 31.0,
+      "gs": 4,
       "g": 5,
       "is_sp": true,
-      "avg_pitches_to_2k": 3.076,
-      "qualifying_pas": 66,
-      "total_pas": 109,
-      "reach_pct": 60.6,
-      "pctile": 13.9
+      "avg_pitches_to_2k": 3.079,
+      "qualifying_pas": 63,
+      "total_pas": 125,
+      "reach_pct": 50.4,
+      "pctile": 16.0
     },
     {
       "player_id": 641793,
@@ -1246,7 +1204,49 @@
       "qualifying_pas": 50,
       "total_pas": 102,
       "reach_pct": 49.0,
-      "pctile": 12.9
+      "pctile": 15.0
+    },
+    {
+      "player_id": 594798,
+      "name": "Jacob deGrom",
+      "team": "TEX",
+      "ip": 25.0,
+      "gs": 4,
+      "g": 4,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.086,
+      "qualifying_pas": 58,
+      "total_pas": 94,
+      "reach_pct": 61.7,
+      "pctile": 14.0
+    },
+    {
+      "player_id": 693821,
+      "name": "Bryce Elder",
+      "team": "ATL",
+      "ip": 32.0,
+      "gs": 6,
+      "g": 6,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.086,
+      "qualifying_pas": 58,
+      "total_pas": 140,
+      "reach_pct": 41.4,
+      "pctile": 14.0
+    },
+    {
+      "player_id": 669467,
+      "name": "Andre Pallante",
+      "team": "STL",
+      "ip": 29.0,
+      "gs": 4,
+      "g": 6,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.113,
+      "qualifying_pas": 71,
+      "total_pas": 124,
+      "reach_pct": 57.3,
+      "pctile": 12.0
     },
     {
       "player_id": 683004,
@@ -1260,7 +1260,7 @@
       "qualifying_pas": 61,
       "total_pas": 118,
       "reach_pct": 51.7,
-      "pctile": 11.9
+      "pctile": 11.0
     },
     {
       "player_id": 677958,
@@ -1274,21 +1274,35 @@
       "qualifying_pas": 51,
       "total_pas": 112,
       "reach_pct": 45.5,
-      "pctile": 10.9
+      "pctile": 10.0
     },
     {
       "player_id": 694738,
       "name": "Landen Roupp",
       "team": "SF",
-      "ip": 27.4,
+      "ip": 27.9,
       "gs": 5,
       "g": 5,
       "is_sp": true,
-      "avg_pitches_to_2k": 3.141,
+      "avg_pitches_to_2k": 3.125,
       "qualifying_pas": 64,
-      "total_pas": 113,
-      "reach_pct": 56.6,
-      "pctile": 9.9
+      "total_pas": 114,
+      "reach_pct": 56.1,
+      "pctile": 9.0
+    },
+    {
+      "player_id": 592791,
+      "name": "Jameson Taillon",
+      "team": "CHC",
+      "ip": 26.4,
+      "gs": 4,
+      "g": 5,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.143,
+      "qualifying_pas": 56,
+      "total_pas": 110,
+      "reach_pct": 50.9,
+      "pctile": 8.0
     },
     {
       "player_id": 680694,
@@ -1302,21 +1316,7 @@
       "qualifying_pas": 49,
       "total_pas": 94,
       "reach_pct": 52.1,
-      "pctile": 8.9
-    },
-    {
-      "player_id": 592791,
-      "name": "Jameson Taillon",
-      "team": "CHC",
-      "ip": 30.9,
-      "gs": 5,
-      "g": 6,
-      "is_sp": true,
-      "avg_pitches_to_2k": 3.182,
-      "qualifying_pas": 66,
-      "total_pas": 131,
-      "reach_pct": 50.4,
-      "pctile": 7.9
+      "pctile": 7.0
     },
     {
       "player_id": 663556,
@@ -1330,7 +1330,7 @@
       "qualifying_pas": 46,
       "total_pas": 83,
       "reach_pct": 55.4,
-      "pctile": 6.9
+      "pctile": 6.0
     },
     {
       "player_id": 656302,
@@ -1344,7 +1344,7 @@
       "qualifying_pas": 59,
       "total_pas": 96,
       "reach_pct": 61.5,
-      "pctile": 5.9
+      "pctile": 5.0
     },
     {
       "player_id": 650633,
@@ -1358,20 +1358,6 @@
       "qualifying_pas": 52,
       "total_pas": 92,
       "reach_pct": 56.5,
-      "pctile": 5.0
-    },
-    {
-      "player_id": 608372,
-      "name": "Tomoyuki Sugano",
-      "team": "COL",
-      "ip": 26.0,
-      "gs": 4,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 3.213,
-      "qualifying_pas": 47,
-      "total_pas": 110,
-      "reach_pct": 42.7,
       "pctile": 4.0
     },
     {
@@ -1389,20 +1375,6 @@
       "pctile": 3.0
     },
     {
-      "player_id": 669467,
-      "name": "Andre Pallante",
-      "team": "STL",
-      "ip": 27.0,
-      "gs": 4,
-      "g": 5,
-      "is_sp": true,
-      "avg_pitches_to_2k": 3.242,
-      "qualifying_pas": 62,
-      "total_pas": 110,
-      "reach_pct": 56.4,
-      "pctile": 2.0
-    },
-    {
       "player_id": 593958,
       "name": "Eduardo Rodriguez",
       "team": "AZ",
@@ -1414,10 +1386,38 @@
       "qualifying_pas": 43,
       "total_pas": 104,
       "reach_pct": 41.3,
+      "pctile": 2.0
+    },
+    {
+      "player_id": 608372,
+      "name": "Tomoyuki Sugano",
+      "team": "COL",
+      "ip": 20.4,
+      "gs": 4,
+      "g": 4,
+      "is_sp": true,
+      "avg_pitches_to_2k": 3.316,
+      "qualifying_pas": 38,
+      "total_pas": 86,
+      "reach_pct": 44.2,
       "pctile": 1.0
     }
   ],
   "relievers": [
+    {
+      "player_id": 607200,
+      "name": "Erick Fedde",
+      "team": "CWS",
+      "ip": 28.0,
+      "gs": 3,
+      "g": 6,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.831,
+      "qualifying_pas": 59,
+      "total_pas": 125,
+      "reach_pct": 47.2,
+      "pctile": 100.0
+    },
     {
       "player_id": 691725,
       "name": "Andrew Painter",
@@ -1430,41 +1430,55 @@
       "qualifying_pas": 42,
       "total_pas": 83,
       "reach_pct": 50.6,
-      "pctile": 100.0
+      "pctile": 80.0
     },
     {
-      "player_id": 571945,
-      "name": "Miles Mikolas",
-      "team": "WSH",
-      "ip": 21.0,
-      "gs": 2,
+      "player_id": 678394,
+      "name": "Brayan Bello",
+      "team": "BOS",
+      "ip": 29.9,
+      "gs": 3,
       "g": 6,
       "is_sp": false,
-      "avg_pitches_to_2k": 2.87,
-      "qualifying_pas": 46,
-      "total_pas": 85,
-      "reach_pct": 54.1,
-      "pctile": 66.7
+      "avg_pitches_to_2k": 2.885,
+      "qualifying_pas": 52,
+      "total_pas": 129,
+      "reach_pct": 40.3,
+      "pctile": 60.0
+    },
+    {
+      "player_id": 623454,
+      "name": "Drew Anderson",
+      "team": "DET",
+      "ip": 20.0,
+      "gs": 0,
+      "g": 9,
+      "is_sp": false,
+      "avg_pitches_to_2k": 2.933,
+      "qualifying_pas": 45,
+      "total_pas": 76,
+      "reach_pct": 59.2,
+      "pctile": 40.0
     },
     {
       "player_id": 694477,
       "name": "Chad Patrick",
       "team": "MIL",
-      "ip": 22.4,
+      "ip": 21.9,
       "gs": 3,
-      "g": 7,
+      "g": 6,
       "is_sp": false,
-      "avg_pitches_to_2k": 2.882,
-      "qualifying_pas": 51,
-      "total_pas": 85,
-      "reach_pct": 60.0,
-      "pctile": 33.3
+      "avg_pitches_to_2k": 2.939,
+      "qualifying_pas": 49,
+      "total_pas": 83,
+      "reach_pct": 59.0,
+      "pctile": 20.0
     }
   ],
   "meta": {
     "min_ip": 20,
     "role_method": "starter_pct_gt_50",
     "total_pitches_analyzed": 100000,
-    "generated_at": "2026-05-29 15:25:54 UTC"
+    "generated_at": "2026-05-30 15:33:29 UTC"
   }
 }
