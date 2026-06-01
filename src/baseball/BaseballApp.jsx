@@ -121,6 +121,8 @@ function BaseballApp() {
   const [fieldingData, setFieldingData] = useState(null);
   const [selectedFielder, setSelectedFielder] = useState(null);
   const [aaaData, setAaaData] = useState(null);
+  const [cardDateFrom, setCardDateFrom] = useState("");
+  const [cardDateTo, setCardDateTo] = useState("");
 
   useEffect(() => {
     setFieldingData(null);
@@ -141,6 +143,11 @@ function BaseballApp() {
   useEffect(() => {
     fetch("/iswing.json").then(r => r.json()).then(setIswingData).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    setCardDateFrom("");
+    setCardDateTo("");
+  }, [season]);
 
   useEffect(() => {
     setLoading(true);
@@ -464,6 +471,48 @@ function BaseballApp() {
             ))}
           </select>
 
+          {/* Date range picker (for hitter/pitcher card tabs) */}
+          {(isHitterTab(tab) || isPitcherTab(tab)) && (
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <input
+                type="date"
+                value={cardDateFrom}
+                onChange={e => setCardDateFrom(e.target.value)}
+                style={{
+                  padding: "4px 6px", fontSize: 11,
+                  background: t.inputBg, color: t.text,
+                  border: `1px solid ${t.inputBorder}`, borderRadius: 5,
+                  outline: "none", fontFamily: "inherit",
+                  colorScheme: t.id === "dark" ? "dark" : "light",
+                }}
+              />
+              <span style={{ fontSize: 11, color: t.textFaint }}>–</span>
+              <input
+                type="date"
+                value={cardDateTo}
+                onChange={e => setCardDateTo(e.target.value)}
+                style={{
+                  padding: "4px 6px", fontSize: 11,
+                  background: t.inputBg, color: t.text,
+                  border: `1px solid ${t.inputBorder}`, borderRadius: 5,
+                  outline: "none", fontFamily: "inherit",
+                  colorScheme: t.id === "dark" ? "dark" : "light",
+                }}
+              />
+              {(cardDateFrom || cardDateTo) && (
+                <button
+                  onClick={() => { setCardDateFrom(""); setCardDateTo(""); }}
+                  style={{
+                    padding: "3px 7px", fontSize: 11,
+                    background: "transparent", color: t.textFaint,
+                    border: `1px solid ${t.inputBorder}`, borderRadius: 5,
+                    cursor: "pointer", fontFamily: "inherit",
+                  }}
+                >✕</button>
+              )}
+            </div>
+          )}
+
           {/* Player Selector (for card views) */}
           {(isHitterTab(tab) || isPitcherTab(tab) || tab === "fielder") && (
             <SearchableSelect
@@ -522,7 +571,9 @@ function BaseballApp() {
               player={curHitter}
               season={season}
               trends={trends?.hitter_trends}
-              allHitters={hitters}
+              allHitters={hittersFull}
+              dateFrom={cardDateFrom}
+              dateTo={cardDateTo}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -536,7 +587,9 @@ function BaseballApp() {
               player={curPitcher}
               season={season}
               trends={trends?.pitcher_trends}
-              allPitchers={pitchers}
+              allPitchers={pitchersFull}
+              dateFrom={cardDateFrom}
+              dateTo={cardDateTo}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -551,6 +604,8 @@ function BaseballApp() {
               season={season}
               allHitters={aaaHittersFull}
               isAAA
+              dateFrom={cardDateFrom}
+              dateTo={cardDateTo}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -565,6 +620,8 @@ function BaseballApp() {
               season={season}
               allPitchers={aaaPitchersFull}
               isAAA
+              dateFrom={cardDateFrom}
+              dateTo={cardDateTo}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
