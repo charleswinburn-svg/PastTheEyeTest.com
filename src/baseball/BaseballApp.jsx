@@ -471,48 +471,6 @@ function BaseballApp() {
             ))}
           </select>
 
-          {/* Date range picker (for hitter/pitcher card tabs) */}
-          {(isHitterTab(tab) || isPitcherTab(tab)) && (
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <input
-                type="date"
-                value={cardDateFrom}
-                onChange={e => setCardDateFrom(e.target.value)}
-                style={{
-                  padding: "4px 6px", fontSize: 11,
-                  background: t.inputBg, color: t.text,
-                  border: `1px solid ${t.inputBorder}`, borderRadius: 5,
-                  outline: "none", fontFamily: "inherit",
-                  colorScheme: t.id === "dark" ? "dark" : "light",
-                }}
-              />
-              <span style={{ fontSize: 11, color: t.textFaint }}>–</span>
-              <input
-                type="date"
-                value={cardDateTo}
-                onChange={e => setCardDateTo(e.target.value)}
-                style={{
-                  padding: "4px 6px", fontSize: 11,
-                  background: t.inputBg, color: t.text,
-                  border: `1px solid ${t.inputBorder}`, borderRadius: 5,
-                  outline: "none", fontFamily: "inherit",
-                  colorScheme: t.id === "dark" ? "dark" : "light",
-                }}
-              />
-              {(cardDateFrom || cardDateTo) && (
-                <button
-                  onClick={() => { setCardDateFrom(""); setCardDateTo(""); }}
-                  style={{
-                    padding: "3px 7px", fontSize: 11,
-                    background: "transparent", color: t.textFaint,
-                    border: `1px solid ${t.inputBorder}`, borderRadius: 5,
-                    cursor: "pointer", fontFamily: "inherit",
-                  }}
-                >✕</button>
-              )}
-            </div>
-          )}
-
           {/* Player Selector (for card views) */}
           {(isHitterTab(tab) || isPitcherTab(tab) || tab === "fielder") && (
             <SearchableSelect
@@ -558,6 +516,63 @@ function BaseballApp() {
           )}
         </div>
       </div>
+
+      {/* ── Date-range bar (hitter/pitcher cards) ── */}
+      {(isHitterTab(tab) || isPitcherTab(tab)) && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: isMobile ? "8px 16px" : "8px 24px",
+          borderBottom: `1px solid ${t.divider}`,
+          background: t.id === "dark" ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.02)",
+          flexWrap: "wrap",
+        }}>
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: t.textMuted,
+            letterSpacing: "0.05em", textTransform: "uppercase",
+          }}>Date range</span>
+          <input
+            type="date"
+            value={cardDateFrom}
+            onChange={e => setCardDateFrom(e.target.value)}
+            style={{
+              padding: "4px 8px", fontSize: 12,
+              background: t.inputBg, color: t.text,
+              border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+              outline: "none", fontFamily: "inherit",
+              colorScheme: t.id === "dark" ? "dark" : "light",
+            }}
+          />
+          <span style={{ fontSize: 12, color: t.textFaint }}>–</span>
+          <input
+            type="date"
+            value={cardDateTo}
+            onChange={e => setCardDateTo(e.target.value)}
+            style={{
+              padding: "4px 8px", fontSize: 12,
+              background: t.inputBg, color: t.text,
+              border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+              outline: "none", fontFamily: "inherit",
+              colorScheme: t.id === "dark" ? "dark" : "light",
+            }}
+          />
+          {(cardDateFrom || cardDateTo) && (
+            <button
+              onClick={() => { setCardDateFrom(""); setCardDateTo(""); }}
+              style={{
+                padding: "4px 10px", fontSize: 11, fontWeight: 600,
+                background: "transparent", color: t.textMuted,
+                border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+                cursor: "pointer", fontFamily: "inherit",
+              }}
+            >✕ Clear</button>
+          )}
+          <span style={{ fontSize: 10, color: t.textFaint, marginLeft: 2 }}>
+            {(cardDateFrom || cardDateTo)
+              ? "date-range stats ranked vs the full-season distribution"
+              : "full season — pick a window to filter"}
+          </span>
+        </div>
+      )}
 
       {/* ── Content ── */}
       <div style={{
