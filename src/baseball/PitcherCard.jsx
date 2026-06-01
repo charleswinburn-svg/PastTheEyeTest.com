@@ -2,10 +2,11 @@ import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
+import { useDateRangeStats } from "./statsCompute.js";
 
 const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 
-export default function PitcherCard({ player, season, allPitchers, isAAA = false }) {
+export default function PitcherCard({ player, season, allPitchers, isAAA = false, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const [pitchPlusData, setPitchPlusData] = useState(null);
   const cardRef = useRef(null);
@@ -43,6 +44,12 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
     await saveCardAsPng(cardRef, `${safeName}_pitcher_${season}.png`);
   }, [player, season]);
 
+  const { categories: rangeCategories, loading: rangeLoading } =
+    useDateRangeStats(player, season, "pitcher", dateFrom, dateTo, allPitchers);
+
+  const displayCategories = rangeCategories ?? player?.categories;
+  const isDateRange = !!(dateFrom || dateTo);
+
   if (!player) {
     return (
       <div style={{ color: "#666", padding: 40, textAlign: "center" }}>
@@ -51,10 +58,15 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
     );
   }
 
-  const cats = Object.entries(player.categories);
+  const cats = Object.entries(displayCategories || {}).filter(([k]) => !k.startsWith("_"));
+
+  const dateSubtitle = isDateRange
+    ? `${dateFrom || "start"} → ${dateTo || "now"} | ${rangeCategories?._ip != null ? `${rangeCategories._ip.toFixed(1)} IP` : "— IP"}`
+    : null;
+
   const subtitle = isAAA
     ? `Parent Org: ${player?.parent_org_name || player?.parent_org_abbr || "—"} | ${season}${player?.ip ? ` | ${player.ip} IP` : ""}`
-    : (buildBioSubtitle(bio, "throws") || `${season}${player.ip ? ` | ${player.ip} IP` : ""}`);
+    : (dateSubtitle || buildBioSubtitle(bio, "throws") || `${season}${player.ip ? ` | ${player.ip} IP` : ""}`);
 
   return (
     <div>
@@ -80,22 +92,35 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           subtitle={subtitle}
         />
         <ProBubblesRow data={pitchPlusData} theme={t} />
-        <div style={{ padding: "8px 12px 4px" }}>
-          {cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
-            <BubblePercentileBar
-              key={label}
-              label={label}
-              pctile={cat.pctile}
-              display={cat.display}
-            />
-          ))}
+        <div style={{ padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
+          {rangeLoading ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 80 }}>
+              <style>{`@keyframes ptet-spin3{to{transform:rotate(360deg)}}`}</style>
+              <div style={{
+                width: 24, height: 24,
+                border: `2px solid ${t.divider}`,
+                borderTopColor: t.accent,
+                borderRadius: "50%",
+                animation: "ptet-spin3 0.8s linear infinite",
+              }} />
+            </div>
+          ) : (
+            cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
+              <BubblePercentileBar
+                key={label}
+                label={label}
+                pctile={cat.pctile}
+                display={cat.display}
+              />
+            ))
+          )}
         </div>
         <div style={{
           padding: "8px 16px 10px",
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{season} Season</span>
+          <span>{isDateRange ? "Date range" : `${season} Season`}</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
