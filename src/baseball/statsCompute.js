@@ -246,19 +246,31 @@ export function computeStatsFromRows(gameLogSplits, savantRows, type) {
   const rowFor = type === "pitcher" ? gameRowPitcher : gameRowHitter;
 
   const savByDate = aggregateSavantToGames(savantRows || []);
-  const acc = { ev_arr: [] };
 
+  // Index game log by date (last entry wins for doubleheaders)
+  const gameByDate = {};
   for (const g of (gameLogSplits || [])) {
     const row = rowFor(g);
     if (!row.date) continue;
-    const sav = savByDate[row.date];
-    const merged = sav ? { ...row, ...sav } : row;
+    gameByDate[row.date] = row;
+  }
+
+  // Union of all dates across both sources so Savant data is never dropped
+  const allDates = new Set([...Object.keys(gameByDate), ...Object.keys(savByDate)]);
+
+  const acc = { ev_arr: [] };
+
+  for (const date of allDates) {
+    const gameRow = gameByDate[date] || {};
+    const savRow  = savByDate[date]  || {};
+    const merged  = { ...gameRow, ...savRow };
     for (const k of keys) {
-      const v = merged[k];
-      if (Array.isArray(v)) {
-        acc[k] = (acc[k] || []).concat(v);
+      if (k === "ev_arr") {
+        const v = merged[k];
+        if (Array.isArray(v)) acc.ev_arr = acc.ev_arr.concat(v);
+        // no-op when v is undefined — keeps ev_arr a clean array
       } else {
-        acc[k] = (acc[k] || 0) + (v || 0);
+        acc[k] = (acc[k] || 0) + (Number(merged[k]) || 0);
       }
     }
   }
@@ -268,7 +280,9 @@ export function computeStatsFromRows(gameLogSplits, savantRows, type) {
     try { stats[label] = def.compute(acc); } catch { stats[label] = null; }
   }
 
-  return { stats, pa: acc.PA || 0, ip: acc.IP || 0 };
+  // Prefer game-log PA; fall back to Savant-derived PA count
+  const sav_pa = Object.values(savByDate).reduce((s, d) => s + (d.PA_sav || 0), 0);
+  return { stats, pa: acc.PA || sav_pa || 0, ip: acc.IP || 0 };
 }
 
 // ── Percentile ranking utilities ──
@@ -302,13 +316,14 @@ export function interpolatePctile(lookup, value) {
 
 // ── Format a raw value to match the exemplar display string's format ──
 export function fmtLike(value, exemplar) {
-  if (value == null || isNaN(value)) return "—";
+  const n = typeof value === "number" ? value : Number(value);
+  if (!isFinite(n)) return "—";
   const ex = String(exemplar || "");
-  if (ex === "—" || !ex) return String(Math.round(value));
+  if (ex === "—" || !ex) return String(Math.round(n));
   const clean = ex.replace(/%$/, "").trim();
   const parts = clean.split(".");
-  if (parts.length === 2) return value.toFixed(parts[1].length);
-  return String(Math.round(value));
+  if (parts.length === 2) return n.toFixed(parts[1].length);
+  return String(Math.round(n));
 }
 
 // ── useDateRangeStats hook ──
