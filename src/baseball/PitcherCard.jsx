@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import { useDateRangeStats } from "./statsCompute.js";
+import { fetchSavantPlayerDateRange, scorePitchCode } from "./mlbApi.js";
 
 const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 
@@ -12,31 +13,101 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
 
-  // Read pre-computed Stuff+/Loc+/Tun+/Pitch+ from the season summaries via
-  // pitch-plus-api's /pitcher_percentiles endpoint. One network call; the
-  // server has already aggregated and ranked against qualified pitchers using
-  // the same pitch_plus_norm.json the summary cards use, so the values match
-  // by construction.
   useEffect(() => {
     setPitchPlusData(null);
     if (!player?.player_id) return;
+    const isDateRange = !!(dateFrom || dateTo);
     let cancelled = false;
-    fetch(`${PITCH_PLUS_API}/pitcher_percentiles/${player.player_id}?season=${season}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(j => {
-        if (cancelled || !j || j.error) return;
-        setPitchPlusData({
-          pitcher_id: player.player_id,
-          season,
-          stuff_plus: { value: j.stuff_plus?.value, percentile: j.stuff_plus?.percentile },
-          loc_plus:   { value: j.loc_plus?.value,   percentile: j.loc_plus?.percentile },
-          tun_plus:   { value: j.tun_plus?.value,   percentile: j.tun_plus?.percentile },
-          pitch_plus: { value: j.pitch_plus?.value, percentile: j.pitch_plus?.percentile },
+
+    if (!isDateRange) {
+      // Full-season: use pre-computed endpoint (fast, authoritative)
+      fetch(`${PITCH_PLUS_API}/pitcher_percentiles/${player.player_id}?season=${season}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(j => {
+          if (cancelled || !j || j.error) return;
+          setPitchPlusData({
+            stuff_plus: { value: j.stuff_plus?.value, percentile: j.stuff_plus?.percentile },
+            loc_plus:   { value: j.loc_plus?.value,   percentile: j.loc_plus?.percentile },
+            tun_plus:   { value: j.tun_plus?.value,   percentile: j.tun_plus?.percentile },
+            pitch_plus: { value: j.pitch_plus?.value, percentile: j.pitch_plus?.percentile },
+          });
+        })
+        .catch(() => {});
+      return () => { cancelled = true; };
+    }
+
+    // Date-range: fetch Savant pitches → /score_aggregate → rank against distribution
+    (async () => {
+      try {
+        const [savantRows, distResp] = await Promise.all([
+          fetchSavantPlayerDateRange(player.player_id, season, "pitcher", dateFrom, dateTo).catch(() => []),
+          fetch(`${PITCH_PLUS_API}/pitcher_grades_distribution?season=${season}`)
+            .then(r => r.ok ? r.json() : null).catch(() => null),
+        ]);
+        if (cancelled) return;
+
+        const sv = (v) => { const f = parseFloat(v); return isNaN(f) ? null : f; };
+        const pitches = (savantRows || [])
+          .filter(r => r.pitch_type && r.pitch_type !== "UN" && r.pitch_type !== "PO")
+          .map(r => ({
+            pitcher_id: player.player_id,
+            _stand:     r.stand    || "R",
+            _p_throws:  r.p_throws || "R",
+            _pitchType: r.pitch_type,
+            _pfx_direct: true,
+            details:  { type: { code: scorePitchCode(r.pitch_type) } },
+            pitchData: {
+              startSpeed: sv(r.release_speed),
+              extension:  sv(r.release_extension),
+              strikeZoneTop:    sv(r.sz_top),
+              strikeZoneBottom: sv(r.sz_bot),
+              coordinates: {
+                pfxX: sv(r.pfx_x),          pfxZ: sv(r.pfx_z),
+                pX:   sv(r.plate_x),         pZ:   sv(r.plate_z),
+                x0:   sv(r.release_pos_x),   z0:   sv(r.release_pos_z),
+                vX0:  sv(r.vx0), vY0: sv(r.vy0), vZ0: sv(r.vz0),
+                aX:   sv(r.ax),  aY:  sv(r.ay),  aZ:  sv(r.az),
+              },
+              breaks: { spinRate: sv(r.release_spin_rate), spinDirection: sv(r.spin_axis) },
+            },
+          }));
+
+        if (!pitches.length || cancelled) return;
+
+        const scoreResp = await fetch(`${PITCH_PLUS_API}/score_aggregate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pitches }),
         });
-      })
-      .catch(() => {});
+        if (!scoreResp.ok || cancelled) return;
+        const scored = await scoreResp.json();
+        const overall = scored?.overall;
+        if (!overall || cancelled) return;
+
+        // Rank the date-range value against full-season qualified distribution
+        // (same population as pitcher_percentiles uses — min 200 pitches in season)
+        const grades = distResp?.grades || {};
+        const rankPctile = (gradeKey, value) => {
+          if (value == null) return null;
+          const dist = Object.values(grades)
+            .filter(g => g.n >= 200 && g[gradeKey] != null)
+            .map(g => g[gradeKey])
+            .sort((a, b) => a - b);
+          if (!dist.length) return null;
+          return Math.round(dist.filter(v => v <= value).length / dist.length * 100);
+        };
+
+        setPitchPlusData({
+          stuff_plus: { value: overall.stuff, percentile: rankPctile("stuff_plus", overall.stuff) },
+          loc_plus:   { value: overall.loc,   percentile: rankPctile("loc_plus",   overall.loc) },
+          tun_plus:   { value: overall.tun,   percentile: rankPctile("tun_plus",   overall.tun) },
+          pitch_plus: { value: overall.pitch, percentile: rankPctile("pitch_plus", overall.pitch) },
+        });
+      } catch { /* silently fail — bubbles stay blank */ }
+    })();
+
     return () => { cancelled = true; };
-  }, [player?.player_id, season, isAAA]);
+  }, [player?.player_id, season, isAAA, dateFrom, dateTo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveCard = useCallback(async () => {
     if (!player) return;
