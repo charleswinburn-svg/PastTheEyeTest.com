@@ -289,9 +289,9 @@ export async function fetchBoxscore(gamePk) {
 }
 
 // ── Get game log for a player ──
-export async function fetchGameLog(playerId, season, group = "pitching", sportId = 1) {
+export async function fetchGameLog(playerId, season, group = "pitching", sportId = 1, gameType = "S,E,R,P,W") {
   const d = await fetchJson(
-    `${API}/people/${playerId}/stats?stats=gameLog&group=${group}&season=${season}&gameType=S,E,R,P,W&sportId=${sportId}`
+    `${API}/people/${playerId}/stats?stats=gameLog&group=${group}&season=${season}&gameType=${gameType}&sportId=${sportId}`
   );
   return d.stats?.[0]?.splits || [];
 }
@@ -962,7 +962,7 @@ export async function fetchSavantPlayerSeason(playerId, season, type = "batter")
   const lookupParam = type === "pitcher" ? "pitchers_lookup%5B%5D" : "batters_lookup%5B%5D";
   const url =
     `/savant-api/statcast_search/csv?all=true&type=details` +
-    `&hfSea=${season}%7C&hfGT=R%7CS%7CE%7CP%7CW%7C` +
+    `&hfSea=${season}%7C&hfGT=R%7C` +
     `&player_type=${type}&${lookupParam}=${playerId}`;
   const r = await fetch(url);
   if (!r.ok) return [];

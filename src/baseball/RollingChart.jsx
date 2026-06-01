@@ -416,7 +416,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
         // gameLog rows by date.
         for (let s = yr; s > yr - 5 && total < target; s--) {
           const [log, savantRows] = await Promise.all([
-            fetchGameLog(playerId, s, group),
+            fetchGameLog(playerId, s, group, 1, "R"),
             fetchSavantPlayerSeason(playerId, s, savantType).catch(() => []),
           ]);
           if (cancelled) return;
