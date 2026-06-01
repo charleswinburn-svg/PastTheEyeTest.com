@@ -160,6 +160,17 @@ function mergeSavant(gameLogRows, savantByDate) {
 // FIP constant varies year to year (~3.10); using 3.15 as a reasonable mid.
 const FIP_C = 3.15;
 
+// wRC+ constants (FanGraphs ~2024 era). Park-neutral — no park factor applied.
+const W_BB = 0.690, W_HBP = 0.720, W_1B = 0.884, W_2B = 1.261, W_3B = 1.601, W_HR = 2.101;
+const LG_WOBA = 0.315, WOBA_SCALE = 1.150, LG_R_PER_PA = 0.115;
+function computeWrcPlus(w) {
+  const singles = Math.max(w.H - w.d2 - w.d3 - w.HR, 0);
+  const denom = w.AB + w.BB + w.HBP + w.SF;
+  if (denom <= 0 || w.PA <= 0) return 0;
+  const woba = (W_BB * w.BB + W_HBP * w.HBP + W_1B * singles + W_2B * w.d2 + W_3B * w.d3 + W_HR * w.HR) / denom;
+  return 100 * ((woba - LG_WOBA) / WOBA_SCALE / LG_R_PER_PA + 1);
+}
+
 // Stats whose compute uses Savant counters; flagged so we know to fetch
 // per-pitch CSVs for the player.
 const STATCAST_COMPUTE = {
@@ -190,6 +201,7 @@ const HITTER_COMPUTE = {
   "ISO":  { compute: w => safe(w.TB, w.AB) - safe(w.H, w.AB), digits: 3 },
   "BB%":  { compute: w => safe(w.BB, w.PA) * 100, suffix: "%" },
   "K%":   { compute: w => safe(w.K,  w.PA) * 100, suffix: "%" },
+  "wRC+": { compute: computeWrcPlus, digits: 0, refLine: 100 },
   ...STATCAST_COMPUTE,
 };
 
@@ -251,6 +263,9 @@ function gameRowHitter(g) {
     SF:  Number(s.sacFlies)          || 0,
     TB:  Number(s.totalBases)        || 0,
     K:   Number(s.strikeOuts)        || 0,
+    d2:  Number(s.doubles)           || 0,
+    d3:  Number(s.triples)           || 0,
+    HR:  Number(s.homeRuns)          || 0,
   };
 }
 
@@ -307,7 +322,7 @@ function percentile(arr, p) {
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
 }
 
-const HITTER_KEYS  = ["PA", "AB", "H", "BB", "HBP", "SF", "TB", "K", ...STATCAST_KEYS];
+const HITTER_KEYS  = ["PA", "AB", "H", "BB", "HBP", "SF", "TB", "K", "d2", "d3", "HR", ...STATCAST_KEYS];
 const PITCHER_KEYS = ["IP", "BF", "H", "BB", "HBP", "K", "HR", "ER", "GO", "AO", ...STATCAST_KEYS];
 
 // Walk games chronologically and emit one point per game once the trailing
@@ -526,7 +541,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
                   dot={false}
                   isAnimationActive={false}
                 />
-                <ReferenceLine y={0} stroke={t.textFaintest} strokeDasharray="4 4" />
+                <ReferenceLine y={computeDef?.refLine ?? 0} stroke={t.textFaintest} strokeDasharray="4 4" />
               </LineChart>
             </ResponsiveContainer>
           </div>
