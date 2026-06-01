@@ -246,29 +246,21 @@ export function computeStatsFromRows(gameLogSplits, savantRows, type) {
   const rowFor = type === "pitcher" ? gameRowPitcher : gameRowHitter;
 
   const savByDate = aggregateSavantToGames(savantRows || []);
+  const acc = { ev_arr: [] };
 
-  // Index game log by date (last entry wins for doubleheaders)
-  const gameByDate = {};
+  // Iterate the (already date-filtered) game log and merge in Savant data only
+  // for dates that have an in-range game. This keeps Savant metrics bounded to
+  // the requested window even when the Savant CSV returns extra dates.
   for (const g of (gameLogSplits || [])) {
     const row = rowFor(g);
     if (!row.date) continue;
-    gameByDate[row.date] = row;
-  }
-
-  // Union of all dates across both sources so Savant data is never dropped
-  const allDates = new Set([...Object.keys(gameByDate), ...Object.keys(savByDate)]);
-
-  const acc = { ev_arr: [] };
-
-  for (const date of allDates) {
-    const gameRow = gameByDate[date] || {};
-    const savRow  = savByDate[date]  || {};
-    const merged  = { ...gameRow, ...savRow };
+    const sav = savByDate[row.date];
+    const merged = sav ? { ...row, ...sav } : row;
     for (const k of keys) {
       if (k === "ev_arr") {
         const v = merged[k];
         if (Array.isArray(v)) acc.ev_arr = acc.ev_arr.concat(v);
-        // no-op when v is undefined — keeps ev_arr a clean array
+        // no-op when missing — keeps ev_arr a clean array (avoids [] + 0 coercion)
       } else {
         acc[k] = (acc[k] || 0) + (Number(merged[k]) || 0);
       }
@@ -280,9 +272,7 @@ export function computeStatsFromRows(gameLogSplits, savantRows, type) {
     try { stats[label] = def.compute(acc); } catch { stats[label] = null; }
   }
 
-  // Prefer game-log PA; fall back to Savant-derived PA count
-  const sav_pa = Object.values(savByDate).reduce((s, d) => s + (d.PA_sav || 0), 0);
-  return { stats, pa: acc.PA || sav_pa || 0, ip: acc.IP || 0 };
+  return { stats, pa: acc.PA || 0, ip: acc.IP || 0 };
 }
 
 // ── Percentile ranking utilities ──
