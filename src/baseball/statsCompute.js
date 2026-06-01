@@ -29,6 +29,23 @@ function percentile(arr, p) {
 
 // ── Savant per-pitch → per-game counters ──
 function aggregateSavantToGames(rows) {
+  // Competitive-swing threshold: drop each batter's slowest ~10% of swings
+  // (mirrors iswing_update.py). Bat-tracking metrics — Avg Bat Speed, Fast
+  // Swing%, Avg Swing Length — are computed over competitive swings only, so the
+  // date-range values line up with Savant's published, competitive-only season
+  // numbers (and the iSwing+ swing set the server already filters the same way).
+  const SWING_DESCS = new Set([
+    "swinging_strike", "swinging_strike_blocked", "foul", "foul_tip",
+    "hit_into_play", "foul_bunt", "missed_bunt",
+  ]);
+  const _batSpeeds = [];
+  for (const r of rows) {
+    if (!SWING_DESCS.has((r.description || "").toLowerCase())) continue;
+    const bs = num(r.bat_speed);
+    if (bs != null) _batSpeeds.push(bs);
+  }
+  const batSpeedP10 = _batSpeeds.length ? percentile(_batSpeeds, 0.10) : 0;
+
   const out = {};
   for (const r of rows) {
     const date = r.game_date;
@@ -77,10 +94,15 @@ function aggregateSavantToGames(rows) {
       if (inZone) g.iz_whiffs += 1;
     }
 
-    const isCompetitive = isSwing && desc !== "foul_bunt" && desc !== "missed_bunt";
+    // Bat tracking over competitive swings only: bat speed at/above the batter's
+    // 10th-percentile threshold, with a hard-hit safety net (matches the
+    // definition used to build competitive_swings_*.csv and the iSwing+ norms).
+    const bs = num(r.bat_speed);
+    const ls = num(r.launch_speed);
+    const isCompetitive = isSwing && desc !== "foul_bunt" && desc !== "missed_bunt"
+      && bs != null && (bs >= batSpeedP10 || (bs >= 60 && ls != null && ls >= 90));
     if (isCompetitive) {
-      const bs = num(r.bat_speed);
-      if (bs != null) { g.sum_bs += bs; g.bs_n += 1; if (bs >= 75) g.fast_swings += 1; }
+      g.sum_bs += bs; g.bs_n += 1; if (bs >= 75) g.fast_swings += 1;
       const sl = num(r.swing_length);
       if (sl != null) { g.sum_sl += sl; g.sl_n += 1; }
       const aa = num(r.attack_angle);
