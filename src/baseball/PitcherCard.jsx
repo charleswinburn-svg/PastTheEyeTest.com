@@ -61,7 +61,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   const cats = Object.entries(displayCategories || {}).filter(([k]) => !k.startsWith("_"));
 
   const dateSubtitle = isDateRange
-    ? `${dateFrom || "start"} → ${dateTo || "now"} | ${rangeCategories?._ip != null ? `${rangeCategories._ip.toFixed(1)} IP` : "— IP"}`
+    ? `${dateFrom || "start"} → ${dateTo || "now"}`
     : null;
 
   const subtitle = isAAA
