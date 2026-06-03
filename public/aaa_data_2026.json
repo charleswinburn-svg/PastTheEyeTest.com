@@ -28045,8 +28045,8 @@
         },
         "LD%": {
           "pctile": 62,
-          "value": 26.3,
-          "display": "26.3"
+          "value": 25.0,
+          "display": "25.0"
         },
         "Chase %": {
           "pctile": 85,
@@ -47214,9 +47214,9 @@
       "parent_org_name": "Los Angeles Dodgers",
       "categories": {
         "FIP": {
-          "pctile": 75,
-          "value": 5.28,
-          "display": "5.28"
+          "pctile": 58,
+          "value": 5.29,
+          "display": "5.29"
         },
         "Avg Exit Velo": {
           "pctile": 26,
@@ -68269,8 +68269,8 @@
       "categories": {
         "FIP": {
           "pctile": 8,
-          "value": 7.37,
-          "display": "7.37"
+          "value": 7.38,
+          "display": "7.38"
         },
         "Avg Exit Velo": {
           "pctile": 80,
@@ -74406,9 +74406,9 @@
       "parent_org_name": "Chicago White Sox",
       "categories": {
         "FIP": {
-          "pctile": 25,
-          "value": 5.52,
-          "display": "5.52"
+          "pctile": 75,
+          "value": 5.19,
+          "display": "5.19"
         },
         "Avg Exit Velo": {
           "pctile": 26,
@@ -81600,9 +81600,9 @@
       "parent_org_name": "New York Mets",
       "categories": {
         "FIP": {
-          "pctile": 58,
-          "value": 5.38,
-          "display": "5.38"
+          "pctile": 25,
+          "value": 5.51,
+          "display": "5.51"
         },
         "Avg Exit Velo": {
           "pctile": 96,
@@ -91963,8 +91963,8 @@
       "categories": {
         "FIP": {
           "pctile": 42,
-          "value": 5.41,
-          "display": "5.41"
+          "value": 5.42,
+          "display": "5.42"
         },
         "Avg Exit Velo": {
           "pctile": 12,
@@ -92821,8 +92821,8 @@
       "categories": {
         "FIP": {
           "pctile": 92,
-          "value": 4.06,
-          "display": "4.06"
+          "value": 4.05,
+          "display": "4.05"
         },
         "Avg Exit Velo": {
           "pctile": 4,
@@ -93322,6 +93322,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-06-02 18:08:42 UTC"
+    "generated_at": "2026-06-03 15:10:56 UTC"
   }
 }
