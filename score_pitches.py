@@ -320,9 +320,13 @@ def engineer_location_features(df):
 # ═══════════════════════════════════════════════════════════════════════════
 
 def load_models(model_dir: Path):
-    stuff = lgb.Booster(model_file=str(model_dir / 'stuff_model_2025.txt'))
     with open(model_dir / 'stuff_model_metadata.json') as f:
-        stuff_features = json.load(f)['features']
+        stuff_meta = json.load(f)
+    stuff_fb = lgb.Booster(model_file=str(model_dir / stuff_meta['fb_model']['file']))
+    stuff_offspeed = lgb.Booster(model_file=str(model_dir / stuff_meta['offspeed_model']['file']))
+    stuff_fb_features = stuff_meta['fb_model']['features']
+    stuff_offspeed_features = stuff_meta['offspeed_model']['features']
+    stuff_family = stuff_meta['family_definition']
 
     tunnel = lgb.Booster(model_file=str(model_dir / 'tunnel_model_2025.txt'))
 
@@ -331,12 +335,23 @@ def load_models(model_dir: Path):
         pt = f.stem.split('_')[2]  # location_model_FF_2025 → FF
         location_models[pt] = lgb.Booster(model_file=str(f))
 
-    return stuff, stuff_features, tunnel, location_models
+    return stuff_fb, stuff_fb_features, stuff_offspeed, stuff_offspeed_features, stuff_family, tunnel, location_models
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # SCORING
 # ═══════════════════════════════════════════════════════════════════════════
+
+# Pitch types not seen in training are remapped to the nearest equivalent so
+# every pitch receives Stuff+/Loc+/Tun+/Pitch+ values. The original pitch_type
+# is preserved for display; only scoring internals (pitch_type_cat, slot
+# regression, location model routing) see the remapped value.
+PITCH_TYPE_REMAP = {
+    'FO': 'FS',  # Forkball   → Splitter
+    'CS': 'CU',  # Slow Curve → Curveball
+    'SC': 'CH',  # Screwball  → Changeup
+    'KN': 'FS',  # Knuckleball → Splitter
+}
 
 TUNNEL_FEATURES = [
     'tunnel_diff_x', 'tunnel_diff_z', 'tunnel_distance',
@@ -351,14 +366,29 @@ LOCATION_FEATURES = [
 ]
 
 
-def score_dataframe(df, stuff, stuff_features, tunnel, location_models, weights):
+def score_dataframe(df, stuff_fb, stuff_fb_features, stuff_offspeed, stuff_offspeed_features, stuff_family, tunnel, location_models, weights):
     """Run all three model stages on a dataframe, return df with prediction cols."""
+    # Remap exotic pitch types to scoring equivalents; restore originals at the end
+    _orig_pitch_type = df['pitch_type'].copy()
+    df = df.copy()
+    df['pitch_type'] = df['pitch_type'].replace(PITCH_TYPE_REMAP)
+
     df = engineer_stuff_features(df)
     df = engineer_tunnel_features(df)
     df = engineer_location_features(df)
 
-    # Stuff
-    df['xRV_stuff'] = stuff.predict(df[stuff_features]).astype('float32')
+    # Stuff: route FB vs offspeed by velocity proximity to fastball baseline
+    mph = stuff_family['mph_threshold']
+    fb_types = set(stuff_family['fastball_types'])
+    fb_mask = (
+        df['fb_velo'].notna() & (np.abs(df['release_speed'] - df['fb_velo']) <= mph)
+    ) | (df['fb_velo'].isna() & df['pitch_type'].isin(fb_types))
+    os_mask = ~fb_mask
+    df['xRV_stuff'] = np.float32(0.0)
+    if fb_mask.any():
+        df.loc[fb_mask, 'xRV_stuff'] = stuff_fb.predict(df.loc[fb_mask, stuff_fb_features]).astype('float32')
+    if os_mask.any():
+        df.loc[os_mask, 'xRV_stuff'] = stuff_offspeed.predict(df.loc[os_mask, stuff_offspeed_features]).astype('float32')
 
     # Tunnel
     df['xRV_tunnel'] = np.float32(0.0)
@@ -384,6 +414,9 @@ def score_dataframe(df, stuff, stuff_features, tunnel, location_models, weights)
         w['tunnel']   * df['xRV_tunnel'] +
         weights['intercept']
     ).astype('float32')
+
+    # Restore original pitch type for display / downstream grouping
+    df['pitch_type'] = _orig_pitch_type.values
 
     return df
 
@@ -433,42 +466,48 @@ def write_per_game_json(df, output_dir: Path, compress=True):
     return written
 
 
-def write_season_aggregates(df, output_dir: Path, season: int):
+def write_season_aggregates(df, output_dir: Path, season: int, norm_path: Path = None):
     """
-    Build season-level pitcher aggregates (rolling averages across all
-    scored pitches for the season so far). Two views:
+    Build season-level pitcher aggregates with correct Pitch+ scaling.
 
-    - per pitcher:                {pitcher_id: {n, xRV/100, stuff/100, ...}}
-    - per pitcher × pitch_type:   {pitcher_id: {pitch_type: {n, xRV/100, ...}}}
+    Bug fix vs. the previous version: the pitcher-overall Plus values
+    were computed by z-scoring the pitcher's mean xRV against per-pitch
+    league norms. That's wrong — per-pitch std is much larger than the
+    spread of pitcher averages, so it compressed every pitcher toward 100.
+
+    Correct approach (matches what /score does for the Summary view):
+      1. Compute per-(pitcher, type) Plus values from per-pitch norms.
+      2. For pitcher overall, weight-average those per-type Plus values
+         by pitch-type usage.
+
+    Algebraically these match what you'd get if you graded every individual
+    pitch then averaged: avg(100 - 10z) = 100 - 10*avg(z).
     """
     season_dir = output_dir / 'season'
     season_dir.mkdir(parents=True, exist_ok=True)
 
-    # Pitcher-level aggregation
-    pitcher_agg = df.groupby('pitcher').agg(
-        n=('xRV_final', 'count'),
-        xRV=('xRV_final', 'mean'),
-        stuff=('xRV_stuff', 'mean'),
-        loc=('xRV_location', 'mean'),
-        tun=('xRV_tunnel', 'mean'),
-    )
+    pitch_plus_norm = None
+    if norm_path and Path(norm_path).exists():
+        with open(norm_path) as f:
+            pitch_plus_norm = json.load(f)
 
-    # Scale to per-100 and round
-    for col in ['xRV', 'stuff', 'loc', 'tun']:
-        pitcher_agg[col] = (pitcher_agg[col] * 100).round(3)
+    def _per_type_plus(xrv_per100, pitch_type, kind):
+        """Grade ONE pitch type for ONE pitcher. xrv_per100 is xRV*100."""
+        if pitch_plus_norm is None or pd.isna(xrv_per100):
+            return None
+        mean_key = {'stuff': 'stuff_mean', 'loc': 'loc_mean',
+                    'tun': 'tun_mean',     'pitch': 'mean'}[kind]
+        std_key  = {'stuff': 'stuff_std',  'loc': 'loc_std',
+                    'tun': 'tun_std',      'pitch': 'std'}[kind]
+        norm_pt = PITCH_TYPE_REMAP.get(pitch_type, pitch_type)
+        n = pitch_plus_norm.get(norm_pt)
+        if not n or std_key not in n or n[std_key] <= 0:
+            return None
+        # Undo the *100 from the agg step to get raw xRV.
+        z = max(-4, min(4, (xrv_per100 / 100 - n[mean_key]) / n[std_key]))
+        return round(100 - z * 10, 1)
 
-    pitcher_out = {
-        str(int(pid)): {
-            'n':     int(row['n']),
-            'xRV':   float(row['xRV']),
-            'stuff': float(row['stuff']),
-            'loc':   float(row['loc']),
-            'tun':   float(row['tun']),
-        }
-        for pid, row in pitcher_agg.iterrows()
-    }
-
-    # Pitcher × pitch_type aggregation
+    # ── Pitcher × pitch_type aggregation (compute per-type Plus values first) ──
     pt_agg = df.groupby(['pitcher', 'pitch_type']).agg(
         n=('xRV_final', 'count'),
         xRV=('xRV_final', 'mean'),
@@ -476,22 +515,105 @@ def write_season_aggregates(df, output_dir: Path, season: int):
         loc=('xRV_location', 'mean'),
         tun=('xRV_tunnel', 'mean'),
     ).reset_index()
-
     for col in ['xRV', 'stuff', 'loc', 'tun']:
         pt_agg[col] = (pt_agg[col] * 100).round(3)
 
     pt_out = {}
     for _, row in pt_agg.iterrows():
         pid = str(int(row['pitcher']))
-        if pid not in pt_out:
-            pt_out[pid] = {}
-        pt_out[pid][row['pitch_type']] = {
-            'n':     int(row['n']),
-            'xRV':   float(row['xRV']),
-            'stuff': float(row['stuff']),
-            'loc':   float(row['loc']),
-            'tun':   float(row['tun']),
+        pt = row['pitch_type']
+        pt_out.setdefault(pid, {})[pt] = {
+            'n':           int(row['n']),
+            'xRV':         float(row['xRV']),
+            'stuff':       float(row['stuff']),
+            'loc':         float(row['loc']),
+            'tun':         float(row['tun']),
+            'stuff_plus':  _per_type_plus(row['stuff'], pt, 'stuff'),
+            'loc_plus':    _per_type_plus(row['loc'],   pt, 'loc'),
+            'tun_plus':    _per_type_plus(row['tun'],   pt, 'tun'),
+            'pitch_plus':  _per_type_plus(row['xRV'],   pt, 'pitch'),
         }
+
+    # ── Pitcher overall — weight-average the per-type Plus values by usage ──
+    def _weighted_overall(pid_pt_grades, metric_key):
+        total = 0
+        weighted_sum = 0.0
+        for pt, g in pid_pt_grades.items():
+            v = g.get(metric_key)
+            n = g.get('n', 0)
+            if v is not None and n > 0:
+                weighted_sum += v * n
+                total += n
+        return round(weighted_sum / total, 1) if total else None
+
+    pitcher_agg = df.groupby('pitcher').agg(
+        n=('xRV_final', 'count'),
+        xRV=('xRV_final', 'mean'),
+        stuff=('xRV_stuff', 'mean'),
+        loc=('xRV_location', 'mean'),
+        tun=('xRV_tunnel', 'mean'),
+    )
+    for col in ['xRV', 'stuff', 'loc', 'tun']:
+        pitcher_agg[col] = (pitcher_agg[col] * 100).round(3)
+
+    pitcher_out = {}
+    for pid, row in pitcher_agg.iterrows():
+        pid_str = str(int(pid))
+        types = pt_out.get(pid_str, {})
+        pitcher_out[pid_str] = {
+            'n':           int(row['n']),
+            'xRV':         float(row['xRV']),
+            'stuff':       float(row['stuff']),
+            'loc':         float(row['loc']),
+            'tun':         float(row['tun']),
+            'stuff_plus':  _weighted_overall(types, 'stuff_plus'),
+            'loc_plus':    _weighted_overall(types, 'loc_plus'),
+            'tun_plus':    _weighted_overall(types, 'tun_plus'),
+            'pitch_plus':  _weighted_overall(types, 'pitch_plus'),
+        }
+
+    # ── Normalize Stuff+ to global mean=100, stdev=10 ───────────────────────
+    # Compute the usage-weighted distribution of raw per-type Stuff+ values,
+    # then apply a linear rescaling so the global distribution has mean=100
+    # and stdev=10.  Store the raw params in the norm file so the API can
+    # apply the same rescaling at query time.
+    _sp_vals, _sp_wts = [], []
+    for _by_pt in pt_out.values():
+        for _g in _by_pt.values():
+            _sp = _g.get('stuff_plus')
+            _n  = _g.get('n', 0)
+            if _sp is not None and _n > 0:
+                _sp_vals.append(_sp)
+                _sp_wts.append(_n)
+
+    if _sp_vals:
+        _sp_arr = np.array(_sp_vals)
+        _sp_w   = np.array(_sp_wts, dtype=float); _sp_w /= _sp_w.sum()
+        _sp_mean  = float(np.average(_sp_arr, weights=_sp_w))
+        _sp_stdev = float(np.sqrt(np.average((_sp_arr - _sp_mean) ** 2, weights=_sp_w)))
+        print(f'  Stuff+ raw dist: mean={_sp_mean:.3f}, stdev={_sp_stdev:.3f}  → rescaling to mean=100, stdev=10')
+
+        if _sp_stdev > 0:
+            # Rescale all per-type Stuff+ values in-place
+            for _by_pt in pt_out.values():
+                for _g in _by_pt.values():
+                    if _g.get('stuff_plus') is not None:
+                        _g['stuff_plus'] = round(
+                            100.0 + (_g['stuff_plus'] - _sp_mean) / _sp_stdev * 10.0, 1)
+
+            # Recompute pitcher-level Stuff+ from the rescaled per-type values
+            for _pid in pitcher_out:
+                pitcher_out[_pid]['stuff_plus'] = _weighted_overall(
+                    pt_out.get(_pid, {}), 'stuff_plus')
+
+            # Persist raw params to norm file so the API applies the same rescaling
+            if norm_path and Path(norm_path).exists():
+                with open(norm_path) as _f:
+                    _norm_data = json.load(_f)
+                _norm_data['_stuff_plus_rescale'] = {'mean': _sp_mean, 'stdev': _sp_stdev}
+                with open(norm_path, 'w') as _f:
+                    json.dump(_norm_data, _f, indent=2)
+                print(f'  Updated {norm_path} with _stuff_plus_rescale')
 
     pitcher_path = season_dir / f'pitcher_grades_{season}.json'
     pt_path      = season_dir / f'pitcher_pitch_type_grades_{season}.json'
@@ -503,6 +625,8 @@ def write_season_aggregates(df, output_dir: Path, season: int):
 
     print(f'  Season pitcher aggregates: {len(pitcher_out)} pitchers → {pitcher_path}')
     print(f'  Season pitch-type aggregates: {sum(len(v) for v in pt_out.values())} rows → {pt_path}')
+
+
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -527,8 +651,8 @@ def main():
     config_path = Path(args.config)
 
     print(f'Loading models from {model_dir}...')
-    stuff, stuff_features, tunnel, location_models = load_models(model_dir)
-    print(f'  Stuff: {len(stuff_features)} features')
+    stuff_fb, stuff_fb_features, stuff_offspeed, stuff_offspeed_features, stuff_family, tunnel, location_models = load_models(model_dir)
+    print(f'  Stuff FB: {len(stuff_fb_features)} features, Offspeed: {len(stuff_offspeed_features)} features')
     print(f'  Location: {len(location_models)} per-pitch-type models')
     print(f'  Tunnel: loaded')
 
@@ -546,7 +670,7 @@ def main():
     # Ensure required columns exist
     required = [
         'pitch_type', 'pitcher', 'game_pk', 'at_bat_number', 'pitch_number',
-        'season', 'stand', 'p_throws', 'plate_x', 'plate_z',
+        'stand', 'p_throws', 'plate_x', 'plate_z',
         'release_speed', 'release_spin_rate', 'release_extension',
         'pfx_x', 'pfx_z', 'spin_axis',
         'release_pos_x', 'release_pos_y', 'release_pos_z',
@@ -567,7 +691,7 @@ def main():
 
     print('Running models...')
     df = _to_float64(df)
-    df = score_dataframe(df, stuff, stuff_features, tunnel, location_models, weights)
+    df = score_dataframe(df, stuff_fb, stuff_fb_features, stuff_offspeed, stuff_offspeed_features, stuff_family, tunnel, location_models, weights)
     print(f'  Scored {len(df):,} pitches')
     print(f'  Mean predicted xRV: {df["xRV_final"].mean():.5f}')
     print(f'  Mean actual xRV:    {df["xRV"].mean():.5f}' if 'xRV' in df.columns else '')
@@ -576,7 +700,7 @@ def main():
     write_per_game_json(df, output_dir, compress=not args.no_compress)
 
     print(f'Writing season {season} aggregates...')
-    write_season_aggregates(df, output_dir, season)
+    write_season_aggregates(df, output_dir, season, model_dir / "pitch_plus_norm.json")
 
     print('Done.')
 
