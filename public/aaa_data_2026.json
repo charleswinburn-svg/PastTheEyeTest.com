@@ -28045,8 +28045,8 @@
         },
         "LD%": {
           "pctile": 62,
-          "value": 25.0,
-          "display": "25.0"
+          "value": 23.8,
+          "display": "23.8"
         },
         "Chase %": {
           "pctile": 85,
@@ -47215,8 +47215,8 @@
       "categories": {
         "FIP": {
           "pctile": 58,
-          "value": 5.29,
-          "display": "5.29"
+          "value": 5.3,
+          "display": "5.30"
         },
         "Avg Exit Velo": {
           "pctile": 26,
@@ -81601,8 +81601,8 @@
       "categories": {
         "FIP": {
           "pctile": 25,
-          "value": 5.51,
-          "display": "5.51"
+          "value": 5.52,
+          "display": "5.52"
         },
         "Avg Exit Velo": {
           "pctile": 96,
@@ -91963,8 +91963,8 @@
       "categories": {
         "FIP": {
           "pctile": 42,
-          "value": 5.42,
-          "display": "5.42"
+          "value": 5.43,
+          "display": "5.43"
         },
         "Avg Exit Velo": {
           "pctile": 12,
@@ -92821,8 +92821,8 @@
       "categories": {
         "FIP": {
           "pctile": 92,
-          "value": 4.05,
-          "display": "4.05"
+          "value": 4.06,
+          "display": "4.06"
         },
         "Avg Exit Velo": {
           "pctile": 4,
@@ -93322,6 +93322,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-06-03 15:10:56 UTC"
+    "generated_at": "2026-06-04 16:14:55 UTC"
   }
 }
