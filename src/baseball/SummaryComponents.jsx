@@ -40,15 +40,19 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
     return out;
   }, [pitches]);
 
-  // Pitch types to overlay: present in BOTH the expected data and the actual means.
-  const expectedRows = (showExpected && expectedMovement)
+  // Pitch types to overlay: present in BOTH the expected data and the actual means,
+  // with finite break values (guards against partial/NaN payloads and NaN geometry).
+  const expectedRows = (showExpected && expectedMovement && typeof expectedMovement === "object")
     ? Object.keys(actualMeans)
-        .filter(pt => expectedMovement[pt])
         .map(pt => {
           const e = expectedMovement[pt], m = actualMeans[pt];
-          return { pt, e, m, dH: m.h - e.hBreak, dV: m.v - e.vBreak };
+          if (!e || !m) return null;
+          const eh = Number(e.hBreak), ev = Number(e.vBreak);
+          if (!isFinite(eh) || !isFinite(ev) || !isFinite(m.h) || !isFinite(m.v)) return null;
+          return { pt, e: { hBreak: eh, vBreak: ev }, m, dH: m.h - eh, dV: m.v - ev };
         })
-        .sort((a, b) => (PITCH_NAMES[a.pt] || a.pt).localeCompare(PITCH_NAMES[b.pt] || b.pt))
+        .filter(Boolean)
+        .sort((a, b) => String(PITCH_NAMES[a.pt] ?? a.pt ?? "").localeCompare(String(PITCH_NAMES[b.pt] ?? b.pt ?? "")))
     : [];
 
   const expRadiusPx = (2.5 / (range * 2)) * side;   // 2.5" — equal x/y scale → true circle
