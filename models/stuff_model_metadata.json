@@ -1,56 +1,73 @@
 {
-  "features": [
-    "release_speed",
-    "pfx_x",
-    "pfx_z",
-    "release_spin_rate",
-    "spin_axis",
-    "release_extension",
-    "release_pos_x",
-    "release_pos_z",
-    "vaa",
-    "haa",
-    "total_movement",
-    "spin_efficiency",
-    "delta_velo",
-    "delta_pfx_x",
-    "delta_pfx_z",
-    "delta_spin",
-    "delta_extension",
-    "delta_vaa",
-    "movement_separation",
-    "release_diff_x",
-    "release_diff_z",
-    "release_distance",
-    "pitch_type_cat",
-    "p_throws_cat"
-  ],
-  "target": "xRV",
+  "config": "v3.4-split-fb-vs-offspeed",
+  "target_year": 2025,
   "train_years": [
-    2021,
     2022,
     2023,
     2024
   ],
-  "target_year": 2025,
-  "cv_rmse": 0.015202099312269932,
-  "cv_r2": 0.10287087757136823,
-  "holdout_rmse": 0.01678139391901715,
-  "holdout_r2": 0.05964411360381705,
-  "best_iterations": 98,
-  "params": {
-    "objective": "regression",
-    "metric": "rmse",
-    "learning_rate": 0.03,
-    "num_leaves": 63,
-    "max_depth": 7,
-    "min_child_samples": 20,
-    "subsample": 0.8,
-    "colsample_bytree": 0.8,
-    "reg_alpha": 0.1,
-    "reg_lambda": 1.0,
-    "n_estimators": 2000,
-    "n_jobs": -1,
-    "random_state": 42
-  }
+  "family_definition": {
+    "method": "within_n_mph_of_fastest_fastball_type",
+    "mph_threshold": 4,
+    "fastball_types": [
+      "FF",
+      "SI",
+      "FC"
+    ],
+    "min_pitches_for_baseline": 10,
+    "note": "Per pitcher-season, identify the fastball type (FF/SI/FC) with highest average velocity. Any pitch within 4 mph of that average joins the fastball family, regardless of pitch_type label."
+  },
+  "fb_model": {
+    "file": "stuff_model_fb_2025.txt",
+    "features": [
+      "release_speed",
+      "pfx_x",
+      "pfx_z",
+      "release_spin_rate",
+      "release_extension",
+      "release_pos_x",
+      "release_pos_z",
+      "arm_angle",
+      "pfx_x_dev_from_slot",
+      "pfx_z_dev_from_slot",
+      "ay_residual",
+      "same_side"
+    ],
+    "n_train_pitches": 990457,
+    "n_trees": 47,
+    "cv_rmse": 0.1772442763760029,
+    "cv_r2": 0.0018113834272450724,
+    "holdout_r2": 0.001817795323502236
+  },
+  "offspeed_model": {
+    "file": "stuff_model_offspeed_2025.txt",
+    "features": [
+      "release_speed",
+      "pfx_x",
+      "pfx_z",
+      "release_spin_rate",
+      "spin_axis_sin",
+      "spin_axis_cos",
+      "spin_efficiency",
+      "fb_velo",
+      "delta_velo",
+      "arm_angle",
+      "pfx_x_dev_from_slot",
+      "pfx_z_dev_from_slot",
+      "ay_residual",
+      "same_side"
+    ],
+    "n_train_pitches": 904958,
+    "n_trees": 49,
+    "cv_rmse": 0.17146860441660938,
+    "cv_r2": 0.0011028377214230556,
+    "holdout_r2": 0.0010874915879903746
+  },
+  "combined_holdout": {
+    "rmse": 0.17701144816908876,
+    "r2": 0.0017560437858350486,
+    "correlation": 0.044114705483647064
+  },
+  "monotone_constraints": null,
+  "target": "xRV"
 }

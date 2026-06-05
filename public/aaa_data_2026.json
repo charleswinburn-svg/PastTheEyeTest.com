@@ -23823,7 +23823,7 @@
           "display": "3.9"
         },
         "LD%": {
-          "pctile": 88,
+          "pctile": 90,
           "value": 30.6,
           "display": "30.6"
         },
@@ -28044,7 +28044,7 @@
           "display": "4.1"
         },
         "LD%": {
-          "pctile": 62,
+          "pctile": 70,
           "value": 23.8,
           "display": "23.8"
         },
@@ -30925,7 +30925,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 12,
+          "pctile": 10,
           "value": 13.6,
           "display": "13.6"
         },
@@ -33538,9 +33538,9 @@
           "display": "8.0"
         },
         "LD%": {
-          "pctile": null,
-          "value": null,
-          "display": "\u2014"
+          "pctile": 50,
+          "value": 20.7,
+          "display": "20.7"
         },
         "Chase %": {
           "pctile": 2,
@@ -37357,7 +37357,7 @@
           "display": "28.6"
         },
         "LD%": {
-          "pctile": 38,
+          "pctile": 30,
           "value": 17.2,
           "display": "17.2"
         },
@@ -68269,8 +68269,8 @@
       "categories": {
         "FIP": {
           "pctile": 8,
-          "value": 7.38,
-          "display": "7.38"
+          "value": 7.39,
+          "display": "7.39"
         },
         "Avg Exit Velo": {
           "pctile": 80,
@@ -74407,8 +74407,8 @@
       "categories": {
         "FIP": {
           "pctile": 75,
-          "value": 5.19,
-          "display": "5.19"
+          "value": 5.2,
+          "display": "5.20"
         },
         "Avg Exit Velo": {
           "pctile": 26,
@@ -91963,8 +91963,8 @@
       "categories": {
         "FIP": {
           "pctile": 42,
-          "value": 5.43,
-          "display": "5.43"
+          "value": 5.44,
+          "display": "5.44"
         },
         "Avg Exit Velo": {
           "pctile": 12,
@@ -92821,8 +92821,8 @@
       "categories": {
         "FIP": {
           "pctile": 92,
-          "value": 4.06,
-          "display": "4.06"
+          "value": 4.07,
+          "display": "4.07"
         },
         "Avg Exit Velo": {
           "pctile": 4,
@@ -93322,6 +93322,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-06-04 16:14:55 UTC"
+    "generated_at": "2026-06-05 15:13:42 UTC"
   }
 }

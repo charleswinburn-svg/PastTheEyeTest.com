@@ -242,11 +242,11 @@ def build(parquet_path: Path, year: int, out_path: Path):
     print(f'  {len(df):,} pitches')
 
     print('Loading models ...')
-    stuff, stuff_features, tunnel, location_models = load_models(MODELS_DIR)
+    stuff_fb, stuff_fb_features, stuff_offspeed, stuff_offspeed_features, stuff_family, tunnel, location_models = load_models(MODELS_DIR)
     weights = load_weights(CONFIG_PATH)
 
     print('Scoring pitches ...')
-    df = score_dataframe(df, stuff, stuff_features, tunnel, location_models, weights)
+    df = score_dataframe(df, stuff_fb, stuff_fb_features, stuff_offspeed, stuff_offspeed_features, stuff_family, tunnel, location_models, weights)
 
     print('Classifying roles ...')
     df = classify_roles(df)
