@@ -962,7 +962,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       {isGame && (
         <div>
           <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
-            <select value={selectedGame?.gamePk || ""} onChange={e => { const g = games.find(x => x.gamePk === parseInt(e.target.value)); setSelectedGame(g || null); setSelectedPlayer(null); }} style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, fontFamily: "inherit", minWidth: 280 }}>
+            <select id="game-selector" name="game-selector" value={selectedGame?.gamePk || ""} onChange={e => { const g = games.find(x => x.gamePk === parseInt(e.target.value)); setSelectedGame(g || null); setSelectedPlayer(null); }} style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, fontFamily: "inherit", minWidth: 280 }}>
               <option value="">Select Game...</option>
               {games.map(g => {
                 const awayName = g.awayFlag ? `${g.awayFlag} ${g.away?.teamName || g.away?.abbreviation || "?"}` : (g.away?.abbreviation || g.away?.teamName || "?");
@@ -1271,6 +1271,8 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           Left panel
           <select
+            id="pitcher-left-panel"
+            name="pitcher-left-panel"
             value={leftPanel}
             onChange={e => setLeftPanel(e.target.value)}
             style={{
@@ -1287,6 +1289,8 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           Right panel
           <select
+            id="pitcher-right-panel"
+            name="pitcher-right-panel"
             value={rightPanel}
             onChange={e => setRightPanel(e.target.value)}
             style={{
@@ -1302,7 +1306,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
         </label>
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", cursor: "pointer" }}
           title="Overlay each pitch type's expected break for this pitcher's arm slot, with the actual-vs-expected residual">
-          <input type="checkbox" checked={showExpected} onChange={e => setShowExpected(e.target.checked)} style={{ cursor: "pointer" }} />
+          <input type="checkbox" id="show-expected-movement" name="show-expected-movement" checked={showExpected} onChange={e => setShowExpected(e.target.checked)} style={{ cursor: "pointer" }} />
           Expected movement
         </label>
       </div>
