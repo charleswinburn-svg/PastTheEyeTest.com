@@ -1,11 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { PITCH_COLORS, PITCH_NAMES, HIT_COLORS } from "./mlbApi.js";
 import { useTheme } from "./ThemeContext.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // MOVEMENT PLOT (Horizontal Break vs Induced Vertical Break)
 // ═══════════════════════════════════════════════════════════
-export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 200, onPitchClick = null }) {
+export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 200, onPitchClick = null,
+  expectedMovement = null, showExpected = false, armAngle = null }) {
   const { theme: t, isDark } = useTheme();
   const axisB = 45, axisT = 20;
   const side = height - axisT - axisB;
@@ -24,6 +25,34 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
     displayPitches = displayPitches.filter((_, i) => Math.floor(i / step) !== Math.floor((i - 1) / step) || i === 0);
     displayPitches = displayPitches.slice(0, maxPitches);
   }
+
+  // Actual per-pitch-type mean from the FULL data (not the downsampled set) so the
+  // expected-vs-actual line and residuals are accurate.
+  const actualMeans = useMemo(() => {
+    const acc = {};
+    for (const p of pitches) {
+      if (p.hBreak == null || p.vBreak == null || !p.pitchType) continue;
+      (acc[p.pitchType] ??= { h: 0, v: 0, n: 0 });
+      acc[p.pitchType].h += p.hBreak; acc[p.pitchType].v += p.vBreak; acc[p.pitchType].n++;
+    }
+    const out = {};
+    for (const [pt, a] of Object.entries(acc)) if (a.n) out[pt] = { h: a.h / a.n, v: a.v / a.n };
+    return out;
+  }, [pitches]);
+
+  // Pitch types to overlay: present in BOTH the expected data and the actual means.
+  const expectedRows = (showExpected && expectedMovement)
+    ? Object.keys(actualMeans)
+        .filter(pt => expectedMovement[pt])
+        .map(pt => {
+          const e = expectedMovement[pt], m = actualMeans[pt];
+          return { pt, e, m, dH: m.h - e.hBreak, dV: m.v - e.vBreak };
+        })
+        .sort((a, b) => (PITCH_NAMES[a.pt] || a.pt).localeCompare(PITCH_NAMES[b.pt] || b.pt))
+    : [];
+
+  const expRadiusPx = (2.5 / (range * 2)) * side;   // 2.5" — equal x/y scale → true circle
+  const fmtIn = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}"`;
 
   const plotBg = isDark ? "#1a1a1a" : "#f0f0f0";
   const gridMinor = isDark ? "#2a2a2a" : "#ddd";
@@ -61,6 +90,23 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
         Induced Vertical Break (in)
       </text>
 
+      {/* Expected-movement overlay: shaded expected circle + line to the actual mean. Drawn
+          under the dots so individual pitches stay readable on top. */}
+      {expectedRows.map(({ pt, e, m }) => {
+        const col = PITCH_COLORS[pt] || "#888";
+        return (
+          <g key={`exp-${pt}`}>
+            <circle cx={scaleX(e.hBreak)} cy={scaleY(e.vBreak)} r={expRadiusPx}
+              fill={col} fillOpacity={0.16} stroke={col} strokeOpacity={0.7}
+              strokeWidth={1.25} strokeDasharray="4,3" />
+            <line x1={scaleX(m.h)} y1={scaleY(m.v)} x2={scaleX(e.hBreak)} y2={scaleY(e.vBreak)}
+              stroke={col} strokeWidth={1.5} strokeOpacity={0.9} />
+            <circle cx={scaleX(m.h)} cy={scaleY(m.v)} r={4}
+              fill={col} stroke={isDark ? "#fff" : "#000"} strokeOpacity={0.55} strokeWidth={1} />
+          </g>
+        );
+      })}
+
       {displayPitches.map((p, i) => (
         <circle key={i}
           cx={scaleX(p.hBreak)} cy={scaleY(p.vBreak)} r={5.5}
@@ -70,6 +116,39 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
           onClick={interactive ? () => onPitchClick(p) : undefined}
         />
       ))}
+
+      {/* Residual box: difference (actual − expected) per pitch type, plus arm angle. */}
+      {expectedRows.length > 0 && (() => {
+        const rowH = 15, padX = 8, padTop = 18, boxW = 150;
+        const boxH = padTop + expectedRows.length * rowH + 6;
+        const bx = pL + 6, by = pT + 6;
+        return (
+          <g>
+            <rect x={bx} y={by} width={boxW} height={boxH} rx={5}
+              fill={isDark ? "rgba(20,20,20,0.82)" : "rgba(255,255,255,0.88)"}
+              stroke={isDark ? "#444" : "#ccc"} strokeWidth={0.75} />
+            <text x={bx + padX} y={by + 13} fontSize={9.5} fontWeight={700}
+              fill={labelFill} letterSpacing="0.04em">
+              ACTUAL − EXPECTED{armAngle != null ? `  ·  SLOT ${Math.round(armAngle)}°` : ""}
+            </text>
+            {expectedRows.map(({ pt, dH, dV }, i) => {
+              const ry = by + padTop + i * rowH + 8;
+              return (
+                <g key={`res-${pt}`}>
+                  <circle cx={bx + padX + 3} cy={ry - 3} r={4} fill={PITCH_COLORS[pt] || "#888"} />
+                  <text x={bx + padX + 13} y={ry} fontSize={10} fontWeight={600} fill={t.textSecondary}>
+                    {PITCH_NAMES[pt] || pt}
+                  </text>
+                  <text x={bx + boxW - padX} y={ry} fontSize={9.5} textAnchor="end"
+                    fill={t.textMuted} fontFamily="ui-monospace, monospace">
+                    {fmtIn(dH)} H  {fmtIn(dV)} V
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+        );
+      })()}
     </svg>
   );
 }
