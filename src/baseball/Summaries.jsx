@@ -1191,6 +1191,31 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
   // Per-side panel selection. Default = current "zones" behavior on both sides.
   const [leftPanel, setLeftPanel] = useState("zones");   // "zones" | "velo"
   const [rightPanel, setRightPanel] = useState("zones"); // "zones" | "platoon"
+  // Expected-movement overlay (slot regression for the pitcher's arm angle). Lazily
+  // fetched the first time it's toggled on, refetched when the pitcher changes.
+  const [showExpected, setShowExpected] = useState(false);
+  const [expectedMovement, setExpectedMovement] = useState(null);
+  useEffect(() => {
+    if (!showExpected || !player?.id) return;
+    let cancelled = false;
+    (async () => {
+      let hand = player.pitchHand?.code;
+      if (hand !== "L" && hand !== "R") {
+        try {
+          const r = await fetch(`/mlb-api/api/v1/people/${player.id}`);
+          const j = await r.json();
+          hand = j?.people?.[0]?.pitchHand?.code || "R";
+        } catch { hand = "R"; }
+      }
+      if (cancelled) return;
+      try {
+        const r = await fetch(`https://api.pasttheeyetest.com/expected_movement/${player.id}?season=${season}&hand=${hand}`);
+        const j = r.ok ? await r.json() : null;
+        if (!cancelled) setExpectedMovement(j);
+      } catch { if (!cancelled) setExpectedMovement(null); }
+    })();
+    return () => { cancelled = true; };
+  }, [showExpected, player?.id, season]);
   const strikePct = data.totalPitches > 0 ? Math.round(data.pitches.filter(p => p.isStrike || p.isInPlay).length / data.totalPitches * 1000) / 10 : 0;
   const swings = data.pitches.filter(p => p.isSwing);
   const whiffPct = swings.length > 0 ? Math.round(data.pitches.filter(p => p.isWhiff).length / swings.length * 1000) / 10 : 0;
@@ -1275,6 +1300,11 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             <option value="platoon">Usage — by platoon</option>
           </select>
         </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", cursor: "pointer" }}
+          title="Overlay each pitch type's expected break for this pitcher's arm slot, with the actual-vs-expected residual">
+          <input type="checkbox" checked={showExpected} onChange={e => setShowExpected(e.target.checked)} style={{ cursor: "pointer" }} />
+          Expected movement
+        </label>
       </div>
 
       <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 1000, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
@@ -1294,6 +1324,9 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             pitches={data.pitches}
             width={420} height={400} maxPitches={200}
             onPitchClick={reclassifyMode ? onPitchClick : null}
+            expectedMovement={expectedMovement?.pitch_types}
+            showExpected={showExpected}
+            armAngle={expectedMovement?.arm_angle ?? null}
           />
           <div style={{ width: 260 }}>
             {rightPanel === "zones" ? (
