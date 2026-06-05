@@ -327,7 +327,7 @@ export async function fetchLeagueStatLeaders(season, seasonType = "R", sportId =
         seen.add(person.id);
         const entry = {
           id: person.id,
-          name: person.fullName,
+          name: person.fullName || person.nameFirstLast || "",
           team: sp.team?.abbreviation || "",
           teamId: sp.team?.id,
           position: sp.position?.abbreviation,
@@ -358,7 +358,7 @@ export async function fetchAllPlayers(season, sportId = 1) {
         if (seen.has(id)) continue;
         seen.add(id);
         const entry = {
-          id, name: p.person.fullName,
+          id, name: p.person.fullName || p.person.nameFirstLast || "",
           team: team.abbreviation, teamId: team.id,
           parentOrgId: team.parentOrgId || team.parentOrganization?.id || null,
           position: p.position?.abbreviation,
@@ -371,8 +371,8 @@ export async function fetchAllPlayers(season, sportId = 1) {
       }
     } catch (e) { /* skip */ }
   }
-  players.pitchers.sort((a, b) => a.name.localeCompare(b.name));
-  players.hitters.sort((a, b) => a.name.localeCompare(b.name));
+  players.pitchers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  players.hitters.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   return players;
 }
 
@@ -421,7 +421,7 @@ export async function fetchWbcPlayers(season) {
                          (parseInt(batting.plateAppearances) || 0) >= 1;
 
           const entry = {
-            id: person.id, name: person.fullName,
+            id: person.id, name: person.fullName || person.nameFirstLast || "",
             team: teamName, teamId,
             position: p.position?.abbreviation || (pitched ? "P" : "DH"),
           };
@@ -471,7 +471,7 @@ export async function fetchWbcPlayers(season) {
           if (seen.has(id)) continue;
           seen.add(id);
           const teamLabel = info.abbreviation || info.teamName;
-          const entry = { id, name: p.person.fullName, team: teamLabel, teamId, position: p.position?.abbreviation };
+          const entry = { id, name: p.person.fullName || p.person.nameFirstLast || "", team: teamLabel, teamId, position: p.position?.abbreviation };
           if (p.position?.type === "Pitcher") pitcherMap.set(id, entry);
           else hitterMap.set(id, entry);
         }
@@ -479,8 +479,8 @@ export async function fetchWbcPlayers(season) {
     }
   } catch (e) { /* failed */ }
 
-  const pitchers = [...pitcherMap.values()].sort((a, b) => a.name.localeCompare(b.name));
-  const hitters = [...hitterMap.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const pitchers = [...pitcherMap.values()].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  const hitters = [...hitterMap.values()].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   console.log(`[WBC] ${pitchers.length} pitchers, ${hitters.length} hitters from ${allGamePks.length} games`);
   return { pitchers, hitters };
 }
