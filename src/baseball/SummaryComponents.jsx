@@ -58,6 +58,58 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
   const expRadiusPx = (2.5 / (range * 2)) * side;   // 2.5" — equal x/y scale → true circle
   const fmtIn = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}"`;
 
+  // Lay out the residual callouts: seed each box radially outward from the plot center
+  // (clear of the central dot mass), then iteratively separate any pair that overlaps so
+  // every box finds its own space. The SLOT arm-angle label is a fixed obstacle to dodge.
+  const calloutBoxes = (() => {
+    const bW = 132, bH = 46, GAP = 6;
+    const ccx = pL + side / 2, ccy = pT + side / 2;
+    const minX = pL + 4, maxX = pL + side - bW - 4;
+    const minY = pT + 4, maxY = pT + side - bH - 4;
+    const clamp = (b) => {
+      if (b.fixed) return;
+      b.x = Math.max(minX, Math.min(maxX, b.x));
+      b.y = Math.max(minY, Math.min(maxY, b.y));
+    };
+    const boxes = expectedRows.map(({ pt, e, dH, dV }) => {
+      const cxE = scaleX(e.hBreak), cyE = scaleY(e.vBreak);
+      let dx = cxE - ccx, dy = cyE - ccy, len = Math.hypot(dx, dy);
+      if (len < 1) { dx = 0.6; dy = -0.8; len = 1; }
+      dx /= len; dy /= len;
+      const push = expRadiusPx + 24 + Math.max(bW, bH) / 2;
+      const b = { pt, dH, dV, col: PITCH_COLORS[pt] || "#888", cxE, cyE, bW, bH, fixed: false,
+                  x: cxE + dx * push - bW / 2, y: cyE + dy * push - bH / 2 };
+      clamp(b);
+      return b;
+    });
+    const all = boxes.slice();
+    if (showExpected && armAngle != null) {
+      all.push({ x: pL + side - 78, y: pT + 2, bW: 76, bH: 20, fixed: true });  // SLOT label
+    }
+    for (let iter = 0; iter < 40; iter++) {
+      let moved = false;
+      for (let i = 0; i < all.length; i++) {
+        for (let j = i + 1; j < all.length; j++) {
+          const a = all[i], c = all[j];
+          if (a.fixed && c.fixed) continue;
+          const ox = Math.min(a.x + a.bW, c.x + c.bW) - Math.max(a.x, c.x) + GAP;
+          const oy = Math.min(a.y + a.bH, c.y + c.bH) - Math.max(a.y, c.y) + GAP;
+          if (ox > 0 && oy > 0) {
+            moved = true;
+            const axisX = ox < oy, s = axisX ? ox : oy;
+            if (a.fixed)      { if (axisX) c.x += (c.x >= a.x ? s : -s); else c.y += (c.y >= a.y ? s : -s); }
+            else if (c.fixed) { if (axisX) a.x += (a.x >= c.x ? s : -s); else a.y += (a.y >= c.y ? s : -s); }
+            else if (axisX)   { const d = a.x <= c.x ? -1 : 1; a.x += d * s / 2; c.x -= d * s / 2; }
+            else              { const d = a.y <= c.y ? -1 : 1; a.y += d * s / 2; c.y -= d * s / 2; }
+            clamp(a); clamp(c);
+          }
+        }
+      }
+      if (!moved) break;
+    }
+    return boxes;
+  })();
+
   const plotBg = isDark ? "#1a1a1a" : "#f0f0f0";
   const gridMinor = isDark ? "#2a2a2a" : "#ddd";
   const gridMajor = isDark ? "#555" : "#999";
@@ -121,36 +173,26 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
         />
       ))}
 
-      {/* Per-pitch-type residual callouts — pushed outward from the plot center so they
-          sit clear of the dot clusters, tied back to each expected circle by a leader. */}
-      {expectedRows.map(({ pt, e, dH, dV }) => {
-        const col = PITCH_COLORS[pt] || "#888";
-        const cxE = scaleX(e.hBreak), cyE = scaleY(e.vBreak);
-        const bW = 132, bH = 46;
-        // Direction: radially outward from the plot center so labels land toward the
-        // margins, away from the pitch dots that cluster near the middle.
-        const ccx = pL + side / 2, ccy = pT + side / 2;
-        let dx = cxE - ccx, dy = cyE - ccy;
-        let len = Math.hypot(dx, dy);
-        if (len < 1) { dx = 0.6; dy = -0.8; len = 1; }
-        dx /= len; dy /= len;
-        const push = expRadiusPx + 24 + Math.max(bW, bH) / 2;
-        let bx = Math.max(pL + 4, Math.min(pL + side - bW - 4, cxE + dx * push - bW / 2));
-        let by = Math.max(pT + 4, Math.min(pT + side - bH - 4, cyE + dy * push - bH / 2));
+      {/* Per-pitch-type residual callouts (positions resolved above so boxes never overlap;
+          a leader line ties each box back to its expected circle). */}
+      {calloutBoxes.map((b) => {
+        const bcx = b.x + b.bW / 2, bcy = b.y + b.bH / 2;
+        let ldx = bcx - b.cxE, ldy = bcy - b.cyE, ll = Math.hypot(ldx, ldy) || 1;
+        ldx /= ll; ldy /= ll;
         return (
-          <g key={`res-${pt}`}>
-            <line x1={cxE + dx * expRadiusPx} y1={cyE + dy * expRadiusPx}
-              x2={bx + bW / 2} y2={by + bH / 2}
-              stroke={col} strokeWidth={1} strokeOpacity={0.4} strokeDasharray="3,3" />
-            <rect x={bx} y={by} width={bW} height={bH} rx={6}
+          <g key={`res-${b.pt}`}>
+            <line x1={b.cxE + ldx * expRadiusPx} y1={b.cyE + ldy * expRadiusPx}
+              x2={bcx} y2={bcy}
+              stroke={b.col} strokeWidth={1} strokeOpacity={0.4} strokeDasharray="3,3" />
+            <rect x={b.x} y={b.y} width={b.bW} height={b.bH} rx={6}
               fill={isDark ? "rgba(16,16,16,0.92)" : "rgba(255,255,255,0.95)"}
-              stroke={col} strokeWidth={1.25} strokeOpacity={0.7} />
-            <circle cx={bx + 14} cy={by + 17} r={5} fill={col} />
-            <text x={bx + 25} y={by + 21} fontSize={13} fontWeight={700} fill={t.textSecondary}>
-              {PITCH_NAMES[pt] || pt}
+              stroke={b.col} strokeWidth={1.25} strokeOpacity={0.7} />
+            <circle cx={b.x + 14} cy={b.y + 17} r={5} fill={b.col} />
+            <text x={b.x + 25} y={b.y + 21} fontSize={13} fontWeight={700} fill={t.textSecondary}>
+              {PITCH_NAMES[b.pt] || b.pt}
             </text>
-            <text x={bx + 12} y={by + 39} fontSize={11.5} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
-              {fmtIn(dH)} H  {fmtIn(dV)} V
+            <text x={b.x + 12} y={b.y + 39} fontSize={11.5} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
+              {fmtIn(b.dH)} H  {fmtIn(b.dV)} V
             </text>
           </g>
         );
