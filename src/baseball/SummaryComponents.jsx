@@ -121,23 +121,35 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
         />
       ))}
 
-      {/* Per-pitch-type residual labels — small floating box near each expected circle. */}
+      {/* Per-pitch-type residual callouts — pushed outward from the plot center so they
+          sit clear of the dot clusters, tied back to each expected circle by a leader. */}
       {expectedRows.map(({ pt, e, dH, dV }) => {
         const col = PITCH_COLORS[pt] || "#888";
-        const cx = scaleX(e.hBreak), cy = scaleY(e.vBreak);
-        const bW = 64, bH = 34, off = expRadiusPx + 6;
-        const bx = (cx + off + bW > pL + side - 2) ? cx - off - bW : cx + off;
-        const by = Math.max(pT + 2, Math.min(pT + side - bH - 2, cy - bH / 2));
+        const cxE = scaleX(e.hBreak), cyE = scaleY(e.vBreak);
+        const bW = 132, bH = 46;
+        // Direction: radially outward from the plot center so labels land toward the
+        // margins, away from the pitch dots that cluster near the middle.
+        const ccx = pL + side / 2, ccy = pT + side / 2;
+        let dx = cxE - ccx, dy = cyE - ccy;
+        let len = Math.hypot(dx, dy);
+        if (len < 1) { dx = 0.6; dy = -0.8; len = 1; }
+        dx /= len; dy /= len;
+        const push = expRadiusPx + 24 + Math.max(bW, bH) / 2;
+        let bx = Math.max(pL + 4, Math.min(pL + side - bW - 4, cxE + dx * push - bW / 2));
+        let by = Math.max(pT + 4, Math.min(pT + side - bH - 4, cyE + dy * push - bH / 2));
         return (
           <g key={`res-${pt}`}>
-            <rect x={bx} y={by} width={bW} height={bH} rx={3}
-              fill={isDark ? "rgba(18,18,18,0.88)" : "rgba(255,255,255,0.92)"}
-              stroke={col} strokeWidth={0.75} strokeOpacity={0.55} />
-            <circle cx={bx + 8} cy={by + 11} r={3.5} fill={col} />
-            <text x={bx + 15} y={by + 14} fontSize={9} fontWeight={700} fill={t.textSecondary}>
+            <line x1={cxE + dx * expRadiusPx} y1={cyE + dy * expRadiusPx}
+              x2={bx + bW / 2} y2={by + bH / 2}
+              stroke={col} strokeWidth={1} strokeOpacity={0.4} strokeDasharray="3,3" />
+            <rect x={bx} y={by} width={bW} height={bH} rx={6}
+              fill={isDark ? "rgba(16,16,16,0.92)" : "rgba(255,255,255,0.95)"}
+              stroke={col} strokeWidth={1.25} strokeOpacity={0.7} />
+            <circle cx={bx + 14} cy={by + 17} r={5} fill={col} />
+            <text x={bx + 25} y={by + 21} fontSize={13} fontWeight={700} fill={t.textSecondary}>
               {PITCH_NAMES[pt] || pt}
             </text>
-            <text x={bx + 6} y={by + 27} fontSize={9.5} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
+            <text x={bx + 12} y={by + 39} fontSize={11.5} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
               {fmtIn(dH)} H  {fmtIn(dV)} V
             </text>
           </g>
