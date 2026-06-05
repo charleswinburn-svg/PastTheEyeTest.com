@@ -121,38 +121,36 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
         />
       ))}
 
-      {/* Residual box: difference (actual − expected) per pitch type, plus arm angle. */}
-      {expectedRows.length > 0 && (() => {
-        const rowH = 15, padX = 8, padTop = 18, boxW = 150;
-        const boxH = padTop + expectedRows.length * rowH + 6;
-        const bx = pL + 6, by = pT + 6;
+      {/* Per-pitch-type residual labels — small floating box near each expected circle. */}
+      {expectedRows.map(({ pt, e, dH, dV }) => {
+        const col = PITCH_COLORS[pt] || "#888";
+        const cx = scaleX(e.hBreak), cy = scaleY(e.vBreak);
+        const bW = 64, bH = 34, off = expRadiusPx + 6;
+        const bx = (cx + off + bW > pL + side - 2) ? cx - off - bW : cx + off;
+        const by = Math.max(pT + 2, Math.min(pT + side - bH - 2, cy - bH / 2));
         return (
-          <g>
-            <rect x={bx} y={by} width={boxW} height={boxH} rx={5}
-              fill={isDark ? "rgba(20,20,20,0.82)" : "rgba(255,255,255,0.88)"}
-              stroke={isDark ? "#444" : "#ccc"} strokeWidth={0.75} />
-            <text x={bx + padX} y={by + 13} fontSize={9.5} fontWeight={700}
-              fill={labelFill} letterSpacing="0.04em">
-              ACTUAL − EXPECTED{armAngle != null ? `  ·  SLOT ${Math.round(armAngle)}°` : ""}
+          <g key={`res-${pt}`}>
+            <rect x={bx} y={by} width={bW} height={bH} rx={3}
+              fill={isDark ? "rgba(18,18,18,0.88)" : "rgba(255,255,255,0.92)"}
+              stroke={col} strokeWidth={0.75} strokeOpacity={0.55} />
+            <circle cx={bx + 8} cy={by + 11} r={3.5} fill={col} />
+            <text x={bx + 15} y={by + 14} fontSize={9} fontWeight={700} fill={t.textSecondary}>
+              {PITCH_NAMES[pt] || pt}
             </text>
-            {expectedRows.map(({ pt, dH, dV }, i) => {
-              const ry = by + padTop + i * rowH + 8;
-              return (
-                <g key={`res-${pt}`}>
-                  <circle cx={bx + padX + 3} cy={ry - 3} r={4} fill={PITCH_COLORS[pt] || "#888"} />
-                  <text x={bx + padX + 13} y={ry} fontSize={10} fontWeight={600} fill={t.textSecondary}>
-                    {PITCH_NAMES[pt] || pt}
-                  </text>
-                  <text x={bx + boxW - padX} y={ry} fontSize={9.5} textAnchor="end"
-                    fill={t.textMuted} fontFamily="ui-monospace, monospace">
-                    {fmtIn(dH)} H  {fmtIn(dV)} V
-                  </text>
-                </g>
-              );
-            })}
+            <text x={bx + 6} y={by + 27} fontSize={9.5} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
+              {fmtIn(dH)} H  {fmtIn(dV)} V
+            </text>
           </g>
         );
-      })()}
+      })}
+
+      {/* Arm angle corner label */}
+      {showExpected && armAngle != null && (
+        <text x={pL + side - 6} y={pT + 14} textAnchor="end" fontSize={9.5} fontWeight={700}
+          fill={labelFill} letterSpacing="0.04em">
+          SLOT {Math.round(armAngle)}°
+        </text>
+      )}
     </svg>
   );
 }
