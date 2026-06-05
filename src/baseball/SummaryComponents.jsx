@@ -58,56 +58,55 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
   const expRadiusPx = (2.5 / (range * 2)) * side;   // 2.5" — equal x/y scale → true circle
   const fmtIn = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}"`;
 
-  // Lay out the residual callouts: seed each box radially outward from the plot center
-  // (clear of the central dot mass), then iteratively separate any pair that overlaps so
-  // every box finds its own space. The SLOT arm-angle label is a fixed obstacle to dodge.
+  // Lay out the residual callouts in BLANK space: build an occupancy grid of everything
+  // already on the plot (actual dots, expected circles, mean markers, SLOT label), then
+  // place each small box at the emptiest spot nearest its expected circle. Placed boxes
+  // become obstacles for the rest, so no two boxes — and ideally no box and no dot — collide.
   const calloutBoxes = (() => {
-    const bW = 132, bH = 46, GAP = 6;
-    const ccx = pL + side / 2, ccy = pT + side / 2;
-    const minX = pL + 4, maxX = pL + side - bW - 4;
-    const minY = pT + 4, maxY = pT + side - bH - 4;
-    const clamp = (b) => {
-      if (b.fixed) return;
-      b.x = Math.max(minX, Math.min(maxX, b.x));
-      b.y = Math.max(minY, Math.min(maxY, b.y));
+    if (!expectedRows.length) return [];
+    const bW = 98, bH = 30, GAP = 4, cell = 10;
+    const cols = Math.max(1, Math.ceil(side / cell));
+    const rows = Math.max(1, Math.ceil(side / cell));
+    const occ = new Uint8Array(cols * rows);
+    const markRect = (x, y, w, h) => {
+      const c0 = Math.max(0, Math.floor((x - pL) / cell)), c1 = Math.min(cols - 1, Math.floor((x + w - pL) / cell));
+      const r0 = Math.max(0, Math.floor((y - pT) / cell)), r1 = Math.min(rows - 1, Math.floor((y + h - pT) / cell));
+      for (let rr = r0; rr <= r1; rr++) for (let cc = c0; cc <= c1; cc++) occ[rr * cols + cc] = 1;
     };
-    const boxes = expectedRows.map(({ pt, e, dH, dV }) => {
-      const cxE = scaleX(e.hBreak), cyE = scaleY(e.vBreak);
-      let dx = cxE - ccx, dy = cyE - ccy, len = Math.hypot(dx, dy);
-      if (len < 1) { dx = 0.6; dy = -0.8; len = 1; }
-      dx /= len; dy /= len;
-      const push = expRadiusPx + 24 + Math.max(bW, bH) / 2;
-      const b = { pt, dH, dV, col: PITCH_COLORS[pt] || "#888", cxE, cyE, bW, bH, fixed: false,
-                  x: cxE + dx * push - bW / 2, y: cyE + dy * push - bH / 2 };
-      clamp(b);
-      return b;
-    });
-    const all = boxes.slice();
-    if (showExpected && armAngle != null) {
-      all.push({ x: pL + side - 78, y: pT + 2, bW: 76, bH: 20, fixed: true });  // SLOT label
+    const markDot = (px, py, r) => markRect(px - r, py - r, 2 * r, 2 * r);
+    // Obstacles: actual dots, expected circles, actual-mean markers, the SLOT label.
+    for (const p of displayPitches) markDot(scaleX(p.hBreak), scaleY(p.vBreak), 7);
+    for (const r of expectedRows) {
+      markDot(scaleX(r.e.hBreak), scaleY(r.e.vBreak), expRadiusPx + 3);
+      markDot(scaleX(r.m.h), scaleY(r.m.v), 6);
     }
-    for (let iter = 0; iter < 40; iter++) {
-      let moved = false;
-      for (let i = 0; i < all.length; i++) {
-        for (let j = i + 1; j < all.length; j++) {
-          const a = all[i], c = all[j];
-          if (a.fixed && c.fixed) continue;
-          const ox = Math.min(a.x + a.bW, c.x + c.bW) - Math.max(a.x, c.x) + GAP;
-          const oy = Math.min(a.y + a.bH, c.y + c.bH) - Math.max(a.y, c.y) + GAP;
-          if (ox > 0 && oy > 0) {
-            moved = true;
-            const axisX = ox < oy, s = axisX ? ox : oy;
-            if (a.fixed)      { if (axisX) c.x += (c.x >= a.x ? s : -s); else c.y += (c.y >= a.y ? s : -s); }
-            else if (c.fixed) { if (axisX) a.x += (a.x >= c.x ? s : -s); else a.y += (a.y >= c.y ? s : -s); }
-            else if (axisX)   { const d = a.x <= c.x ? -1 : 1; a.x += d * s / 2; c.x -= d * s / 2; }
-            else              { const d = a.y <= c.y ? -1 : 1; a.y += d * s / 2; c.y -= d * s / 2; }
-            clamp(a); clamp(c);
-          }
+    if (showExpected && armAngle != null) markRect(pL + side - 80, pT + 2, 78, 20);
+    // Occupied-cell count under a candidate box (top-left bx,by).
+    const occCost = (bx, by) => {
+      const c0 = Math.max(0, Math.floor((bx - pL) / cell)), c1 = Math.min(cols - 1, Math.floor((bx + bW - pL) / cell));
+      const r0 = Math.max(0, Math.floor((by - pT) / cell)), r1 = Math.min(rows - 1, Math.floor((by + bH - pT) / cell));
+      let n = 0;
+      for (let rr = r0; rr <= r1; rr++) for (let cc = c0; cc <= c1; cc++) n += occ[rr * cols + cc];
+      return n;
+    };
+    const minX = pL + 3, maxX = pL + side - bW - 3;
+    const minY = pT + 3, maxY = pT + side - bH - 3;
+    return expectedRows.map(({ pt, e, dH, dV, m }) => {
+      const cxE = scaleX(e.hBreak), cyE = scaleY(e.vBreak);
+      const ax = cxE, ay = cyE;  // anchor (leader origin) = expected circle
+      let best = { x: Math.max(minX, Math.min(maxX, ax - bW / 2)), y: Math.max(minY, Math.min(maxY, ay - bH / 2)) };
+      let bestScore = Infinity;
+      for (let by = minY; by <= maxY; by += cell) {
+        for (let bx = minX; bx <= maxX; bx += cell) {
+          const dxc = bx + bW / 2 - ax, dyc = by + bH / 2 - ay;
+          const score = occCost(bx, by) * 6 + Math.sqrt(dxc * dxc + dyc * dyc) * 0.03;
+          if (score < bestScore) { bestScore = score; best = { x: bx, y: by }; }
         }
       }
-      if (!moved) break;
-    }
-    return boxes;
+      // Reserve this box (plus a small gap) so later callouts treat it as occupied too.
+      markRect(best.x - GAP, best.y - GAP, bW + 2 * GAP, bH + 2 * GAP);
+      return { pt, dH, dV, col: PITCH_COLORS[pt] || "#888", cxE, cyE, bW, bH, x: best.x, y: best.y };
+    });
   })();
 
   const plotBg = isDark ? "#1a1a1a" : "#f0f0f0";
@@ -173,8 +172,8 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
         />
       ))}
 
-      {/* Per-pitch-type residual callouts (positions resolved above so boxes never overlap;
-          a leader line ties each box back to its expected circle). */}
+      {/* Per-pitch-type residual callouts — placed in blank space above; a faint leader
+          line ties each box back to its expected circle. */}
       {calloutBoxes.map((b) => {
         const bcx = b.x + b.bW / 2, bcy = b.y + b.bH / 2;
         let ldx = bcx - b.cxE, ldy = bcy - b.cyE, ll = Math.hypot(ldx, ldy) || 1;
@@ -183,15 +182,15 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
           <g key={`res-${b.pt}`}>
             <line x1={b.cxE + ldx * expRadiusPx} y1={b.cyE + ldy * expRadiusPx}
               x2={bcx} y2={bcy}
-              stroke={b.col} strokeWidth={1} strokeOpacity={0.4} strokeDasharray="3,3" />
-            <rect x={b.x} y={b.y} width={b.bW} height={b.bH} rx={6}
+              stroke={b.col} strokeWidth={0.85} strokeOpacity={0.4} strokeDasharray="3,3" />
+            <rect x={b.x} y={b.y} width={b.bW} height={b.bH} rx={4}
               fill={isDark ? "rgba(16,16,16,0.92)" : "rgba(255,255,255,0.95)"}
-              stroke={b.col} strokeWidth={1.25} strokeOpacity={0.7} />
-            <circle cx={b.x + 14} cy={b.y + 17} r={5} fill={b.col} />
-            <text x={b.x + 25} y={b.y + 21} fontSize={13} fontWeight={700} fill={t.textSecondary}>
+              stroke={b.col} strokeWidth={1} strokeOpacity={0.7} />
+            <circle cx={b.x + 9} cy={b.y + 10} r={3.5} fill={b.col} />
+            <text x={b.x + 16} y={b.y + 13} fontSize={9.5} fontWeight={700} fill={t.textSecondary}>
               {PITCH_NAMES[b.pt] || b.pt}
             </text>
-            <text x={b.x + 12} y={b.y + 39} fontSize={11.5} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
+            <text x={b.x + 6} y={b.y + 25} fontSize={8} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
               {fmtIn(b.dH)} H  {fmtIn(b.dV)} V
             </text>
           </g>
