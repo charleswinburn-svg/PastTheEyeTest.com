@@ -166,8 +166,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         const seenHitters = new Set(roster.hitters.map(x => x.id));
         for (const p of leaders.pitchers) if (!seenPitchers.has(p.id)) { roster.pitchers.push(p); seenPitchers.add(p.id); }
         for (const p of leaders.hitters)  if (!seenHitters.has(p.id))  { roster.hitters.push(p);  seenHitters.add(p.id); }
-        roster.pitchers.sort((a, b) => a.name.localeCompare(b.name));
-        roster.hitters.sort((a, b) => a.name.localeCompare(b.name));
+        roster.pitchers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        roster.hitters.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
         console.log(`[Summaries] Loaded ${roster.pitchers.length} pitchers, ${roster.hitters.length} hitters`);
         setPlayers(roster);
         setLoadingPlayers(false);
@@ -207,7 +207,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
               if (!person) continue;
               const hasPitching = p.stats?.pitching && Object.keys(p.stats.pitching).length > 0;
               const hasBatting = p.stats?.batting && Object.keys(p.stats.batting).length > 0;
-              const entry = { id: person.id, name: person.fullName, team: teamAbbr, teamId, position: p.position?.abbreviation };
+              const entry = { id: person.id, name: person.fullName || person.nameFirstLast || "", team: teamAbbr, teamId, position: p.position?.abbreviation };
               if (hasPitching && !seenPitchers.has(person.id)) {
                 newPitchers.push(entry); seenPitchers.add(person.id);
               }
@@ -228,8 +228,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       if (!cancelled && (newPitchers.length || newHitters.length)) {
         console.log(`[Summaries] Boxscore scan found ${newPitchers.length} additional pitchers, ${newHitters.length} hitters`);
         setPlayers(prev => ({
-          pitchers: [...(prev?.pitchers || []), ...newPitchers].sort((a, b) => a.name.localeCompare(b.name)),
-          hitters: [...(prev?.hitters || []), ...newHitters].sort((a, b) => a.name.localeCompare(b.name)),
+          pitchers: [...(prev?.pitchers || []), ...newPitchers].sort((a, b) => (a.name || "").localeCompare(b.name || "")),
+          hitters: [...(prev?.hitters || []), ...newHitters].sort((a, b) => (a.name || "").localeCompare(b.name || "")),
         }));
       }
     })();
@@ -284,13 +284,13 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         const isPitcherInGame = stats.pitching && Object.keys(stats.pitching).length > 0;
         const isHitterInGame = stats.batting && Object.keys(stats.batting).length > 0;
         if (isPitcher && isPitcherInGame) {
-          result.push({ id: person.id, name: person.fullName, team: teamName, teamId, ip: stats.pitching.inningsPitched });
+          result.push({ id: person.id, name: person.fullName || person.nameFirstLast || "", team: teamName, teamId, ip: stats.pitching.inningsPitched });
         } else if (!isPitcher && isHitterInGame) {
-          result.push({ id: person.id, name: person.fullName, team: teamName, teamId, abs: stats.batting.atBats, hits: stats.batting.hits });
+          result.push({ id: person.id, name: person.fullName || person.nameFirstLast || "", team: teamName, teamId, abs: stats.batting.atBats, hits: stats.batting.hits });
         }
       }
     }
-    result.sort((a, b) => a.name.localeCompare(b.name));
+    result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     return result;
   }, [boxscoreData, isPitcher, isGame, selectedGame]);
 
