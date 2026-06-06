@@ -166,8 +166,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         const seenHitters = new Set(roster.hitters.map(x => x.id));
         for (const p of leaders.pitchers) if (!seenPitchers.has(p.id)) { roster.pitchers.push(p); seenPitchers.add(p.id); }
         for (const p of leaders.hitters)  if (!seenHitters.has(p.id))  { roster.hitters.push(p);  seenHitters.add(p.id); }
-        roster.pitchers.sort((a, b) => a.name.localeCompare(b.name));
-        roster.hitters.sort((a, b) => a.name.localeCompare(b.name));
+        roster.pitchers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        roster.hitters.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
         console.log(`[Summaries] Loaded ${roster.pitchers.length} pitchers, ${roster.hitters.length} hitters`);
         setPlayers(roster);
         setLoadingPlayers(false);
@@ -207,7 +207,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
               if (!person) continue;
               const hasPitching = p.stats?.pitching && Object.keys(p.stats.pitching).length > 0;
               const hasBatting = p.stats?.batting && Object.keys(p.stats.batting).length > 0;
-              const entry = { id: person.id, name: person.fullName, team: teamAbbr, teamId, position: p.position?.abbreviation };
+              const entry = { id: person.id, name: person.fullName || person.nameFirstLast || "", team: teamAbbr, teamId, position: p.position?.abbreviation };
               if (hasPitching && !seenPitchers.has(person.id)) {
                 newPitchers.push(entry); seenPitchers.add(person.id);
               }
@@ -228,8 +228,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       if (!cancelled && (newPitchers.length || newHitters.length)) {
         console.log(`[Summaries] Boxscore scan found ${newPitchers.length} additional pitchers, ${newHitters.length} hitters`);
         setPlayers(prev => ({
-          pitchers: [...(prev?.pitchers || []), ...newPitchers].sort((a, b) => a.name.localeCompare(b.name)),
-          hitters: [...(prev?.hitters || []), ...newHitters].sort((a, b) => a.name.localeCompare(b.name)),
+          pitchers: [...(prev?.pitchers || []), ...newPitchers].sort((a, b) => (a.name || "").localeCompare(b.name || "")),
+          hitters: [...(prev?.hitters || []), ...newHitters].sort((a, b) => (a.name || "").localeCompare(b.name || "")),
         }));
       }
     })();
@@ -284,13 +284,13 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         const isPitcherInGame = stats.pitching && Object.keys(stats.pitching).length > 0;
         const isHitterInGame = stats.batting && Object.keys(stats.batting).length > 0;
         if (isPitcher && isPitcherInGame) {
-          result.push({ id: person.id, name: person.fullName, team: teamName, teamId, ip: stats.pitching.inningsPitched });
+          result.push({ id: person.id, name: person.fullName || person.nameFirstLast || "", team: teamName, teamId, ip: stats.pitching.inningsPitched });
         } else if (!isPitcher && isHitterInGame) {
-          result.push({ id: person.id, name: person.fullName, team: teamName, teamId, abs: stats.batting.atBats, hits: stats.batting.hits });
+          result.push({ id: person.id, name: person.fullName || person.nameFirstLast || "", team: teamName, teamId, abs: stats.batting.atBats, hits: stats.batting.hits });
         }
       }
     }
-    result.sort((a, b) => a.name.localeCompare(b.name));
+    result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     return result;
   }, [boxscoreData, isPitcher, isGame, selectedGame]);
 
@@ -814,8 +814,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
             locPlus:    round(v.loc),
             tunnelPlus: round(v.tun),
             pitchPlus:  round(v.pitch),
-            L: { pitchPlus: round(byTypeL[apiPt]?.pitch), stuffPlus: round(byTypeL[apiPt]?.stuff) },
-            R: { pitchPlus: round(byTypeR[apiPt]?.pitch), stuffPlus: round(byTypeR[apiPt]?.stuff) },
+            L: { pitchPlus: round(byTypeL[apiPt]?.pitch) },
+            R: { pitchPlus: round(byTypeR[apiPt]?.pitch) },
           };
         }
         console.log(`[Pitch+] Scored ${allPitches.length} pitches via /score_aggregate:`, out);
@@ -962,7 +962,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       {isGame && (
         <div>
           <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
-            <select value={selectedGame?.gamePk || ""} onChange={e => { const g = games.find(x => x.gamePk === parseInt(e.target.value)); setSelectedGame(g || null); setSelectedPlayer(null); }} style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, fontFamily: "inherit", minWidth: 280 }}>
+            <select id="game-selector" name="game-selector" value={selectedGame?.gamePk || ""} onChange={e => { const g = games.find(x => x.gamePk === parseInt(e.target.value)); setSelectedGame(g || null); setSelectedPlayer(null); }} style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, fontFamily: "inherit", minWidth: 280 }}>
               <option value="">Select Game...</option>
               {games.map(g => {
                 const awayName = g.awayFlag ? `${g.awayFlag} ${g.away?.teamName || g.away?.abbreviation || "?"}` : (g.away?.abbreviation || g.away?.teamName || "?");
@@ -1191,6 +1191,31 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
   // Per-side panel selection. Default = current "zones" behavior on both sides.
   const [leftPanel, setLeftPanel] = useState("zones");   // "zones" | "velo"
   const [rightPanel, setRightPanel] = useState("zones"); // "zones" | "platoon"
+  // Expected-movement overlay (slot regression for the pitcher's arm angle). Lazily
+  // fetched the first time it's toggled on, refetched when the pitcher changes.
+  const [showExpected, setShowExpected] = useState(false);
+  const [expectedMovement, setExpectedMovement] = useState(null);
+  useEffect(() => {
+    if (!showExpected || !player?.id) return;
+    let cancelled = false;
+    (async () => {
+      let hand = player.pitchHand?.code;
+      if (hand !== "L" && hand !== "R") {
+        try {
+          const r = await fetch(`/mlb-api/api/v1/people/${player.id}`);
+          const j = await r.json();
+          hand = j?.people?.[0]?.pitchHand?.code || "R";
+        } catch { hand = "R"; }
+      }
+      if (cancelled) return;
+      try {
+        const r = await fetch(`https://api.pasttheeyetest.com/expected_movement/${player.id}?season=${season}&hand=${hand}`);
+        const j = r.ok ? await r.json() : null;
+        if (!cancelled) setExpectedMovement(j);
+      } catch { if (!cancelled) setExpectedMovement(null); }
+    })();
+    return () => { cancelled = true; };
+  }, [showExpected, player?.id, season]);
   const strikePct = data.totalPitches > 0 ? Math.round(data.pitches.filter(p => p.isStrike || p.isInPlay).length / data.totalPitches * 1000) / 10 : 0;
   const swings = data.pitches.filter(p => p.isSwing);
   const whiffPct = swings.length > 0 ? Math.round(data.pitches.filter(p => p.isWhiff).length / swings.length * 1000) / 10 : 0;
@@ -1246,6 +1271,8 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           Left panel
           <select
+            id="pitcher-left-panel"
+            name="pitcher-left-panel"
             value={leftPanel}
             onChange={e => setLeftPanel(e.target.value)}
             style={{
@@ -1262,6 +1289,8 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           Right panel
           <select
+            id="pitcher-right-panel"
+            name="pitcher-right-panel"
             value={rightPanel}
             onChange={e => setRightPanel(e.target.value)}
             style={{
@@ -1274,6 +1303,11 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             <option value="zonesAll">Zones — overall</option>
             <option value="platoon">Usage — by platoon</option>
           </select>
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", cursor: "pointer" }}
+          title="Overlay each pitch type's expected break for this pitcher's arm slot, with the actual-vs-expected residual">
+          <input type="checkbox" id="show-expected-movement" name="show-expected-movement" checked={showExpected} onChange={e => setShowExpected(e.target.checked)} style={{ cursor: "pointer" }} />
+          Expected movement
         </label>
       </div>
 
@@ -1294,6 +1328,9 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             pitches={data.pitches}
             width={420} height={400} maxPitches={200}
             onPitchClick={reclassifyMode ? onPitchClick : null}
+            expectedMovement={expectedMovement?.pitch_types}
+            showExpected={showExpected}
+            armAngle={expectedMovement?.arm_angle ?? null}
           />
           <div style={{ width: 260 }}>
             {rightPanel === "zones" ? (
