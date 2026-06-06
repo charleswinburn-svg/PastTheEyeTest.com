@@ -58,6 +58,57 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
   const expRadiusPx = (2.5 / (range * 2)) * side;   // 2.5" — equal x/y scale → true circle
   const fmtIn = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}"`;
 
+  // Lay out the residual callouts in BLANK space: build an occupancy grid of everything
+  // already on the plot (actual dots, expected circles, mean markers, SLOT label), then
+  // place each small box at the emptiest spot nearest its expected circle. Placed boxes
+  // become obstacles for the rest, so no two boxes — and ideally no box and no dot — collide.
+  const calloutBoxes = (() => {
+    if (!expectedRows.length) return [];
+    const bW = 98, bH = 30, GAP = 4, cell = 10;
+    const cols = Math.max(1, Math.ceil(side / cell));
+    const rows = Math.max(1, Math.ceil(side / cell));
+    const occ = new Uint8Array(cols * rows);
+    const markRect = (x, y, w, h) => {
+      const c0 = Math.max(0, Math.floor((x - pL) / cell)), c1 = Math.min(cols - 1, Math.floor((x + w - pL) / cell));
+      const r0 = Math.max(0, Math.floor((y - pT) / cell)), r1 = Math.min(rows - 1, Math.floor((y + h - pT) / cell));
+      for (let rr = r0; rr <= r1; rr++) for (let cc = c0; cc <= c1; cc++) occ[rr * cols + cc] = 1;
+    };
+    const markDot = (px, py, r) => markRect(px - r, py - r, 2 * r, 2 * r);
+    // Obstacles: actual dots, expected circles, actual-mean markers, the SLOT label.
+    for (const p of displayPitches) markDot(scaleX(p.hBreak), scaleY(p.vBreak), 7);
+    for (const r of expectedRows) {
+      markDot(scaleX(r.e.hBreak), scaleY(r.e.vBreak), expRadiusPx + 3);
+      markDot(scaleX(r.m.h), scaleY(r.m.v), 6);
+    }
+    if (showExpected && armAngle != null) markRect(pL + side - 80, pT + 2, 78, 20);
+    // Occupied-cell count under a candidate box (top-left bx,by).
+    const occCost = (bx, by) => {
+      const c0 = Math.max(0, Math.floor((bx - pL) / cell)), c1 = Math.min(cols - 1, Math.floor((bx + bW - pL) / cell));
+      const r0 = Math.max(0, Math.floor((by - pT) / cell)), r1 = Math.min(rows - 1, Math.floor((by + bH - pT) / cell));
+      let n = 0;
+      for (let rr = r0; rr <= r1; rr++) for (let cc = c0; cc <= c1; cc++) n += occ[rr * cols + cc];
+      return n;
+    };
+    const minX = pL + 3, maxX = pL + side - bW - 3;
+    const minY = pT + 3, maxY = pT + side - bH - 3;
+    return expectedRows.map(({ pt, e, dH, dV, m }) => {
+      const cxE = scaleX(e.hBreak), cyE = scaleY(e.vBreak);
+      const ax = cxE, ay = cyE;  // anchor (leader origin) = expected circle
+      let best = { x: Math.max(minX, Math.min(maxX, ax - bW / 2)), y: Math.max(minY, Math.min(maxY, ay - bH / 2)) };
+      let bestScore = Infinity;
+      for (let by = minY; by <= maxY; by += cell) {
+        for (let bx = minX; bx <= maxX; bx += cell) {
+          const dxc = bx + bW / 2 - ax, dyc = by + bH / 2 - ay;
+          const score = occCost(bx, by) * 6 + Math.sqrt(dxc * dxc + dyc * dyc) * 0.03;
+          if (score < bestScore) { bestScore = score; best = { x: bx, y: by }; }
+        }
+      }
+      // Reserve this box (plus a small gap) so later callouts treat it as occupied too.
+      markRect(best.x - GAP, best.y - GAP, bW + 2 * GAP, bH + 2 * GAP);
+      return { pt, dH, dV, col: PITCH_COLORS[pt] || "#888", cxE, cyE, bW, bH, x: best.x, y: best.y };
+    });
+  })();
+
   const plotBg = isDark ? "#1a1a1a" : "#f0f0f0";
   const gridMinor = isDark ? "#2a2a2a" : "#ddd";
   const gridMajor = isDark ? "#555" : "#999";
@@ -121,38 +172,38 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
         />
       ))}
 
-      {/* Residual box: difference (actual − expected) per pitch type, plus arm angle. */}
-      {expectedRows.length > 0 && (() => {
-        const rowH = 15, padX = 8, padTop = 18, boxW = 150;
-        const boxH = padTop + expectedRows.length * rowH + 6;
-        const bx = pL + 6, by = pT + 6;
+      {/* Per-pitch-type residual callouts — placed in blank space above; a faint leader
+          line ties each box back to its expected circle. */}
+      {calloutBoxes.map((b) => {
+        const bcx = b.x + b.bW / 2, bcy = b.y + b.bH / 2;
+        let ldx = bcx - b.cxE, ldy = bcy - b.cyE, ll = Math.hypot(ldx, ldy) || 1;
+        ldx /= ll; ldy /= ll;
         return (
-          <g>
-            <rect x={bx} y={by} width={boxW} height={boxH} rx={5}
-              fill={isDark ? "rgba(20,20,20,0.82)" : "rgba(255,255,255,0.88)"}
-              stroke={isDark ? "#444" : "#ccc"} strokeWidth={0.75} />
-            <text x={bx + padX} y={by + 13} fontSize={9.5} fontWeight={700}
-              fill={labelFill} letterSpacing="0.04em">
-              ACTUAL − EXPECTED{armAngle != null ? `  ·  SLOT ${Math.round(armAngle)}°` : ""}
+          <g key={`res-${b.pt}`}>
+            <line x1={b.cxE + ldx * expRadiusPx} y1={b.cyE + ldy * expRadiusPx}
+              x2={bcx} y2={bcy}
+              stroke={b.col} strokeWidth={0.85} strokeOpacity={0.4} strokeDasharray="3,3" />
+            <rect x={b.x} y={b.y} width={b.bW} height={b.bH} rx={4}
+              fill={isDark ? "rgba(16,16,16,0.92)" : "rgba(255,255,255,0.95)"}
+              stroke={b.col} strokeWidth={1} strokeOpacity={0.7} />
+            <circle cx={b.x + 9} cy={b.y + 10} r={3.5} fill={b.col} />
+            <text x={b.x + 16} y={b.y + 13} fontSize={9.5} fontWeight={700} fill={t.textSecondary}>
+              {PITCH_NAMES[b.pt] || b.pt}
             </text>
-            {expectedRows.map(({ pt, dH, dV }, i) => {
-              const ry = by + padTop + i * rowH + 8;
-              return (
-                <g key={`res-${pt}`}>
-                  <circle cx={bx + padX + 3} cy={ry - 3} r={4} fill={PITCH_COLORS[pt] || "#888"} />
-                  <text x={bx + padX + 13} y={ry} fontSize={10} fontWeight={600} fill={t.textSecondary}>
-                    {PITCH_NAMES[pt] || pt}
-                  </text>
-                  <text x={bx + boxW - padX} y={ry} fontSize={9.5} textAnchor="end"
-                    fill={t.textMuted} fontFamily="ui-monospace, monospace">
-                    {fmtIn(dH)} H  {fmtIn(dV)} V
-                  </text>
-                </g>
-              );
-            })}
+            <text x={b.x + 6} y={b.y + 25} fontSize={8} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
+              {fmtIn(b.dH)} H  {fmtIn(b.dV)} V
+            </text>
           </g>
         );
-      })()}
+      })}
+
+      {/* Arm angle corner label */}
+      {showExpected && armAngle != null && (
+        <text x={pL + side - 6} y={pT + 14} textAnchor="end" fontSize={9.5} fontWeight={700}
+          fill={labelFill} letterSpacing="0.04em">
+          SLOT {Math.round(armAngle)}°
+        </text>
+      )}
     </svg>
   );
 }
@@ -932,11 +983,12 @@ const HITTER_COL_LABELS = { all: "Overall", first: "First Pitch", behind: "Ahead
 const BUCKET_KEYS = PITCHER_COL_KEYS;
 
 function bucketPitches(pitches) {
+  const known = pitches.filter(p => p.pitchType !== "UN");
   const result = {};
   for (const bucket of COUNT_BUCKETS) {
-    result[bucket.id] = pitches.filter(p => p.balls != null && p.strikes != null && bucket.test(p.balls, p.strikes));
+    result[bucket.id] = known.filter(p => p.balls != null && p.strikes != null && bucket.test(p.balls, p.strikes));
   }
-  result.all = pitches.filter(p => p.balls != null && p.strikes != null);
+  result.all = known.filter(p => p.balls != null && p.strikes != null);
   return result;
 }
 
@@ -1652,7 +1704,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
         <line
           x1={sideW + centerW / 2} x2={sideW + centerW / 2}
           y1={headerH + 4} y2={height - 4}
-          stroke={t.divider} strokeWidth={1}
+          stroke={t.textMuted} strokeWidth={2}
         />
 
         {/* Rows */}
@@ -1667,9 +1719,9 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
           const barH = rowH - 10;
           const midY = y + barH / 2;
 
-          // Per-handedness Pitch+
-          const lPp = pitchPlus?.[pt]?.L?.pitchPlus;
-          const rPp = pitchPlus?.[pt]?.R?.pitchPlus;
+          // Per-handedness Stuff+
+          const lPp = pitchPlus?.[pt]?.L?.stuffPlus;
+          const rPp = pitchPlus?.[pt]?.R?.stuffPlus;
 
           return (
             <g key={pt}>
@@ -1695,7 +1747,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                       fontSize={8} fontWeight={700}
                       fill={t.textSecondary}
                       fontFamily="'DM Mono', monospace"
-                    >{Math.round(lPp)} Pitch+</text>
+                    >{Math.round(lPp)} Stuff+</text>
                   )}
                 </>
               )}
@@ -1722,7 +1774,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                       fontSize={8} fontWeight={700}
                       fill={t.textSecondary}
                       fontFamily="'DM Mono', monospace"
-                    >{Math.round(rPp)} Pitch+</text>
+                    >{Math.round(rPp)} Stuff+</text>
                   )}
                 </>
               )}
