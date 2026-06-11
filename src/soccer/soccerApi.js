@@ -122,13 +122,60 @@ export async function fetchAllFixtures(leagueId) {
     console.warn("bzzoiro events fetch failed — serving cached fixtures", e);
   }
 
-  // Merge with previously seen events so results never vanish from the UI
-  // if the feed drops or reorders past matches. Fresh data wins per id.
+  // Merge with previously seen events — the feed is a rolling window of
+  // upcoming matches, so finished games drop out of it. Fresh data wins per id.
   const byId = new Map();
   for (const m of cached) byId.set(m.id ?? m.event_id, m);
   for (const m of all) byId.set(m.id ?? m.event_id, m);
   byId.delete(undefined);
   byId.delete(null);
+
+  // Cached events that kicked off but vanished from the feed before we saw
+  // them finish: pull their final score/status from the detail endpoint.
+  const feedIds = new Set(all.map(m => m.id ?? m.event_id));
+  const now = Date.now();
+  const stale = [...byId.values()].filter(m => {
+    const id = m.id ?? m.event_id;
+    if (feedIds.has(id) || isFinishedEvent(m)) return false;
+    const t = new Date(eventStart(m) ?? 0).getTime();
+    return t > 0 && t < now;
+  });
+  for (const m of stale.slice(0, 10)) {
+    const id = m.id ?? m.event_id;
+    try {
+      const d = await fetchEventDetail(id);
+      const ev = d.event ?? d;
+      if (ev && typeof ev === "object") byId.set(id, { ...m, ...ev });
+    } catch { /* keep cached version */ }
+  }
+
+  // One-time-per-session backfill for matches that finished before this cache
+  // existed. Tournament event ids are sequential, so probe a few ids below the
+  // lowest one we know about and keep any that belong to this league.
+  try {
+    const flag = `bzz_backfill_${leagueId}`;
+    const numericIds = [...byId.keys()].filter(x => typeof x === "number");
+    if (!sessionStorage.getItem(flag) && numericIds.length > 0) {
+      sessionStorage.setItem(flag, "1");
+      const minId = Math.min(...numericIds);
+      let misses = 0;
+      for (let id = minId - 1; misses < 2 && id >= minId - 12; id--) {
+        try {
+          const d = await fetchEventDetail(id);
+          const ev = d.event ?? d;
+          const lgRaw = ev?.league;
+          const lgId = typeof lgRaw === "object" ? lgRaw?.id : (lgRaw ?? ev?.league_id);
+          if (ev && Number(lgId) === Number(leagueId)) {
+            byId.set(ev.id ?? id, ev);
+            misses = 0;
+          } else {
+            misses += 1;
+          }
+        } catch { misses += 1; }
+      }
+    }
+  } catch { /* sessionStorage unavailable */ }
+
   const merged = [...byId.values()];
   try { localStorage.setItem(key, JSON.stringify(merged)); } catch { /* storage full */ }
   if (typeof window !== "undefined") window.__bzzEvents = merged;

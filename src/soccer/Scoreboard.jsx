@@ -32,7 +32,7 @@ function statusLabel(status, minute) {
   if (s === "1h" || s === "2h" || s === "inprogress" || s.includes("live")) {
     return minute ? `${minute}'` : "LIVE";
   }
-  if (s === "ns" || s.includes("not started")) return "Upcoming";
+  if (s === "ns" || s.replace(/\s/g, "") === "notstarted") return "Upcoming";
   return status.toUpperCase();
 }
 
@@ -43,7 +43,7 @@ function MatchCard({ match, onSelect, selected }) {
   const homeGoals = score.home ?? score.home_score ?? match.home_score ?? match.score_home ?? "—";
   const awayGoals = score.away ?? score.away_score ?? match.away_score ?? match.score_away ?? "—";
   const status = match.status ?? match.state ?? "";
-  const minute = match.minute ?? match.elapsed ?? null;
+  const minute = match.current_minute ?? match.minute ?? match.elapsed ?? null;
   const isLive = isLiveEvent(match);
   const isFinished = isFinishedEvent(match);
   const start = eventStart(match);
@@ -140,16 +140,16 @@ function MatchDetail({ matchId }) {
 
   const d = detail.event ?? detail;
   const incidents = d.incidents ?? d.events ?? d.timeline ?? d.goals ?? d.commentary ?? [];
-  const homeXg = d.home_xg_live ?? d.xg_home ?? null;
-  const awayXg = d.away_xg_live ?? d.xg_away ?? null;
+  const homeXg = d.home_xg_live ?? d.actual_home_xg ?? d.xg_home ?? null;
+  const awayXg = d.away_xg_live ?? d.actual_away_xg ?? d.xg_away ?? null;
 
   return (
     <div style={{ marginTop: 12, background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "12px 16px" }}>
       {(homeXg != null || awayXg != null) && (
         <div style={{ display: "flex", gap: 16, marginBottom: 10, fontSize: 11, color: T.textMuted }}>
-          <span>xG: <span style={{ color: "#93c5fd", fontWeight: 700, fontFamily: "'DM Mono', monospace" }}>{homeXg?.toFixed(2) ?? "—"}</span></span>
+          <span>xG: <span style={{ color: "#93c5fd", fontWeight: 700, fontFamily: "'DM Mono', monospace" }}>{homeXg != null ? Number(homeXg).toFixed(2) : "—"}</span></span>
           <span style={{ color: T.textFaint }}>—</span>
-          <span><span style={{ color: "#fca5a5", fontWeight: 700, fontFamily: "'DM Mono', monospace" }}>{awayXg?.toFixed(2) ?? "—"}</span> :xG</span>
+          <span><span style={{ color: "#fca5a5", fontWeight: 700, fontFamily: "'DM Mono', monospace" }}>{awayXg != null ? Number(awayXg).toFixed(2) : "—"}</span> :xG</span>
         </div>
       )}
       <div style={{ fontSize: 11, fontWeight: 700, color: T.accent, letterSpacing: "0.08em", marginBottom: 10, textTransform: "uppercase" }}>
