@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchOutrightOdds, fetchFixtures, fetchEventOdds } from "./soccerApi.js";
+import { fetchOutrightOdds, fetchAllFixtures, fetchEventOdds, eventStart, eventTeam } from "./soccerApi.js";
 
 const T = {
   bg: "#0a0f1a",
@@ -61,9 +61,13 @@ function MatchOddsRow({ match }) {
       .catch(() => {});
   }, [match.id]);
 
-  const home = match.home_team ?? match.homeTeam ?? {};
-  const away = match.away_team ?? match.awayTeam ?? {};
+  const home = eventTeam(match, "home");
+  const away = eventTeam(match, "away");
+  // Match-level odds may already be embedded on the event (odds_home/draw/away)
   const o = odds?.odds ?? odds ?? {};
+  const homeOdds = o.home_win ?? o["1"] ?? o.home ?? match.odds_home;
+  const drawOdds = o.draw ?? o["X"] ?? match.odds_draw;
+  const awayOdds = o.away_win ?? o["2"] ?? o.away ?? match.odds_away;
 
   return (
     <div style={{
@@ -82,16 +86,16 @@ function MatchOddsRow({ match }) {
         </div>
       </div>
 
-      {odds ? (
+      {(homeOdds ?? drawOdds ?? awayOdds) != null ? (
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <OddsChip decimal={o.home_win ?? o["1"] ?? o.home} label={home.shortName ?? "Home"} />
-          {(o.draw ?? o["X"]) != null && (
-            <OddsChip decimal={o.draw ?? o["X"]} label="Draw" />
-          )}
-          <OddsChip decimal={o.away_win ?? o["2"] ?? o.away} label={away.shortName ?? "Away"} />
+          <OddsChip decimal={homeOdds} label={home.shortName ?? "Home"} />
+          {drawOdds != null && <OddsChip decimal={drawOdds} label="Draw" />}
+          <OddsChip decimal={awayOdds} label={away.shortName ?? "Away"} />
         </div>
       ) : (
-        <div style={{ fontSize: 11, color: T.textFaint }}>Loading odds…</div>
+        <div style={{ fontSize: 11, color: T.textFaint }}>
+          {odds === null ? "Loading odds…" : "No odds yet for this match"}
+        </div>
       )}
     </div>
   );
@@ -167,14 +171,15 @@ export default function OddsPanel({ leagueId }) {
     if (!leagueId) return;
     Promise.all([
       fetchOutrightOdds(leagueId).catch(() => null),
-      fetchFixtures(leagueId, { status: "not_started" }).catch(() => []),
-    ]).then(([oRaw, matchRaw]) => {
+      fetchAllFixtures(leagueId).catch(() => []),
+    ]).then(([oRaw, list]) => {
       setOutrights(oRaw);
-      const list = Array.isArray(matchRaw)
-        ? matchRaw
-        : (matchRaw.results ?? matchRaw.data ?? matchRaw.events ?? []);
-      // Upcoming matches with odds (next 5)
-      setUpcomingMatches(list.slice(0, 5));
+      // Next 8 matches that haven't finished, soonest first
+      const upcoming = list
+        .filter(m => !/ft|finished|ended|after/i.test(m.status ?? m.state ?? ""))
+        .sort((a, b) => new Date(eventStart(a) ?? 0) - new Date(eventStart(b) ?? 0))
+        .slice(0, 8);
+      setUpcomingMatches(upcoming);
     }).finally(() => setLoading(false));
   }, [leagueId]);
 

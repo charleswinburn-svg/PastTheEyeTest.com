@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchLiveAndToday, fetchEventDetail, fetchStandings } from "./soccerApi.js";
+import { fetchAllFixtures, fetchEventDetail, fetchStandings, eventStart, eventTeam } from "./soccerApi.js";
 
 const T = {
   bg: "#0a0f1a",
@@ -48,15 +48,16 @@ function Flag({ code, size = 20 }) {
 }
 
 function MatchCard({ match, onSelect, selected }) {
-  const home = match.home_team ?? match.homeTeam ?? {};
-  const away = match.away_team ?? match.awayTeam ?? {};
+  const home = eventTeam(match, "home");
+  const away = eventTeam(match, "away");
   const score = match.score ?? match.result ?? {};
-  const homeGoals = score.home ?? score.home_score ?? match.home_score ?? "—";
-  const awayGoals = score.away ?? score.away_score ?? match.away_score ?? "—";
+  const homeGoals = score.home ?? score.home_score ?? match.home_score ?? match.score_home ?? "—";
+  const awayGoals = score.away ?? score.away_score ?? match.away_score ?? match.score_away ?? "—";
   const status = match.status ?? match.state ?? "";
   const minute = match.minute ?? match.elapsed ?? null;
-  const isLive = /live|inprogress|1h|2h/i.test(status);
-  const isFinished = /ft|finished/i.test(status);
+  const isLive = /live|inprogress|1h|2h|ht/i.test(status);
+  const isFinished = /ft|finished|ended|after/i.test(status);
+  const start = eventStart(match);
 
   return (
     <div
@@ -123,9 +124,9 @@ function MatchCard({ match, onSelect, selected }) {
       </div>
 
       {/* Kick-off time if upcoming */}
-      {!isFinished && !isLive && match.start_time && (
+      {!isFinished && !isLive && start && (
         <div style={{ textAlign: "center", marginTop: 6, fontSize: 11, color: T.textFaint }}>
-          {new Date(match.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          {new Date(start).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
         </div>
       )}
     </div>
@@ -258,18 +259,21 @@ export default function Scoreboard({ leagueId }) {
   const load = useCallback(async () => {
     if (!leagueId) return;
     try {
-      const [rawMatches, rawStandings] = await Promise.all([
-        fetchLiveAndToday(leagueId).catch(() => []),
+      const [matchList, rawStandings] = await Promise.all([
+        fetchAllFixtures(leagueId),
         fetchStandings(leagueId).catch(() => []),
       ]);
-      const matchList = Array.isArray(rawMatches)
-        ? rawMatches
-        : (rawMatches.results ?? rawMatches.data ?? rawMatches.events ?? []);
       const standList = Array.isArray(rawStandings)
         ? rawStandings
         : (rawStandings.results ?? rawStandings.data ?? rawStandings.standings ?? []);
-      setMatches(matchList);
+      const sorted = [...matchList].sort((a, b) => {
+        const ta = new Date(eventStart(a) ?? 0).getTime();
+        const tb = new Date(eventStart(b) ?? 0).getTime();
+        return ta - tb;
+      });
+      setMatches(sorted);
       setStandings(standList);
+      setError(null);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -322,14 +326,24 @@ export default function Scoreboard({ leagueId }) {
         <button style={tabStyle("groups")} onClick={() => setActiveTab("groups")}>Group Standings</button>
       </div>
 
-      {activeTab === "matches" && (
-        <div>
-          {matches.length === 0 ? (
-            <div style={{ color: T.textFaint, textAlign: "center", padding: 32, fontSize: 13 }}>
-              No matches today
+      {activeTab === "matches" && (() => {
+        const statusOf = m => m.status ?? m.state ?? "";
+        const live = matches.filter(m => /live|inprogress|1h|2h|ht/i.test(statusOf(m)));
+        const finished = matches.filter(m => /ft|finished|ended|after/i.test(statusOf(m)));
+        const todayStr = new Date().toDateString();
+        const upcoming = matches.filter(m => !live.includes(m) && !finished.includes(m));
+        const today = upcoming.filter(m => {
+          const s = eventStart(m);
+          return s && new Date(s).toDateString() === todayStr;
+        });
+        const later = upcoming.filter(m => !today.includes(m));
+
+        const Section = ({ title, items }) => items.length === 0 ? null : (
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.accent, letterSpacing: "0.08em", marginBottom: 8, textTransform: "uppercase" }}>
+              {title}
             </div>
-          ) : (
-            matches.map(m => (
+            {items.map(m => (
               <div key={m.id}>
                 <MatchCard
                   match={m}
@@ -338,10 +352,23 @@ export default function Scoreboard({ leagueId }) {
                 />
                 {selectedId === m.id && <MatchDetail matchId={m.id} />}
               </div>
-            ))
-          )}
-        </div>
-      )}
+            ))}
+          </div>
+        );
+
+        return matches.length === 0 ? (
+          <div style={{ color: T.textFaint, textAlign: "center", padding: 32, fontSize: 13 }}>
+            No fixtures available yet
+          </div>
+        ) : (
+          <div>
+            <Section title="Live" items={live} />
+            <Section title="Today" items={today} />
+            <Section title="Upcoming" items={later} />
+            <Section title="Results" items={[...finished].reverse()} />
+          </div>
+        );
+      })()}
 
       {activeTab === "groups" && (
         <div>

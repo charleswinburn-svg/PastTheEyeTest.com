@@ -23,13 +23,21 @@ async function get(path, params = {}) {
 }
 
 // ── League discovery ──────────────────────────────────────────
+// FIFA World Cup 2026 — confirmed against the live API. League 188 is an
+// empty duplicate; 27 holds all fixtures (season id 188).
+export const WC_LEAGUE = { id: 27, name: "World Cup 2026", season_id: 188 };
+
+export async function findWorldCupLeague() {
+  return WC_LEAGUE;
+}
+
 // The leagues endpoint is paginated (~10 per page, alphabetical).
 export async function fetchLeagues(page) {
   return get("/leagues/", page ? { page } : {});
 }
 
-// Find the FIFA World Cup league — walks all pages of the paginated list.
-export async function findWorldCupLeague() {
+// Generic discovery (kept for future tournaments) — walks the paginated list.
+export async function discoverWorldCupLeague() {
   const cached = sessionStorage.getItem("bzz_wc_league");
   if (cached) return JSON.parse(cached);
 
@@ -78,10 +86,25 @@ export async function fetchFixtures(leagueId, params = {}) {
   return get("/events/", { league: leagueId, ...params });
 }
 
-// Returns today's matches for a league
-export async function fetchLiveAndToday(leagueId) {
-  const today = new Date().toISOString().slice(0, 10);
-  return get("/events/", { league: leagueId, date: today });
+// The tournament has few enough events to fetch in one call — filter client-side
+export async function fetchAllFixtures(leagueId) {
+  const raw = await get("/events/", { league: leagueId });
+  return Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? raw.events ?? []);
+}
+
+// Kickoff timestamp — the API field name varies by endpoint version
+export function eventStart(m) {
+  return m.start_time ?? m.start_at ?? m.date ?? m.kickoff ?? m.datetime ?? m.start ?? null;
+}
+
+// Team object — events return home_team/away_team as plain strings with the
+// full object in home_team_obj/away_team_obj
+export function eventTeam(m, side) {
+  const obj = m[`${side}_team_obj`];
+  const raw = m[`${side}_team`];
+  if (obj && typeof obj === "object") return obj;
+  if (raw && typeof raw === "object") return raw;
+  return { name: raw ?? "" };
 }
 
 // Full event detail (lineups, stats, live score, incidents)
@@ -124,11 +147,11 @@ export async function fetchAllTournamentPlayerStats(leagueId) {
     if (Date.now() - ts < 30 * 60 * 1000) return data; // 30-min cache
   }
 
-  // Collect stats across all completed fixtures
-  const fixturesRaw = await fetchFixtures(leagueId, { status: "finished" });
-  const fixtures = Array.isArray(fixturesRaw)
-    ? fixturesRaw
-    : (fixturesRaw.results ?? fixturesRaw.data ?? []);
+  // Collect stats across all completed fixtures (filter client-side)
+  const allFixtures = await fetchAllFixtures(leagueId);
+  const fixtures = allFixtures.filter(f =>
+    /ft|finished|ended|after/i.test(f.status ?? f.state ?? "")
+  );
 
   // Aggregate per-player stats across all matches
   const playerMap = {};

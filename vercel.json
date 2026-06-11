@@ -7,7 +7,7 @@
     { "source": "/nhl-api/:path*",    "destination": "https://api-web.nhle.com/:path*" },
     { "source": "/nhl-assets/:path*", "destination": "https://assets.nhle.com/:path*" },
     { "source": "/flag-assets/:path*","destination": "https://flagcdn.com/:path*" },
-    { "source": "/bzzoiro/:path*",    "destination": "https://sports.bzzoiro.com/:path*" },
+    { "source": "/bzzoiro/(.*)",      "destination": "https://sports.bzzoiro.com/$1" },
     { "source": "/(.*)",              "destination": "/index.html" }
   ]
 }
