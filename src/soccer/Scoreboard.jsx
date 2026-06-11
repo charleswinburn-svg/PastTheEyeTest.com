@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchAllFixtures, fetchEventDetail, fetchStandings, eventStart, eventTeam } from "./soccerApi.js";
+import { fetchAllFixtures, fetchEventDetail, computeStandingsFromFixtures, eventStart, eventTeam } from "./soccerApi.js";
 import { Flag } from "./flags.jsx";
 
 const T = {
@@ -70,7 +70,7 @@ function MatchCard({ match, onSelect, selected }) {
           )}
         </span>
         <span style={{ fontSize: 10, color: T.textFaint }}>
-          {match.group ?? match.stage ?? ""}
+          {match.group_name ?? match.group ?? match.stage ?? ""}
         </span>
       </div>
 
@@ -138,24 +138,34 @@ function MatchDetail({ matchId }) {
   if (loading) return <div style={{ color: T.textFaint, padding: 20, textAlign: "center" }}>Loading match data…</div>;
   if (!detail) return null;
 
-  const incidents = detail.incidents ?? detail.events ?? [];
+  const d = detail.event ?? detail;
+  const incidents = d.incidents ?? d.events ?? d.timeline ?? d.goals ?? d.commentary ?? [];
+  const homeXg = d.home_xg_live ?? d.xg_home ?? null;
+  const awayXg = d.away_xg_live ?? d.xg_away ?? null;
 
   return (
     <div style={{ marginTop: 12, background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "12px 16px" }}>
+      {(homeXg != null || awayXg != null) && (
+        <div style={{ display: "flex", gap: 16, marginBottom: 10, fontSize: 11, color: T.textMuted }}>
+          <span>xG: <span style={{ color: "#93c5fd", fontWeight: 700, fontFamily: "'DM Mono', monospace" }}>{homeXg?.toFixed(2) ?? "—"}</span></span>
+          <span style={{ color: T.textFaint }}>—</span>
+          <span><span style={{ color: "#fca5a5", fontWeight: 700, fontFamily: "'DM Mono', monospace" }}>{awayXg?.toFixed(2) ?? "—"}</span> :xG</span>
+        </div>
+      )}
       <div style={{ fontSize: 11, fontWeight: 700, color: T.accent, letterSpacing: "0.08em", marginBottom: 10, textTransform: "uppercase" }}>
         Match Events
       </div>
       {incidents.length === 0 && (
-        <div style={{ color: T.textFaint, fontSize: 12 }}>No events yet</div>
+        <div style={{ color: T.textFaint, fontSize: 12 }}>No events available for this match</div>
       )}
       {incidents.map((inc, i) => {
-        const type = inc.type ?? inc.incident_type ?? "";
+        const type = inc.type ?? inc.incident_type ?? inc.event_type ?? "";
         const isGoal = /goal/i.test(type);
         const isCard = /card/i.test(type);
         const isSub = /sub/i.test(type);
-        const icon = isGoal ? "⚽" : isCard ? (inc.card_type === "red" ? "🟥" : "🟨") : isSub ? "🔄" : "•";
-        const playerName = inc.player ?? inc.player_name ?? inc.player_in ?? "";
-        const side = inc.is_home ? "home" : "away";
+        const icon = isGoal ? "⚽" : isCard ? ((inc.card_type ?? inc.color ?? "") === "red" ? "🟥" : "🟨") : isSub ? "🔄" : "•";
+        const playerName = inc.player ?? inc.player_name ?? inc.player_in ?? inc.name ?? "";
+        const side = (inc.is_home ?? inc.home_team ?? false) ? "home" : "away";
 
         return (
           <div key={i} style={{
@@ -163,14 +173,14 @@ function MatchDetail({ matchId }) {
             borderBottom: i < incidents.length - 1 ? `1px solid ${T.divider}` : "none",
           }}>
             <span style={{ width: 30, fontSize: 10, color: T.textFaint, fontFamily: "'DM Mono', monospace", flexShrink: 0 }}>
-              {inc.minute ?? inc.time ?? ""}'
+              {inc.minute ?? inc.time ?? inc.elapsed ?? ""}'
             </span>
             <span style={{ fontSize: 14 }}>{icon}</span>
             <span style={{ fontSize: 12, color: side === "home" ? "#93c5fd" : "#fca5a5", fontWeight: 500 }}>
               {playerName}
             </span>
-            {isSub && inc.player_out && (
-              <span style={{ fontSize: 11, color: T.textFaint }}>← {inc.player_out}</span>
+            {isSub && (inc.player_out ?? inc.player_off) && (
+              <span style={{ fontSize: 11, color: T.textFaint }}>← {inc.player_out ?? inc.player_off}</span>
             )}
           </div>
         );
@@ -248,20 +258,14 @@ export default function Scoreboard({ leagueId }) {
   const load = useCallback(async () => {
     if (!leagueId) return;
     try {
-      const [matchList, rawStandings] = await Promise.all([
-        fetchAllFixtures(leagueId),
-        fetchStandings(leagueId).catch(() => []),
-      ]);
-      const standList = Array.isArray(rawStandings)
-        ? rawStandings
-        : (rawStandings.results ?? rawStandings.data ?? rawStandings.standings ?? []);
+      const matchList = await fetchAllFixtures(leagueId);
       const sorted = [...matchList].sort((a, b) => {
         const ta = new Date(eventStart(a) ?? 0).getTime();
         const tb = new Date(eventStart(b) ?? 0).getTime();
         return ta - tb;
       });
       setMatches(sorted);
-      setStandings(standList);
+      setStandings(computeStandingsFromFixtures(sorted));
       setError(null);
     } catch (e) {
       setError(e.message);

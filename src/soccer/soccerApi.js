@@ -92,9 +92,9 @@ export async function fetchAllFixtures(leagueId) {
   return Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? raw.events ?? []);
 }
 
-// Kickoff timestamp — the API field name varies by endpoint version
+// Kickoff timestamp — confirmed bzzoiro field is event_date
 export function eventStart(m) {
-  return m.start_time ?? m.start_at ?? m.date ?? m.kickoff ?? m.datetime ?? m.start ?? null;
+  return m.event_date ?? m.start_time ?? m.start_at ?? m.date ?? m.kickoff ?? m.datetime ?? m.start ?? null;
 }
 
 // Team object — events return home_team/away_team as plain strings with the
@@ -113,6 +113,60 @@ export async function fetchEventDetail(eventId) {
 }
 
 // ── Group standings ───────────────────────────────────────────
+// Computed client-side from fixtures — the bzzoiro /standings/ endpoint 404s.
+export function computeStandingsFromFixtures(fixtures) {
+  const groups = {};
+
+  for (const m of fixtures) {
+    if (!/ft|finished|ended|after/i.test(m.status ?? "")) continue;
+    const group = m.group_name ?? m.group ?? m.stage ?? null;
+    if (!group || /round|knockout|final/i.test(group)) continue;
+
+    const home = eventTeam(m, "home");
+    const away = eventTeam(m, "away");
+    const homeName = home.name ?? home.shortName ?? "";
+    const awayName = away.name ?? away.shortName ?? "";
+    if (!homeName || !awayName) continue;
+
+    const hs = Number(m.home_score ?? m.score?.home ?? 0);
+    const as_ = Number(m.away_score ?? m.score?.away ?? 0);
+
+    if (!groups[group]) groups[group] = {};
+    const ensure = (name, obj) => {
+      if (!groups[group][name]) groups[group][name] = {
+        team: obj, played: 0, won: 0, drawn: 0, lost: 0,
+        goals_for: 0, goals_against: 0, points: 0,
+      };
+    };
+    ensure(homeName, home);
+    ensure(awayName, away);
+
+    const ht = groups[group][homeName];
+    const at = groups[group][awayName];
+    ht.played++; at.played++;
+    ht.goals_for += hs; ht.goals_against += as_;
+    at.goals_for += as_; at.goals_against += hs;
+
+    if (hs > as_) { ht.won++; at.lost++; ht.points += 3; }
+    else if (hs < as_) { at.won++; ht.lost++; at.points += 3; }
+    else { ht.drawn++; at.drawn++; ht.points++; at.points++; }
+  }
+
+  return Object.entries(groups)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([group, teams]) => ({
+      name: group,
+      group,
+      table: Object.values(teams)
+        .sort((a, b) =>
+          b.points - a.points ||
+          (b.goals_for - b.goals_against) - (a.goals_for - a.goals_against) ||
+          b.goals_for - a.goals_for
+        )
+        .map((t, i) => ({ ...t, position: i + 1 })),
+    }));
+}
+
 export async function fetchStandings(leagueId) {
   return get("/standings/", { league: leagueId });
 }

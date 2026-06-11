@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchOutrightOdds, fetchAllFixtures, fetchEventOdds, eventStart, eventTeam } from "./soccerApi.js";
+import { Flag, flagCode } from "./flags.jsx";
 
 const T = {
   bg: "#0a0f1a",
@@ -13,18 +14,6 @@ const T = {
   red: "#ef4444",
   divider: "#1e293b",
 };
-
-function Flag({ code, size = 18 }) {
-  if (!code) return null;
-  return (
-    <img
-      src={`/flag-assets/w80/${code.toLowerCase()}.png`}
-      alt={code}
-      style={{ width: size, height: Math.round(size * 0.66), objectFit: "contain", flexShrink: 0 }}
-      onError={e => { e.target.style.display = "none"; }}
-    />
-  );
-}
 
 function toAmerican(decimal) {
   if (!decimal || decimal <= 1) return "—";
