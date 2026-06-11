@@ -43,6 +43,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/savant-api/, ''),
       },
+      // ── Bzzoiro Football API ──
+      '/bzzoiro': {
+        target: 'https://sports.bzzoiro.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/bzzoiro/, ''),
+      },
     },
   },
 });
