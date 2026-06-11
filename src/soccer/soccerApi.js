@@ -46,12 +46,31 @@ export async function findWorldCupLeague() {
   }
 
   const cups = all.filter(l => /world\s*cup|fifa/i.test(l.name ?? ""));
-  // Exclude Club World Cup, youth, futsal, etc. — prefer the men's senior tournament
-  const wc =
-    cups.find(l => !/club|u-?\d{2}|youth|futsal|beach/i.test(l.name) && !l.is_women) ??
-    cups[0] ?? null;
+  // Exclude qualification rounds, Club World Cup, youth, futsal, women's variants
+  let candidates = cups.filter(l =>
+    !/qualif|club|u-?\d{2}|youth|futsal|beach/i.test(l.name) && !l.is_women
+  );
+  if (candidates.length === 0) candidates = cups;
+
+  // bzzoiro has duplicate "World Cup 2026" entries — prefer one with an active
+  // season, then probe which actually has fixtures
+  candidates.sort((a, b) => (b.current_season ? 1 : 0) - (a.current_season ? 1 : 0));
+
+  let wc = candidates.length === 1 ? candidates[0] : null;
+  if (!wc && candidates.length > 1) {
+    for (const cand of candidates) {
+      const id = cand.id ?? cand.league_id ?? cand.pk;
+      try {
+        const ev = await get("/events/", { league: id });
+        const list = Array.isArray(ev) ? ev : (ev.results ?? ev.data ?? []);
+        if (list.length > 0) { wc = cand; break; }
+      } catch { /* dead entry — try the next */ }
+    }
+    wc = wc ?? candidates[0];
+  }
+
   if (wc) sessionStorage.setItem("bzz_wc_league", JSON.stringify(wc));
-  return wc;
+  return wc ?? null;
 }
 
 // ── Fixtures / live scores ────────────────────────────────────
