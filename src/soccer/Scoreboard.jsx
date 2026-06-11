@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchAllFixtures, fetchEventDetail, computeStandingsFromFixtures, eventStart, eventTeam } from "./soccerApi.js";
+import { fetchAllFixtures, fetchEventDetail, computeStandingsFromFixtures, eventStart, eventTeam, isFinishedEvent, isLiveEvent } from "./soccerApi.js";
 import { Flag } from "./flags.jsx";
 
 const T = {
@@ -44,8 +44,8 @@ function MatchCard({ match, onSelect, selected }) {
   const awayGoals = score.away ?? score.away_score ?? match.away_score ?? match.score_away ?? "—";
   const status = match.status ?? match.state ?? "";
   const minute = match.minute ?? match.elapsed ?? null;
-  const isLive = /live|inprogress|1h|2h|ht/i.test(status);
-  const isFinished = /ft|finished|ended|after/i.test(status);
+  const isLive = isLiveEvent(match);
+  const isFinished = isFinishedEvent(match);
   const start = eventStart(match);
 
   return (
@@ -64,7 +64,7 @@ function MatchCard({ match, onSelect, selected }) {
       {/* Status row */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, alignItems: "center" }}>
         <span style={{ fontSize: 10, fontWeight: 700, color: statusColor(status), letterSpacing: "0.06em", textTransform: "uppercase" }}>
-          {statusLabel(status, minute)}
+          {statusLabel(status, minute) || (isFinished ? "FT" : isLive ? "LIVE" : "")}
           {isLive && (
             <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: T.green, marginLeft: 5, verticalAlign: "middle", animation: "pulse 1.2s infinite" }} />
           )}
@@ -309,9 +309,8 @@ export default function Scoreboard({ leagueId }) {
     </div>
   );
 
-  const statusOf = m => m.status ?? m.state ?? "";
-  const live = matches.filter(m => /live|inprogress|1h|2h|ht/i.test(statusOf(m)));
-  const finished = matches.filter(m => /ft|finished|ended|after/i.test(statusOf(m)));
+  const live = matches.filter(isLiveEvent);
+  const finished = matches.filter(isFinishedEvent);
   const todayStr = new Date().toDateString();
   const upcoming = matches.filter(m => !live.includes(m) && !finished.includes(m));
   const today = upcoming.filter(m => {

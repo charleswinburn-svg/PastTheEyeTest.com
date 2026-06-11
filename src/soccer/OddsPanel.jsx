@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchOutrightOdds, fetchAllFixtures, fetchEventOdds, eventStart, eventTeam } from "./soccerApi.js";
+import { fetchOutrightOdds, fetchAllFixtures, fetchEventOdds, eventStart, eventTeam, isFinishedEvent } from "./soccerApi.js";
 import { Flag, flagCode } from "./flags.jsx";
 
 const T = {
@@ -165,7 +165,7 @@ export default function OddsPanel({ leagueId }) {
       setOutrights(oRaw);
       // Next 8 matches that haven't finished, soonest first
       const upcoming = list
-        .filter(m => !/ft|finished|ended|after/i.test(m.status ?? m.state ?? ""))
+        .filter(m => !isFinishedEvent(m))
         .sort((a, b) => new Date(eventStart(a) ?? 0) - new Date(eventStart(b) ?? 0))
         .slice(0, 8);
       setUpcomingMatches(upcoming);

@@ -86,16 +86,51 @@ export async function fetchFixtures(leagueId, params = {}) {
   return get("/events/", { league: leagueId, ...params });
 }
 
-// The tournament has few enough events to fetch in one call — filter client-side
+// Fetch the full fixture list, following pagination (the endpoint pages like
+// /leagues/ does — only reading page 1 made finished matches disappear once
+// the feed grew). page_size is a hint; ignored if the API doesn't support it.
 export async function fetchAllFixtures(leagueId) {
-  const raw = await get("/events/", { league: leagueId });
-  return Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? raw.events ?? []);
+  const all = [];
+  let raw = await get("/events/", { league: leagueId, page_size: 200 });
+  for (let i = 0; i < 30; i++) {
+    const list = Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? raw.events ?? []);
+    all.push(...list);
+    const next = !Array.isArray(raw) && raw.next;
+    if (!next || list.length === 0) break;
+    let pageNum = null;
+    try { pageNum = new URL(next, location.origin).searchParams.get("page"); } catch { /* malformed next */ }
+    if (!pageNum) break;
+    raw = await get("/events/", { league: leagueId, page_size: 200, page: pageNum });
+  }
+
+  // Merge with previously seen events so results never vanish from the UI
+  // if the feed drops or reorders past matches. Fresh data wins per id.
+  const key = `bzz_events_${leagueId}`;
+  let cached = [];
+  try { cached = JSON.parse(localStorage.getItem(key) ?? "[]"); } catch { /* corrupt cache */ }
+  const byId = new Map();
+  for (const m of cached) byId.set(m.id ?? m.event_id, m);
+  for (const m of all) byId.set(m.id ?? m.event_id, m);
+  byId.delete(undefined);
+  byId.delete(null);
+  const merged = [...byId.values()];
+  try { localStorage.setItem(key, JSON.stringify(merged)); } catch { /* storage full */ }
+  return merged;
 }
 
 // Kickoff timestamp — confirmed bzzoiro field is event_date
 export function eventStart(m) {
   return m.event_date ?? m.start_time ?? m.start_at ?? m.date ?? m.kickoff ?? m.datetime ?? m.start ?? null;
 }
+
+// Combined status string — period ("FT", "1H", "HT") backs up status, since
+// either field alone has been unreliable
+export function eventStatus(m) {
+  return `${m.status ?? m.state ?? ""} ${m.period ?? ""}`.trim();
+}
+
+export const isFinishedEvent = m => /ft|finished|ended|after/i.test(eventStatus(m));
+export const isLiveEvent = m => /live|inprogress|halftime|break|1h|2h|ht/i.test(eventStatus(m)) && !isFinishedEvent(m);
 
 // Team object — events return home_team/away_team as plain strings with the
 // full object in home_team_obj/away_team_obj
@@ -118,7 +153,7 @@ export function computeStandingsFromFixtures(fixtures) {
   const groups = {};
 
   for (const m of fixtures) {
-    if (!/ft|finished|ended|after/i.test(m.status ?? "")) continue;
+    if (!isFinishedEvent(m)) continue;
     const group = m.group_name ?? m.group ?? m.stage ?? null;
     if (!group || /round|knockout|final/i.test(group)) continue;
 
@@ -203,9 +238,7 @@ export async function fetchAllTournamentPlayerStats(leagueId) {
 
   // Collect stats across all completed fixtures (filter client-side)
   const allFixtures = await fetchAllFixtures(leagueId);
-  const fixtures = allFixtures.filter(f =>
-    /ft|finished|ended|after/i.test(f.status ?? f.state ?? "")
-  );
+  const fixtures = allFixtures.filter(isFinishedEvent);
 
   // Aggregate per-player stats across all matches
   const playerMap = {};
