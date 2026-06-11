@@ -377,7 +377,7 @@ export default function Scoreboard({ leagueId }) {
       {activeTab === "finished" && (
         finished.length === 0 ? (
           <div style={{ color: T.textFaint, textAlign: "center", padding: 32, fontSize: 13 }}>
-            No finished matches yet
+            No finished matches yet ({matches.length} fixtures loaded)
           </div>
         ) : (
           <div>
@@ -390,13 +390,18 @@ export default function Scoreboard({ leagueId }) {
         <div>
           {standings.length === 0 ? (
             <div style={{ color: T.textFaint, textAlign: "center", padding: 32, fontSize: 13 }}>
-              Standings not yet available
+              Standings appear once group games finish
             </div>
           ) : (
             standings.map((s, i) => <GroupTable key={i} standing={s} />)
           )}
         </div>
       )}
+
+      {/* Diagnostic footer — shows what the API actually returned */}
+      <div style={{ marginTop: 10, fontSize: 10, color: T.textFaint, textAlign: "right", fontFamily: "'DM Mono', monospace" }}>
+        {matches.length} fixtures · {live.length} live · {finished.length} finished
+      </div>
     </div>
   );
 }

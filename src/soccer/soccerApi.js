@@ -88,26 +88,42 @@ export async function fetchFixtures(leagueId, params = {}) {
 
 // Fetch the full fixture list, following pagination (the endpoint pages like
 // /leagues/ does — only reading page 1 made finished matches disappear once
-// the feed grew). page_size is a hint; ignored if the API doesn't support it.
+// the feed grew). page_size is a hint; some APIs reject unknown params, so
+// retry bare if it errors. On total failure, serve the cached fixture list.
 export async function fetchAllFixtures(leagueId) {
+  const key = `bzz_events_${leagueId}`;
+  let cached = [];
+  try { cached = JSON.parse(localStorage.getItem(key) ?? "[]"); } catch { /* corrupt cache */ }
+
   const all = [];
-  let raw = await get("/events/", { league: leagueId, page_size: 200 });
-  for (let i = 0; i < 30; i++) {
-    const list = Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? raw.events ?? []);
-    all.push(...list);
-    const next = !Array.isArray(raw) && raw.next;
-    if (!next || list.length === 0) break;
-    let pageNum = null;
-    try { pageNum = new URL(next, location.origin).searchParams.get("page"); } catch { /* malformed next */ }
-    if (!pageNum) break;
-    raw = await get("/events/", { league: leagueId, page_size: 200, page: pageNum });
+  try {
+    let raw;
+    try {
+      raw = await get("/events/", { league: leagueId, page_size: 200 });
+    } catch {
+      raw = await get("/events/", { league: leagueId });
+    }
+    for (let i = 0; i < 30; i++) {
+      const list = Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? raw.events ?? []);
+      all.push(...list);
+      const next = !Array.isArray(raw) && raw.next;
+      if (!next || list.length === 0) break;
+      // Re-use every param from the next link so page/page_size stay consistent
+      let params = null;
+      try {
+        params = Object.fromEntries(new URL(next, location.origin).searchParams.entries());
+        delete params._;
+      } catch { /* malformed next */ }
+      if (!params || !params.page) break;
+      raw = await get("/events/", params);
+    }
+  } catch (e) {
+    if (cached.length === 0) throw e;
+    console.warn("bzzoiro events fetch failed — serving cached fixtures", e);
   }
 
   // Merge with previously seen events so results never vanish from the UI
   // if the feed drops or reorders past matches. Fresh data wins per id.
-  const key = `bzz_events_${leagueId}`;
-  let cached = [];
-  try { cached = JSON.parse(localStorage.getItem(key) ?? "[]"); } catch { /* corrupt cache */ }
   const byId = new Map();
   for (const m of cached) byId.set(m.id ?? m.event_id, m);
   for (const m of all) byId.set(m.id ?? m.event_id, m);
@@ -115,6 +131,7 @@ export async function fetchAllFixtures(leagueId) {
   byId.delete(null);
   const merged = [...byId.values()];
   try { localStorage.setItem(key, JSON.stringify(merged)); } catch { /* storage full */ }
+  if (typeof window !== "undefined") window.__bzzEvents = merged;
   return merged;
 }
 
