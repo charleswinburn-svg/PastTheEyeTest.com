@@ -1,6 +1,7 @@
 import { useRef, useCallback } from "react";
 import { BubblePercentileBar, saveCardAsPng } from "../baseball/SharedComponents.jsx";
 import { buildPlayerCategories } from "./soccerApi.js";
+import { flagCode } from "./flags.jsx";
 
 const T = {
   bg: "#0a0f1a",
@@ -18,16 +19,19 @@ const T = {
   divider: "#1e293b",
 };
 
-// FIFA country colors (fallback to a World Cup green)
+// National team primary colors keyed by flagcdn code (fallback World Cup green)
 const COUNTRY_COLORS = {
-  BRA: "#009C3B", ARG: "#74ACDF", FRA: "#002395", ENG: "#cf091e",
-  ESP: "#AA151B", GER: "#000000", POR: "#006600", ITA: "#003580",
-  NED: "#FF4F00", BEL: "#000000", URU: "#5EB6E4", MEX: "#006847",
-  USA: "#002868", JPN: "#BC002D", SEN: "#00853F", MAR: "#C1272D",
-  AUS: "#00008B", CAN: "#FF0000", CHN: "#DE2910", KOR: "#003478",
-  COL: "#FCD116", ECU: "#FFD100", CRC: "#002B7F", TUN: "#E70013",
-  CMR: "#007A5E", GHA: "#006B3F", NGR: "#008751", EGY: "#CE1126",
-  ALG: "#006233", SAU: "#006C35", IRN: "#239F40", QAT: "#8D1B3D",
+  br: "#009C3B", ar: "#74ACDF", fr: "#002395", "gb-eng": "#cf091e",
+  "gb-sct": "#003078", es: "#AA151B", de: "#000000", pt: "#006600",
+  it: "#003580", nl: "#FF4F00", be: "#000000", uy: "#5EB6E4",
+  mx: "#006847", us: "#002868", jp: "#BC002D", sn: "#00853F",
+  ma: "#C1272D", au: "#00008B", ca: "#FF0000", kr: "#003478",
+  co: "#FCD116", ec: "#FFD100", cr: "#002B7F", tn: "#E70013",
+  cm: "#007A5E", gh: "#006B3F", ng: "#008751", eg: "#CE1126",
+  dz: "#006233", sa: "#006C35", ir: "#239F40", qa: "#8D1B3D",
+  ch: "#D52B1E", hr: "#FF0000", rs: "#C6363C", pl: "#DC143C",
+  tr: "#E30A17", py: "#D52B1E", za: "#007A4D", cz: "#11457E",
+  ba: "#002F6C", ht: "#00209F",
 };
 
 function hexLum(hex) {
@@ -39,7 +43,7 @@ function hexLum(hex) {
 }
 
 function SoccerPlayerHeader({ player }) {
-  const cc = (player.country_code ?? "").toUpperCase();
+  const cc = flagCode({ name: player.team, country_code: player.country_code });
   const bgColor = COUNTRY_COLORS[cc] || "#1b4332";
   const light = hexLum(bgColor) > 0.179;
   const textColor = light ? "#111" : "#fff";
@@ -91,9 +95,9 @@ function SoccerPlayerHeader({ player }) {
       <div style={{ width: 72, height: 72, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {cc && (
           <img
-            src={`/flag-assets/w80/${cc.toLowerCase()}.png`}
+            src={`/flag-assets/w80/${cc}.png`}
             alt={cc}
-            style={{ maxWidth: 72, maxHeight: 48, objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }}
+            style={{ maxWidth: 72, maxHeight: 48, objectFit: "contain", borderRadius: 3, filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }}
             onError={e => { e.target.style.display = "none"; }}
           />
         )}

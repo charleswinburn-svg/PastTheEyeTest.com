@@ -76,13 +76,13 @@ function MatchOddsRow({ match }) {
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <Flag code={home.country_code ?? home.alpha2} />
+          <Flag team={home} />
           <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{home.name ?? home.shortName ?? ""}</span>
         </div>
         <span style={{ fontSize: 11, color: T.textFaint, fontWeight: 600 }}>vs</span>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{away.name ?? away.shortName ?? ""}</span>
-          <Flag code={away.country_code ?? away.alpha2} />
+          <Flag team={away} />
         </div>
       </div>
 
@@ -135,7 +135,7 @@ function OutrightOdds({ outrights }) {
             <span style={{ width: 20, fontSize: 11, color: T.textFaint, fontFamily: "'DM Mono', monospace", flexShrink: 0, textAlign: "right" }}>
               {i + 1}
             </span>
-            <Flag code={cc} />
+            <Flag team={name} />
             <span style={{ width: 140, fontSize: 12, color: T.text, fontWeight: 500, flexShrink: 0 }}>{name}</span>
             <div style={{ flex: 1, position: "relative", height: 18, display: "flex", alignItems: "center" }}>
               <div style={{

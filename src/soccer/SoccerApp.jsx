@@ -22,6 +22,11 @@ const TABS = [
   { id: "players", label: "Player Cards" },
 ];
 
+// Player cards stay locked until the Round of 32 — percentile ranks computed
+// off 1–3 group games are too noisy to be meaningful
+const KO_START = new Date("2026-06-28T00:00:00");
+const koUnlocked = () => Date.now() >= KO_START.getTime();
+
 export default function SoccerApp() {
   const [activeTab, setActiveTab] = useState("scores");
   const [leagueId, setLeagueId] = useState(null);
@@ -45,9 +50,9 @@ export default function SoccerApp() {
       .catch(e => setLeagueError(e.message));
   }, []);
 
-  // Load player stats when switching to player tab
+  // Load player stats when switching to player tab (only once unlocked)
   useEffect(() => {
-    if (activeTab !== "players" || !leagueId || allPlayers.length > 0) return;
+    if (activeTab !== "players" || !koUnlocked() || !leagueId || allPlayers.length > 0) return;
     setPlayersLoading(true);
     fetchAllTournamentPlayerStats(leagueId)
       .then(players => setAllPlayers(players))
@@ -129,7 +134,21 @@ export default function SoccerApp() {
 
         {activeTab === "odds" && <OddsPanel leagueId={leagueId} />}
 
-        {activeTab === "players" && (
+        {activeTab === "players" && !koUnlocked() && (
+          <div style={{ textAlign: "center", padding: "48px 24px" }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 6 }}>
+              Player cards unlock at the knockout stage
+            </div>
+            <div style={{ fontSize: 12, color: T.textMuted, maxWidth: 420, margin: "0 auto", lineHeight: 1.5 }}>
+              Percentile ranks need a full group stage of data to be meaningful.
+              Cards go live when the Round of 32 kicks off on{" "}
+              {KO_START.toLocaleDateString([], { month: "long", day: "numeric" })}.
+            </div>
+          </div>
+        )}
+
+        {activeTab === "players" && koUnlocked() && (
           <div>
             {playersLoading ? (
               <div style={{ color: T.textFaint, textAlign: "center", padding: 32 }}>

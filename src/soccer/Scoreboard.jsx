@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchAllFixtures, fetchEventDetail, fetchStandings, eventStart, eventTeam } from "./soccerApi.js";
+import { Flag } from "./flags.jsx";
 
 const T = {
   bg: "#0a0f1a",
@@ -33,18 +34,6 @@ function statusLabel(status, minute) {
   }
   if (s === "ns" || s.includes("not started")) return "Upcoming";
   return status.toUpperCase();
-}
-
-function Flag({ code, size = 20 }) {
-  if (!code) return <span style={{ width: size, height: size, display: "inline-block" }} />;
-  return (
-    <img
-      src={`/flag-assets/w80/${code.toLowerCase()}.png`}
-      alt={code}
-      style={{ width: size, height: Math.round(size * 0.66), objectFit: "contain", flexShrink: 0 }}
-      onError={e => { e.target.style.display = "none"; }}
-    />
-  );
 }
 
 function MatchCard({ match, onSelect, selected }) {
@@ -92,7 +81,7 @@ function MatchCard({ match, onSelect, selected }) {
           <span style={{ fontSize: 13, fontWeight: 600, color: T.text, textAlign: "right" }}>
             {home.name ?? home.shortName ?? ""}
           </span>
-          <Flag code={home.country_code ?? home.alpha2 ?? home.flag} />
+          <Flag team={home} />
         </div>
 
         {/* Score */}
@@ -116,7 +105,7 @@ function MatchCard({ match, onSelect, selected }) {
 
         {/* Away */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
-          <Flag code={away.country_code ?? away.alpha2 ?? away.flag} />
+          <Flag team={away} />
           <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
             {away.name ?? away.shortName ?? ""}
           </span>
@@ -221,7 +210,7 @@ function GroupTable({ standing }) {
                 </td>
                 <td style={{ padding: "4px 6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <Flag code={team.country_code ?? team.alpha2} size={16} />
+                    <Flag team={team.name ? team : (row.team_name ?? "")} size={16} />
                     <span style={{ color: T.text, fontWeight: 500 }}>
                       {team.shortName ?? team.name ?? row.team_name ?? ""}
                     </span>
