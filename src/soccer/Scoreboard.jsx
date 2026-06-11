@@ -309,6 +309,47 @@ export default function Scoreboard({ leagueId }) {
     </div>
   );
 
+  const statusOf = m => m.status ?? m.state ?? "";
+  const live = matches.filter(m => /live|inprogress|1h|2h|ht/i.test(statusOf(m)));
+  const finished = matches.filter(m => /ft|finished|ended|after/i.test(statusOf(m)));
+  const todayStr = new Date().toDateString();
+  const upcoming = matches.filter(m => !live.includes(m) && !finished.includes(m));
+  const today = upcoming.filter(m => {
+    const s = eventStart(m);
+    return s && new Date(s).toDateString() === todayStr;
+  });
+  const later = upcoming.filter(m => !today.includes(m));
+
+  // Finished matches grouped by day, most recent day first
+  const finishedByDay = [];
+  for (const m of [...finished].reverse()) {
+    const s = eventStart(m);
+    const day = s
+      ? new Date(s).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })
+      : "Earlier";
+    const bucket = finishedByDay.find(b => b.day === day);
+    if (bucket) bucket.items.push(m);
+    else finishedByDay.push({ day, items: [m] });
+  }
+
+  const Section = ({ title, items }) => items.length === 0 ? null : (
+    <div style={{ marginBottom: 18 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: T.accent, letterSpacing: "0.08em", marginBottom: 8, textTransform: "uppercase" }}>
+        {title}
+      </div>
+      {items.map(m => (
+        <div key={m.id}>
+          <MatchCard
+            match={m}
+            selected={selectedId === m.id}
+            onSelect={id => setSelectedId(id === selectedId ? null : id)}
+          />
+          {selectedId === m.id && <MatchDetail matchId={m.id} />}
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div>
       <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
@@ -316,52 +357,35 @@ export default function Scoreboard({ leagueId }) {
       {/* Tabs */}
       <div style={{ display: "flex", borderBottom: `1px solid ${T.border}`, marginBottom: 16 }}>
         <button style={tabStyle("matches")} onClick={() => setActiveTab("matches")}>Today's Matches</button>
+        <button style={tabStyle("finished")} onClick={() => setActiveTab("finished")}>Finished</button>
         <button style={tabStyle("groups")} onClick={() => setActiveTab("groups")}>Group Standings</button>
       </div>
 
-      {activeTab === "matches" && (() => {
-        const statusOf = m => m.status ?? m.state ?? "";
-        const live = matches.filter(m => /live|inprogress|1h|2h|ht/i.test(statusOf(m)));
-        const finished = matches.filter(m => /ft|finished|ended|after/i.test(statusOf(m)));
-        const todayStr = new Date().toDateString();
-        const upcoming = matches.filter(m => !live.includes(m) && !finished.includes(m));
-        const today = upcoming.filter(m => {
-          const s = eventStart(m);
-          return s && new Date(s).toDateString() === todayStr;
-        });
-        const later = upcoming.filter(m => !today.includes(m));
-
-        const Section = ({ title, items }) => items.length === 0 ? null : (
-          <div style={{ marginBottom: 18 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.accent, letterSpacing: "0.08em", marginBottom: 8, textTransform: "uppercase" }}>
-              {title}
-            </div>
-            {items.map(m => (
-              <div key={m.id}>
-                <MatchCard
-                  match={m}
-                  selected={selectedId === m.id}
-                  onSelect={id => setSelectedId(id === selectedId ? null : id)}
-                />
-                {selectedId === m.id && <MatchDetail matchId={m.id} />}
-              </div>
-            ))}
-          </div>
-        );
-
-        return matches.length === 0 ? (
+      {activeTab === "matches" && (
+        live.length + today.length + later.length === 0 ? (
           <div style={{ color: T.textFaint, textAlign: "center", padding: 32, fontSize: 13 }}>
-            No fixtures available yet
+            No upcoming fixtures — see the Finished tab for results
           </div>
         ) : (
           <div>
             <Section title="Live" items={live} />
             <Section title="Today" items={today} />
             <Section title="Upcoming" items={later} />
-            <Section title="Results" items={[...finished].reverse()} />
           </div>
-        );
-      })()}
+        )
+      )}
+
+      {activeTab === "finished" && (
+        finished.length === 0 ? (
+          <div style={{ color: T.textFaint, textAlign: "center", padding: 32, fontSize: 13 }}>
+            No finished matches yet
+          </div>
+        ) : (
+          <div>
+            {finishedByDay.map(b => <Section key={b.day} title={b.day} items={b.items} />)}
+          </div>
+        )
+      )}
 
       {activeTab === "groups" && (
         <div>

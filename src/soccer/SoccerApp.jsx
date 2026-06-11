@@ -119,7 +119,7 @@ export default function SoccerApp() {
       {/* Tab nav */}
       <div style={{
         background: T.card, borderBottom: `1px solid ${T.border}`,
-        display: "flex", padding: "0 16px",
+        display: "flex", justifyContent: "center", padding: "0 16px",
       }}>
         {TABS.map(tab => (
           <button key={tab.id} style={tabStyle(tab.id)} onClick={() => setActiveTab(tab.id)}>
