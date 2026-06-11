@@ -11,28 +11,47 @@ function authHeaders() {
 async function get(path, params = {}) {
   const url = new URL(BASE + path, location.origin);
   Object.entries(params).forEach(([k, v]) => v != null && url.searchParams.set(k, v));
+  // Cache-buster: prevents stale edge-cached HTML from being served for API paths
+  url.searchParams.set("_", Date.now());
   const r = await fetch(url.toString(), { headers: authHeaders() });
   if (!r.ok) throw new Error(`bzzoiro ${path} → ${r.status}`);
-  return r.json();
+  const text = await r.text();
+  if (text.trimStart().startsWith("<")) {
+    throw new Error("Proxy returned HTML instead of JSON — check the /bzzoiro rewrite");
+  }
+  return JSON.parse(text);
 }
 
 // ── League discovery ──────────────────────────────────────────
-// Call once to find the World Cup league ID, then cache it.
-export async function fetchLeagues() {
-  return get("/leagues/");
+// The leagues endpoint is paginated (~10 per page, alphabetical).
+export async function fetchLeagues(page) {
+  return get("/leagues/", page ? { page } : {});
 }
 
-// Find the FIFA World Cup 2026 league (searches by name keyword)
+// Find the FIFA World Cup league — walks all pages of the paginated list.
 export async function findWorldCupLeague() {
   const cached = sessionStorage.getItem("bzz_wc_league");
   if (cached) return JSON.parse(cached);
-  const leagues = await fetchLeagues();
-  const list = Array.isArray(leagues) ? leagues : (leagues.results ?? leagues.data ?? []);
-  const wc = list.find(l =>
-    /world.?cup/i.test(l.name) || /fifa/i.test(l.name) || l.name?.toLowerCase().includes("2026")
-  );
+
+  const all = [];
+  let pageData = await fetchLeagues();
+  for (let i = 0; i < 15; i++) {
+    const list = Array.isArray(pageData) ? pageData : (pageData.results ?? pageData.data ?? []);
+    all.push(...list);
+    const next = !Array.isArray(pageData) && pageData.next;
+    if (!next) break;
+    const pageNum = new URL(next).searchParams.get("page");
+    if (!pageNum) break;
+    pageData = await fetchLeagues(pageNum);
+  }
+
+  const cups = all.filter(l => /world\s*cup|fifa/i.test(l.name ?? ""));
+  // Exclude Club World Cup, youth, futsal, etc. — prefer the men's senior tournament
+  const wc =
+    cups.find(l => !/club|u-?\d{2}|youth|futsal|beach/i.test(l.name) && !l.is_women) ??
+    cups[0] ?? null;
   if (wc) sessionStorage.setItem("bzz_wc_league", JSON.stringify(wc));
-  return wc ?? null;
+  return wc;
 }
 
 // ── Fixtures / live scores ────────────────────────────────────
