@@ -28,9 +28,9 @@
           "display": "92.9"
         },
         "90th % EV": {
-          "pctile": 84,
-          "value": 105.9,
-          "display": "105.9"
+          "pctile": 85,
+          "value": 106.1,
+          "display": "106.1"
         },
         "Barrel %": {
           "pctile": 97,
@@ -95,9 +95,9 @@
           "display": "87.7"
         },
         "90th % EV": {
-          "pctile": 68,
-          "value": 104.3,
-          "display": "104.3"
+          "pctile": 66,
+          "value": 104.2,
+          "display": "104.2"
         },
         "Barrel %": {
           "pctile": 61,
@@ -363,9 +363,9 @@
           "display": "91.8"
         },
         "90th % EV": {
-          "pctile": 90,
-          "value": 106.9,
-          "display": "106.9"
+          "pctile": 91,
+          "value": 107.1,
+          "display": "107.1"
         },
         "Barrel %": {
           "pctile": 90,
@@ -430,7 +430,7 @@
           "display": "89.9"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -497,9 +497,9 @@
           "display": "91.5"
         },
         "90th % EV": {
-          "pctile": 90,
-          "value": 106.8,
-          "display": "106.8"
+          "pctile": 84,
+          "value": 105.9,
+          "display": "105.9"
         },
         "Barrel %": {
           "pctile": 94,
@@ -564,9 +564,9 @@
           "display": "87.0"
         },
         "90th % EV": {
-          "pctile": 38,
-          "value": 101.9,
-          "display": "101.9"
+          "pctile": 31,
+          "value": 101.4,
+          "display": "101.4"
         },
         "Barrel %": {
           "pctile": 61,
@@ -698,9 +698,9 @@
           "display": "91.3"
         },
         "90th % EV": {
-          "pctile": 76,
-          "value": 104.9,
-          "display": "104.9"
+          "pctile": 74,
+          "value": 104.8,
+          "display": "104.8"
         },
         "Barrel %": {
           "pctile": 69,
@@ -765,7 +765,7 @@
           "display": "87.4"
         },
         "90th % EV": {
-          "pctile": 28,
+          "pctile": 27,
           "value": 100.8,
           "display": "100.8"
         },
@@ -832,7 +832,7 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 40,
+          "pctile": 39,
           "value": 102.1,
           "display": "102.1"
         },
@@ -899,9 +899,9 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 89,
-          "value": 106.5,
-          "display": "106.5"
+          "pctile": 92,
+          "value": 107.3,
+          "display": "107.3"
         },
         "Barrel %": {
           "pctile": 69,
@@ -966,7 +966,7 @@
           "display": "89.5"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -1234,7 +1234,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -1368,9 +1368,9 @@
           "display": "88.3"
         },
         "90th % EV": {
-          "pctile": 31,
-          "value": 101.2,
-          "display": "101.2"
+          "pctile": 29,
+          "value": 101.0,
+          "display": "101.0"
         },
         "Barrel %": {
           "pctile": 47,
@@ -1435,9 +1435,9 @@
           "display": "89.6"
         },
         "90th % EV": {
-          "pctile": 87,
-          "value": 106.3,
-          "display": "106.3"
+          "pctile": 85,
+          "value": 106.1,
+          "display": "106.1"
         },
         "Barrel %": {
           "pctile": 65,
@@ -1502,9 +1502,9 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 59,
-          "value": 103.4,
-          "display": "103.4"
+          "pctile": 54,
+          "value": 103.1,
+          "display": "103.1"
         },
         "Barrel %": {
           "pctile": 39,
@@ -1636,7 +1636,7 @@
           "display": "89.8"
         },
         "90th % EV": {
-          "pctile": 61,
+          "pctile": 60,
           "value": 103.7,
           "display": "103.7"
         },
@@ -1704,8 +1704,8 @@
         },
         "90th % EV": {
           "pctile": 16,
-          "value": 99.2,
-          "display": "99.2"
+          "value": 99.3,
+          "display": "99.3"
         },
         "Barrel %": {
           "pctile": 49,
@@ -1770,7 +1770,7 @@
           "display": "88.1"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -1904,7 +1904,7 @@
           "display": "87.8"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -2038,7 +2038,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 104.2,
           "display": "104.2"
         },
@@ -2105,7 +2105,7 @@
           "display": "88.1"
         },
         "90th % EV": {
-          "pctile": 40,
+          "pctile": 39,
           "value": 102.1,
           "display": "102.1"
         },
@@ -2172,7 +2172,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 61,
+          "pctile": 60,
           "value": 103.7,
           "display": "103.7"
         },
@@ -2440,7 +2440,7 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -2507,7 +2507,7 @@
           "display": "87.9"
         },
         "90th % EV": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 102.4,
           "display": "102.4"
         },
@@ -2574,7 +2574,7 @@
           "display": "91.4"
         },
         "90th % EV": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 106.0,
           "display": "106.0"
         },
@@ -2775,9 +2775,9 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 33,
-          "value": 101.5,
-          "display": "101.5"
+          "pctile": 36,
+          "value": 101.8,
+          "display": "101.8"
         },
         "Barrel %": {
           "pctile": 42,
@@ -2842,7 +2842,7 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -2909,7 +2909,7 @@
           "display": "85.4"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -2976,7 +2976,7 @@
           "display": "88.1"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -3020,11 +3020,11 @@
     {
       "name": "Nolan Jones",
       "player_id": 666134,
-      "team": "CLE",
+      "team": "CHW",
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "CLE",
-      "parent_org_name": "Cleveland Guardians",
+      "parent_org_abbr": "CHW",
+      "parent_org_name": "Chicago White Sox",
       "pa": 222,
       "categories": {
         "xSLG": {
@@ -3044,8 +3044,8 @@
         },
         "90th % EV": {
           "pctile": 91,
-          "value": 107.1,
-          "display": "107.1"
+          "value": 107.0,
+          "display": "107.0"
         },
         "Barrel %": {
           "pctile": 71,
@@ -3110,7 +3110,7 @@
           "display": "87.9"
         },
         "90th % EV": {
-          "pctile": 37,
+          "pctile": 36,
           "value": 101.8,
           "display": "101.8"
         },
@@ -3244,7 +3244,7 @@
           "display": "81.8"
         },
         "90th % EV": {
-          "pctile": 7,
+          "pctile": 6,
           "value": 95.5,
           "display": "95.5"
         },
@@ -3378,9 +3378,9 @@
           "display": "87.9"
         },
         "90th % EV": {
-          "pctile": 36,
-          "value": 101.7,
-          "display": "101.7"
+          "pctile": 43,
+          "value": 102.4,
+          "display": "102.4"
         },
         "Barrel %": {
           "pctile": 53,
@@ -3445,7 +3445,7 @@
           "display": "86.6"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -3579,9 +3579,9 @@
           "display": "88.0"
         },
         "90th % EV": {
-          "pctile": 52,
-          "value": 102.9,
-          "display": "102.9"
+          "pctile": 47,
+          "value": 102.6,
+          "display": "102.6"
         },
         "Barrel %": {
           "pctile": 56,
@@ -3646,9 +3646,9 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 31,
-          "value": 101.2,
-          "display": "101.2"
+          "pctile": 30,
+          "value": 101.1,
+          "display": "101.1"
         },
         "Barrel %": {
           "pctile": 37,
@@ -3713,9 +3713,9 @@
           "display": "90.2"
         },
         "90th % EV": {
-          "pctile": 96,
-          "value": 108.1,
-          "display": "108.1"
+          "pctile": 94,
+          "value": 107.6,
+          "display": "107.6"
         },
         "Barrel %": {
           "pctile": 58,
@@ -3847,7 +3847,7 @@
           "display": "86.2"
         },
         "90th % EV": {
-          "pctile": 41,
+          "pctile": 40,
           "value": 102.2,
           "display": "102.2"
         },
@@ -3914,9 +3914,9 @@
           "display": "90.8"
         },
         "90th % EV": {
-          "pctile": 85,
-          "value": 106.0,
-          "display": "106.0"
+          "pctile": 82,
+          "value": 105.7,
+          "display": "105.7"
         },
         "Barrel %": {
           "pctile": 38,
@@ -3981,7 +3981,7 @@
           "display": "88.0"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -4048,7 +4048,7 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 38,
+          "pctile": 37,
           "value": 101.9,
           "display": "101.9"
         },
@@ -4115,7 +4115,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 82,
+          "pctile": 81,
           "value": 105.6,
           "display": "105.6"
         },
@@ -4182,9 +4182,9 @@
           "display": "87.8"
         },
         "90th % EV": {
-          "pctile": 62,
-          "value": 103.8,
-          "display": "103.8"
+          "pctile": 57,
+          "value": 103.3,
+          "display": "103.3"
         },
         "Barrel %": {
           "pctile": 74,
@@ -4383,7 +4383,7 @@
           "display": "86.8"
         },
         "90th % EV": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 99.4,
           "display": "99.4"
         },
@@ -4450,7 +4450,7 @@
           "display": "84.9"
         },
         "90th % EV": {
-          "pctile": 57,
+          "pctile": 56,
           "value": 103.2,
           "display": "103.2"
         },
@@ -4517,7 +4517,7 @@
           "display": "89.1"
         },
         "90th % EV": {
-          "pctile": 40,
+          "pctile": 39,
           "value": 102.1,
           "display": "102.1"
         },
@@ -4718,9 +4718,9 @@
           "display": "91.4"
         },
         "90th % EV": {
-          "pctile": 98,
-          "value": 109.0,
-          "display": "109.0"
+          "pctile": 97,
+          "value": 108.5,
+          "display": "108.5"
         },
         "Barrel %": {
           "pctile": 61,
@@ -4852,7 +4852,7 @@
           "display": "86.7"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -4919,9 +4919,9 @@
           "display": "88.3"
         },
         "90th % EV": {
-          "pctile": 43,
-          "value": 102.3,
-          "display": "102.3"
+          "pctile": 48,
+          "value": 102.7,
+          "display": "102.7"
         },
         "Barrel %": {
           "pctile": 57,
@@ -5053,7 +5053,7 @@
           "display": "89.2"
         },
         "90th % EV": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 106.0,
           "display": "106.0"
         },
@@ -5120,7 +5120,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 102.6,
           "display": "102.6"
         },
@@ -5187,7 +5187,7 @@
           "display": "85.6"
         },
         "90th % EV": {
-          "pctile": 15,
+          "pctile": 14,
           "value": 99.0,
           "display": "99.0"
         },
@@ -5321,9 +5321,9 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 46,
-          "value": 102.5,
-          "display": "102.5"
+          "pctile": 50,
+          "value": 102.8,
+          "display": "102.8"
         },
         "Barrel %": {
           "pctile": 37,
@@ -5388,7 +5388,7 @@
           "display": "87.9"
         },
         "90th % EV": {
-          "pctile": 28,
+          "pctile": 27,
           "value": 100.8,
           "display": "100.8"
         },
@@ -5455,9 +5455,9 @@
           "display": "85.5"
         },
         "90th % EV": {
-          "pctile": 68,
-          "value": 104.3,
-          "display": "104.3"
+          "pctile": 66,
+          "value": 104.2,
+          "display": "104.2"
         },
         "Barrel %": {
           "pctile": 50,
@@ -5522,7 +5522,7 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 104.0,
           "display": "104.0"
         },
@@ -5589,7 +5589,7 @@
           "display": "86.8"
         },
         "90th % EV": {
-          "pctile": 60,
+          "pctile": 59,
           "value": 103.6,
           "display": "103.6"
         },
@@ -5656,9 +5656,9 @@
           "display": "85.1"
         },
         "90th % EV": {
-          "pctile": 23,
-          "value": 100.3,
-          "display": "100.3"
+          "pctile": 30,
+          "value": 101.1,
+          "display": "101.1"
         },
         "Barrel %": {
           "pctile": 46,
@@ -5723,9 +5723,9 @@
           "display": "90.3"
         },
         "90th % EV": {
-          "pctile": 93,
-          "value": 107.5,
-          "display": "107.5"
+          "pctile": 83,
+          "value": 105.8,
+          "display": "105.8"
         },
         "Barrel %": {
           "pctile": 80,
@@ -5791,8 +5791,8 @@
         },
         "90th % EV": {
           "pctile": 41,
-          "value": 102.2,
-          "display": "102.2"
+          "value": 102.3,
+          "display": "102.3"
         },
         "Barrel %": {
           "pctile": 45,
@@ -5857,7 +5857,7 @@
           "display": "88.2"
         },
         "90th % EV": {
-          "pctile": 40,
+          "pctile": 39,
           "value": 102.1,
           "display": "102.1"
         },
@@ -5924,7 +5924,7 @@
           "display": "89.3"
         },
         "90th % EV": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 104.0,
           "display": "104.0"
         },
@@ -6058,7 +6058,7 @@
           "display": "87.0"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -6125,7 +6125,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 104.1,
           "display": "104.1"
         },
@@ -6192,7 +6192,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -6326,7 +6326,7 @@
           "display": "88.0"
         },
         "90th % EV": {
-          "pctile": 30,
+          "pctile": 29,
           "value": 101.0,
           "display": "101.0"
         },
@@ -6460,7 +6460,7 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 103.9,
           "display": "103.9"
         },
@@ -6527,7 +6527,7 @@
           "display": "90.3"
         },
         "90th % EV": {
-          "pctile": 57,
+          "pctile": 56,
           "value": 103.2,
           "display": "103.2"
         },
@@ -6661,7 +6661,7 @@
           "display": "85.7"
         },
         "90th % EV": {
-          "pctile": 38,
+          "pctile": 37,
           "value": 101.9,
           "display": "101.9"
         },
@@ -6728,7 +6728,7 @@
           "display": "83.9"
         },
         "90th % EV": {
-          "pctile": 28,
+          "pctile": 26,
           "value": 100.7,
           "display": "100.7"
         },
@@ -6795,7 +6795,7 @@
           "display": "88.2"
         },
         "90th % EV": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 102.6,
           "display": "102.6"
         },
@@ -6862,7 +6862,7 @@
           "display": "88.3"
         },
         "90th % EV": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 104.1,
           "display": "104.1"
         },
@@ -6996,7 +6996,7 @@
           "display": "87.1"
         },
         "90th % EV": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 102.6,
           "display": "102.6"
         },
@@ -7064,8 +7064,8 @@
         },
         "90th % EV": {
           "pctile": 31,
-          "value": 101.2,
-          "display": "101.2"
+          "value": 101.3,
+          "display": "101.3"
         },
         "Barrel %": {
           "pctile": 30,
@@ -7130,7 +7130,7 @@
           "display": "86.6"
         },
         "90th % EV": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 102.4,
           "display": "102.4"
         },
@@ -7264,7 +7264,7 @@
           "display": "89.3"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -7331,9 +7331,9 @@
           "display": "85.8"
         },
         "90th % EV": {
-          "pctile": 40,
-          "value": 102.1,
-          "display": "102.1"
+          "pctile": 48,
+          "value": 102.7,
+          "display": "102.7"
         },
         "Barrel %": {
           "pctile": 54,
@@ -7465,7 +7465,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 104.2,
           "display": "104.2"
         },
@@ -7532,9 +7532,9 @@
           "display": "87.0"
         },
         "90th % EV": {
-          "pctile": 25,
-          "value": 100.4,
-          "display": "100.4"
+          "pctile": 26,
+          "value": 100.7,
+          "display": "100.7"
         },
         "Barrel %": {
           "pctile": 21,
@@ -7800,7 +7800,7 @@
           "display": "88.2"
         },
         "90th % EV": {
-          "pctile": 26,
+          "pctile": 25,
           "value": 100.5,
           "display": "100.5"
         },
@@ -7934,7 +7934,7 @@
           "display": "90.0"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -8001,9 +8001,9 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 18,
-          "value": 99.5,
-          "display": "99.5"
+          "pctile": 20,
+          "value": 100.0,
+          "display": "100.0"
         },
         "Barrel %": {
           "pctile": 45,
@@ -8135,9 +8135,9 @@
           "display": "88.7"
         },
         "90th % EV": {
-          "pctile": 26,
-          "value": 100.5,
-          "display": "100.5"
+          "pctile": 24,
+          "value": 100.4,
+          "display": "100.4"
         },
         "Barrel %": {
           "pctile": 57,
@@ -8202,9 +8202,9 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 58,
-          "value": 103.3,
-          "display": "103.3"
+          "pctile": 53,
+          "value": 103.0,
+          "display": "103.0"
         },
         "Barrel %": {
           "pctile": 52,
@@ -8269,7 +8269,7 @@
           "display": "86.3"
         },
         "90th % EV": {
-          "pctile": 59,
+          "pctile": 58,
           "value": 103.5,
           "display": "103.5"
         },
@@ -8336,7 +8336,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 99.4,
           "display": "99.4"
         },
@@ -8403,9 +8403,9 @@
           "display": "85.7"
         },
         "90th % EV": {
-          "pctile": 28,
-          "value": 100.7,
-          "display": "100.7"
+          "pctile": 21,
+          "value": 100.1,
+          "display": "100.1"
         },
         "Barrel %": {
           "pctile": 28,
@@ -8470,7 +8470,7 @@
           "display": "88.3"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -8537,7 +8537,7 @@
           "display": "89.1"
         },
         "90th % EV": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 102.4,
           "display": "102.4"
         },
@@ -8671,7 +8671,7 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 106.0,
           "display": "106.0"
         },
@@ -8738,7 +8738,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 102.8,
           "display": "102.8"
         },
@@ -8872,9 +8872,9 @@
           "display": "91.6"
         },
         "90th % EV": {
-          "pctile": 99,
-          "value": 109.6,
-          "display": "109.6"
+          "pctile": 98,
+          "value": 109.3,
+          "display": "109.3"
         },
         "Barrel %": {
           "pctile": 89,
@@ -8939,7 +8939,7 @@
           "display": "84.3"
         },
         "90th % EV": {
-          "pctile": 13,
+          "pctile": 12,
           "value": 98.7,
           "display": "98.7"
         },
@@ -9207,7 +9207,7 @@
           "display": "86.7"
         },
         "90th % EV": {
-          "pctile": 39,
+          "pctile": 38,
           "value": 102.0,
           "display": "102.0"
         },
@@ -9274,9 +9274,9 @@
           "display": "91.5"
         },
         "90th % EV": {
-          "pctile": 81,
-          "value": 105.4,
-          "display": "105.4"
+          "pctile": 80,
+          "value": 105.3,
+          "display": "105.3"
         },
         "Barrel %": {
           "pctile": 83,
@@ -9475,7 +9475,7 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -9542,7 +9542,7 @@
           "display": "87.5"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -9676,9 +9676,9 @@
           "display": "89.6"
         },
         "90th % EV": {
-          "pctile": 62,
-          "value": 103.8,
-          "display": "103.8"
+          "pctile": 60,
+          "value": 103.7,
+          "display": "103.7"
         },
         "Barrel %": {
           "pctile": 86,
@@ -9743,7 +9743,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 104.1,
           "display": "104.1"
         },
@@ -9810,7 +9810,7 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 36,
+          "pctile": 35,
           "value": 101.7,
           "display": "101.7"
         },
@@ -10011,7 +10011,7 @@
           "display": "85.8"
         },
         "90th % EV": {
-          "pctile": 39,
+          "pctile": 38,
           "value": 102.0,
           "display": "102.0"
         },
@@ -10145,7 +10145,7 @@
           "display": "86.3"
         },
         "90th % EV": {
-          "pctile": 41,
+          "pctile": 40,
           "value": 102.2,
           "display": "102.2"
         },
@@ -10346,9 +10346,9 @@
           "display": "89.1"
         },
         "90th % EV": {
-          "pctile": 76,
-          "value": 104.9,
-          "display": "104.9"
+          "pctile": 78,
+          "value": 105.1,
+          "display": "105.1"
         },
         "Barrel %": {
           "pctile": 74,
@@ -10413,7 +10413,7 @@
           "display": "89.3"
         },
         "90th % EV": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 103.0,
           "display": "103.0"
         },
@@ -10547,7 +10547,7 @@
           "display": "87.8"
         },
         "90th % EV": {
-          "pctile": 28,
+          "pctile": 27,
           "value": 100.8,
           "display": "100.8"
         },
@@ -10614,7 +10614,7 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -10681,7 +10681,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 104.0,
           "display": "104.0"
         },
@@ -10815,9 +10815,9 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 31,
-          "value": 101.3,
-          "display": "101.3"
+          "pctile": 29,
+          "value": 101.0,
+          "display": "101.0"
         },
         "Barrel %": {
           "pctile": 67,
@@ -10949,9 +10949,9 @@
           "display": "92.4"
         },
         "90th % EV": {
-          "pctile": 69,
-          "value": 104.4,
-          "display": "104.4"
+          "pctile": 74,
+          "value": 104.8,
+          "display": "104.8"
         },
         "Barrel %": {
           "pctile": 45,
@@ -11016,7 +11016,7 @@
           "display": "85.4"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -11083,7 +11083,7 @@
           "display": "87.9"
         },
         "90th % EV": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 103.3,
           "display": "103.3"
         },
@@ -11150,7 +11150,7 @@
           "display": "86.2"
         },
         "90th % EV": {
-          "pctile": 32,
+          "pctile": 31,
           "value": 101.4,
           "display": "101.4"
         },
@@ -11217,7 +11217,7 @@
           "display": "90.8"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -11284,7 +11284,7 @@
           "display": "87.5"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -11351,7 +11351,7 @@
           "display": "90.9"
         },
         "90th % EV": {
-          "pctile": 29,
+          "pctile": 28,
           "value": 100.9,
           "display": "100.9"
         },
@@ -11418,7 +11418,7 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 49,
+          "pctile": 48,
           "value": 102.7,
           "display": "102.7"
         },
@@ -11552,7 +11552,7 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 61,
+          "pctile": 60,
           "value": 103.7,
           "display": "103.7"
         },
@@ -11619,7 +11619,7 @@
           "display": "88.6"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -11754,8 +11754,8 @@
         },
         "90th % EV": {
           "pctile": 39,
-          "value": 102.0,
-          "display": "102.0"
+          "value": 102.1,
+          "display": "102.1"
         },
         "Barrel %": {
           "pctile": 37,
@@ -11887,9 +11887,9 @@
           "display": "83.8"
         },
         "90th % EV": {
-          "pctile": 36,
-          "value": 101.7,
-          "display": "101.7"
+          "pctile": 30,
+          "value": 101.1,
+          "display": "101.1"
         },
         "Barrel %": {
           "pctile": 50,
@@ -11954,7 +11954,7 @@
           "display": "85.4"
         },
         "90th % EV": {
-          "pctile": 16,
+          "pctile": 15,
           "value": 99.1,
           "display": "99.1"
         },
@@ -12155,9 +12155,9 @@
           "display": "85.0"
         },
         "90th % EV": {
-          "pctile": 13,
-          "value": 98.6,
-          "display": "98.6"
+          "pctile": 18,
+          "value": 99.6,
+          "display": "99.6"
         },
         "Barrel %": {
           "pctile": 23,
@@ -12423,7 +12423,7 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 36,
+          "pctile": 35,
           "value": 101.7,
           "display": "101.7"
         },
@@ -12557,7 +12557,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 61,
+          "pctile": 60,
           "value": 103.7,
           "display": "103.7"
         },
@@ -12624,7 +12624,7 @@
           "display": "85.1"
         },
         "90th % EV": {
-          "pctile": 11,
+          "pctile": 10,
           "value": 97.8,
           "display": "97.8"
         },
@@ -12758,7 +12758,7 @@
           "display": "92.3"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -12825,7 +12825,7 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 26,
+          "pctile": 25,
           "value": 100.5,
           "display": "100.5"
         },
@@ -12892,9 +12892,9 @@
           "display": "82.6"
         },
         "90th % EV": {
-          "pctile": 18,
-          "value": 99.5,
-          "display": "99.5"
+          "pctile": 15,
+          "value": 99.2,
+          "display": "99.2"
         },
         "Barrel %": {
           "pctile": 20,
@@ -12959,7 +12959,7 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 38,
+          "pctile": 37,
           "value": 101.9,
           "display": "101.9"
         },
@@ -13026,7 +13026,7 @@
           "display": "92.9"
         },
         "90th % EV": {
-          "pctile": 97,
+          "pctile": 98,
           "value": 108.9,
           "display": "108.9"
         },
@@ -13093,7 +13093,7 @@
           "display": "90.3"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -13160,7 +13160,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 49,
+          "pctile": 48,
           "value": 102.7,
           "display": "102.7"
         },
@@ -13361,7 +13361,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 49,
+          "pctile": 48,
           "value": 102.7,
           "display": "102.7"
         },
@@ -13495,9 +13495,9 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 66,
-          "value": 104.1,
-          "display": "104.1"
+          "pctile": 69,
+          "value": 104.4,
+          "display": "104.4"
         },
         "Barrel %": {
           "pctile": 53,
@@ -13562,7 +13562,7 @@
           "display": "88.2"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -13629,7 +13629,7 @@
           "display": "86.1"
         },
         "90th % EV": {
-          "pctile": 9,
+          "pctile": 8,
           "value": 96.6,
           "display": "96.6"
         },
@@ -13696,9 +13696,9 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 41,
-          "value": 102.2,
-          "display": "102.2"
+          "pctile": 43,
+          "value": 102.4,
+          "display": "102.4"
         },
         "Barrel %": {
           "pctile": 20,
@@ -13964,9 +13964,9 @@
           "display": "87.3"
         },
         "90th % EV": {
-          "pctile": 64,
-          "value": 103.9,
-          "display": "103.9"
+          "pctile": 59,
+          "value": 103.6,
+          "display": "103.6"
         },
         "Barrel %": {
           "pctile": 52,
@@ -14098,9 +14098,9 @@
           "display": "90.4"
         },
         "90th % EV": {
-          "pctile": 97,
-          "value": 108.5,
-          "display": "108.5"
+          "pctile": 93,
+          "value": 107.5,
+          "display": "107.5"
         },
         "Barrel %": {
           "pctile": 93,
@@ -14165,9 +14165,9 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 83,
-          "value": 105.8,
-          "display": "105.8"
+          "pctile": 88,
+          "value": 106.5,
+          "display": "106.5"
         },
         "Barrel %": {
           "pctile": 85,
@@ -14366,7 +14366,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -14433,9 +14433,9 @@
           "display": "87.9"
         },
         "90th % EV": {
-          "pctile": 51,
-          "value": 102.8,
-          "display": "102.8"
+          "pctile": 48,
+          "value": 102.7,
+          "display": "102.7"
         },
         "Barrel %": {
           "pctile": 34,
@@ -14567,7 +14567,7 @@
           "display": "92.4"
         },
         "90th % EV": {
-          "pctile": 81,
+          "pctile": 80,
           "value": 105.4,
           "display": "105.4"
         },
@@ -14768,7 +14768,7 @@
           "display": "85.5"
         },
         "90th % EV": {
-          "pctile": 9,
+          "pctile": 7,
           "value": 96.5,
           "display": "96.5"
         },
@@ -14835,7 +14835,7 @@
           "display": "89.2"
         },
         "90th % EV": {
-          "pctile": 20,
+          "pctile": 19,
           "value": 99.8,
           "display": "99.8"
         },
@@ -14902,7 +14902,7 @@
           "display": "86.0"
         },
         "90th % EV": {
-          "pctile": 21,
+          "pctile": 20,
           "value": 100.0,
           "display": "100.0"
         },
@@ -14969,7 +14969,7 @@
           "display": "83.8"
         },
         "90th % EV": {
-          "pctile": 13,
+          "pctile": 12,
           "value": 98.7,
           "display": "98.7"
         },
@@ -15103,9 +15103,9 @@
           "display": "85.4"
         },
         "90th % EV": {
-          "pctile": 20,
-          "value": 99.9,
-          "display": "99.9"
+          "pctile": 15,
+          "value": 99.1,
+          "display": "99.1"
         },
         "Barrel %": {
           "pctile": 20,
@@ -15170,7 +15170,7 @@
           "display": "83.4"
         },
         "90th % EV": {
-          "pctile": 20,
+          "pctile": 19,
           "value": 99.8,
           "display": "99.8"
         },
@@ -15237,9 +15237,9 @@
           "display": "86.1"
         },
         "90th % EV": {
-          "pctile": 46,
-          "value": 102.5,
-          "display": "102.5"
+          "pctile": 40,
+          "value": 102.2,
+          "display": "102.2"
         },
         "Barrel %": {
           "pctile": 62,
@@ -15304,7 +15304,7 @@
           "display": "86.8"
         },
         "90th % EV": {
-          "pctile": 27,
+          "pctile": 26,
           "value": 100.6,
           "display": "100.6"
         },
@@ -15371,9 +15371,9 @@
           "display": "87.1"
         },
         "90th % EV": {
-          "pctile": 41,
-          "value": 102.2,
-          "display": "102.2"
+          "pctile": 36,
+          "value": 101.8,
+          "display": "101.8"
         },
         "Barrel %": {
           "pctile": 32,
@@ -15438,7 +15438,7 @@
           "display": "86.7"
         },
         "90th % EV": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 102.8,
           "display": "102.8"
         },
@@ -15639,7 +15639,7 @@
           "display": "87.1"
         },
         "90th % EV": {
-          "pctile": 32,
+          "pctile": 31,
           "value": 101.4,
           "display": "101.4"
         },
@@ -15706,7 +15706,7 @@
           "display": "90.2"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -15773,7 +15773,7 @@
           "display": "88.0"
         },
         "90th % EV": {
-          "pctile": 59,
+          "pctile": 58,
           "value": 103.5,
           "display": "103.5"
         },
@@ -15840,7 +15840,7 @@
           "display": "90.9"
         },
         "90th % EV": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 103.0,
           "display": "103.0"
         },
@@ -15907,7 +15907,7 @@
           "display": "86.2"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -16041,7 +16041,7 @@
           "display": "84.3"
         },
         "90th % EV": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 99.6,
           "display": "99.6"
         },
@@ -16108,7 +16108,7 @@
           "display": "81.7"
         },
         "90th % EV": {
-          "pctile": 15,
+          "pctile": 14,
           "value": 99.0,
           "display": "99.0"
         },
@@ -16175,7 +16175,7 @@
           "display": "85.5"
         },
         "90th % EV": {
-          "pctile": 11,
+          "pctile": 10,
           "value": 97.9,
           "display": "97.9"
         },
@@ -16242,7 +16242,7 @@
           "display": "84.9"
         },
         "90th % EV": {
-          "pctile": 15,
+          "pctile": 14,
           "value": 99.0,
           "display": "99.0"
         },
@@ -16376,9 +16376,9 @@
           "display": "90.1"
         },
         "90th % EV": {
-          "pctile": 72,
-          "value": 104.6,
-          "display": "104.6"
+          "pctile": 65,
+          "value": 104.1,
+          "display": "104.1"
         },
         "Barrel %": {
           "pctile": 48,
@@ -16443,7 +16443,7 @@
           "display": "88.2"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -16510,7 +16510,7 @@
           "display": "85.4"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -16577,7 +16577,7 @@
           "display": "91.7"
         },
         "90th % EV": {
-          "pctile": 94,
+          "pctile": 95,
           "value": 107.8,
           "display": "107.8"
         },
@@ -16644,7 +16644,7 @@
           "display": "85.9"
         },
         "90th % EV": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 103.0,
           "display": "103.0"
         },
@@ -16711,9 +16711,9 @@
           "display": "90.7"
         },
         "90th % EV": {
-          "pctile": 59,
-          "value": 103.4,
-          "display": "103.4"
+          "pctile": 41,
+          "value": 102.3,
+          "display": "102.3"
         },
         "Barrel %": {
           "pctile": 24,
@@ -16845,7 +16845,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 37,
+          "pctile": 36,
           "value": 101.8,
           "display": "101.8"
         },
@@ -16912,7 +16912,7 @@
           "display": "90.6"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -17046,7 +17046,7 @@
           "display": "82.2"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -17090,11 +17090,11 @@
     {
       "name": "Tyler Fitzgerald",
       "player_id": 666149,
-      "team": "LAD",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "LAD",
-      "parent_org_name": "Los Angeles Dodgers",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "pa": 132,
       "categories": {
         "xSLG": {
@@ -17247,7 +17247,7 @@
           "display": "87.9"
         },
         "90th % EV": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 102.4,
           "display": "102.4"
         },
@@ -17314,7 +17314,7 @@
           "display": "85.0"
         },
         "90th % EV": {
-          "pctile": 15,
+          "pctile": 14,
           "value": 99.0,
           "display": "99.0"
         },
@@ -17381,7 +17381,7 @@
           "display": "87.5"
         },
         "90th % EV": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 99.4,
           "display": "99.4"
         },
@@ -17448,7 +17448,7 @@
           "display": "86.8"
         },
         "90th % EV": {
-          "pctile": 27,
+          "pctile": 26,
           "value": 100.6,
           "display": "100.6"
         },
@@ -17515,7 +17515,7 @@
           "display": "85.3"
         },
         "90th % EV": {
-          "pctile": 27,
+          "pctile": 26,
           "value": 100.6,
           "display": "100.6"
         },
@@ -17716,7 +17716,7 @@
           "display": "86.8"
         },
         "90th % EV": {
-          "pctile": 49,
+          "pctile": 48,
           "value": 102.7,
           "display": "102.7"
         },
@@ -17783,7 +17783,7 @@
           "display": "84.2"
         },
         "90th % EV": {
-          "pctile": 36,
+          "pctile": 35,
           "value": 101.7,
           "display": "101.7"
         },
@@ -17850,7 +17850,7 @@
           "display": "87.8"
         },
         "90th % EV": {
-          "pctile": 32,
+          "pctile": 31,
           "value": 101.4,
           "display": "101.4"
         },
@@ -17917,7 +17917,7 @@
           "display": "85.6"
         },
         "90th % EV": {
-          "pctile": 14,
+          "pctile": 12,
           "value": 98.8,
           "display": "98.8"
         },
@@ -17984,7 +17984,7 @@
           "display": "77.5"
         },
         "90th % EV": {
-          "pctile": 12,
+          "pctile": 11,
           "value": 98.1,
           "display": "98.1"
         },
@@ -18051,9 +18051,9 @@
           "display": "91.1"
         },
         "90th % EV": {
-          "pctile": 77,
-          "value": 105.0,
-          "display": "105.0"
+          "pctile": 72,
+          "value": 104.6,
+          "display": "104.6"
         },
         "Barrel %": {
           "pctile": 69,
@@ -18118,7 +18118,7 @@
           "display": "86.2"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -18185,9 +18185,9 @@
           "display": "90.2"
         },
         "90th % EV": {
-          "pctile": 65,
-          "value": 104.0,
-          "display": "104.0"
+          "pctile": 62,
+          "value": 103.8,
+          "display": "103.8"
         },
         "Barrel %": {
           "pctile": 76,
@@ -18252,7 +18252,7 @@
           "display": "90.1"
         },
         "90th % EV": {
-          "pctile": 61,
+          "pctile": 60,
           "value": 103.7,
           "display": "103.7"
         },
@@ -18319,7 +18319,7 @@
           "display": "88.7"
         },
         "90th % EV": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 106.0,
           "display": "106.0"
         },
@@ -18453,7 +18453,7 @@
           "display": "83.8"
         },
         "90th % EV": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 98.9,
           "display": "98.9"
         },
@@ -18654,7 +18654,7 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 102.6,
           "display": "102.6"
         },
@@ -18855,7 +18855,7 @@
           "display": "88.8"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -18922,7 +18922,7 @@
           "display": "90.3"
         },
         "90th % EV": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 102.8,
           "display": "102.8"
         },
@@ -19123,7 +19123,7 @@
           "display": "87.8"
         },
         "90th % EV": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 98.9,
           "display": "98.9"
         },
@@ -19190,7 +19190,7 @@
           "display": "82.6"
         },
         "90th % EV": {
-          "pctile": 7,
+          "pctile": 6,
           "value": 95.6,
           "display": "95.6"
         },
@@ -19257,7 +19257,7 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 103.9,
           "display": "103.9"
         },
@@ -19458,7 +19458,7 @@
           "display": "90.1"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -19525,7 +19525,7 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 104.2,
           "display": "104.2"
         },
@@ -19592,7 +19592,7 @@
           "display": "90.5"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -19659,7 +19659,7 @@
           "display": "84.9"
         },
         "90th % EV": {
-          "pctile": 21,
+          "pctile": 20,
           "value": 100.0,
           "display": "100.0"
         },
@@ -19726,7 +19726,7 @@
           "display": "85.9"
         },
         "90th % EV": {
-          "pctile": 49,
+          "pctile": 48,
           "value": 102.7,
           "display": "102.7"
         },
@@ -19793,9 +19793,9 @@
           "display": "88.0"
         },
         "90th % EV": {
-          "pctile": 48,
-          "value": 102.6,
-          "display": "102.6"
+          "pctile": 56,
+          "value": 103.2,
+          "display": "103.2"
         },
         "Barrel %": {
           "pctile": 33,
@@ -19860,7 +19860,7 @@
           "display": "91.1"
         },
         "90th % EV": {
-          "pctile": 31,
+          "pctile": 30,
           "value": 101.2,
           "display": "101.2"
         },
@@ -20061,7 +20061,7 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 29,
+          "pctile": 28,
           "value": 100.9,
           "display": "100.9"
         },
@@ -20128,9 +20128,9 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 49,
-          "value": 102.7,
-          "display": "102.7"
+          "pctile": 45,
+          "value": 102.5,
+          "display": "102.5"
         },
         "Barrel %": {
           "pctile": 24,
@@ -20195,9 +20195,9 @@
           "display": "90.8"
         },
         "90th % EV": {
-          "pctile": 54,
-          "value": 103.0,
-          "display": "103.0"
+          "pctile": 48,
+          "value": 102.7,
+          "display": "102.7"
         },
         "Barrel %": {
           "pctile": 63,
@@ -20262,7 +20262,7 @@
           "display": "87.4"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -20329,9 +20329,9 @@
           "display": "91.1"
         },
         "90th % EV": {
-          "pctile": 95,
-          "value": 107.9,
-          "display": "107.9"
+          "pctile": 90,
+          "value": 106.9,
+          "display": "106.9"
         },
         "Barrel %": {
           "pctile": 54,
@@ -20396,9 +20396,9 @@
           "display": "88.0"
         },
         "90th % EV": {
-          "pctile": 55,
-          "value": 103.1,
-          "display": "103.1"
+          "pctile": 58,
+          "value": 103.5,
+          "display": "103.5"
         },
         "Barrel %": {
           "pctile": 78,
@@ -20597,9 +20597,9 @@
           "display": "91.9"
         },
         "90th % EV": {
-          "pctile": 81,
-          "value": 105.4,
-          "display": "105.4"
+          "pctile": 77,
+          "value": 105.0,
+          "display": "105.0"
         },
         "Barrel %": {
           "pctile": 62,
@@ -20664,7 +20664,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 102.4,
           "display": "102.4"
         },
@@ -20798,9 +20798,9 @@
           "display": "92.7"
         },
         "90th % EV": {
-          "pctile": 79,
-          "value": 105.2,
-          "display": "105.2"
+          "pctile": 70,
+          "value": 104.5,
+          "display": "104.5"
         },
         "Barrel %": {
           "pctile": 83,
@@ -20865,9 +20865,9 @@
           "display": "89.2"
         },
         "90th % EV": {
-          "pctile": 73,
-          "value": 104.7,
-          "display": "104.7"
+          "pctile": 70,
+          "value": 104.5,
+          "display": "104.5"
         },
         "Barrel %": {
           "pctile": 41,
@@ -20932,7 +20932,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 27,
+          "pctile": 26,
           "value": 100.6,
           "display": "100.6"
         },
@@ -21200,7 +21200,7 @@
           "display": "88.1"
         },
         "90th % EV": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 103.3,
           "display": "103.3"
         },
@@ -21267,9 +21267,9 @@
           "display": "88.7"
         },
         "90th % EV": {
-          "pctile": 71,
-          "value": 104.5,
-          "display": "104.5"
+          "pctile": 65,
+          "value": 104.1,
+          "display": "104.1"
         },
         "Barrel %": {
           "pctile": 32,
@@ -21334,7 +21334,7 @@
           "display": "82.9"
         },
         "90th % EV": {
-          "pctile": 8,
+          "pctile": 7,
           "value": 96.0,
           "display": "96.0"
         },
@@ -21401,7 +21401,7 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -21602,7 +21602,7 @@
           "display": "80.9"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -21669,9 +21669,9 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 30,
-          "value": 101.0,
-          "display": "101.0"
+          "pctile": 28,
+          "value": 100.9,
+          "display": "100.9"
         },
         "Barrel %": {
           "pctile": 28,
@@ -21736,7 +21736,7 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 99.4,
           "display": "99.4"
         },
@@ -21870,7 +21870,7 @@
           "display": "85.4"
         },
         "90th % EV": {
-          "pctile": 30,
+          "pctile": 29,
           "value": 101.0,
           "display": "101.0"
         },
@@ -21937,7 +21937,7 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 103.3,
           "display": "103.3"
         },
@@ -22004,7 +22004,7 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 49,
+          "pctile": 48,
           "value": 102.7,
           "display": "102.7"
         },
@@ -22071,7 +22071,7 @@
           "display": "90.8"
         },
         "90th % EV": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 106.0,
           "display": "106.0"
         },
@@ -22272,7 +22272,7 @@
           "display": "88.6"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -22339,7 +22339,7 @@
           "display": "86.8"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -22406,7 +22406,7 @@
           "display": "83.2"
         },
         "90th % EV": {
-          "pctile": 16,
+          "pctile": 15,
           "value": 99.2,
           "display": "99.2"
         },
@@ -22540,7 +22540,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 20,
+          "pctile": 19,
           "value": 99.8,
           "display": "99.8"
         },
@@ -22607,7 +22607,7 @@
           "display": "92.8"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -22741,7 +22741,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 57,
+          "pctile": 56,
           "value": 103.2,
           "display": "103.2"
         },
@@ -22808,7 +22808,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 28,
+          "pctile": 27,
           "value": 100.8,
           "display": "100.8"
         },
@@ -22875,7 +22875,7 @@
           "display": "90.3"
         },
         "90th % EV": {
-          "pctile": 89,
+          "pctile": 88,
           "value": 106.5,
           "display": "106.5"
         },
@@ -22942,7 +22942,7 @@
           "display": "91.3"
         },
         "90th % EV": {
-          "pctile": 81,
+          "pctile": 80,
           "value": 105.4,
           "display": "105.4"
         },
@@ -23009,9 +23009,9 @@
           "display": "90.7"
         },
         "90th % EV": {
-          "pctile": 92,
-          "value": 107.2,
-          "display": "107.2"
+          "pctile": 91,
+          "value": 107.1,
+          "display": "107.1"
         },
         "Barrel %": {
           "pctile": 35,
@@ -23076,7 +23076,7 @@
           "display": "82.2"
         },
         "90th % EV": {
-          "pctile": 21,
+          "pctile": 20,
           "value": 100.0,
           "display": "100.0"
         },
@@ -23143,9 +23143,9 @@
           "display": "92.9"
         },
         "90th % EV": {
-          "pctile": 74,
-          "value": 104.8,
-          "display": "104.8"
+          "pctile": 70,
+          "value": 104.5,
+          "display": "104.5"
         },
         "Barrel %": {
           "pctile": 24,
@@ -23277,7 +23277,7 @@
           "display": "88.8"
         },
         "90th % EV": {
-          "pctile": 36,
+          "pctile": 35,
           "value": 101.7,
           "display": "101.7"
         },
@@ -23344,7 +23344,7 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -23478,7 +23478,7 @@
           "display": "84.3"
         },
         "90th % EV": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 104.5,
           "display": "104.5"
         },
@@ -23612,7 +23612,7 @@
           "display": "87.4"
         },
         "90th % EV": {
-          "pctile": 38,
+          "pctile": 37,
           "value": 101.9,
           "display": "101.9"
         },
@@ -23679,7 +23679,7 @@
           "display": "92.1"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -23814,8 +23814,8 @@
         },
         "90th % EV": {
           "pctile": 91,
-          "value": 107.1,
-          "display": "107.1"
+          "value": 107.0,
+          "display": "107.0"
         },
         "Barrel %": {
           "pctile": 93,
@@ -23880,7 +23880,7 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -24014,7 +24014,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -24148,9 +24148,9 @@
           "display": "88.0"
         },
         "90th % EV": {
-          "pctile": 25,
-          "value": 100.4,
-          "display": "100.4"
+          "pctile": 27,
+          "value": 100.8,
+          "display": "100.8"
         },
         "Barrel %": {
           "pctile": 68,
@@ -24282,7 +24282,7 @@
           "display": "81.8"
         },
         "90th % EV": {
-          "pctile": 8,
+          "pctile": 6,
           "value": 95.8,
           "display": "95.8"
         },
@@ -24416,7 +24416,7 @@
           "display": "88.8"
         },
         "90th % EV": {
-          "pctile": 60,
+          "pctile": 59,
           "value": 103.6,
           "display": "103.6"
         },
@@ -24550,9 +24550,9 @@
           "display": "85.3"
         },
         "90th % EV": {
-          "pctile": 26,
-          "value": 100.5,
-          "display": "100.5"
+          "pctile": 24,
+          "value": 100.4,
+          "display": "100.4"
         },
         "Barrel %": {
           "pctile": 32,
@@ -24617,7 +24617,7 @@
           "display": "82.7"
         },
         "90th % EV": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 103.9,
           "display": "103.9"
         },
@@ -24684,7 +24684,7 @@
           "display": "90.4"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -24751,7 +24751,7 @@
           "display": "88.8"
         },
         "90th % EV": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 103.0,
           "display": "103.0"
         },
@@ -24885,7 +24885,7 @@
           "display": "87.3"
         },
         "90th % EV": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 103.0,
           "display": "103.0"
         },
@@ -24952,7 +24952,7 @@
           "display": "83.9"
         },
         "90th % EV": {
-          "pctile": 38,
+          "pctile": 37,
           "value": 101.9,
           "display": "101.9"
         },
@@ -25019,7 +25019,7 @@
           "display": "93.2"
         },
         "90th % EV": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 104.0,
           "display": "104.0"
         },
@@ -25086,7 +25086,7 @@
           "display": "85.4"
         },
         "90th % EV": {
-          "pctile": 27,
+          "pctile": 26,
           "value": 100.6,
           "display": "100.6"
         },
@@ -25153,7 +25153,7 @@
           "display": "92.1"
         },
         "90th % EV": {
-          "pctile": 94,
+          "pctile": 95,
           "value": 107.8,
           "display": "107.8"
         },
@@ -25354,7 +25354,7 @@
           "display": "88.4"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -25488,7 +25488,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 13,
+          "pctile": 12,
           "value": 98.6,
           "display": "98.6"
         },
@@ -25622,9 +25622,9 @@
           "display": "86.3"
         },
         "90th % EV": {
-          "pctile": 21,
-          "value": 100.1,
-          "display": "100.1"
+          "pctile": 13,
+          "value": 98.9,
+          "display": "98.9"
         },
         "Barrel %": {
           "pctile": 10,
@@ -25689,7 +25689,7 @@
           "display": "88.3"
         },
         "90th % EV": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 104.2,
           "display": "104.2"
         },
@@ -25756,7 +25756,7 @@
           "display": "86.6"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -25823,7 +25823,7 @@
           "display": "84.8"
         },
         "90th % EV": {
-          "pctile": 37,
+          "pctile": 36,
           "value": 101.8,
           "display": "101.8"
         },
@@ -25890,7 +25890,7 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -26024,7 +26024,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 103.3,
           "display": "103.3"
         },
@@ -26091,7 +26091,7 @@
           "display": "84.1"
         },
         "90th % EV": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 102.6,
           "display": "102.6"
         },
@@ -26158,7 +26158,7 @@
           "display": "85.7"
         },
         "90th % EV": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 99.6,
           "display": "99.6"
         },
@@ -26225,7 +26225,7 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 12,
+          "pctile": 10,
           "value": 98.0,
           "display": "98.0"
         },
@@ -26359,7 +26359,7 @@
           "display": "88.3"
         },
         "90th % EV": {
-          "pctile": 59,
+          "pctile": 58,
           "value": 103.5,
           "display": "103.5"
         },
@@ -26426,7 +26426,7 @@
           "display": "85.5"
         },
         "90th % EV": {
-          "pctile": 11,
+          "pctile": 10,
           "value": 97.3,
           "display": "97.3"
         },
@@ -26560,9 +26560,9 @@
           "display": "91.2"
         },
         "90th % EV": {
-          "pctile": 85,
-          "value": 106.1,
-          "display": "106.1"
+          "pctile": 88,
+          "value": 106.4,
+          "display": "106.4"
         },
         "Barrel %": {
           "pctile": 87,
@@ -26627,9 +26627,9 @@
           "display": "86.3"
         },
         "90th % EV": {
-          "pctile": 52,
-          "value": 102.9,
-          "display": "102.9"
+          "pctile": 65,
+          "value": 104.1,
+          "display": "104.1"
         },
         "Barrel %": {
           "pctile": 77,
@@ -26761,7 +26761,7 @@
           "display": "91.9"
         },
         "90th % EV": {
-          "pctile": 59,
+          "pctile": 58,
           "value": 103.5,
           "display": "103.5"
         },
@@ -26828,7 +26828,7 @@
           "display": "85.0"
         },
         "90th % EV": {
-          "pctile": 29,
+          "pctile": 28,
           "value": 100.9,
           "display": "100.9"
         },
@@ -26895,7 +26895,7 @@
           "display": "85.0"
         },
         "90th % EV": {
-          "pctile": 16,
+          "pctile": 15,
           "value": 99.1,
           "display": "99.1"
         },
@@ -26962,7 +26962,7 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 103.3,
           "display": "103.3"
         },
@@ -27029,7 +27029,7 @@
           "display": "89.2"
         },
         "90th % EV": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 102.8,
           "display": "102.8"
         },
@@ -27096,7 +27096,7 @@
           "display": "88.6"
         },
         "90th % EV": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 102.8,
           "display": "102.8"
         },
@@ -27163,7 +27163,7 @@
           "display": "86.1"
         },
         "90th % EV": {
-          "pctile": 39,
+          "pctile": 38,
           "value": 102.0,
           "display": "102.0"
         },
@@ -27230,7 +27230,7 @@
           "display": "88.1"
         },
         "90th % EV": {
-          "pctile": 30,
+          "pctile": 29,
           "value": 101.0,
           "display": "101.0"
         },
@@ -27297,7 +27297,7 @@
           "display": "87.3"
         },
         "90th % EV": {
-          "pctile": 38,
+          "pctile": 37,
           "value": 101.9,
           "display": "101.9"
         },
@@ -27431,7 +27431,7 @@
           "display": "85.9"
         },
         "90th % EV": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 103.9,
           "display": "103.9"
         },
@@ -27498,7 +27498,7 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 37,
+          "pctile": 36,
           "value": 101.8,
           "display": "101.8"
         },
@@ -27565,9 +27565,9 @@
           "display": "87.8"
         },
         "90th % EV": {
-          "pctile": 40,
-          "value": 102.1,
-          "display": "102.1"
+          "pctile": 30,
+          "value": 101.2,
+          "display": "101.2"
         },
         "Barrel %": {
           "pctile": 10,
@@ -27632,7 +27632,7 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 61,
+          "pctile": 60,
           "value": 103.7,
           "display": "103.7"
         },
@@ -27699,7 +27699,7 @@
           "display": "84.9"
         },
         "90th % EV": {
-          "pctile": 40,
+          "pctile": 39,
           "value": 102.1,
           "display": "102.1"
         },
@@ -27900,7 +27900,7 @@
           "display": "90.8"
         },
         "90th % EV": {
-          "pctile": 40,
+          "pctile": 39,
           "value": 102.1,
           "display": "102.1"
         },
@@ -27967,7 +27967,7 @@
           "display": "89.1"
         },
         "90th % EV": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 102.8,
           "display": "102.8"
         },
@@ -28034,7 +28034,7 @@
           "display": "84.2"
         },
         "90th % EV": {
-          "pctile": 36,
+          "pctile": 35,
           "value": 101.7,
           "display": "101.7"
         },
@@ -28101,7 +28101,7 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -28235,9 +28235,9 @@
           "display": "84.5"
         },
         "90th % EV": {
-          "pctile": 27,
-          "value": 100.6,
-          "display": "100.6"
+          "pctile": 20,
+          "value": 100.0,
+          "display": "100.0"
         },
         "Barrel %": {
           "pctile": 50,
@@ -28503,7 +28503,7 @@
           "display": "85.6"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -28570,7 +28570,7 @@
           "display": "80.8"
         },
         "90th % EV": {
-          "pctile": 15,
+          "pctile": 14,
           "value": 99.0,
           "display": "99.0"
         },
@@ -28704,7 +28704,7 @@
           "display": "89.9"
         },
         "90th % EV": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 103.9,
           "display": "103.9"
         },
@@ -28771,7 +28771,7 @@
           "display": "88.7"
         },
         "90th % EV": {
-          "pctile": 15,
+          "pctile": 14,
           "value": 99.0,
           "display": "99.0"
         },
@@ -28838,7 +28838,7 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -28905,7 +28905,7 @@
           "display": "88.4"
         },
         "90th % EV": {
-          "pctile": 57,
+          "pctile": 56,
           "value": 103.2,
           "display": "103.2"
         },
@@ -28972,7 +28972,7 @@
           "display": "89.1"
         },
         "90th % EV": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 103.3,
           "display": "103.3"
         },
@@ -29106,7 +29106,7 @@
           "display": "85.2"
         },
         "90th % EV": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 99.5,
           "display": "99.5"
         },
@@ -29173,7 +29173,7 @@
           "display": "91.0"
         },
         "90th % EV": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 104.0,
           "display": "104.0"
         },
@@ -29240,7 +29240,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 103.0,
           "display": "103.0"
         },
@@ -29374,9 +29374,9 @@
           "display": "88.4"
         },
         "90th % EV": {
-          "pctile": 12,
-          "value": 98.5,
-          "display": "98.5"
+          "pctile": 11,
+          "value": 98.2,
+          "display": "98.2"
         },
         "Barrel %": {
           "pctile": 10,
@@ -29441,7 +29441,7 @@
           "display": "89.3"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -29508,7 +29508,7 @@
           "display": "89.6"
         },
         "90th % EV": {
-          "pctile": 16,
+          "pctile": 15,
           "value": 99.2,
           "display": "99.2"
         },
@@ -29642,7 +29642,7 @@
           "display": "88.9"
         },
         "90th % EV": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 99.6,
           "display": "99.6"
         },
@@ -29709,7 +29709,7 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -29843,7 +29843,7 @@
           "display": "90.7"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -30044,7 +30044,7 @@
           "display": "92.4"
         },
         "90th % EV": {
-          "pctile": 59,
+          "pctile": 58,
           "value": 103.4,
           "display": "103.4"
         },
@@ -30122,8 +30122,8 @@
         },
         "LD%": {
           "pctile": 42,
-          "value": 24.0,
-          "display": "24.0"
+          "value": 21.4,
+          "display": "21.4"
         },
         "Chase %": {
           "pctile": 86,
@@ -30178,7 +30178,7 @@
           "display": "92.7"
         },
         "90th % EV": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 104.1,
           "display": "104.1"
         },
@@ -30312,7 +30312,7 @@
           "display": "80.1"
         },
         "90th % EV": {
-          "pctile": 6,
+          "pctile": 5,
           "value": 95.0,
           "display": "95.0"
         },
@@ -30379,7 +30379,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 104.1,
           "display": "104.1"
         },
@@ -30446,7 +30446,7 @@
           "display": "83.1"
         },
         "90th % EV": {
-          "pctile": 31,
+          "pctile": 30,
           "value": 101.2,
           "display": "101.2"
         },
@@ -30513,9 +30513,9 @@
           "display": "93.5"
         },
         "90th % EV": {
-          "pctile": 81,
-          "value": 105.5,
-          "display": "105.5"
+          "pctile": 79,
+          "value": 105.2,
+          "display": "105.2"
         },
         "Barrel %": {
           "pctile": 26,
@@ -30580,9 +30580,9 @@
           "display": "85.3"
         },
         "90th % EV": {
-          "pctile": 79,
-          "value": 105.2,
-          "display": "105.2"
+          "pctile": 83,
+          "value": 105.8,
+          "display": "105.8"
         },
         "Barrel %": {
           "pctile": 90,
@@ -30715,8 +30715,8 @@
         },
         "90th % EV": {
           "pctile": 10,
-          "value": 97.2,
-          "display": "97.2"
+          "value": 98.0,
+          "display": "98.0"
         },
         "Barrel %": {
           "pctile": 10,
@@ -30781,7 +30781,7 @@
           "display": "90.7"
         },
         "90th % EV": {
-          "pctile": 31,
+          "pctile": 30,
           "value": 101.2,
           "display": "101.2"
         },
@@ -30848,7 +30848,7 @@
           "display": "86.8"
         },
         "90th % EV": {
-          "pctile": 89,
+          "pctile": 88,
           "value": 106.5,
           "display": "106.5"
         },
@@ -30915,7 +30915,7 @@
           "display": "85.3"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -30982,7 +30982,7 @@
           "display": "86.8"
         },
         "90th % EV": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 103.3,
           "display": "103.3"
         },
@@ -31049,7 +31049,7 @@
           "display": "88.1"
         },
         "90th % EV": {
-          "pctile": 10,
+          "pctile": 9,
           "value": 97.1,
           "display": "97.1"
         },
@@ -31183,7 +31183,7 @@
           "display": "86.1"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -31317,7 +31317,7 @@
           "display": "85.0"
         },
         "90th % EV": {
-          "pctile": 10,
+          "pctile": 9,
           "value": 97.2,
           "display": "97.2"
         },
@@ -31384,7 +31384,7 @@
           "display": "86.5"
         },
         "90th % EV": {
-          "pctile": 16,
+          "pctile": 15,
           "value": 99.2,
           "display": "99.2"
         },
@@ -31518,9 +31518,9 @@
           "display": "85.2"
         },
         "90th % EV": {
-          "pctile": 12,
-          "value": 98.3,
-          "display": "98.3"
+          "pctile": 36,
+          "value": 101.8,
+          "display": "101.8"
         },
         "Barrel %": {
           "pctile": 61,
@@ -31719,7 +31719,7 @@
           "display": "89.2"
         },
         "90th % EV": {
-          "pctile": 57,
+          "pctile": 56,
           "value": 103.2,
           "display": "103.2"
         },
@@ -31786,7 +31786,7 @@
           "display": "89.1"
         },
         "90th % EV": {
-          "pctile": 14,
+          "pctile": 12,
           "value": 98.8,
           "display": "98.8"
         },
@@ -31920,7 +31920,7 @@
           "display": "89.7"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -31987,7 +31987,7 @@
           "display": "91.2"
         },
         "90th % EV": {
-          "pctile": 38,
+          "pctile": 37,
           "value": 101.9,
           "display": "101.9"
         },
@@ -32054,7 +32054,7 @@
           "display": "82.6"
         },
         "90th % EV": {
-          "pctile": 4,
+          "pctile": 5,
           "value": 94.6,
           "display": "94.6"
         },
@@ -32121,7 +32121,7 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 40,
+          "pctile": 39,
           "value": 102.1,
           "display": "102.1"
         },
@@ -32188,9 +32188,9 @@
           "display": "88.8"
         },
         "90th % EV": {
-          "pctile": 49,
-          "value": 102.7,
-          "display": "102.7"
+          "pctile": 64,
+          "value": 104.0,
+          "display": "104.0"
         },
         "Barrel %": {
           "pctile": 29,
@@ -32255,7 +32255,7 @@
           "display": "91.1"
         },
         "90th % EV": {
-          "pctile": 11,
+          "pctile": 10,
           "value": 97.7,
           "display": "97.7"
         },
@@ -32322,7 +32322,7 @@
           "display": "87.5"
         },
         "90th % EV": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 103.0,
           "display": "103.0"
         },
@@ -32456,7 +32456,7 @@
           "display": "83.8"
         },
         "90th % EV": {
-          "pctile": 27,
+          "pctile": 26,
           "value": 100.6,
           "display": "100.6"
         },
@@ -32590,7 +32590,7 @@
           "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 102.4,
           "display": "102.4"
         },
@@ -32657,7 +32657,7 @@
           "display": "89.1"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -32724,7 +32724,7 @@
           "display": "88.7"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -32791,7 +32791,7 @@
           "display": "90.6"
         },
         "90th % EV": {
-          "pctile": 49,
+          "pctile": 48,
           "value": 102.7,
           "display": "102.7"
         },
@@ -32858,7 +32858,7 @@
           "display": "85.0"
         },
         "90th % EV": {
-          "pctile": 15,
+          "pctile": 14,
           "value": 99.0,
           "display": "99.0"
         },
@@ -32992,7 +32992,7 @@
           "display": "85.1"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -33059,7 +33059,7 @@
           "display": "86.3"
         },
         "90th % EV": {
-          "pctile": 36,
+          "pctile": 35,
           "value": 101.7,
           "display": "101.7"
         },
@@ -33193,7 +33193,7 @@
           "display": "90.1"
         },
         "90th % EV": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 99.4,
           "display": "99.4"
         },
@@ -33260,7 +33260,7 @@
           "display": "86.0"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -33327,7 +33327,7 @@
           "display": "88.7"
         },
         "90th % EV": {
-          "pctile": 36,
+          "pctile": 35,
           "value": 101.7,
           "display": "101.7"
         },
@@ -33394,7 +33394,7 @@
           "display": "83.1"
         },
         "90th % EV": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 99.3,
           "display": "99.3"
         },
@@ -33528,7 +33528,7 @@
           "display": "87.4"
         },
         "90th % EV": {
-          "pctile": 10,
+          "pctile": 9,
           "value": 97.1,
           "display": "97.1"
         },
@@ -33595,9 +33595,9 @@
           "display": "93.3"
         },
         "90th % EV": {
-          "pctile": 48,
-          "value": 102.6,
-          "display": "102.6"
+          "pctile": 57,
+          "value": 103.3,
+          "display": "103.3"
         },
         "Barrel %": {
           "pctile": 82,
@@ -33662,7 +33662,7 @@
           "display": "84.4"
         },
         "90th % EV": {
-          "pctile": 36,
+          "pctile": 35,
           "value": 101.7,
           "display": "101.7"
         },
@@ -33729,7 +33729,7 @@
           "display": "85.2"
         },
         "90th % EV": {
-          "pctile": 20,
+          "pctile": 19,
           "value": 99.8,
           "display": "99.8"
         },
@@ -33796,7 +33796,7 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 103.0,
           "display": "103.0"
         },
@@ -33930,7 +33930,7 @@
           "display": "88.1"
         },
         "90th % EV": {
-          "pctile": 20,
+          "pctile": 19,
           "value": 99.8,
           "display": "99.8"
         },
@@ -34008,8 +34008,8 @@
         },
         "LD%": {
           "pctile": 58,
-          "value": 25.0,
-          "display": "25.0"
+          "value": 26.1,
+          "display": "26.1"
         },
         "Chase %": {
           "pctile": 12,
@@ -34064,9 +34064,9 @@
           "display": "90.1"
         },
         "90th % EV": {
-          "pctile": 58,
-          "value": 103.3,
-          "display": "103.3"
+          "pctile": 51,
+          "value": 102.9,
+          "display": "102.9"
         },
         "Barrel %": {
           "pctile": 10,
@@ -34131,9 +34131,9 @@
           "display": "95.7"
         },
         "90th % EV": {
-          "pctile": 86,
-          "value": 106.2,
-          "display": "106.2"
+          "pctile": 88,
+          "value": 106.5,
+          "display": "106.5"
         },
         "Barrel %": {
           "pctile": 99,
@@ -34198,9 +34198,9 @@
           "display": "92.0"
         },
         "90th % EV": {
-          "pctile": 55,
-          "value": 103.1,
-          "display": "103.1"
+          "pctile": 67,
+          "value": 104.3,
+          "display": "104.3"
         },
         "Barrel %": {
           "pctile": 40,
@@ -34265,7 +34265,7 @@
           "display": "81.1"
         },
         "90th % EV": {
-          "pctile": 8,
+          "pctile": 7,
           "value": 96.0,
           "display": "96.0"
         },
@@ -34332,7 +34332,7 @@
           "display": "82.1"
         },
         "90th % EV": {
-          "pctile": 33,
+          "pctile": 32,
           "value": 101.5,
           "display": "101.5"
         },
@@ -34399,7 +34399,7 @@
           "display": "83.0"
         },
         "90th % EV": {
-          "pctile": 60,
+          "pctile": 59,
           "value": 103.6,
           "display": "103.6"
         },
@@ -34466,7 +34466,7 @@
           "display": "89.9"
         },
         "90th % EV": {
-          "pctile": 57,
+          "pctile": 56,
           "value": 103.2,
           "display": "103.2"
         },
@@ -34533,7 +34533,7 @@
           "display": "90.4"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -34734,7 +34734,7 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 28,
+          "pctile": 27,
           "value": 100.8,
           "display": "100.8"
         },
@@ -34801,7 +34801,7 @@
           "display": "90.8"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -34868,7 +34868,7 @@
           "display": "88.5"
         },
         "90th % EV": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 102.4,
           "display": "102.4"
         },
@@ -34935,7 +34935,7 @@
           "display": "87.3"
         },
         "90th % EV": {
-          "pctile": 28,
+          "pctile": 26,
           "value": 100.7,
           "display": "100.7"
         },
@@ -35069,7 +35069,7 @@
           "display": "84.3"
         },
         "90th % EV": {
-          "pctile": 9,
+          "pctile": 8,
           "value": 96.7,
           "display": "96.7"
         },
@@ -35136,7 +35136,7 @@
           "display": "87.1"
         },
         "90th % EV": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 102.6,
           "display": "102.6"
         },
@@ -35203,9 +35203,9 @@
           "display": "88.2"
         },
         "90th % EV": {
-          "pctile": 60,
-          "value": 103.6,
-          "display": "103.6"
+          "pctile": 63,
+          "value": 103.9,
+          "display": "103.9"
         },
         "Barrel %": {
           "pctile": 82,
@@ -35270,7 +35270,7 @@
           "display": "90.1"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -35337,7 +35337,7 @@
           "display": "89.2"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -35404,7 +35404,7 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 103.1,
           "display": "103.1"
         },
@@ -35672,7 +35672,7 @@
           "display": "87.5"
         },
         "90th % EV": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 102.8,
           "display": "102.8"
         },
@@ -35739,7 +35739,7 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 60,
+          "pctile": 59,
           "value": 103.6,
           "display": "103.6"
         },
@@ -36141,7 +36141,7 @@
           "display": "93.3"
         },
         "90th % EV": {
-          "pctile": 60,
+          "pctile": 59,
           "value": 103.6,
           "display": "103.6"
         },
@@ -36208,7 +36208,7 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 102.5,
           "display": "102.5"
         },
@@ -36275,7 +36275,7 @@
           "display": "89.9"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -36342,7 +36342,7 @@
           "display": "89.0"
         },
         "90th % EV": {
-          "pctile": 10,
+          "pctile": 9,
           "value": 97.0,
           "display": "97.0"
         },
@@ -36610,7 +36610,7 @@
           "display": "84.0"
         },
         "90th % EV": {
-          "pctile": 89,
+          "pctile": 88,
           "value": 106.5,
           "display": "106.5"
         },
@@ -36744,7 +36744,7 @@
           "display": "88.2"
         },
         "90th % EV": {
-          "pctile": 26,
+          "pctile": 25,
           "value": 100.5,
           "display": "100.5"
         },
@@ -36878,7 +36878,7 @@
           "display": "88.0"
         },
         "90th % EV": {
-          "pctile": 38,
+          "pctile": 37,
           "value": 101.9,
           "display": "101.9"
         },
@@ -36945,7 +36945,7 @@
           "display": "91.2"
         },
         "90th % EV": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 99.5,
           "display": "99.5"
         },
@@ -37012,7 +37012,7 @@
           "display": "87.3"
         },
         "90th % EV": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 99.6,
           "display": "99.6"
         },
@@ -37079,7 +37079,7 @@
           "display": "86.4"
         },
         "90th % EV": {
-          "pctile": 93,
+          "pctile": 94,
           "value": 107.6,
           "display": "107.6"
         },
@@ -37213,7 +37213,7 @@
           "display": "87.7"
         },
         "90th % EV": {
-          "pctile": 26,
+          "pctile": 25,
           "value": 100.5,
           "display": "100.5"
         },
@@ -37280,7 +37280,7 @@
           "display": "91.6"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -37347,7 +37347,7 @@
           "display": "88.8"
         },
         "90th % EV": {
-          "pctile": 12,
+          "pctile": 11,
           "value": 98.2,
           "display": "98.2"
         },
@@ -37414,7 +37414,7 @@
           "display": "90.6"
         },
         "90th % EV": {
-          "pctile": 81,
+          "pctile": 80,
           "value": 105.4,
           "display": "105.4"
         },
@@ -37481,7 +37481,7 @@
           "display": "86.6"
         },
         "90th % EV": {
-          "pctile": 9,
+          "pctile": 8,
           "value": 96.9,
           "display": "96.9"
         },
@@ -37548,7 +37548,7 @@
           "display": "83.7"
         },
         "90th % EV": {
-          "pctile": 6,
+          "pctile": 5,
           "value": 95.0,
           "display": "95.0"
         },
@@ -37615,9 +37615,9 @@
           "display": "95.1"
         },
         "90th % EV": {
-          "pctile": 65,
-          "value": 104.0,
-          "display": "104.0"
+          "pctile": 97,
+          "value": 108.4,
+          "display": "108.4"
         },
         "Barrel %": {
           "pctile": 10,
@@ -37682,7 +37682,7 @@
           "display": "79.1"
         },
         "90th % EV": {
-          "pctile": 7,
+          "pctile": 6,
           "value": 95.4,
           "display": "95.4"
         },
@@ -37749,7 +37749,7 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 57,
+          "pctile": 56,
           "value": 103.2,
           "display": "103.2"
         },
@@ -37816,7 +37816,7 @@
           "display": "84.2"
         },
         "90th % EV": {
-          "pctile": 12,
+          "pctile": 11,
           "value": 98.5,
           "display": "98.5"
         },
@@ -37950,7 +37950,7 @@
           "display": "88.1"
         },
         "90th % EV": {
-          "pctile": 28,
+          "pctile": 27,
           "value": 100.8,
           "display": "100.8"
         },
@@ -38017,7 +38017,7 @@
           "display": "79.5"
         },
         "90th % EV": {
-          "pctile": 14,
+          "pctile": 12,
           "value": 98.8,
           "display": "98.8"
         },
@@ -38151,7 +38151,7 @@
           "display": "84.7"
         },
         "90th % EV": {
-          "pctile": 20,
+          "pctile": 19,
           "value": 99.8,
           "display": "99.8"
         },
@@ -38285,7 +38285,7 @@
           "display": "85.3"
         },
         "90th % EV": {
-          "pctile": 4,
+          "pctile": 5,
           "value": 94.6,
           "display": "94.6"
         },
@@ -38352,7 +38352,7 @@
           "display": "76.9"
         },
         "90th % EV": {
-          "pctile": 8,
+          "pctile": 6,
           "value": 95.8,
           "display": "95.8"
         },
@@ -38419,7 +38419,7 @@
           "display": "77.5"
         },
         "90th % EV": {
-          "pctile": 16,
+          "pctile": 15,
           "value": 99.1,
           "display": "99.1"
         },
@@ -38486,7 +38486,7 @@
           "display": "83.6"
         },
         "90th % EV": {
-          "pctile": 11,
+          "pctile": 10,
           "value": 97.9,
           "display": "97.9"
         },
@@ -38553,7 +38553,7 @@
           "display": "80.6"
         },
         "90th % EV": {
-          "pctile": 10,
+          "pctile": 9,
           "value": 97.2,
           "display": "97.2"
         },
@@ -38754,7 +38754,7 @@
           "display": "89.5"
         },
         "90th % EV": {
-          "pctile": 59,
+          "pctile": 58,
           "value": 103.5,
           "display": "103.5"
         },
@@ -38821,7 +38821,7 @@
           "display": "94.0"
         },
         "90th % EV": {
-          "pctile": 60,
+          "pctile": 59,
           "value": 103.6,
           "display": "103.6"
         },
@@ -39089,7 +39089,7 @@
           "display": "101.3"
         },
         "90th % EV": {
-          "pctile": 82,
+          "pctile": 81,
           "value": 105.6,
           "display": "105.6"
         },
@@ -39156,7 +39156,7 @@
           "display": "81.8"
         },
         "90th % EV": {
-          "pctile": 14,
+          "pctile": 12,
           "value": 98.8,
           "display": "98.8"
         },
@@ -39223,7 +39223,7 @@
           "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 99.6,
           "display": "99.6"
         },
@@ -39290,7 +39290,7 @@
           "display": "87.1"
         },
         "90th % EV": {
-          "pctile": 9,
+          "pctile": 7,
           "value": 96.5,
           "display": "96.5"
         },
@@ -39424,7 +39424,7 @@
           "display": "86.9"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -39491,7 +39491,7 @@
           "display": "80.7"
         },
         "90th % EV": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 99.7,
           "display": "99.7"
         },
@@ -39558,7 +39558,7 @@
           "display": "92.0"
         },
         "90th % EV": {
-          "pctile": 49,
+          "pctile": 48,
           "value": 102.7,
           "display": "102.7"
         },
@@ -39692,7 +39692,7 @@
           "display": "72.8"
         },
         "90th % EV": {
-          "pctile": 37,
+          "pctile": 36,
           "value": 101.8,
           "display": "101.8"
         },
@@ -39759,9 +39759,9 @@
           "display": "89.4"
         },
         "90th % EV": {
-          "pctile": 1,
-          "value": 91.1,
-          "display": "91.1"
+          "pctile": 16,
+          "value": 99.3,
+          "display": "99.3"
         },
         "Barrel %": {
           "pctile": 10,
@@ -39893,7 +39893,7 @@
           "display": "90.5"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -39960,7 +39960,7 @@
           "display": "84.4"
         },
         "90th % EV": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 103.9,
           "display": "103.9"
         },
@@ -40027,7 +40027,7 @@
           "display": "76.7"
         },
         "90th % EV": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 99.5,
           "display": "99.5"
         },
@@ -40094,7 +40094,7 @@
           "display": "83.3"
         },
         "90th % EV": {
-          "pctile": 7,
+          "pctile": 6,
           "value": 95.1,
           "display": "95.1"
         },
@@ -40161,7 +40161,7 @@
           "display": "81.8"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -40228,9 +40228,9 @@
           "display": "90.3"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 95,
+          "value": 107.9,
+          "display": "107.9"
         },
         "Barrel %": {
           "pctile": 10,
@@ -40362,7 +40362,7 @@
           "display": "99.1"
         },
         "90th % EV": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 102.6,
           "display": "102.6"
         },
@@ -40429,7 +40429,7 @@
           "display": "89.5"
         },
         "90th % EV": {
-          "pctile": 7,
+          "pctile": 6,
           "value": 95.2,
           "display": "95.2"
         },
@@ -40563,7 +40563,7 @@
           "display": "90.4"
         },
         "90th % EV": {
-          "pctile": 10,
+          "pctile": 9,
           "value": 97.2,
           "display": "97.2"
         },
@@ -40630,7 +40630,7 @@
           "display": "91.6"
         },
         "90th % EV": {
-          "pctile": 9,
+          "pctile": 8,
           "value": 96.8,
           "display": "96.8"
         },
@@ -40764,7 +40764,7 @@
           "display": "85.8"
         },
         "90th % EV": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 99.4,
           "display": "99.4"
         },
@@ -40965,7 +40965,7 @@
           "display": "96.2"
         },
         "90th % EV": {
-          "pctile": 8,
+          "pctile": 7,
           "value": 96.2,
           "display": "96.2"
         },
@@ -41166,7 +41166,7 @@
           "display": "93.1"
         },
         "90th % EV": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 102.3,
           "display": "102.3"
         },
@@ -41233,7 +41233,7 @@
           "display": "92.5"
         },
         "90th % EV": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 102.9,
           "display": "102.9"
         },
@@ -41300,7 +41300,7 @@
           "display": "80.7"
         },
         "90th % EV": {
-          "pctile": 0,
+          "pctile": 1,
           "value": 81.1,
           "display": "81.1"
         },
@@ -41367,7 +41367,7 @@
           "display": "92.3"
         },
         "90th % EV": {
-          "pctile": 2,
+          "pctile": 3,
           "value": 92.6,
           "display": "92.6"
         },
@@ -41501,9 +41501,9 @@
           "display": "91.5"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 7,
+          "value": 96.5,
+          "display": "96.5"
         },
         "Barrel %": {
           "pctile": 10,
@@ -41568,9 +41568,9 @@
           "display": "97.1"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 62,
+          "value": 103.8,
+          "display": "103.8"
         },
         "Barrel %": {
           "pctile": 10,
@@ -41635,7 +41635,7 @@
           "display": "95.9"
         },
         "90th % EV": {
-          "pctile": 8,
+          "pctile": 7,
           "value": 95.9,
           "display": "95.9"
         },
@@ -41702,7 +41702,7 @@
           "display": "96.7"
         },
         "90th % EV": {
-          "pctile": 9,
+          "pctile": 8,
           "value": 96.7,
           "display": "96.7"
         },
@@ -41769,7 +41769,7 @@
           "display": "87.0"
         },
         "90th % EV": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 104.3,
           "display": "104.3"
         },
@@ -41836,7 +41836,7 @@
           "display": "91.0"
         },
         "90th % EV": {
-          "pctile": 12,
+          "pctile": 11,
           "value": 98.4,
           "display": "98.4"
         },
@@ -42037,7 +42037,7 @@
           "display": "65.0"
         },
         "90th % EV": {
-          "pctile": 13,
+          "pctile": 12,
           "value": 98.7,
           "display": "98.7"
         },
@@ -42171,9 +42171,9 @@
           "display": "96.8"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 74,
+          "value": 104.8,
+          "display": "104.8"
         },
         "Barrel %": {
           "pctile": 10,
@@ -42305,7 +42305,7 @@
           "display": "93.1"
         },
         "90th % EV": {
-          "pctile": 10,
+          "pctile": 9,
           "value": 97.0,
           "display": "97.0"
         },
@@ -42372,9 +42372,9 @@
           "display": "85.9"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 2,
+          "value": 90.4,
+          "display": "90.4"
         },
         "Barrel %": {
           "pctile": 10,
@@ -42439,9 +42439,9 @@
           "display": "55.4"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 0,
+          "value": 55.4,
+          "display": "55.4"
         },
         "Barrel %": {
           "pctile": 10,
@@ -42506,7 +42506,7 @@
           "display": "89.7"
         },
         "90th % EV": {
-          "pctile": 93,
+          "pctile": 94,
           "value": 107.6,
           "display": "107.6"
         },
@@ -42573,7 +42573,7 @@
           "display": "90.3"
         },
         "90th % EV": {
-          "pctile": 39,
+          "pctile": 38,
           "value": 102.0,
           "display": "102.0"
         },
@@ -42640,7 +42640,7 @@
           "display": "87.1"
         },
         "90th % EV": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 100.4,
           "display": "100.4"
         },
@@ -42707,9 +42707,9 @@
           "display": "97.9"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 64,
+          "value": 104.0,
+          "display": "104.0"
         },
         "Barrel %": {
           "pctile": 10,
@@ -42774,9 +42774,9 @@
           "display": "106.2"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 86,
+          "value": 106.2,
+          "display": "106.2"
         },
         "Barrel %": {
           "pctile": 100,
@@ -43042,9 +43042,9 @@
           "display": "98.1"
         },
         "90th % EV": {
-          "pctile": 6,
-          "value": 95.0,
-          "display": "95.0"
+          "pctile": 11,
+          "value": 98.1,
+          "display": "98.1"
         },
         "Barrel %": {
           "pctile": 10,
@@ -43176,7 +43176,7 @@
           "display": "101.0"
         },
         "90th % EV": {
-          "pctile": 30,
+          "pctile": 29,
           "value": 101.0,
           "display": "101.0"
         },
@@ -43386,7 +43386,7 @@
           "display": "0.394"
         },
         "xwOBA": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 0.319,
           "display": "0.319"
         },
@@ -43574,7 +43574,7 @@
           "display": "8.7"
         },
         "xBA": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.268,
           "display": "0.268"
         },
@@ -43609,7 +43609,7 @@
           "display": "4.0"
         },
         "K-BB%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 11.2,
           "display": "11.2"
         }
@@ -43929,7 +43929,7 @@
           "display": "24.6"
         },
         "Chase%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.106,
           "display": "29.1"
         },
@@ -43970,7 +43970,7 @@
           "display": "10.9"
         },
         "xBA": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.261,
           "display": "0.261"
         },
@@ -43995,7 +43995,7 @@
           "display": "20.2"
         },
         "Chase%": {
-          "pctile": 54,
+          "pctile": 53,
           "value": 27.668,
           "display": "27.7"
         },
@@ -44036,7 +44036,7 @@
           "display": "9.3"
         },
         "xBA": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.261,
           "display": "0.261"
         },
@@ -44107,7 +44107,7 @@
           "display": "0.269"
         },
         "xSLG": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 0.412,
           "display": "0.412"
         },
@@ -44452,7 +44452,7 @@
           "display": "28.8"
         },
         "K%": {
-          "pctile": 73,
+          "pctile": 72,
           "value": 27.8,
           "display": "27.8"
         },
@@ -44513,7 +44513,7 @@
           "display": "0.313"
         },
         "Whiff%": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 29.9,
           "display": "29.9"
         },
@@ -44589,7 +44589,7 @@
           "display": "13.4"
         },
         "Chase%": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 27.8937,
           "display": "27.9"
         },
@@ -44872,11 +44872,11 @@
     {
       "name": "Logan Allen",
       "player_id": 663531,
-      "team": "LAD",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "LAD",
-      "parent_org_name": "Los Angeles Dodgers",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -44924,7 +44924,7 @@
           "display": "22.3"
         },
         "BB%": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 11.8,
           "display": "11.8"
         },
@@ -45102,7 +45102,7 @@
           "display": "0.381"
         },
         "xwOBA": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 0.319,
           "display": "0.319"
         },
@@ -45371,7 +45371,7 @@
           "display": "0.325"
         },
         "Whiff%": {
-          "pctile": 90,
+          "pctile": 89,
           "value": 35.9,
           "display": "35.9"
         },
@@ -45457,7 +45457,7 @@
           "display": "7.0"
         },
         "K-BB%": {
-          "pctile": 63,
+          "pctile": 62,
           "value": 14.3,
           "display": "14.3"
         }
@@ -45701,7 +45701,7 @@
           "display": "0.267"
         },
         "Whiff%": {
-          "pctile": 90,
+          "pctile": 89,
           "value": 35.9,
           "display": "35.9"
         },
@@ -45762,12 +45762,12 @@
           "display": "0.409"
         },
         "xwOBA": {
-          "pctile": 24,
+          "pctile": 23,
           "value": 0.346,
           "display": "0.346"
         },
         "Whiff%": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 27.8,
           "display": "27.8"
         },
@@ -46239,7 +46239,7 @@
           "display": "21.1"
         },
         "Chase%": {
-          "pctile": 40,
+          "pctile": 39,
           "value": 25.6125,
           "display": "25.6"
         },
@@ -46454,6 +46454,72 @@
       }
     },
     {
+      "name": "Riley Cornelio",
+      "player_id": 683000,
+      "team": "WSN",
+      "aaa_team": null,
+      "aaa_team_id": null,
+      "parent_org_abbr": "WSN",
+      "parent_org_name": "Washington Nationals",
+      "categories": {
+        "FIP": {
+          "pctile": null,
+          "value": null,
+          "display": "\u2014"
+        },
+        "Avg Exit Velo": {
+          "pctile": 23,
+          "value": 90.3,
+          "display": "90.3"
+        },
+        "Barrel%": {
+          "pctile": 10,
+          "value": 12.0,
+          "display": "12.0"
+        },
+        "xBA": {
+          "pctile": 70,
+          "value": 0.2,
+          "display": "0.200"
+        },
+        "xSLG": {
+          "pctile": 41,
+          "value": 0.376,
+          "display": "0.376"
+        },
+        "xwOBA": {
+          "pctile": 50,
+          "value": 0.312,
+          "display": "0.312"
+        },
+        "Whiff%": {
+          "pctile": 94,
+          "value": 39.5,
+          "display": "39.5"
+        },
+        "K%": {
+          "pctile": 92,
+          "value": 34.4,
+          "display": "34.4"
+        },
+        "Chase%": {
+          "pctile": 76,
+          "value": 30.8793,
+          "display": "30.9"
+        },
+        "BB%": {
+          "pctile": 32,
+          "value": 14.0,
+          "display": "14.0"
+        },
+        "K-BB%": {
+          "pctile": 82,
+          "value": 20.4,
+          "display": "20.4"
+        }
+      }
+    },
+    {
       "name": "Quinn Mathews",
       "player_id": 687273,
       "team": "STL",
@@ -46493,7 +46559,7 @@
           "display": "0.322"
         },
         "Whiff%": {
-          "pctile": 89,
+          "pctile": 88,
           "value": 35.3,
           "display": "35.3"
         },
@@ -46579,7 +46645,7 @@
           "display": "5.4"
         },
         "K-BB%": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 12.5,
           "display": "12.5"
         }
@@ -46904,7 +46970,7 @@
           "display": "29.6"
         },
         "BB%": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 11.8,
           "display": "11.8"
         },
@@ -46975,7 +47041,7 @@
           "display": "8.8"
         },
         "K-BB%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 11.2,
           "display": "11.2"
         }
@@ -47011,7 +47077,7 @@
           "display": "0.281"
         },
         "xSLG": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 0.412,
           "display": "0.412"
         },
@@ -47031,7 +47097,7 @@
           "display": "15.6"
         },
         "Chase%": {
-          "pctile": 73,
+          "pctile": 72,
           "value": 30.0752,
           "display": "30.1"
         },
@@ -47087,7 +47153,7 @@
           "display": "0.339"
         },
         "Whiff%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.4,
           "display": "29.4"
         },
@@ -47204,7 +47270,7 @@
           "display": "6.0"
         },
         "xBA": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 0.221,
           "display": "0.221"
         },
@@ -47818,7 +47884,7 @@
           "display": "22.9"
         },
         "K%": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 21.9,
           "display": "21.9"
         },
@@ -48204,7 +48270,7 @@
           "display": "0.368"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -48275,7 +48341,7 @@
           "display": "0.326"
         },
         "Whiff%": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 29.9,
           "display": "29.9"
         },
@@ -48341,7 +48407,7 @@
           "display": "0.339"
         },
         "Whiff%": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 19.6,
           "display": "19.6"
         },
@@ -48392,7 +48458,7 @@
           "display": "10.5"
         },
         "xBA": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 0.221,
           "display": "0.221"
         },
@@ -48422,7 +48488,7 @@
           "display": "29.3"
         },
         "BB%": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 11.8,
           "display": "11.8"
         },
@@ -48539,7 +48605,7 @@
           "display": "0.326"
         },
         "Whiff%": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 29.9,
           "display": "29.9"
         },
@@ -48595,7 +48661,7 @@
           "display": "0.228"
         },
         "xSLG": {
-          "pctile": 53,
+          "pctile": 54,
           "value": 0.342,
           "display": "0.342"
         },
@@ -49133,7 +49199,7 @@
           "display": "0.258"
         },
         "Whiff%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 26.3,
           "display": "26.3"
         },
@@ -49189,7 +49255,7 @@
           "display": "0.214"
         },
         "xSLG": {
-          "pctile": 44,
+          "pctile": 45,
           "value": 0.364,
           "display": "0.364"
         },
@@ -49275,7 +49341,7 @@
           "display": "27.4"
         },
         "Chase%": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 29.1892,
           "display": "29.2"
         },
@@ -49285,7 +49351,7 @@
           "display": "9.6"
         },
         "K-BB%": {
-          "pctile": 76,
+          "pctile": 75,
           "value": 17.8,
           "display": "17.8"
         }
@@ -49595,7 +49661,7 @@
           "display": "0.293"
         },
         "Whiff%": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 27.8,
           "display": "27.8"
         },
@@ -49631,7 +49697,7 @@
       "parent_org_name": "Los Angeles Dodgers",
       "categories": {
         "FIP": {
-          "pctile": 36,
+          "pctile": 44,
           "value": 5.3,
           "display": "5.30"
         },
@@ -49788,7 +49854,7 @@
           "display": "0.382"
         },
         "xwOBA": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 0.319,
           "display": "0.319"
         },
@@ -50118,7 +50184,7 @@
           "display": "0.382"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -50179,7 +50245,7 @@
           "display": "0.254"
         },
         "xSLG": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 0.412,
           "display": "0.412"
         },
@@ -50331,7 +50397,7 @@
           "display": "29.7"
         },
         "Chase%": {
-          "pctile": 52,
+          "pctile": 51,
           "value": 27.3529,
           "display": "27.4"
         },
@@ -50362,7 +50428,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 25,
+          "pctile": 26,
           "value": 90.1,
           "display": "90.1"
         },
@@ -50565,7 +50631,7 @@
           "display": "88.7"
         },
         "Barrel%": {
-          "pctile": 36,
+          "pctile": 37,
           "value": 7.6,
           "display": "7.6"
         },
@@ -50585,7 +50651,7 @@
           "display": "0.369"
         },
         "Whiff%": {
-          "pctile": 13,
+          "pctile": 12,
           "value": 19.3,
           "display": "19.3"
         },
@@ -50722,7 +50788,7 @@
           "display": "34.7"
         },
         "K%": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 31.5,
           "display": "31.5"
         },
@@ -50910,7 +50976,7 @@
           "display": "0.369"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -51037,7 +51103,7 @@
           "display": "0.258"
         },
         "xSLG": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 0.359,
           "display": "0.359"
         },
@@ -51286,7 +51352,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 30,
+          "pctile": 31,
           "value": 89.8,
           "display": "89.8"
         },
@@ -51306,7 +51372,7 @@
           "display": "0.385"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -51331,7 +51397,7 @@
           "display": "9.9"
         },
         "K-BB%": {
-          "pctile": 55,
+          "pctile": 54,
           "value": 12.5,
           "display": "12.5"
         }
@@ -51362,7 +51428,7 @@
           "display": "6.0"
         },
         "xBA": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.268,
           "display": "0.268"
         },
@@ -51397,7 +51463,7 @@
           "display": "8.6"
         },
         "K-BB%": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 10.4,
           "display": "10.4"
         }
@@ -51428,7 +51494,7 @@
           "display": "9.5"
         },
         "xBA": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.268,
           "display": "0.268"
         },
@@ -51463,7 +51529,7 @@
           "display": "7.3"
         },
         "K-BB%": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 14.7,
           "display": "14.7"
         }
@@ -51651,7 +51717,7 @@
           "display": "16.0"
         },
         "Chase%": {
-          "pctile": 83,
+          "pctile": 84,
           "value": 32.7703,
           "display": "32.8"
         },
@@ -51692,7 +51758,7 @@
           "display": "14.1"
         },
         "xBA": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.261,
           "display": "0.261"
         },
@@ -52174,7 +52240,7 @@
           "display": "20.6"
         },
         "K%": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 21.9,
           "display": "21.9"
         },
@@ -52357,7 +52423,7 @@
           "display": "0.187"
         },
         "xSLG": {
-          "pctile": 77,
+          "pctile": 78,
           "value": 0.282,
           "display": "0.282"
         },
@@ -52758,7 +52824,7 @@
           "display": "0.457"
         },
         "xwOBA": {
-          "pctile": 24,
+          "pctile": 23,
           "value": 0.346,
           "display": "0.346"
         },
@@ -52814,7 +52880,7 @@
           "display": "13.0"
         },
         "xBA": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.261,
           "display": "0.261"
         },
@@ -53296,7 +53362,7 @@
           "display": "29.7"
         },
         "K%": {
-          "pctile": 63,
+          "pctile": 62,
           "value": 25.4,
           "display": "25.4"
         },
@@ -53606,7 +53672,7 @@
           "display": "6.5"
         },
         "xBA": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 0.206,
           "display": "0.206"
         },
@@ -53687,7 +53753,7 @@
           "display": "0.350"
         },
         "Whiff%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 26.3,
           "display": "26.3"
         },
@@ -53743,7 +53809,7 @@
           "display": "0.199"
         },
         "xSLG": {
-          "pctile": 81,
+          "pctile": 82,
           "value": 0.269,
           "display": "0.269"
         },
@@ -53961,7 +54027,7 @@
           "display": "19.3"
         },
         "Chase%": {
-          "pctile": 46,
+          "pctile": 45,
           "value": 26.6187,
           "display": "26.6"
         },
@@ -54078,7 +54144,7 @@
           "display": "0.442"
         },
         "xwOBA": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 0.319,
           "display": "0.319"
         },
@@ -54266,7 +54332,7 @@
           "display": "12.0"
         },
         "xBA": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.268,
           "display": "0.268"
         },
@@ -54347,7 +54413,7 @@
           "display": "0.383"
         },
         "Whiff%": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 26.5,
           "display": "26.5"
         },
@@ -54362,7 +54428,7 @@
           "display": "26.0"
         },
         "BB%": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 18.0,
           "display": "18.0"
         },
@@ -54418,7 +54484,7 @@
           "display": "21.3"
         },
         "K%": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 17.3,
           "display": "17.3"
         },
@@ -54469,7 +54535,7 @@
           "display": "0.200"
         },
         "xSLG": {
-          "pctile": 76,
+          "pctile": 77,
           "value": 0.286,
           "display": "0.286"
         },
@@ -54631,7 +54697,7 @@
           "display": "8.9"
         },
         "K-BB%": {
-          "pctile": 87,
+          "pctile": 88,
           "value": 23.6,
           "display": "23.6"
         }
@@ -54640,11 +54706,11 @@
     {
       "name": "Lyon Richardson",
       "player_id": 680689,
-      "team": "CIN",
+      "team": "MIL",
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "CIN",
-      "parent_org_name": "Cincinnati Reds",
+      "parent_org_abbr": "MIL",
+      "parent_org_name": "Milwaukee Brewers",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -55215,7 +55281,7 @@
           "display": "22.0"
         },
         "Chase%": {
-          "pctile": 16,
+          "pctile": 15,
           "value": 21.1538,
           "display": "21.2"
         },
@@ -55413,7 +55479,7 @@
           "display": "20.3"
         },
         "Chase%": {
-          "pctile": 71,
+          "pctile": 70,
           "value": 29.8319,
           "display": "29.8"
         },
@@ -55733,7 +55799,7 @@
           "display": "0.296"
         },
         "Whiff%": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 19.6,
           "display": "19.6"
         },
@@ -56058,7 +56124,7 @@
           "display": "0.279"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -56139,7 +56205,7 @@
           "display": "30.8"
         },
         "Chase%": {
-          "pctile": 63,
+          "pctile": 62,
           "value": 28.6792,
           "display": "28.7"
         },
@@ -56398,7 +56464,7 @@
           "display": "31.5"
         },
         "K%": {
-          "pctile": 83,
+          "pctile": 82,
           "value": 31.1,
           "display": "31.1"
         },
@@ -56459,7 +56525,7 @@
           "display": "0.265"
         },
         "Whiff%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.4,
           "display": "29.4"
         },
@@ -56469,7 +56535,7 @@
           "display": "40.4"
         },
         "Chase%": {
-          "pctile": 73,
+          "pctile": 72,
           "value": 30.0752,
           "display": "30.1"
         },
@@ -56505,7 +56571,7 @@
           "display": "84.8"
         },
         "Barrel%": {
-          "pctile": 36,
+          "pctile": 37,
           "value": 7.6,
           "display": "7.6"
         },
@@ -56667,7 +56733,7 @@
           "display": "29.7"
         },
         "Chase%": {
-          "pctile": 69,
+          "pctile": 68,
           "value": 29.5547,
           "display": "29.6"
         },
@@ -56713,7 +56779,7 @@
           "display": "0.179"
         },
         "xSLG": {
-          "pctile": 84,
+          "pctile": 85,
           "value": 0.255,
           "display": "0.255"
         },
@@ -56723,7 +56789,7 @@
           "display": "0.258"
         },
         "Whiff%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.4,
           "display": "29.4"
         },
@@ -56860,7 +56926,7 @@
           "display": "28.0"
         },
         "K%": {
-          "pctile": 74,
+          "pctile": 73,
           "value": 28.0,
           "display": "28.0"
         },
@@ -56896,7 +56962,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 91.3,
           "display": "91.3"
         },
@@ -56941,7 +57007,7 @@
           "display": "8.0"
         },
         "K-BB%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 11.2,
           "display": "11.2"
         }
@@ -57094,7 +57160,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 25,
+          "pctile": 26,
           "value": 90.1,
           "display": "90.1"
         },
@@ -57175,7 +57241,7 @@
           "display": "0.158"
         },
         "xSLG": {
-          "pctile": 81,
+          "pctile": 82,
           "value": 0.269,
           "display": "0.269"
         },
@@ -57251,7 +57317,7 @@
           "display": "0.287"
         },
         "Whiff%": {
-          "pctile": 87,
+          "pctile": 86,
           "value": 34.6,
           "display": "34.6"
         },
@@ -57307,7 +57373,7 @@
           "display": "0.199"
         },
         "xSLG": {
-          "pctile": 76,
+          "pctile": 77,
           "value": 0.286,
           "display": "0.286"
         },
@@ -57510,7 +57576,7 @@
           "display": "0.396"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -57525,7 +57591,7 @@
           "display": "23.7"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -57779,7 +57845,7 @@
           "display": "0.339"
         },
         "Whiff%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.4,
           "display": "29.4"
         },
@@ -58028,7 +58094,7 @@
           "display": "10.8"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
@@ -58414,7 +58480,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 91.3,
           "display": "91.3"
         },
@@ -58449,7 +58515,7 @@
           "display": "15.3"
         },
         "Chase%": {
-          "pctile": 42,
+          "pctile": 41,
           "value": 25.9109,
           "display": "25.9"
         },
@@ -58551,7 +58617,7 @@
           "display": "89.4"
         },
         "Barrel%": {
-          "pctile": 36,
+          "pctile": 37,
           "value": 7.6,
           "display": "7.6"
         },
@@ -58647,7 +58713,7 @@
           "display": "33.0"
         },
         "Chase%": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 28.0769,
           "display": "28.1"
         },
@@ -58779,7 +58845,7 @@
           "display": "18.6"
         },
         "Chase%": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 29.3173,
           "display": "29.3"
         },
@@ -58845,7 +58911,7 @@
           "display": "15.3"
         },
         "Chase%": {
-          "pctile": 60,
+          "pctile": 59,
           "value": 28.3401,
           "display": "28.3"
         },
@@ -58996,11 +59062,11 @@
     {
       "name": "Javy Guerra",
       "player_id": 642770,
-      "team": "ATL",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "ATL",
-      "parent_org_name": "Atlanta Braves",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -59170,7 +59236,7 @@
           "display": "29.5"
         },
         "K%": {
-          "pctile": 83,
+          "pctile": 82,
           "value": 31.1,
           "display": "31.1"
         },
@@ -59353,7 +59419,7 @@
           "display": "0.235"
         },
         "xSLG": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 0.359,
           "display": "0.359"
         },
@@ -59414,7 +59480,7 @@
           "display": "8.7"
         },
         "xBA": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.261,
           "display": "0.261"
         },
@@ -59632,7 +59698,7 @@
           "display": "30.0"
         },
         "K%": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 21.9,
           "display": "21.9"
         },
@@ -59810,7 +59876,7 @@
           "display": "7.4"
         },
         "xBA": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.261,
           "display": "0.261"
         },
@@ -60130,12 +60196,12 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 91.3,
           "display": "91.3"
         },
         "Barrel%": {
-          "pctile": 36,
+          "pctile": 37,
           "value": 7.6,
           "display": "7.6"
         },
@@ -60165,7 +60231,7 @@
           "display": "19.6"
         },
         "Chase%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 27.0742,
           "display": "27.1"
         },
@@ -60551,7 +60617,7 @@
           "display": "0.365"
         },
         "Whiff%": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 26.5,
           "display": "26.5"
         },
@@ -60668,7 +60734,7 @@
           "display": "2.9"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
@@ -60876,7 +60942,7 @@
           "display": "0.367"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -60891,7 +60957,7 @@
           "display": "24.6"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -61064,7 +61130,7 @@
           "display": "5.3"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
@@ -61216,7 +61282,7 @@
           "display": "30.8"
         },
         "K%": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 26.6,
           "display": "26.6"
         },
@@ -61262,12 +61328,12 @@
           "display": "5.8"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
         "xSLG": {
-          "pctile": 76,
+          "pctile": 77,
           "value": 0.286,
           "display": "0.286"
         },
@@ -61495,7 +61561,7 @@
           "display": "8.7"
         },
         "K-BB%": {
-          "pctile": 84,
+          "pctile": 85,
           "value": 21.7,
           "display": "21.7"
         }
@@ -61673,7 +61739,7 @@
           "display": "0.317"
         },
         "Whiff%": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 26.5,
           "display": "26.5"
         },
@@ -61693,7 +61759,7 @@
           "display": "16.7"
         },
         "K-BB%": {
-          "pctile": 43,
+          "pctile": 42,
           "value": 9.8,
           "display": "9.8"
         }
@@ -61993,7 +62059,7 @@
           "display": "0.240"
         },
         "xSLG": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.418,
           "display": "0.418"
         },
@@ -62120,7 +62186,7 @@
           "display": "21.5"
         },
         "xBA": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.268,
           "display": "0.268"
         },
@@ -62211,7 +62277,7 @@
           "display": "30.7"
         },
         "Chase%": {
-          "pctile": 69,
+          "pctile": 68,
           "value": 29.5547,
           "display": "29.6"
         },
@@ -62221,7 +62287,7 @@
           "display": "12.9"
         },
         "K-BB%": {
-          "pctile": 76,
+          "pctile": 75,
           "value": 17.8,
           "display": "17.8"
         }
@@ -62668,7 +62734,7 @@
           "display": "26.9"
         },
         "K%": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 21.9,
           "display": "21.9"
         },
@@ -62927,7 +62993,7 @@
           "display": "0.410"
         },
         "Whiff%": {
-          "pctile": 51,
+          "pctile": 50,
           "value": 26.5,
           "display": "26.5"
         },
@@ -62993,7 +63059,7 @@
           "display": "0.305"
         },
         "Whiff%": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 27.8,
           "display": "27.8"
         },
@@ -63257,7 +63323,7 @@
           "display": "0.332"
         },
         "Whiff%": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 29.9,
           "display": "29.9"
         },
@@ -63277,7 +63343,7 @@
           "display": "8.9"
         },
         "K-BB%": {
-          "pctile": 76,
+          "pctile": 75,
           "value": 17.8,
           "display": "17.8"
         }
@@ -63328,7 +63394,7 @@
           "display": "21.7"
         },
         "K%": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 24.0,
           "display": "24.0"
         },
@@ -63394,12 +63460,12 @@
           "display": "30.2"
         },
         "K%": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 24.0,
           "display": "24.0"
         },
         "Chase%": {
-          "pctile": 16,
+          "pctile": 15,
           "value": 21.1538,
           "display": "21.2"
         },
@@ -63430,7 +63496,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 91.3,
           "display": "91.3"
         },
@@ -63516,7 +63582,7 @@
           "display": "0.343"
         },
         "xwOBA": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 0.319,
           "display": "0.319"
         },
@@ -63526,7 +63592,7 @@
           "display": "19.8"
         },
         "K%": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 21.9,
           "display": "21.9"
         },
@@ -63856,7 +63922,7 @@
           "display": "33.3"
         },
         "K%": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 26.6,
           "display": "26.6"
         },
@@ -63917,7 +63983,7 @@
           "display": "0.293"
         },
         "Whiff%": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 19.6,
           "display": "19.6"
         },
@@ -63968,7 +64034,7 @@
           "display": "1.6"
         },
         "xBA": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.261,
           "display": "0.261"
         },
@@ -64450,7 +64516,7 @@
           "display": "30.9"
         },
         "K%": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 21.9,
           "display": "21.9"
         },
@@ -64521,7 +64587,7 @@
           "display": "22.6"
         },
         "Chase%": {
-          "pctile": 72,
+          "pctile": 71,
           "value": 30.0,
           "display": "30.0"
         },
@@ -64993,7 +65059,7 @@
           "display": "13.3"
         },
         "K-BB%": {
-          "pctile": 63,
+          "pctile": 62,
           "value": 14.3,
           "display": "14.3"
         }
@@ -65176,7 +65242,7 @@
           "display": "40.7"
         },
         "K%": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 31.5,
           "display": "31.5"
         },
@@ -65293,7 +65359,7 @@
           "display": "0.317"
         },
         "xSLG": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.418,
           "display": "0.418"
         },
@@ -65943,7 +66009,7 @@
           "display": "89.4"
         },
         "Barrel%": {
-          "pctile": 36,
+          "pctile": 37,
           "value": 7.6,
           "display": "7.6"
         },
@@ -66004,7 +66070,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 25,
+          "pctile": 26,
           "value": 90.1,
           "display": "90.1"
         },
@@ -66176,7 +66242,7 @@
           "display": "26.1"
         },
         "BB%": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 11.8,
           "display": "11.8"
         },
@@ -66349,7 +66415,7 @@
           "display": "0.238"
         },
         "xSLG": {
-          "pctile": 53,
+          "pctile": 54,
           "value": 0.342,
           "display": "0.342"
         },
@@ -66572,7 +66638,7 @@
           "display": "24.2"
         },
         "BB%": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 17.4,
           "display": "17.4"
         },
@@ -66775,7 +66841,7 @@
           "display": "12.0"
         },
         "K-BB%": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 10.8,
           "display": "10.8"
         }
@@ -66897,7 +66963,7 @@
           "display": "33.3"
         },
         "Chase%": {
-          "pctile": 70,
+          "pctile": 69,
           "value": 29.6482,
           "display": "29.6"
         },
@@ -67085,7 +67151,7 @@
           "display": "0.293"
         },
         "Whiff%": {
-          "pctile": 82,
+          "pctile": 81,
           "value": 32.9,
           "display": "32.9"
         },
@@ -67136,7 +67202,7 @@
           "display": "11.1"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
@@ -67481,12 +67547,12 @@
           "display": "0.306"
         },
         "Whiff%": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 29.9,
           "display": "29.9"
         },
         "K%": {
-          "pctile": 74,
+          "pctile": 73,
           "value": 28.0,
           "display": "28.0"
         },
@@ -67496,7 +67562,7 @@
           "display": "26.9"
         },
         "BB%": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 11.8,
           "display": "11.8"
         },
@@ -67567,7 +67633,7 @@
           "display": "14.5"
         },
         "K-BB%": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 15.6,
           "display": "15.6"
         }
@@ -67755,7 +67821,7 @@
           "display": "21.1"
         },
         "Chase%": {
-          "pctile": 70,
+          "pctile": 69,
           "value": 29.6482,
           "display": "29.6"
         },
@@ -68014,7 +68080,7 @@
           "display": "29.8"
         },
         "K%": {
-          "pctile": 74,
+          "pctile": 73,
           "value": 28.0,
           "display": "28.0"
         },
@@ -68080,7 +68146,7 @@
           "display": "36.6"
         },
         "K%": {
-          "pctile": 91,
+          "pctile": 90,
           "value": 33.8,
           "display": "33.8"
         },
@@ -68116,7 +68182,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 30,
+          "pctile": 31,
           "value": 89.8,
           "display": "89.8"
         },
@@ -68151,7 +68217,7 @@
           "display": "28.4"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -68603,12 +68669,12 @@
           "display": "0.249"
         },
         "Whiff%": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 27.8,
           "display": "27.8"
         },
         "K%": {
-          "pctile": 74,
+          "pctile": 73,
           "value": 28.0,
           "display": "28.0"
         },
@@ -68674,7 +68740,7 @@
           "display": "29.8"
         },
         "K%": {
-          "pctile": 91,
+          "pctile": 90,
           "value": 33.8,
           "display": "33.8"
         },
@@ -68740,7 +68806,7 @@
           "display": "25.4"
         },
         "K%": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 26.6,
           "display": "26.6"
         },
@@ -68776,7 +68842,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 25,
+          "pctile": 26,
           "value": 90.1,
           "display": "90.1"
         },
@@ -68837,9 +68903,9 @@
       "parent_org_name": "Chicago Cubs",
       "categories": {
         "FIP": {
-          "pctile": null,
-          "value": null,
-          "display": "\u2014"
+          "pctile": 6,
+          "value": 14.73,
+          "display": "14.73"
         },
         "Avg Exit Velo": {
           "pctile": 79,
@@ -68969,7 +69035,7 @@
       "parent_org_name": "Washington Nationals",
       "categories": {
         "FIP": {
-          "pctile": 7,
+          "pctile": 19,
           "value": 7.39,
           "display": "7.39"
         },
@@ -69050,7 +69116,7 @@
           "display": "6.0"
         },
         "xBA": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.268,
           "display": "0.268"
         },
@@ -69172,7 +69238,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 91.3,
           "display": "91.3"
         },
@@ -69187,7 +69253,7 @@
           "display": "0.174"
         },
         "xSLG": {
-          "pctile": 44,
+          "pctile": 45,
           "value": 0.364,
           "display": "0.364"
         },
@@ -69436,7 +69502,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 30,
+          "pctile": 31,
           "value": 89.8,
           "display": "89.8"
         },
@@ -69471,7 +69537,7 @@
           "display": "27.0"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -69522,7 +69588,7 @@
           "display": "0.373"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -69578,7 +69644,7 @@
           "display": "7.3"
         },
         "xBA": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 0.221,
           "display": "0.221"
         },
@@ -70065,7 +70131,7 @@
           "display": "22.4"
         },
         "Chase%": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 26.2069,
           "display": "26.2"
         },
@@ -70502,7 +70568,7 @@
           "display": "6.0"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
@@ -70730,7 +70796,7 @@
           "display": "26.5"
         },
         "BB%": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 19.4,
           "display": "19.4"
         },
@@ -71177,7 +71243,7 @@
           "display": "0.247"
         },
         "Whiff%": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 27.8,
           "display": "27.8"
         },
@@ -71451,7 +71517,7 @@
           "display": "29.9"
         },
         "Chase%": {
-          "pctile": 79,
+          "pctile": 80,
           "value": 31.7568,
           "display": "31.8"
         },
@@ -71614,7 +71680,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 30,
+          "pctile": 31,
           "value": 89.8,
           "display": "89.8"
         },
@@ -71842,7 +71908,7 @@
           "display": "32.1"
         },
         "K%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 26.1,
           "display": "26.1"
         },
@@ -71852,7 +71918,7 @@
           "display": "27.7"
         },
         "BB%": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 17.4,
           "display": "17.4"
         },
@@ -72177,7 +72243,7 @@
           "display": "39.2"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -72248,7 +72314,7 @@
           "display": "27.2"
         },
         "BB%": {
-          "pctile": 34,
+          "pctile": 35,
           "value": 13.6,
           "display": "13.6"
         },
@@ -72421,7 +72487,7 @@
           "display": "0.170"
         },
         "xSLG": {
-          "pctile": 84,
+          "pctile": 85,
           "value": 0.255,
           "display": "0.255"
         },
@@ -72553,7 +72619,7 @@
           "display": "0.247"
         },
         "xSLG": {
-          "pctile": 44,
+          "pctile": 45,
           "value": 0.364,
           "display": "0.364"
         },
@@ -73045,7 +73111,7 @@
           "display": "12.0"
         },
         "K-BB%": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 14.7,
           "display": "14.7"
         }
@@ -73868,7 +73934,7 @@
           "display": "14.7"
         },
         "xBA": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 0.221,
           "display": "0.221"
         },
@@ -73934,7 +74000,7 @@
           "display": "4.3"
         },
         "xBA": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.268,
           "display": "0.268"
         },
@@ -74010,7 +74076,7 @@
           "display": "0.466"
         },
         "xwOBA": {
-          "pctile": 24,
+          "pctile": 23,
           "value": 0.346,
           "display": "0.346"
         },
@@ -74091,7 +74157,7 @@
           "display": "29.5"
         },
         "Chase%": {
-          "pctile": 48,
+          "pctile": 47,
           "value": 26.875,
           "display": "26.9"
         },
@@ -74365,7 +74431,7 @@
           "display": "10.8"
         },
         "K-BB%": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 15.4,
           "display": "15.4"
         }
@@ -74533,7 +74599,7 @@
           "display": "0.251"
         },
         "xSLG": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 0.359,
           "display": "0.359"
         },
@@ -74563,7 +74629,7 @@
           "display": "8.1"
         },
         "K-BB%": {
-          "pctile": 70,
+          "pctile": 69,
           "value": 16.1,
           "display": "16.1"
         }
@@ -74873,7 +74939,7 @@
           "display": "0.324"
         },
         "Whiff%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 26.3,
           "display": "26.3"
         },
@@ -75157,7 +75223,7 @@
           "display": "14.5"
         },
         "K-BB%": {
-          "pctile": 76,
+          "pctile": 75,
           "value": 17.8,
           "display": "17.8"
         }
@@ -75594,12 +75660,12 @@
           "display": "0.381"
         },
         "xwOBA": {
-          "pctile": 17,
+          "pctile": 16,
           "value": 0.361,
           "display": "0.361"
         },
         "Whiff%": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 19.6,
           "display": "19.6"
         },
@@ -75995,7 +76061,7 @@
           "display": "0.389"
         },
         "Whiff%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 26.3,
           "display": "26.3"
         },
@@ -76132,7 +76198,7 @@
           "display": "32.7"
         },
         "K%": {
-          "pctile": 63,
+          "pctile": 62,
           "value": 25.4,
           "display": "25.4"
         },
@@ -76366,7 +76432,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 30,
+          "pctile": 31,
           "value": 89.8,
           "display": "89.8"
         },
@@ -76391,7 +76457,7 @@
           "display": "0.298"
         },
         "Whiff%": {
-          "pctile": 68,
+          "pctile": 67,
           "value": 29.9,
           "display": "29.9"
         },
@@ -76574,7 +76640,7 @@
           "display": "2.9"
         },
         "xBA": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 0.206,
           "display": "0.206"
         },
@@ -76843,7 +76909,7 @@
           "display": "0.190"
         },
         "xSLG": {
-          "pctile": 81,
+          "pctile": 82,
           "value": 0.269,
           "display": "0.269"
         },
@@ -76929,7 +76995,7 @@
           "display": "34.5"
         },
         "Chase%": {
-          "pctile": 81,
+          "pctile": 82,
           "value": 32.2314,
           "display": "32.2"
         },
@@ -77005,7 +77071,7 @@
           "display": "12.5"
         },
         "K-BB%": {
-          "pctile": 70,
+          "pctile": 69,
           "value": 16.1,
           "display": "16.1"
         }
@@ -77320,7 +77386,7 @@
           "display": "29.7"
         },
         "K%": {
-          "pctile": 67,
+          "pctile": 66,
           "value": 26.6,
           "display": "26.6"
         },
@@ -77447,7 +77513,7 @@
           "display": "0.363"
         },
         "Whiff%": {
-          "pctile": 82,
+          "pctile": 81,
           "value": 32.9,
           "display": "32.9"
         },
@@ -77665,7 +77731,7 @@
           "display": "5.2"
         },
         "K-BB%": {
-          "pctile": 79,
+          "pctile": 78,
           "value": 18.9,
           "display": "18.9"
         }
@@ -77762,7 +77828,7 @@
           "display": "7.9"
         },
         "xBA": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 0.221,
           "display": "0.221"
         },
@@ -77792,7 +77858,7 @@
           "display": "31.5"
         },
         "BB%": {
-          "pctile": 34,
+          "pctile": 35,
           "value": 13.6,
           "display": "13.6"
         },
@@ -77828,7 +77894,7 @@
           "display": "3.6"
         },
         "xBA": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 0.206,
           "display": "0.206"
         },
@@ -77914,7 +77980,7 @@
           "display": "28.8"
         },
         "K%": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 31.5,
           "display": "31.5"
         },
@@ -78178,7 +78244,7 @@
           "display": "28.7"
         },
         "K%": {
-          "pctile": 83,
+          "pctile": 82,
           "value": 31.1,
           "display": "31.1"
         },
@@ -78356,7 +78422,7 @@
           "display": "2.8"
         },
         "xBA": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 0.206,
           "display": "0.206"
         },
@@ -78645,7 +78711,7 @@
           "display": "15.9"
         },
         "Chase%": {
-          "pctile": 25,
+          "pctile": 24,
           "value": 23.4043,
           "display": "23.4"
         },
@@ -78671,12 +78737,12 @@
       "parent_org_name": "Chicago White Sox",
       "categories": {
         "FIP": {
-          "pctile": 64,
+          "pctile": 69,
           "value": 4.77,
           "display": "4.77"
         },
         "Avg Exit Velo": {
-          "pctile": 25,
+          "pctile": 26,
           "value": 90.1,
           "display": "90.1"
         },
@@ -78772,7 +78838,7 @@
           "display": "33.7"
         },
         "K%": {
-          "pctile": 74,
+          "pctile": 73,
           "value": 28.0,
           "display": "28.0"
         },
@@ -79016,7 +79082,7 @@
           "display": "10.3"
         },
         "xBA": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 0.206,
           "display": "0.206"
         },
@@ -79041,7 +79107,7 @@
           "display": "23.6"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -79117,7 +79183,7 @@
           "display": "7.1"
         },
         "K-BB%": {
-          "pctile": 70,
+          "pctile": 69,
           "value": 16.1,
           "display": "16.1"
         }
@@ -79239,7 +79305,7 @@
           "display": "38.0"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -79295,7 +79361,7 @@
           "display": "0.358"
         },
         "Whiff%": {
-          "pctile": 75,
+          "pctile": 74,
           "value": 31.2,
           "display": "31.2"
         },
@@ -79447,7 +79513,7 @@
           "display": "12.5"
         },
         "K-BB%": {
-          "pctile": 63,
+          "pctile": 62,
           "value": 14.3,
           "display": "14.3"
         }
@@ -79488,7 +79554,7 @@
           "display": "0.409"
         },
         "xwOBA": {
-          "pctile": 24,
+          "pctile": 23,
           "value": 0.346,
           "display": "0.346"
         },
@@ -79732,7 +79798,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 30,
+          "pctile": 31,
           "value": 89.8,
           "display": "89.8"
         },
@@ -80173,7 +80239,7 @@
           "display": "7.8"
         },
         "K-BB%": {
-          "pctile": 43,
+          "pctile": 42,
           "value": 9.8,
           "display": "9.8"
         }
@@ -80539,7 +80605,7 @@
           "display": "0.134"
         },
         "xSLG": {
-          "pctile": 87,
+          "pctile": 88,
           "value": 0.239,
           "display": "0.239"
         },
@@ -80732,7 +80798,7 @@
           "display": "8.0"
         },
         "xBA": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 0.206,
           "display": "0.206"
         },
@@ -80813,7 +80879,7 @@
           "display": "0.307"
         },
         "Whiff%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.4,
           "display": "29.4"
         },
@@ -80828,7 +80894,7 @@
           "display": "16.8"
         },
         "BB%": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 17.4,
           "display": "17.4"
         },
@@ -80864,7 +80930,7 @@
           "display": "3.3"
         },
         "xBA": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 0.206,
           "display": "0.206"
         },
@@ -81031,7 +81097,7 @@
           "display": "14.3"
         },
         "K-BB%": {
-          "pctile": 63,
+          "pctile": 62,
           "value": 14.3,
           "display": "14.3"
         }
@@ -81067,7 +81133,7 @@
           "display": "0.183"
         },
         "xSLG": {
-          "pctile": 81,
+          "pctile": 82,
           "value": 0.269,
           "display": "0.269"
         },
@@ -81417,7 +81483,7 @@
           "display": "39.6"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -81681,7 +81747,7 @@
           "display": "29.5"
         },
         "Chase%": {
-          "pctile": 75,
+          "pctile": 74,
           "value": 30.5263,
           "display": "30.5"
         },
@@ -81869,7 +81935,7 @@
           "display": "0.336"
         },
         "Whiff%": {
-          "pctile": 87,
+          "pctile": 86,
           "value": 34.6,
           "display": "34.6"
         },
@@ -82057,12 +82123,12 @@
           "display": "0.240"
         },
         "xSLG": {
-          "pctile": 23,
+          "pctile": 22,
           "value": 0.418,
           "display": "0.418"
         },
         "xwOBA": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 0.319,
           "display": "0.319"
         },
@@ -82595,7 +82661,7 @@
           "display": "0.307"
         },
         "Whiff%": {
-          "pctile": 90,
+          "pctile": 89,
           "value": 35.9,
           "display": "35.9"
         },
@@ -83133,7 +83199,7 @@
           "display": "26.2"
         },
         "Chase%": {
-          "pctile": 72,
+          "pctile": 71,
           "value": 30.0,
           "display": "30.0"
         },
@@ -83758,7 +83824,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 91.3,
           "display": "91.3"
         },
@@ -84057,7 +84123,7 @@
           "display": "31.4"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -84194,7 +84260,7 @@
           "display": "17.5"
         },
         "BB%": {
-          "pctile": 14,
+          "pctile": 13,
           "value": 19.4,
           "display": "19.4"
         },
@@ -85108,7 +85174,7 @@
           "display": "33.9"
         },
         "K%": {
-          "pctile": 73,
+          "pctile": 72,
           "value": 27.8,
           "display": "27.8"
         },
@@ -85748,7 +85814,7 @@
           "display": "0.0"
         },
         "xBA": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.268,
           "display": "0.268"
         },
@@ -85773,7 +85839,7 @@
           "display": "23.5"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -85783,7 +85849,7 @@
           "display": "8.8"
         },
         "K-BB%": {
-          "pctile": 64,
+          "pctile": 63,
           "value": 14.7,
           "display": "14.7"
         }
@@ -85814,7 +85880,7 @@
           "display": "6.2"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
@@ -85990,11 +86056,11 @@
     {
       "name": "T.J. Sikkema",
       "player_id": 674674,
-      "team": "BOS",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "BOS",
-      "parent_org_name": "Boston Red Sox",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -86225,7 +86291,7 @@
           "display": "0.229"
         },
         "Whiff%": {
-          "pctile": 94,
+          "pctile": 93,
           "value": 38.3,
           "display": "38.3"
         },
@@ -86499,7 +86565,7 @@
           "display": "21.4"
         },
         "Chase%": {
-          "pctile": 19,
+          "pctile": 18,
           "value": 21.875,
           "display": "21.9"
         },
@@ -86550,7 +86616,7 @@
           "display": "0.395"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -86657,7 +86723,7 @@
       "parent_org_name": "New York Mets",
       "categories": {
         "FIP": {
-          "pctile": 50,
+          "pctile": 56,
           "value": 4.98,
           "display": "4.98"
         },
@@ -86809,7 +86875,7 @@
           "display": "0.304"
         },
         "xSLG": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.437,
           "display": "0.437"
         },
@@ -87794,7 +87860,7 @@
           "display": "0.0"
         },
         "xBA": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 0.221,
           "display": "0.221"
         },
@@ -87875,7 +87941,7 @@
           "display": "0.355"
         },
         "Whiff%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.4,
           "display": "29.4"
         },
@@ -88540,7 +88606,7 @@
           "display": "36.0"
         },
         "K%": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 24.0,
           "display": "24.0"
         },
@@ -88606,7 +88672,7 @@
           "display": "26.8"
         },
         "K%": {
-          "pctile": 74,
+          "pctile": 73,
           "value": 28.0,
           "display": "28.0"
         },
@@ -89017,7 +89083,7 @@
           "display": "8.7"
         },
         "K-BB%": {
-          "pctile": 84,
+          "pctile": 85,
           "value": 21.7,
           "display": "21.7"
         }
@@ -89129,7 +89195,7 @@
           "display": "0.344"
         },
         "Whiff%": {
-          "pctile": 89,
+          "pctile": 88,
           "value": 35.3,
           "display": "35.3"
         },
@@ -89276,7 +89342,7 @@
           "display": "25.0"
         },
         "BB%": {
-          "pctile": 34,
+          "pctile": 35,
           "value": 13.6,
           "display": "13.6"
         },
@@ -89312,7 +89378,7 @@
           "display": "10.0"
         },
         "xBA": {
-          "pctile": 56,
+          "pctile": 55,
           "value": 0.221,
           "display": "0.221"
         },
@@ -89804,7 +89870,7 @@
           "display": "17.4"
         },
         "BB%": {
-          "pctile": 34,
+          "pctile": 35,
           "value": 13.6,
           "display": "13.6"
         },
@@ -89992,7 +90058,7 @@
           "display": "30.6"
         },
         "K%": {
-          "pctile": 73,
+          "pctile": 72,
           "value": 27.8,
           "display": "27.8"
         },
@@ -90043,7 +90109,7 @@
           "display": "0.246"
         },
         "xSLG": {
-          "pctile": 18,
+          "pctile": 17,
           "value": 0.437,
           "display": "0.437"
         },
@@ -90322,7 +90388,7 @@
           "display": "38.1"
         },
         "K%": {
-          "pctile": 73,
+          "pctile": 72,
           "value": 27.8,
           "display": "27.8"
         },
@@ -90703,7 +90769,7 @@
           "display": "0.191"
         },
         "xSLG": {
-          "pctile": 85,
+          "pctile": 86,
           "value": 0.249,
           "display": "0.249"
         },
@@ -90835,7 +90901,7 @@
           "display": "0.239"
         },
         "xSLG": {
-          "pctile": 76,
+          "pctile": 77,
           "value": 0.286,
           "display": "0.286"
         },
@@ -90896,7 +90962,7 @@
           "display": "0.0"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
@@ -90940,11 +91006,11 @@
     {
       "name": "Taijuan Walker",
       "player_id": 592836,
-      "team": null,
+      "team": "LAA",
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": null,
-      "parent_org_name": "Free Agent",
+      "parent_org_abbr": "LAA",
+      "parent_org_name": "Los Angeles Angels",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -91520,7 +91586,7 @@
           "display": "18.4"
         },
         "BB%": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 11.8,
           "display": "11.8"
         },
@@ -91566,7 +91632,7 @@
           "display": "0.378"
         },
         "xwOBA": {
-          "pctile": 45,
+          "pctile": 44,
           "value": 0.318,
           "display": "0.318"
         },
@@ -91850,7 +91916,7 @@
           "display": "32.4"
         },
         "BB%": {
-          "pctile": 46,
+          "pctile": 47,
           "value": 11.8,
           "display": "11.8"
         },
@@ -91891,7 +91957,7 @@
           "display": "0.200"
         },
         "xSLG": {
-          "pctile": 81,
+          "pctile": 82,
           "value": 0.269,
           "display": "0.269"
         },
@@ -91901,7 +91967,7 @@
           "display": "0.203"
         },
         "Whiff%": {
-          "pctile": 50,
+          "pctile": 49,
           "value": 26.3,
           "display": "26.3"
         },
@@ -92693,7 +92759,7 @@
           "display": "0.327"
         },
         "Whiff%": {
-          "pctile": 87,
+          "pctile": 86,
           "value": 34.6,
           "display": "34.6"
         },
@@ -92759,7 +92825,7 @@
           "display": "0.344"
         },
         "Whiff%": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 27.8,
           "display": "27.8"
         },
@@ -93023,7 +93089,7 @@
           "display": "0.410"
         },
         "Whiff%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.4,
           "display": "29.4"
         },
@@ -93546,7 +93612,7 @@
           "display": "0.092"
         },
         "xwOBA": {
-          "pctile": 44,
+          "pctile": 43,
           "value": 0.319,
           "display": "0.319"
         },
@@ -93976,11 +94042,11 @@
     {
       "name": "Bryce Montes de Oca",
       "player_id": 656755,
-      "team": "WSN",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
-      "parent_org_abbr": "WSN",
-      "parent_org_name": "Washington Nationals",
+      "parent_org_abbr": null,
+      "parent_org_name": "Free Agent",
       "categories": {
         "FIP": {
           "pctile": null,
@@ -94115,7 +94181,7 @@
       "parent_org_name": "Milwaukee Brewers",
       "categories": {
         "FIP": {
-          "pctile": 79,
+          "pctile": 81,
           "value": 4.55,
           "display": "4.55"
         },
@@ -94206,7 +94272,7 @@
           "display": "0.194"
         },
         "xwOBA": {
-          "pctile": 15,
+          "pctile": 14,
           "value": 0.366,
           "display": "0.366"
         },
@@ -94384,7 +94450,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 30,
+          "pctile": 31,
           "value": 89.8,
           "display": "89.8"
         },
@@ -94790,7 +94856,7 @@
           "display": "0.0"
         },
         "xBA": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 0.207,
           "display": "0.207"
         },
@@ -94871,7 +94937,7 @@
           "display": "0.262"
         },
         "Whiff%": {
-          "pctile": 58,
+          "pctile": 57,
           "value": 27.8,
           "display": "27.8"
         },
@@ -94912,7 +94978,7 @@
           "display": "\u2014"
         },
         "Avg Exit Velo": {
-          "pctile": 25,
+          "pctile": 26,
           "value": 90.1,
           "display": "90.1"
         },
@@ -95201,7 +95267,7 @@
           "display": "0.337"
         },
         "Whiff%": {
-          "pctile": 65,
+          "pctile": 64,
           "value": 29.4,
           "display": "29.4"
         },
@@ -95739,7 +95805,7 @@
           "display": "18.2"
         },
         "Chase%": {
-          "pctile": 62,
+          "pctile": 61,
           "value": 28.5714,
           "display": "28.6"
         },
@@ -96069,7 +96135,7 @@
           "display": "37.5"
         },
         "Chase%": {
-          "pctile": 72,
+          "pctile": 71,
           "value": 30.0,
           "display": "30.0"
         },
@@ -97811,9 +97877,9 @@
       "parent_org_name": "Free Agent",
       "categories": {
         "FIP": {
-          "pctile": 21,
-          "value": 5.44,
-          "display": "5.44"
+          "pctile": 31,
+          "value": 5.43,
+          "display": "5.43"
         },
         "Avg Exit Velo": {
           "pctile": 11,
@@ -98115,7 +98181,7 @@
           "display": "25.0"
         },
         "Chase%": {
-          "pctile": 72,
+          "pctile": 71,
           "value": 30.0,
           "display": "30.0"
         },
@@ -98735,9 +98801,9 @@
       "parent_org_name": "Toronto Blue Jays",
       "categories": {
         "FIP": {
-          "pctile": 93,
-          "value": 4.16,
-          "display": "4.16"
+          "pctile": 94,
+          "value": 4.15,
+          "display": "4.15"
         },
         "Avg Exit Velo": {
           "pctile": 4,
@@ -99501,6 +99567,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-06-11 15:36:14 UTC"
+    "generated_at": "2026-06-12 22:07:57 UTC"
   }
 }
