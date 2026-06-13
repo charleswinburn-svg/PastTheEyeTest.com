@@ -1,10 +1,12 @@
 import { useState } from "react";
 import HockeyApp from "./hockey/HockeyApp.jsx";
 import BaseballApp from "./baseball/BaseballApp.jsx";
+import SoccerApp from "./soccer/SoccerApp.jsx";
 
 const SPORTS = [
   { id: "hockey",  label: "NHL",           icon: "🏒" },
   { id: "baseball", label: "MLB",          icon: "⚾" },
+  { id: "soccer",  label: "World Cup",     icon: "⚽" },
 ];
 
 export default function App() {
@@ -89,6 +91,7 @@ export default function App() {
       {/* ── Sport Content ── */}
       {sport === "hockey" && <HockeyApp />}
       {sport === "baseball" && <BaseballApp />}
+      {sport === "soccer" && <SoccerApp />}
     </div>
   );
 }
