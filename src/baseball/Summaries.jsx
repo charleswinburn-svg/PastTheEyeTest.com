@@ -731,29 +731,37 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         } catch { pitcherHand = "R"; }
       }
 
-      // Build payload from MLB Stats API pitch (enrichedData source)
-      const makePitch = (p) => ({
-        pitcher_id: selectedPlayer.id,
-        _stand: p.batSide || "R",
-        _p_throws: pitcherHand,
-        _pitchType: p.pitchType,
-        details: { type: { code: scorePitchCode(p.pitchType) } },
-        pitchData: {
-          startSpeed: p.velo,
-          extension: p.extension,
-          strikeZoneTop: p.szTop,
-          strikeZoneBottom: p.szBot,
-          coordinates: {
-            pfxX: p.pfxX_raw ?? null,
-            pfxZ: p.pfxZ_raw ?? null,
-            pX: p.pX, pZ: p.pZ,
-            x0: p.relX, z0: p.relHeight,
-            vX0: p.vX0, vY0: p.vY0, vZ0: p.vZ0,
-            aX: p.aX, aY: p.aY, aZ: p.aZ,
+      // Build payload from MLB Stats API pitch (enrichedData source).
+      // When the API provides pfxX/pfxZ coordinates, use them directly (sign-corrected) so
+      // the server bypasses kinematic derivation. The MLB API publishes pfx in feet with
+      // opposite sign from Statcast convention, so we negate both axes. Falling back to
+      // kinematic derivation (_pfx_direct absent) when pfxX_raw is null (rare, live pitches).
+      const makePitch = (p) => {
+        const hasPfx = p.pfxX_raw != null && p.pfxZ_raw != null;
+        return {
+          pitcher_id: selectedPlayer.id,
+          _stand: p.batSide || "R",
+          _p_throws: pitcherHand,
+          _pitchType: p.pitchType,
+          ...(hasPfx && { _pfx_direct: true }),
+          details: { type: { code: scorePitchCode(p.pitchType) } },
+          pitchData: {
+            startSpeed: p.velo,
+            extension: p.extension,
+            strikeZoneTop: p.szTop,
+            strikeZoneBottom: p.szBot,
+            coordinates: {
+              pfxX: hasPfx ? -p.pfxX_raw : null,
+              pfxZ: hasPfx ? -p.pfxZ_raw : null,
+              pX: p.pX, pZ: p.pZ,
+              x0: p.relX, z0: p.relHeight,
+              vX0: p.vX0, vY0: p.vY0, vZ0: p.vZ0,
+              aX: p.aX, aY: p.aY, aZ: p.aZ,
+            },
+            breaks: { spinRate: p.spin, spinDirection: p.spinDirection },
           },
-          breaks: { spinRate: p.spin, spinDirection: p.spinDirection },
-        },
-      });
+        };
+      };
 
       // Build payload from Statcast (Savant) CSV row — same data source as batch scoring
       const sv = (v) => { const f = parseFloat(v); return isNaN(f) ? null : f; };
