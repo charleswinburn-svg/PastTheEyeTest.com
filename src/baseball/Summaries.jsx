@@ -918,12 +918,18 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     if (!leaderboardPlus) return pitchPlus;
     const merged = { ...pitchPlus };
     for (const [pt, pg] of Object.entries(leaderboardPlus)) {
+      // Leaderboard L/R are Statcast-based (same source as overall grades) — prefer them
+      // over the kinematic pfx live-API path to avoid the API vs Savant mismatch.
+      const lbL = pg.L != null ? { stuffPlus: pg.L.stuff_plus ?? null, pitchPlus: pg.L.pitch_plus ?? null } : null;
+      const lbR = pg.R != null ? { stuffPlus: pg.R.stuff_plus ?? null, pitchPlus: pg.R.pitch_plus ?? null } : null;
       merged[pt] = {
         ...(merged[pt] || {}),
         stuffPlus:  pg.stuff  ?? merged[pt]?.stuffPlus,
         locPlus:    pg.loc    ?? merged[pt]?.locPlus,
         tunnelPlus: pg.tun    ?? merged[pt]?.tunnelPlus,
         pitchPlus:  pg.pitch  ?? merged[pt]?.pitchPlus,
+        L: lbL ?? merged[pt]?.L ?? null,
+        R: lbR ?? merged[pt]?.R ?? null,
       };
     }
     return merged;
