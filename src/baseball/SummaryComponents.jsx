@@ -6,10 +6,19 @@ import { useTheme } from "./ThemeContext.jsx";
 // MOVEMENT PLOT (Horizontal Break vs Induced Vertical Break)
 // ═══════════════════════════════════════════════════════════
 export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 200, onPitchClick = null,
-  expectedMovement = null, showExpected = false, armAngle = null, pitchPlus }) {
+  expectedMovement = null, showExpected = false, armAngle = null, pitchPlus, perPitchScores, pitchKey }) {
   const { theme: t, isDark } = useTheme();
   const [hovered, setHovered] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const _pitchKey = pitchKey ?? ((p) => `${p.gamePk ?? ""}_${p.atBatIndex ?? ""}_${p.pitchNumber ?? ""}`);
+  const getScores = (p) => {
+    if (perPitchScores) {
+      const s = perPitchScores.get(_pitchKey(p));
+      if (s) return { stuffPlus: s.stuff, locPlus: s.loc, pitchPlus: s.pitch };
+    }
+    const agg = pitchPlus?.[p.pitchType];
+    return agg ? { stuffPlus: agg.stuffPlus, locPlus: agg.locPlus, pitchPlus: agg.pitchPlus } : null;
+  };
   const axisB = 45, axisT = 20;
   const side = height - axisT - axisB;
   const pL = (width - side) / 2;
@@ -207,7 +216,7 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
         </text>
       )}
     </svg>
-    {hovered && <MovementPitchTooltip pitch={hovered} pos={tooltipPos} ptScores={pitchPlus?.[hovered.pitchType]} />}
+    {hovered && <MovementPitchTooltip pitch={hovered} pos={tooltipPos} ptScores={getScores(hovered)} />}
     </div>
   );
 }

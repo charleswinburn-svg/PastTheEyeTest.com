@@ -65,6 +65,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const [leagueAvgs, setLeagueAvgs] = useState(null);
   const [baselineAvgs, setBaselineAvgs] = useState(null);
   const [pitchPlus, setPitchPlus] = useState(null);
+  const [perPitchScores, setPerPitchScores] = useState(null);
   const [leaderboardPlus, setLeaderboardPlus] = useState(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo,   setDateTo]   = useState("");
@@ -83,6 +84,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const [reclassifyTarget, setReclassifyTarget] = useState(null);
 
   const pitchOverrideKey = (p) => `${p.gamePk ?? ""}_${p.atBatIndex ?? ""}_${p.pitchNumber ?? ""}`;
+  // Works for both enriched pitch objects (gamePk/atBatIndex/pitchNumber) and Savant rows (game_pk/at_bat_number/pitch_number)
+  const pitchKey = (p) => `${p.gamePk ?? p.game_pk ?? ""}_${p.atBatIndex ?? p.at_bat_number ?? ""}_${p.pitchNumber ?? p.pitch_number ?? ""}`;
 
   // Load pre-computed league avgs (from league_avgs_pipeline.py) as baseline
   useEffect(() => {
@@ -792,7 +795,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         }).then(r => r.ok ? r.json() : null).catch(() => null);
       };
 
-      const runScoring = async (allPitches, lPitches, rPitches) => {
+      const runScoring = async (allPitches, lPitches, rPitches, sourcePitches) => {
         const aliasedToOrig = {};
         for (const p of allPitches) {
           const apiCode = p.details.type.code;
@@ -820,6 +823,16 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         }
         console.log(`[Pitch+] Scored ${allPitches.length} pitches via /score_aggregate:`, out);
         setPitchPlus(out);
+
+        // Build per-pitch scores Map (key = pitchKey(source pitch) → {stuff, loc, pitch})
+        const pp = allData?.per_pitch;
+        if (pp?.length && sourcePitches?.length) {
+          const ppMap = new Map();
+          for (let i = 0; i < Math.min(pp.length, sourcePitches.length); i++) {
+            if (pp[i] != null) ppMap.set(pitchKey(sourcePitches[i]), pp[i]);
+          }
+          setPerPitchScores(ppMap);
+        }
       };
 
       // Game view: prefer Savant CSV data (same source as leaderboard batch pipeline).
@@ -844,6 +857,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
             pitcherRows.map(makePitchSavant),
             pitcherRows.filter(r => r.stand === "L").map(makePitchSavant),
             pitcherRows.filter(r => r.stand === "R").map(makePitchSavant),
+            pitcherRows,
           );
           return;
         }
@@ -861,6 +875,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         eligible.map(makePitch),
         eligible.filter(p => p.batSide === "L").map(makePitch),
         eligible.filter(p => p.batSide === "R").map(makePitch),
+        eligible,
       );
     })();
     return () => { cancelled = true; };
@@ -1338,6 +1353,8 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             showExpected={showExpected}
             armAngle={expectedMovement?.arm_angle ?? null}
             pitchPlus={pitchPlus}
+            perPitchScores={perPitchScores}
+            pitchKey={pitchKey}
           />
           <div style={{ width: 260 }}>
             {rightPanel === "zones" ? (
