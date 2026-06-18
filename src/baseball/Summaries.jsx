@@ -1337,6 +1337,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             expectedMovement={expectedMovement?.pitch_types}
             showExpected={showExpected}
             armAngle={expectedMovement?.arm_angle ?? null}
+            pitchPlus={pitchPlus}
           />
           <div style={{ width: 260 }}>
             {rightPanel === "zones" ? (
