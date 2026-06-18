@@ -506,10 +506,12 @@ function describeZone(pX, pZ, batSide) {
 
 function plusTextColor(val) {
   if (val == null || !isFinite(val)) return '#999';
-  if (val >= 115) return '#5ef55e';
-  if (val >= 105) return '#9ed99e';
-  if (val >= 95)  return '#ffc97a';
-  return '#f57878';
+  const dist = Math.abs(val - 100);
+  if (dist < 0.5) return '#bbb';
+  const step = Math.min(4, Math.floor((dist - 0.5) / 5));
+  const greens = ['#a8e6ab', '#75d47a', '#45c44d', '#1db028', '#07991a'];
+  const reds   = ['#f0a8a8', '#e87272', '#da4040', '#cb1616', '#b50505'];
+  return val > 100 ? greens[step] : reds[step];
 }
 
 function PitchTooltip({ pitch: p, pos, ptScores }) {
@@ -762,22 +764,16 @@ function effColor(val, metricKey, pitchType, avgSet) {
 
 // Uniform coloring: all pitch types graded relative to global mean=100, stdev=10.
 // All four metrics are now rescaled to the same distribution by the batch pipeline.
-const PLUS_STATS_BY_PT = {
-  stuffPlus:  { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10 } },
-  locPlus:    { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10 } },
-  tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10 } },
-  pitchPlus:  { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10 } },
-};
 
-// Plus-scale color: dark green at ≥mean+2σ, dark red at ≤mean-2σ, 5 discrete shades each side.
-function plusColorRaw(v, mean, stdev) {
-  if (v == null || !isFinite(v) || !stdev) return null;
-  const z = (v - mean) / (2 * stdev);   // ±1 at ±2σ from pitch-type mean
-  const t = Math.max(0, Math.min(1, Math.abs(z)));
-  if (t < 0.05) return null;
-  const step = Math.min(4, Math.floor(t * 5));   // 5 shades per direction = 10 total
+/// Plus-scale color: 5 discrete shades each side of 100, fixed 5-unit intervals.
+// Neutral: 99.5–100.5 | bands: ±0.5–5.5, ±5.5–10.5, ±10.5–15.5, ±15.5–20.5, >±20.5 (darkest)
+function plusColorRaw(v) {
+  if (v == null || !isFinite(v)) return null;
+  const dist = Math.abs(v - 100);
+  if (dist < 0.5) return null;
+  const step = Math.min(4, Math.floor((dist - 0.5) / 5));
   const alphas = [0.22, 0.38, 0.54, 0.70, 0.86];
-  return z > 0
+  return v > 100
     ? `rgba(30,160,30,${alphas[step]})`
     : `rgba(200,35,35,${alphas[step]})`;
 }
@@ -916,10 +912,7 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
 
     // Pitch+/Stuff+/Location+/Tunnel+: color relative to each pitch type's own mean/stdev
     if (key === "pitchPlus" || key === "stuffPlus" || key === "locPlus" || key === "tunnelPlus") {
-      const s = PLUS_STATS_BY_PT[key] || {};
-      const mean  = (s.mean?.[pitchType]  ?? s.mean?.DEFAULT  ?? 100);
-      const stdev = (s.stdev?.[pitchType] ?? s.stdev?.DEFAULT ?? 5);
-      return presentBg(plusColorRaw(value, mean, stdev));
+      return presentBg(plusColorRaw(value));
     }
 
     // Use live league avgs when available
