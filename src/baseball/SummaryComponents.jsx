@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PITCH_COLORS, PITCH_NAMES, HIT_COLORS } from "./mlbApi.js";
 import { useTheme } from "./ThemeContext.jsx";
 
@@ -457,10 +457,110 @@ export function SprayChart({ battedBalls, width = 580, height = 400 }) {
 
 
 // ═══════════════════════════════════════════════════════════
+// PITCH TOOLTIP HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function formatPitchResult(p) {
+  const c = p?.callCode;
+  if (c === 'C') return 'Called Strike';
+  if (c === 'S' || c === 'W' || c === 'M') return 'Swinging Strike';
+  if (c === 'T') return 'Foul Tip';
+  if (c === 'F' || c === 'L' || c === 'O') return 'Foul';
+  if (c === 'B' || c === 'P') return 'Ball';
+  if (c === 'I' || c === 'V') return 'Ball (Intentional)';
+  if (c === 'H') return 'Hit by Pitch';
+  if (c === 'X' || c === 'D' || c === 'E') return p?.result ? `In Play — ${p.result}` : 'In Play';
+  return p?.result || '—';
+}
+
+function describeZone(pX, pZ, batSide) {
+  const inZone = pX >= -0.88 && pX <= 0.88 && pZ >= 1.5 && pZ <= 3.5;
+  const v = pZ > 2.9 ? 'High' : pZ < 2.1 ? 'Low' : 'Middle';
+  let h;
+  if (Math.abs(pX) < 0.33) {
+    h = 'Middle';
+  } else {
+    const isRightOfPlate = pX > 0;
+    if (batSide === 'R') h = isRightOfPlate ? 'Inside' : 'Outside';
+    else if (batSide === 'L') h = isRightOfPlate ? 'Outside' : 'Inside';
+    else h = isRightOfPlate ? 'Right' : 'Left';
+  }
+  return `${v}-${h}${!inZone ? ' (Ball)' : ''}`;
+}
+
+function plusTextColor(val) {
+  if (val == null || !isFinite(val)) return '#999';
+  if (val >= 115) return '#5ef55e';
+  if (val >= 105) return '#9ed99e';
+  if (val >= 95)  return '#ffc97a';
+  return '#f57878';
+}
+
+function PitchTooltip({ pitch: p, pos, ptScores }) {
+  if (!p || !pos) return null;
+  const name = PITCH_NAMES[p.pitchType] || p.pitchType || '';
+  const color = PITCH_COLORS[p.pitchType] || '#888';
+  const sp = ptScores?.stuffPlus;
+  const lp = ptScores?.locPlus;
+  const pp = ptScores?.pitchPlus;
+  const flipX = typeof window !== 'undefined' && pos.x > window.innerWidth - 230;
+  const flipY = typeof window !== 'undefined' && pos.y > window.innerHeight - 180;
+  const left = flipX ? pos.x - 225 : pos.x + 14;
+  const top = flipY ? pos.y - 165 : pos.y - 10;
+  return (
+    <div style={{
+      position: 'fixed', left, top, zIndex: 10000,
+      background: 'rgba(12,12,12,0.95)',
+      border: `1.5px solid ${color}`,
+      borderRadius: 8,
+      padding: '8px 11px',
+      fontSize: 11,
+      color: '#ddd',
+      pointerEvents: 'none',
+      minWidth: 180,
+      lineHeight: 1.6,
+      boxShadow: '0 6px 20px rgba(0,0,0,0.7)',
+    }}>
+      <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ background: color, color: '#fff', borderRadius: 3, padding: '1px 6px', fontSize: 10 }}>{p.pitchType}</span>
+        <span style={{ color: '#eee' }}>{name}</span>
+      </div>
+      {p.velo != null && (
+        <div>
+          {p.velo.toFixed(1)} mph
+          {p.spin != null && <span style={{ color: '#aaa' }}> · {p.spin.toLocaleString()} rpm</span>}
+        </div>
+      )}
+      {(p.vBreak != null || p.hBreak != null) && (
+        <div style={{ color: '#bbb' }}>
+          {p.vBreak != null && `IVB ${p.vBreak >= 0 ? '+' : ''}${p.vBreak.toFixed(1)}"`}
+          {p.vBreak != null && p.hBreak != null && '  '}
+          {p.hBreak != null && `HB ${p.hBreak >= 0 ? '+' : ''}${p.hBreak.toFixed(1)}"`}
+        </div>
+      )}
+      {(sp != null || lp != null || pp != null) && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+          {sp != null && <span>Stuff+ <b style={{ color: plusTextColor(sp) }}>{sp}</b></span>}
+          {lp != null && <span>Loc+ <b style={{ color: plusTextColor(lp) }}>{lp}</b></span>}
+          {pp != null && <span>Pitch+ <b style={{ color: plusTextColor(pp) }}>{pp}</b></span>}
+        </div>
+      )}
+      {p.pX != null && p.pZ != null && (
+        <div style={{ color: '#999', fontSize: 10.5 }}>{describeZone(p.pX, p.pZ, p.batSide)}</div>
+      )}
+      <div style={{ fontWeight: 600, color: '#eee', marginTop: 2 }}>{formatPitchResult(p)}</div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════
 // ZONE PLOT (Strike Zone with pitch dots)
 // ═══════════════════════════════════════════════════════════
-export function ZonePlot({ pitches, title, width = 260, height = 300 }) {
+export function ZonePlot({ pitches, title, width = 260, height = 300, pitchPlus }) {
   const { theme: t, isDark } = useTheme();
+  const [hovered, setHovered] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const pad = { top: 25, right: 20, bottom: 30, left: 20 };
   const zoneW = width - pad.left - pad.right;
   const zoneH = height - pad.top - pad.bottom;
@@ -500,6 +600,9 @@ export function ZonePlot({ pitches, title, width = 260, height = 300 }) {
             cx={scaleX(p.pX)} cy={scaleY(p.pZ)} r={6}
             fill={PITCH_COLORS[p.pitchType] || "#888"} fillOpacity={0.85}
             stroke={isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.15)"} strokeWidth={0.5}
+            style={{ cursor: "pointer" }}
+            onMouseEnter={(e) => { setHovered(p); setTooltipPos({ x: e.clientX, y: e.clientY }); }}
+            onMouseLeave={() => setHovered(null)}
           />
         ))}
 
@@ -507,6 +610,7 @@ export function ZonePlot({ pitches, title, width = 260, height = 300 }) {
         <text x={width - 8} y={height - 6} textAnchor="end"
           fill={t.textMuted} fontSize={10}>n={count}</text>
       </svg>
+      {hovered && <PitchTooltip pitch={hovered} pos={tooltipPos} ptScores={pitchPlus?.[hovered.pitchType]} />}
     </div>
   );
 }
@@ -1359,8 +1463,10 @@ function heatColor(val, max) {
 // Up to 9 mini strike zones in a 3×3 grid
 // ═══════════════════════════════════════════════════════════
 
-function MiniZone({ pitches, pitchType, color, size, isGame }) {
+function MiniZone({ pitches, pitchType, color, size, isGame, ptScores }) {
   const { isDark } = useTheme();
+  const [hovered, setHovered] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const w = size, h = Math.round(size * 1.15);
   const labelH = 15;
   const pad = 2;
@@ -1394,26 +1500,33 @@ function MiniZone({ pitches, pitchType, color, size, isGame }) {
   const countFill = isDark ? "#555" : "#999";
 
   return (
-    <svg width={w} height={h} style={{ display: "block" }}>
-      <rect x={0} y={0} width={w} height={h} fill={bgFill} rx={3} />
-      <rect x={0} y={0} width={w} height={labelH} fill={color + "70"} rx={3} />
-      <text x={w / 2} y={11} textAnchor="middle" fill="#fff" fontSize={10} fontWeight={700}>{abbr}</text>
-      <rect x={zoneL} y={zoneT} width={zoneW} height={zoneH}
-        fill="none" stroke={zoneStroke} strokeWidth={1} />
-      <polygon points={hpPts} fill="none" stroke={zoneStroke} strokeWidth={0.8} />
-      {useDots ? filtered.map((p, i) => (
-        <circle key={i} cx={toX(p.pX)} cy={toY(p.pZ)} r={dotR}
-          fill={color} fillOpacity={0.85} stroke="rgba(0,0,0,0.3)" strokeWidth={0.4} />
-      )) : heatDataUrl && (
-        <image href={heatDataUrl} x={pad} y={labelH} width={plotW} height={plotH}
-          style={{ imageRendering: "auto" }} />
-      )}
-      <text x={w - 3} y={h - 2} textAnchor="end" fill={countFill} fontSize={7}>{filtered.length}</text>
-    </svg>
+    <div style={{ display: "inline-block" }}>
+      <svg width={w} height={h} style={{ display: "block" }}>
+        <rect x={0} y={0} width={w} height={h} fill={bgFill} rx={3} />
+        <rect x={0} y={0} width={w} height={labelH} fill={color + "70"} rx={3} />
+        <text x={w / 2} y={11} textAnchor="middle" fill="#fff" fontSize={10} fontWeight={700}>{abbr}</text>
+        <rect x={zoneL} y={zoneT} width={zoneW} height={zoneH}
+          fill="none" stroke={zoneStroke} strokeWidth={1} />
+        <polygon points={hpPts} fill="none" stroke={zoneStroke} strokeWidth={0.8} />
+        {useDots ? filtered.map((p, i) => (
+          <circle key={i} cx={toX(p.pX)} cy={toY(p.pZ)} r={dotR}
+            fill={color} fillOpacity={0.85} stroke="rgba(0,0,0,0.3)" strokeWidth={0.4}
+            style={{ cursor: "pointer" }}
+            onMouseEnter={(e) => { setHovered(p); setTooltipPos({ x: e.clientX, y: e.clientY }); }}
+            onMouseLeave={() => setHovered(null)}
+          />
+        )) : heatDataUrl && (
+          <image href={heatDataUrl} x={pad} y={labelH} width={plotW} height={plotH}
+            style={{ imageRendering: "auto" }} />
+        )}
+        <text x={w - 3} y={h - 2} textAnchor="end" fill={countFill} fontSize={7}>{filtered.length}</text>
+      </svg>
+      {hovered && <PitchTooltip pitch={hovered} pos={tooltipPos} ptScores={ptScores} />}
+    </div>
   );
 }
 
-export function LocationZonePanel({ pitches, side, width = 260, isGame }) {
+export function LocationZonePanel({ pitches, side, width = 260, isGame, pitchPlus }) {
   const { theme: th } = useTheme();
   const filtered = pitches.filter(p => p.pX != null && p.pZ != null);
   const types = [...new Set(filtered.map(p => p.pitchType))].filter(pt => pt !== "UN");
@@ -1439,6 +1552,7 @@ export function LocationZonePanel({ pitches, side, width = 260, isGame }) {
             color={PITCH_COLORS[pt] || "#888888"}
             size={zoneSize}
             isGame={isGame}
+            ptScores={pitchPlus?.[pt]}
           />
         ))}
       </div>

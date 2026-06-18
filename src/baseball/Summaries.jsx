@@ -1323,9 +1323,9 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 4px 0", gap: 4 }}>
           <div style={{ width: 260 }}>
             {leftPanel === "zones" ? (
-              <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "L")} side="L" width={260} isGame={isGame} />
+              <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "L")} side="L" width={260} isGame={isGame} pitchPlus={pitchPlus} />
             ) : leftPanel === "zonesAll" ? (
-              <LocationZonePanel pitches={data.pitches} side="ALL" width={260} isGame={isGame} />
+              <LocationZonePanel pitches={data.pitches} side="ALL" width={260} isGame={isGame} pitchPlus={pitchPlus} />
             ) : (
               <RollingVeloChart pitches={data.pitches} mode={isGame ? "game" : "season"} width={260} height={400} />
             )}
@@ -1340,9 +1340,9 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
           />
           <div style={{ width: 260 }}>
             {rightPanel === "zones" ? (
-              <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} />
+              <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} pitchPlus={pitchPlus} />
             ) : rightPanel === "zonesAll" ? (
-              <LocationZonePanel pitches={data.pitches} side="ALL" width={260} isGame={isGame} />
+              <LocationZonePanel pitches={data.pitches} side="ALL" width={260} isGame={isGame} pitchPlus={pitchPlus} />
             ) : (
               <PlatoonUsageBars pitches={data.pitches} pitchPlus={pitchPlus} width={260} height={400} />
             )}
