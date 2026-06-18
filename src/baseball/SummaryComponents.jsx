@@ -6,8 +6,10 @@ import { useTheme } from "./ThemeContext.jsx";
 // MOVEMENT PLOT (Horizontal Break vs Induced Vertical Break)
 // ═══════════════════════════════════════════════════════════
 export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 200, onPitchClick = null,
-  expectedMovement = null, showExpected = false, armAngle = null }) {
+  expectedMovement = null, showExpected = false, armAngle = null, pitchPlus }) {
   const { theme: t, isDark } = useTheme();
+  const [hovered, setHovered] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const axisB = 45, axisT = 20;
   const side = height - axisT - axisB;
   const pL = (width - side) / 2;
@@ -114,12 +116,10 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
   const gridMajor = isDark ? "#555" : "#999";
   const labelFill = isDark ? "#888" : "#666";
 
-  // When reclassify mode is on we make dots interactive: bigger hit target,
-  // pointer cursor, ring-on-hover. Reclassified pitches get a thicker border
-  // so it's easy to see what's been changed.
   const interactive = !!onPitchClick;
 
   return (
+    <div style={{ display: "inline-block" }}>
     <svg width={width} height={height} style={{ display: "block" }}>
       <rect x={pL} y={pT} width={side} height={side} fill={plotBg} rx={4} />
 
@@ -167,8 +167,10 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
           cx={scaleX(p.hBreak)} cy={scaleY(p.vBreak)} r={5.5}
           fill={PITCH_COLORS[p.pitchType] || "#888"} fillOpacity={0.9}
           stroke={isDark ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.15)"} strokeWidth={0.5}
-          style={interactive ? { cursor: "crosshair" } : undefined}
+          style={{ cursor: interactive ? "crosshair" : "pointer" }}
           onClick={interactive ? () => onPitchClick(p) : undefined}
+          onMouseEnter={(e) => { setHovered(p); setTooltipPos({ x: e.clientX, y: e.clientY }); }}
+          onMouseLeave={() => setHovered(null)}
         />
       ))}
 
@@ -205,6 +207,8 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
         </text>
       )}
     </svg>
+    {hovered && <MovementPitchTooltip pitch={hovered} pos={tooltipPos} ptScores={pitchPlus?.[hovered.pitchType]} />}
+    </div>
   );
 }
 
@@ -549,6 +553,86 @@ function PitchTooltip({ pitch: p, pos, ptScores }) {
         <div style={{ color: '#999', fontSize: 10.5 }}>{describeZone(p.pX, p.pZ, p.batSide)}</div>
       )}
       <div style={{ fontWeight: 600, color: '#eee', marginTop: 2 }}>{formatPitchResult(p)}</div>
+    </div>
+  );
+}
+
+
+function MovementPitchTooltip({ pitch: p, pos, ptScores }) {
+  if (!p || !pos) return null;
+  const name = PITCH_NAMES[p.pitchType] || p.pitchType || '';
+  const color = PITCH_COLORS[p.pitchType] || '#888';
+  const sp = ptScores?.stuffPlus;
+  const lp = ptScores?.locPlus;
+  const pp = ptScores?.pitchPlus;
+  const flipX = typeof window !== 'undefined' && pos.x > window.innerWidth - 230;
+  const flipY = typeof window !== 'undefined' && pos.y > window.innerHeight - 290;
+  const left = flipX ? pos.x - 220 : pos.x + 14;
+  const top = flipY ? pos.y - 280 : pos.y - 10;
+
+  // Mini zone geometry
+  const mzW = 110, mzH = 126;
+  const mzPad = 8;
+  const mzPW = mzW - mzPad * 2, mzPH = mzH - mzPad * 2;
+  const xMin = -1.6, xMax = 1.6, zMin = 0.8, zMax = 4.0;
+  const toX = x => mzPad + (x - xMin) / (xMax - xMin) * mzPW;
+  const toY = z => mzPad + (zMax - z) / (zMax - zMin) * mzPH;
+  const zL = toX(-0.88), zR = toX(0.88), zT = toY(3.5), zB = toY(1.5);
+  const zW = zR - zL, zH = zB - zT;
+  const hpCx = toX(0), hpTop = zB + 3, hpW = zW * 0.55, hpH = hpW * 0.3;
+  const hpPts = `${hpCx-hpW/2},${hpTop} ${hpCx-hpW/2},${hpTop+hpH*0.55} ${hpCx},${hpTop+hpH} ${hpCx+hpW/2},${hpTop+hpH*0.55} ${hpCx+hpW/2},${hpTop}`;
+
+  return (
+    <div style={{
+      position: 'fixed', left, top, zIndex: 10000,
+      background: 'rgba(12,12,12,0.95)',
+      border: `1.5px solid ${color}`,
+      borderRadius: 8,
+      padding: '8px 11px 10px',
+      fontSize: 11,
+      color: '#ddd',
+      pointerEvents: 'none',
+      minWidth: 180,
+      lineHeight: 1.6,
+      boxShadow: '0 6px 20px rgba(0,0,0,0.7)',
+    }}>
+      <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ background: color, color: '#fff', borderRadius: 3, padding: '1px 6px', fontSize: 10 }}>{p.pitchType}</span>
+        <span style={{ color: '#eee' }}>{name}</span>
+      </div>
+      {p.velo != null && (
+        <div>
+          {Math.round(p.velo)} mph
+          {p.spin != null && <span style={{ color: '#aaa' }}> · {Math.round(p.spin).toLocaleString()} rpm</span>}
+        </div>
+      )}
+      {(p.vBreak != null || p.hBreak != null) && (
+        <div style={{ color: '#bbb' }}>
+          {p.vBreak != null && `IVB ${p.vBreak >= 0 ? '+' : ''}${Math.round(p.vBreak)}"`}
+          {p.vBreak != null && p.hBreak != null && '  '}
+          {p.hBreak != null && `HB ${p.hBreak >= 0 ? '+' : ''}${Math.round(p.hBreak)}"`}
+        </div>
+      )}
+      {(sp != null || lp != null || pp != null) && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+          {sp != null && <span>Stuff+ <b style={{ color: plusTextColor(sp) }}>{Math.round(sp)}</b></span>}
+          {lp != null && <span>Loc+ <b style={{ color: plusTextColor(lp) }}>{Math.round(lp)}</b></span>}
+          {pp != null && <span>Pitch+ <b style={{ color: plusTextColor(pp) }}>{Math.round(pp)}</b></span>}
+        </div>
+      )}
+      <div style={{ color: '#999', fontSize: 10, marginTop: 1 }}>{formatPitchResult(p)}</div>
+      {p.pX != null && p.pZ != null && (
+        <svg width={mzW} height={mzH} style={{ display: 'block', margin: '6px auto 0' }}>
+          <rect x={0} y={0} width={mzW} height={mzH} fill="rgba(255,255,255,0.04)" rx={4} />
+          <rect x={zL} y={zT} width={zW} height={zH} fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth={1} />
+          <line x1={zL} y1={zT + zH/3} x2={zR} y2={zT + zH/3} stroke="rgba(255,255,255,0.15)" strokeWidth={0.5} />
+          <line x1={zL} y1={zT + 2*zH/3} x2={zR} y2={zT + 2*zH/3} stroke="rgba(255,255,255,0.15)" strokeWidth={0.5} />
+          <line x1={zL + zW/3} y1={zT} x2={zL + zW/3} y2={zB} stroke="rgba(255,255,255,0.15)" strokeWidth={0.5} />
+          <line x1={zL + 2*zW/3} y1={zT} x2={zL + 2*zW/3} y2={zB} stroke="rgba(255,255,255,0.15)" strokeWidth={0.5} />
+          <polygon points={hpPts} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth={0.8} />
+          <circle cx={toX(p.pX)} cy={toY(p.pZ)} r={5.5} fill={color} stroke="#fff" strokeWidth={1.5} />
+        </svg>
+      )}
     </div>
   );
 }
