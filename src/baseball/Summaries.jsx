@@ -1118,6 +1118,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           season={currentSeason} seasonType={seasonType}
           isGame={isGame} isAAA={isAAA}
           leagueAvgs={effectiveLeagueAvgs} pitchPlus={effectivePitchPlus}
+          perPitchScores={perPitchScores} pitchKey={pitchKey}
           reclassifyMode={reclassifyMode}
           dateFrom={dateFrom} dateTo={dateTo}
           onPitchClick={(p) => setReclassifyTarget({ kind: "single", pitch: p })}
@@ -1205,7 +1206,7 @@ function CountsCard({ player, season, seasonType, isAAA, isPitcher, children, da
   );
 }
 
-function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, reclassifyMode = false, onPitchClick = null, onTypeClick = null, dateFrom = "", dateTo = "" }) {
+function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, perPitchScores, pitchKey, reclassifyMode = false, onPitchClick = null, onTypeClick = null, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const pitchRows = useMemo(() => aggregateByPitchType(data.pitches), [data.pitches]);
