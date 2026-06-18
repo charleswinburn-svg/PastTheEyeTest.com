@@ -883,26 +883,13 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
 
     if (isDark) {
       const bgAlpha = Math.min(0.92, alpha + 0.10).toFixed(2);
-      const useWhite = parseFloat(bgAlpha) > 0.52;
-      const tint = isGreen
-        ? `rgba(40,185,65,${bgAlpha})`
-        : `rgba(225,55,60,${bgAlpha})`;
-      const textColor = useWhite
-        ? "#ffffff"
-        : (isGreen ? "rgb(130,245,155)" : "rgb(255,145,155)");
-      return { background: tint, color: textColor, isPill: true };
+      const tint = isGreen ? `rgba(40,185,65,${bgAlpha})` : `rgba(225,55,60,${bgAlpha})`;
+      return { background: tint, color: "#ffffff", isPill: true };
     }
 
-    // Light mode: add 0.30 so even the weakest step is clearly visible on white.
-    // White text above alpha 0.58 (steps 2-4); deep-colored text for the two lightest steps.
     const bgAlpha = Math.min(0.96, alpha + 0.30).toFixed(2);
-    const useWhite = parseFloat(bgAlpha) > 0.58;
-    const tint = isGreen
-      ? `rgba(22,163,74,${bgAlpha})`
-      : `rgba(220,38,38,${bgAlpha})`;
-    const textColor = useWhite
-      ? "#ffffff"
-      : (isGreen ? "rgb(5,80,35)" : "rgb(130,10,10)");
+    const tint = isGreen ? `rgba(22,163,74,${bgAlpha})` : `rgba(220,38,38,${bgAlpha})`;
+    const textColor = parseFloat(bgAlpha) > 0.58 ? "#ffffff" : "#000000";
     return { background: tint, color: textColor, isPill: true };
   };
 
