@@ -560,13 +560,13 @@ function effColor(val, metricKey, pitchType, avgSet) {
     : `rgba(200,35,35,${alpha})`;
 }
 
-// Uniform coloring: all pitch types graded relative to global mean=100.
-// Stuff+ stdev=10 (global distribution). Pitch+/Loc+/Tun+ use empirical global stdevs.
+// Uniform coloring: all pitch types graded relative to global mean=100, stdev=10.
+// All four metrics are now rescaled to the same distribution by the batch pipeline.
 const PLUS_STATS_BY_PT = {
-  stuffPlus:  { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10  } },
-  locPlus:    { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 1.7 } },
-  tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.0 } },
-  pitchPlus:  { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 2.2 } },
+  stuffPlus:  { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10 } },
+  locPlus:    { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10 } },
+  tunnelPlus: { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10 } },
+  pitchPlus:  { mean: { DEFAULT: 100 }, stdev: { DEFAULT: 10 } },
 };
 
 // Plus-scale color: dark green at ≥mean+2σ, dark red at ≤mean-2σ, 5 discrete shades each side.
