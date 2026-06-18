@@ -76,16 +76,18 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   // useEffect below picks up the changes automatically because enrichedData
   // is in its dep array.
   const [reclassifyMode, setReclassifyMode] = useState(false);
-  // pitchOverrides: Map<key, newType> where key = `${gamePk}_${atBatIndex}_${pitchNumber}`
+  // pitchOverrides: Map<key, newType> where key = `${gamePk}_${at_bat_number}_${pitchNumber}`
+  // Keys use 1-based at_bat_number: MLB API atBatIndex is 0-based so we add 1 to normalize.
   const [pitchOverrides, setPitchOverrides] = useState(() => new Map());
   // typeOverrides: Map<originalType, newType> — bulk reclassification per pitch_type
   const [typeOverrides, setTypeOverrides] = useState(() => new Map());
   // Modal state — which pitch is open for reclassification
   const [reclassifyTarget, setReclassifyTarget] = useState(null);
 
-  const pitchOverrideKey = (p) => `${p.gamePk ?? ""}_${p.atBatIndex ?? ""}_${p.pitchNumber ?? ""}`;
-  // Works for both enriched pitch objects (gamePk/atBatIndex/pitchNumber) and Savant rows (game_pk/at_bat_number/pitch_number)
-  const pitchKey = (p) => `${p.gamePk ?? p.game_pk ?? ""}_${p.atBatIndex ?? p.at_bat_number ?? ""}_${p.pitchNumber ?? p.pitch_number ?? ""}`;
+  // Normalize to 1-based at_bat_number. MLB API atBatIndex is 0-based; Statcast at_bat_number is 1-based.
+  const _abNum = (p) => p.at_bat_number != null ? p.at_bat_number : p.atBatIndex != null ? p.atBatIndex + 1 : "";
+  const pitchOverrideKey = (p) => `${p.gamePk ?? p.game_pk ?? ""}_${_abNum(p)}_${p.pitchNumber ?? p.pitch_number ?? ""}`;
+  const pitchKey = (p) => `${p.gamePk ?? p.game_pk ?? ""}_${_abNum(p)}_${p.pitchNumber ?? p.pitch_number ?? ""}`;
 
   // Load pre-computed league avgs (from league_avgs_pipeline.py) as baseline
   useEffect(() => {
