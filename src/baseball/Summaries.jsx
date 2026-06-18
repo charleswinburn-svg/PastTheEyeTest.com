@@ -475,7 +475,12 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const extractedData = useMemo(() => {
     if (isGame) {
       if (!pbpData || !selectedPlayer) return null;
-      return isPitcher ? extractPitcherData(pbpData, selectedPlayer.id) : extractBatterData(pbpData, selectedPlayer.id);
+      const gameResult = isPitcher ? extractPitcherData(pbpData, selectedPlayer.id) : extractBatterData(pbpData, selectedPlayer.id);
+      const gPk = selectedGame?.gamePk;
+      if (gameResult?.pitches && gPk) {
+        gameResult.pitches = gameResult.pitches.map(p => ({ ...p, gamePk: gPk }));
+      }
+      return gameResult;
     } else {
       if (!seasonPbps.length || !selectedPlayer) return null;
       const inRange = (dateFrom || dateTo)
