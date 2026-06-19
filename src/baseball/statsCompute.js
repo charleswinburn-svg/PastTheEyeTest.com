@@ -316,6 +316,42 @@ export function fmtLike(value, exemplar) {
   return String(Math.round(n));
 }
 
+// ── xRV/600 PA date-range helpers ──
+// The xRV model is Python-only, so per-game metric SUMS are precomputed into
+// hitter_xrv_games_{season}.json. A date range is just: sum the in-range games'
+// sums, divide by the in-range PA, ×600 — then rank vs the season distribution.
+
+// games: array of [date, pa, ...14 metric sums] (build_hitter_xrv.py METRICS order).
+// Returns { pa, values: number[14] }, or { pa: 0, values: null } when no PA in range.
+export function computeXrvDateRange(games, dateFrom, dateTo) {
+  if (!Array.isArray(games) || !games.length) return null;
+  let pa = 0;
+  const sums = new Array(14).fill(0);
+  for (const row of games) {
+    const d = row[0];
+    if (dateFrom && d < dateFrom) continue;
+    if (dateTo && d > dateTo) continue;
+    pa += row[1] || 0;
+    for (let i = 0; i < 14; i++) sums[i] += row[2 + i] || 0;
+  }
+  if (pa <= 0) return { pa: 0, values: null };
+  return { pa, values: sums.map(s => (s / pa) * 600) };
+}
+
+// Build a sorted (value → pctile) lookup for one xRV metric from the season file
+// (xrvAll: { id: { metrics: { label: {value, pctile} } } }) so a date-range value
+// can be interpolated against the full-season distribution (via interpolatePctile).
+export function buildXrvPctileLookup(xrvAll, label) {
+  const points = [];
+  for (const id in (xrvAll || {})) {
+    const m = xrvAll[id]?.metrics?.[label];
+    if (!m || m.pctile == null || m.value == null) continue;
+    points.push([m.value, m.pctile]);
+  }
+  points.sort((a, b) => a[0] - b[0]);
+  return points;
+}
+
 // ── useDateRangeStats hook ──
 export function useDateRangeStats(player, season, type, dateFrom, dateTo, allPlayers) {
   const [result, setResult] = useState({ categories: null, loading: false });

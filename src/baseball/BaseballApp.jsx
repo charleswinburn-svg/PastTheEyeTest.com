@@ -119,6 +119,8 @@ function BaseballApp() {
   const [selectedPitcher, setSelectedPitcher] = useState(null);
   const [iswingData, setIswingData] = useState(null);
   const [xrvData, setXrvData] = useState(null);
+  const [xrvGamesData, setXrvGamesData] = useState(null);
+  const [xrvGamesLoading, setXrvGamesLoading] = useState(false);
   const [fieldingData, setFieldingData] = useState(null);
   const [selectedFielder, setSelectedFielder] = useState(null);
   const [aaaData, setAaaData] = useState(null);
@@ -159,6 +161,21 @@ function BaseballApp() {
     setCardDateFrom("");
     setCardDateTo("");
   }, [season]);
+
+  // Per-game xRV sums for date-range aggregation. Lazy-loaded only when a date
+  // range is active on the hitter card (the file is large; most sessions never
+  // need it) and reset on season change so the next range refetches.
+  useEffect(() => { setXrvGamesData(null); }, [season]);
+  useEffect(() => {
+    const need = tab === "hitter" && !!(cardDateFrom || cardDateTo);
+    if (!need || xrvGamesData) return;
+    setXrvGamesLoading(true);
+    fetch(`/hitter_xrv_games_${season}.json`)
+      .then(r => r.ok ? r.json() : {})
+      .then(d => setXrvGamesData(d || {}))
+      .catch(() => setXrvGamesData({}))
+      .finally(() => setXrvGamesLoading(false));
+  }, [tab, cardDateFrom, cardDateTo, season, xrvGamesData]);
 
   useEffect(() => {
     setLoading(true);
@@ -605,6 +622,9 @@ function BaseballApp() {
               allHitters={hittersFull}
               dateFrom={cardDateFrom}
               dateTo={cardDateTo}
+              xrvAll={xrvData}
+              xrvGames={curHitter?.player_id != null ? xrvGamesData?.[String(curHitter.player_id)] : null}
+              xrvGamesLoading={xrvGamesLoading}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
