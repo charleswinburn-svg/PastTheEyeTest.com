@@ -118,6 +118,7 @@ function BaseballApp() {
   const [selectedHitter, setSelectedHitter] = useState(null);
   const [selectedPitcher, setSelectedPitcher] = useState(null);
   const [iswingData, setIswingData] = useState(null);
+  const [xrvData, setXrvData] = useState(null);
   const [fieldingData, setFieldingData] = useState(null);
   const [selectedFielder, setSelectedFielder] = useState(null);
   const [aaaData, setAaaData] = useState(null);
@@ -143,6 +144,16 @@ function BaseballApp() {
   useEffect(() => {
     fetch("/iswing.json").then(r => r.json()).then(setIswingData).catch(() => {});
   }, []);
+
+  // Hitter xRV/600 PA (season-precomputed, keyed by player_id). Optional —
+  // the card degrades gracefully (right column shows N/A) when absent.
+  useEffect(() => {
+    setXrvData(null);
+    fetch(`/hitter_xrv_${season}.json`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setXrvData(d))
+      .catch(() => setXrvData(null));
+  }, [season]);
 
   useEffect(() => {
     setCardDateFrom("");
@@ -182,19 +193,24 @@ function BaseballApp() {
 
   const hittersFull = useMemo(() => {
     const base = disambiguate(hitters);
-    if (!iswingData) return base;
-    const yr = String(season);
     return base.map(h => {
-      const iswing = fuzzyLookup(iswingData, h.name);
-      const val = iswing?.[yr];
-      const pct = iswing?.[yr + "_pct"];
-      if (val == null || pct == null) return h;
-      return {
-        ...h,
-        categories: { "iSwing+": { display: String(val), pctile: pct }, ...h.categories },
-      };
+      let out = h;
+      // iSwing+ (merged by name into categories, like before)
+      if (iswingData) {
+        const yr = String(season);
+        const iswing = fuzzyLookup(iswingData, h.name);
+        const val = iswing?.[yr];
+        const pct = iswing?.[yr + "_pct"];
+        if (val != null && pct != null) {
+          out = { ...out, categories: { "iSwing+": { display: String(val), pctile: pct }, ...out.categories } };
+        }
+      }
+      // xRV/600 PA (merged by player_id onto a separate `xrv` field → right column)
+      const xrv = h.player_id != null ? xrvData?.[String(h.player_id)] : null;
+      if (xrv?.metrics) out = { ...out, xrv: xrv.metrics };
+      return out;
     });
-  }, [hitters, iswingData, season]);
+  }, [hitters, iswingData, xrvData, season]);
   const pitchersFull = useMemo(() => disambiguate(pitchers), [pitchers]);
   const hitterNames = useMemo(() => hittersFull.map(h => h.displayName).sort(), [hittersFull]);
   const pitcherNames = useMemo(() => pitchersFull.map(p => p.displayName).sort(), [pitchersFull]);
