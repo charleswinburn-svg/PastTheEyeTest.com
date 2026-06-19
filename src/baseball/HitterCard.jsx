@@ -4,6 +4,15 @@ import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubti
 import RollingChart from "./RollingChart.jsx";
 import { useDateRangeStats } from "./statsCompute.js";
 
+// Fixed display order for the xRV / 600 PA column (matches build_hitter_xrv.py).
+const XRV_LABELS = [
+  "xRV/600", "Contact Quality", "Whiff", "Decision",
+  "Fastball", "Breaking", "Offspeed",
+  "Inner", "Middle (vertical)", "Outer",
+  "Upper", "Middle (horizontal)", "Lower",
+  "Chase",
+];
+
 export default function HitterCard({ player, season, isAAA = false, dateFrom = "", dateTo = "", allHitters = [] }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
@@ -31,6 +40,12 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
 
   const cats = Object.entries(displayCategories || {}).filter(([k]) => !k.startsWith("_"));
 
+  // xRV/600 PA metrics (season-precomputed, merged onto player.xrv by player_id).
+  // Right column only renders when present, so the card stays single-column until
+  // the hitter_xrv_{season}.json pipeline output exists.
+  const xrv = player?.xrv;
+  const hasXrv = !!(xrv && Object.keys(xrv).length > 0);
+
   const dateSubtitle = isDateRange
     ? `${dateFrom || "start"} → ${dateTo || "now"} | ${rangeCategories?._pa ?? "—"} PA`
     : null;
@@ -50,7 +65,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           border: `1px solid ${t.cardBorder}`,
           overflow: "hidden",
           boxShadow: `0 4px 24px ${t.shadow}`,
-          maxWidth: 600,
+          maxWidth: hasXrv ? 1040 : 600,
           margin: "0 auto",
         }}
       >
@@ -61,27 +76,51 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           playerId={player.player_id}
           subtitle={subtitle}
         />
-        <div style={{ padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
-          {rangeLoading ? (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 80 }}>
-              <style>{`@keyframes ptet-spin2{to{transform:rotate(360deg)}}`}</style>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap", padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
+          {/* Left column — existing percentile bars (Savant + FanGraphs) */}
+          <div style={{ flex: "1 1 320px", minWidth: 280 }}>
+            {rangeLoading ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 80 }}>
+                <style>{`@keyframes ptet-spin2{to{transform:rotate(360deg)}}`}</style>
+                <div style={{
+                  width: 24, height: 24,
+                  border: `2px solid ${t.divider}`,
+                  borderTopColor: t.accent,
+                  borderRadius: "50%",
+                  animation: "ptet-spin2 0.8s linear infinite",
+                }} />
+              </div>
+            ) : (
+              cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
+                <BubblePercentileBar
+                  key={label}
+                  label={label}
+                  pctile={cat.pctile}
+                  display={cat.display}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Right column — xRV / 600 PA (season) */}
+          {hasXrv && (
+            <div style={{ flex: "1 1 360px", minWidth: 300 }}>
               <div style={{
-                width: 24, height: 24,
-                border: `2px solid ${t.divider}`,
-                borderTopColor: t.accent,
-                borderRadius: "50%",
-                animation: "ptet-spin2 0.8s linear infinite",
-              }} />
+                fontSize: 10, fontWeight: 700, color: t.textFaint,
+                textTransform: "uppercase", letterSpacing: "0.06em",
+                textAlign: "right", padding: "0 50px 4px 0",
+              }}>
+                xRV / 600 PA · season
+              </div>
+              {XRV_LABELS.map((label) => (
+                <BubblePercentileBar
+                  key={label}
+                  label={label}
+                  pctile={xrv[label]?.pctile ?? null}
+                  display={xrv[label]?.display ?? "—"}
+                />
+              ))}
             </div>
-          ) : (
-            cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
-              <BubblePercentileBar
-                key={label}
-                label={label}
-                pctile={cat.pctile}
-                display={cat.display}
-              />
-            ))
           )}
         </div>
         <div style={{
