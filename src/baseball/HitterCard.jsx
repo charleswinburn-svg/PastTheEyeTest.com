@@ -1,8 +1,8 @@
 import { useTheme } from "./ThemeContext.jsx";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useMemo } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
-import { useDateRangeStats } from "./statsCompute.js";
+import { useDateRangeStats, computeXrvDateRange, buildXrvPctileLookup, interpolatePctile } from "./statsCompute.js";
 
 // Fixed display order for the xRV / 600 PA column (matches build_hitter_xrv.py).
 const XRV_LABELS = [
@@ -13,7 +13,7 @@ const XRV_LABELS = [
   "Chase",
 ];
 
-export default function HitterCard({ player, season, isAAA = false, dateFrom = "", dateTo = "", allHitters = [] }) {
+export default function HitterCard({ player, season, isAAA = false, dateFrom = "", dateTo = "", allHitters = [], xrvAll = null, xrvGames = null, xrvGamesLoading = false }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
@@ -23,6 +23,24 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
 
   const displayCategories = rangeCategories ?? player?.categories;
   const isDateRange = !!(dateFrom || dateTo);
+
+  // Date-range xRV/600: aggregate the player's per-game sums over the window and
+  // rank each metric against the full-season distribution (xrvAll). Falls back to
+  // season values (player.xrv) when no range is active. Computed before the early
+  // return so hook order stays stable.
+  const xrvRange = useMemo(() => {
+    if (!isDateRange || !Array.isArray(xrvGames)) return null;
+    const r = computeXrvDateRange(xrvGames, dateFrom, dateTo);
+    if (!r) return null;
+    if (!r.values) return { pa: 0, metrics: null };
+    const metrics = {};
+    XRV_LABELS.forEach((label, i) => {
+      const v = r.values[i];
+      const pctile = interpolatePctile(buildXrvPctileLookup(xrvAll, label), v);
+      metrics[label] = { value: v, display: `${v >= 0 ? "+" : ""}${v.toFixed(1)}`, pctile };
+    });
+    return { pa: r.pa, metrics };
+  }, [isDateRange, xrvGames, xrvAll, dateFrom, dateTo]);
 
   const saveCard = useCallback(async () => {
     if (!player) return;
@@ -45,6 +63,19 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
   // the hitter_xrv_{season}.json pipeline output exists.
   const xrv = player?.xrv;
   const hasXrv = !!(xrv && Object.keys(xrv).length > 0);
+  // Column presence stays tied to season qualification (hasXrv). When a date range
+  // is active we swap in range-computed metrics once the per-game file loads.
+  // xrvRange is: null = no per-game data (file missing or not loaded yet),
+  //   {pa:0, metrics:null} = player has games but none in the window,
+  //   {pa>0, metrics} = computed range values.
+  const xrvShowRange = isDateRange && hasXrv;
+  const xrvLoading = xrvShowRange && xrvGamesLoading && !xrvRange?.metrics;
+  const xrvGamesMissing = xrvShowRange && !xrvGamesLoading && xrvRange == null;
+  // Fall back to season values (honestly labeled) when not in range mode or when the
+  // per-game file isn't available — so this never blanks out the column unnecessarily.
+  const seasonFallback = !xrvShowRange || xrvGamesMissing;
+  const xrvScope = seasonFallback ? "season" : "date range";
+  const xrvMetrics = xrvRange?.metrics ?? (seasonFallback ? xrv : null);
 
   const dateSubtitle = isDateRange
     ? `${dateFrom || "start"} → ${dateTo || "now"} | ${rangeCategories?._pa ?? "—"} PA`
@@ -102,7 +133,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
             )}
           </div>
 
-          {/* Right column — xRV / 600 PA (season) */}
+          {/* Right column — xRV / 600 PA (season, or date range when a window is set) */}
           {hasXrv && (
             <div style={{ flex: "1 1 360px", minWidth: 300 }}>
               <div style={{
@@ -110,16 +141,29 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                 textTransform: "uppercase", letterSpacing: "0.06em",
                 textAlign: "right", padding: "0 50px 4px 0",
               }}>
-                xRV / 600 PA · season
+                xRV / 600 PA · {xrvScope}
               </div>
-              {XRV_LABELS.map((label) => (
-                <BubblePercentileBar
-                  key={label}
-                  label={label}
-                  pctile={xrv[label]?.pctile ?? null}
-                  display={xrv[label]?.display ?? "—"}
-                />
-              ))}
+              {xrvLoading ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 80 }}>
+                  <style>{`@keyframes ptet-spin2{to{transform:rotate(360deg)}}`}</style>
+                  <div style={{
+                    width: 24, height: 24,
+                    border: `2px solid ${t.divider}`,
+                    borderTopColor: t.accent,
+                    borderRadius: "50%",
+                    animation: "ptet-spin2 0.8s linear infinite",
+                  }} />
+                </div>
+              ) : (
+                XRV_LABELS.map((label) => (
+                  <BubblePercentileBar
+                    key={label}
+                    label={label}
+                    pctile={xrvMetrics?.[label]?.pctile ?? null}
+                    display={xrvMetrics?.[label]?.display ?? "—"}
+                  />
+                ))
+              )}
             </div>
           )}
         </div>

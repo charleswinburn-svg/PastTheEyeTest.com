@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 """
 build_hitter_xrv.py — Score a season of Statcast with the hitter xRV model and
-write public/hitter_xrv_{season}.json: per-batter xRV/600 PA broken down into
-14 metrics (overall, the three swing/take skills, by pitch family, by zone), each
-with a league percentile among qualified hitters.
+write two files:
+
+  public/hitter_xrv_{season}.json       per-batter xRV/600 PA broken into 14
+                                        metrics (overall, the three swing/take
+                                        skills, by pitch family, by zone), each
+                                        with a league percentile among qualified
+                                        hitters. Powers the season card column.
+
+  public/hitter_xrv_games_{season}.json per-(batter, game) raw metric SUMS + PA
+                                        for qualified hitters, so the frontend can
+                                        aggregate any date range client-side and
+                                        rank it against the season distribution.
 
 ────────────────────────────────────────────────────────────────────────────
 ⚠ RUNTIME REQUIREMENT — read before running
@@ -132,42 +141,90 @@ def qualify_threshold(season: int) -> int:
     return MIN_PA
 
 
-def score_and_aggregate(model, df: pd.DataFrame) -> pd.DataFrame:
-    """Run the model and aggregate to per-batter xRV/600 PA for all 14 metrics."""
+def add_contrib_cols(scored: pd.DataFrame) -> list:
+    """Add one per-pitch contribution column per metric so the season and the
+    per-game aggregations are both a single groupby-sum. Returns the column names
+    in METRICS order."""
+    for c in ("total", "decision", "whiff", "contact_spray"):
+        if c in scored.columns:
+            scored[c] = pd.to_numeric(scored[c], errors="coerce").fillna(0.0)
+    cols = []
+    for i, (_label, kind, key) in enumerate(METRICS):
+        cname = f"_c{i}"
+        if kind == "col":
+            scored[cname] = pd.to_numeric(scored[key], errors="coerce").fillna(0.0)
+        elif kind == "group":
+            scored[cname] = np.where(scored["pitch_group"] == key, scored["total"], 0.0)
+        elif kind == "zh":
+            scored[cname] = np.where(scored["zone_horiz"] == key, scored["total"], 0.0)
+        elif kind == "zv":
+            scored[cname] = np.where(scored["zone_vert"] == key, scored["total"], 0.0)
+        else:
+            raise ValueError(kind)
+        cols.append(cname)
+    return cols
+
+
+def score_pitches(model, df: pd.DataFrame):
+    """Run the model; return (scored pitches with game date + contrib cols, contrib col names)."""
     scored = model.score(df)
     scored = scored[scored["batter"].notna()].copy()
     scored["batter"] = scored["batter"].astype("int64")
+    scored["game_pk"] = scored["game_pk"].astype("int64")
 
+    # The model output drops game_date; re-attach it by game_pk for per-game splits.
+    src = df.dropna(subset=["game_pk"]).copy()
+    src["game_pk"] = src["game_pk"].astype("int64")
+    date_by_game = src.groupby("game_pk")["game_date"].first()
+    date_by_game = pd.to_datetime(date_by_game, errors="coerce").dt.strftime("%Y-%m-%d")
+    scored["_gdate"] = scored["game_pk"].map(date_by_game)
+
+    contrib = add_contrib_cols(scored)
+    return scored, contrib
+
+
+def aggregate_season(scored: pd.DataFrame, contrib: list) -> pd.DataFrame:
+    """Aggregate scored pitches to per-batter xRV/600 PA for all 14 metrics."""
     # PA = distinct (game_pk, at_bat_number) per batter
     pa = (scored[["batter", "game_pk", "at_bat_number"]]
           .drop_duplicates()
           .groupby("batter").size().rename("pa"))
-
     batters = pa.index
+    sums = scored.groupby("batter")[contrib].sum().reindex(batters).fillna(0.0)
+
     out = pd.DataFrame(index=batters)
     out["pa"] = pa
-
-    g = scored.groupby("batter")
-
-    def slice_sum(mask):
-        s = scored.loc[mask].groupby("batter")["total"].sum()
-        return s.reindex(batters).fillna(0.0)
-
-    for label, kind, key in METRICS:
-        if kind == "col":
-            col = g[key].sum().reindex(batters).fillna(0.0)
-        elif kind == "group":
-            col = slice_sum(scored["pitch_group"] == key)
-        elif kind == "zh":
-            col = slice_sum(scored["zone_horiz"] == key)
-        elif kind == "zv":
-            col = slice_sum(scored["zone_vert"] == key)
-        else:
-            raise ValueError(kind)
-        # per 600 PA
-        out[label] = col / out["pa"] * 600.0
-
+    for (label, _, _), cname in zip(METRICS, contrib):
+        out[label] = sums[cname] / out["pa"] * 600.0
     return out.reset_index()
+
+
+def build_games_json(scored: pd.DataFrame, contrib: list, qualified_ids: set) -> dict:
+    """Per-(batter, game) raw metric SUMS + PA so the frontend can aggregate any
+    date range (sum sums / sum PA × 600) and rank vs the season distribution.
+
+    Each player maps to a list of [date, pa, *14 sums] rows (METRICS order),
+    sorted by date. Only qualified hitters are emitted — matches the card's
+    column visibility and keeps the file small."""
+    s = scored[scored["batter"].isin(qualified_ids)]
+    if s.empty:
+        return {}
+    sums = s.groupby(["batter", "game_pk"])[contrib].sum()
+    pa = (s[["batter", "game_pk", "at_bat_number"]]
+          .drop_duplicates()
+          .groupby(["batter", "game_pk"]).size())
+    dates = s.groupby(["batter", "game_pk"])["_gdate"].first()
+
+    res: dict = {}
+    for idx, row in sums.iterrows():
+        d = dates.loc[idx]
+        if not isinstance(d, str):
+            continue  # unresolved game date → skip (can't date-filter it)
+        arr = [d, int(pa.loc[idx])] + [round(float(row[c]), 3) for c in contrib]
+        res.setdefault(str(int(idx[0])), []).append(arr)
+    for k in res:
+        res[k].sort(key=lambda r: r[0])
+    return res
 
 
 def build_json(agg: pd.DataFrame, season: int) -> dict:
@@ -202,13 +259,25 @@ def build_json(agg: pd.DataFrame, season: int) -> dict:
 def run_season(model, season: int, parquet: str | None, out_dir: Path):
     log(f"=== Hitter xRV {season} ===")
     df = load_season_df(season, parquet)
-    agg = score_and_aggregate(model, df)
+    scored, contrib = score_pitches(model, df)
+
+    # Season card data (per-batter xRV/600 PA + percentiles).
+    agg = aggregate_season(scored, contrib)
     data = build_json(agg, season)
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"hitter_xrv_{season}.json"
     with open(out_path, "w") as f:
         json.dump(data, f)
     log(f"  Wrote {len(data)} hitters → {out_path}")
+
+    # Per-game sums for client-side date-range aggregation (qualified hitters only).
+    qualified_ids = {int(k) for k in data}
+    games = build_games_json(scored, contrib, qualified_ids)
+    games_path = out_dir / f"hitter_xrv_games_{season}.json"
+    with open(games_path, "w") as f:
+        json.dump(games, f)
+    n_games = sum(len(v) for v in games.values())
+    log(f"  Wrote {n_games} player-games ({len(games)} hitters) → {games_path}")
 
 
 def main():
