@@ -10,7 +10,10 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
   const { theme: t, isDark } = useTheme();
   const [hovered, setHovered] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-  const _pitchKey = pitchKey ?? ((p) => `${p.gamePk ?? ""}_${p.atBatIndex ?? ""}_${p.pitchNumber ?? ""}`);
+  const _pitchKey = pitchKey ?? ((p) => {
+    const abNum = p.at_bat_number != null ? p.at_bat_number : p.atBatIndex != null ? p.atBatIndex + 1 : "";
+    return `${p.gamePk ?? p.game_pk ?? ""}_${abNum}_${p.pitchNumber ?? p.pitch_number ?? ""}`;
+  });
   const getScores = (p) => {
     if (perPitchScores) {
       const s = perPitchScores.get(_pitchKey(p));
