@@ -828,7 +828,7 @@ export function StatBar({ stats }) {
             borderRadius: 4, padding: "6px 4px", textAlign: "center",
             flex: 1, minWidth: 0,
           }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: text, fontFamily: "'DM Mono', monospace" }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: text, fontFamily: "'Pliant', sans-serif" }}>
               {formatted}
             </div>
             <div style={{ fontSize: 9, color: t.text, marginTop: 2, fontWeight: 600, letterSpacing: "0.02em", opacity: 0.7 }}>{s.label}</div>
@@ -976,7 +976,7 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
                     <td key={c.key} style={{
                       padding: "6px 4px", textAlign: c.align || "center",
                       borderBottom: `1px solid ${t.tableBorder}`,
-                      fontFamily: "'DM Mono', monospace",
+                      fontFamily: "'Pliant', sans-serif",
                       whiteSpace: "nowrap",
                     }}>
                       <span style={{
@@ -1002,8 +1002,8 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
                     textAlign: c.align || "center",
                     borderBottom: `1px solid ${t.tableBorder}`,
                     color: t.textSecondary,
-                    fontWeight: 600,
-                    fontFamily: "'DM Mono', monospace",
+                    fontWeight: 700,
+                    fontFamily: "'Pliant', sans-serif",
                     whiteSpace: "nowrap",
                   }}>
                     {formatted}
@@ -1064,7 +1064,7 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
                           padding: "8px 4px",
                           textAlign: "center",
                           borderTop: `2px solid ${t.divider}`,
-                          fontFamily: "'DM Mono', monospace",
+                          fontFamily: "'Pliant', sans-serif",
                           whiteSpace: "nowrap",
                         }}>
                           <span style={{
@@ -1088,7 +1088,7 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
                         borderTop: `2px solid ${t.divider}`,
                         color: t.text,
                         fontWeight: 800,
-                        fontFamily: "'DM Mono', monospace",
+                        fontFamily: "'Pliant', sans-serif",
                         whiteSpace: "nowrap",
                       }}>{fmtted}</td>
                     );
@@ -1224,10 +1224,10 @@ function cellBg(val, avg, higherGood, scale = 5) {
 function countStyles(sz, t) {
   return {
     tblWrap: { overflowX: "auto", marginBottom: sz > 14 ? 4 : 2 },
-    secTitle: { fontSize: sz - 1, fontWeight: 700, color: t.text, margin: `${sz > 14 ? 10 : 6}px 0 ${sz > 14 ? 4 : 2}px`, textAlign: "center", letterSpacing: "-0.01em", textTransform: "uppercase" },
-    thS: { padding: `${Math.max(3, sz - 10)}px 4px`, borderBottom: `2px solid ${t.divider}`, color: t.textMuted, fontSize: sz - 3, fontWeight: 700, textAlign: "center", whiteSpace: "nowrap" },
-    tdS: { padding: `${Math.max(3, sz - 10)}px 4px`, borderBottom: `1px solid ${t.tableBorder}`, textAlign: "center", fontSize: sz, fontFamily: "'DM Mono', monospace", color: t.textSecondary, fontWeight: 500 },
-    labelS: { padding: `${Math.max(3, sz - 10)}px 6px`, borderBottom: `1px solid ${t.tableBorder}`, textAlign: "left", fontFamily: "inherit", fontWeight: 700, color: t.text, fontSize: sz - 1, whiteSpace: "nowrap" },
+    secTitle: { fontSize: sz - 1, fontWeight: 800, color: t.text, margin: `${sz > 14 ? 10 : 6}px 0 ${sz > 14 ? 4 : 2}px`, textAlign: "center", letterSpacing: "-0.01em", textTransform: "uppercase", fontFamily: "'Pliant', sans-serif" },
+    thS: { padding: `${Math.max(3, sz - 10)}px 4px`, borderBottom: `2px solid ${t.divider}`, color: t.textMuted, fontSize: sz - 3, fontWeight: 800, textAlign: "center", whiteSpace: "nowrap", fontFamily: "'Pliant', sans-serif" },
+    tdS: { padding: `${Math.max(3, sz - 10)}px 4px`, borderBottom: `1px solid ${t.tableBorder}`, textAlign: "center", fontSize: sz, fontFamily: "'Pliant', sans-serif", color: t.textSecondary, fontWeight: 700 },
+    labelS: { padding: `${Math.max(3, sz - 10)}px 6px`, borderBottom: `1px solid ${t.tableBorder}`, textAlign: "left", fontFamily: "'Pliant', sans-serif", fontWeight: 800, color: t.text, fontSize: sz - 1, whiteSpace: "nowrap" },
     labelW: Math.max(70, 85 + (sz - 14) * 3),
   };
 }
@@ -1745,7 +1745,7 @@ export function RollingVeloChart({ pitches, mode = "game", width = 260, height =
             <text
               x={pad.left - 4} y={yPos(v) + 3}
               textAnchor="end" fontSize={9} fill={t.textFaint}
-              fontFamily="'DM Mono', monospace"
+              fontFamily="'Pliant', sans-serif"
             >{v}</text>
           </g>
         ))}
@@ -1771,7 +1771,7 @@ export function RollingVeloChart({ pitches, mode = "game", width = 260, height =
             x={xPos(tk.x)} y={pad.top + plotH + 14}
             textAnchor={mode === "season" ? "end" : "middle"}
             fontSize={9} fill={t.textFaint}
-            fontFamily={mode === "game" ? "'DM Mono', monospace" : "inherit"}
+            fontFamily={mode === "game" ? "'Pliant', sans-serif" : "inherit"}
             transform={mode === "season" ? `rotate(-35 ${xPos(tk.x)} ${pad.top + plotH + 14})` : ""}
           >{tk.label}</text>
         ))}
@@ -1882,12 +1882,12 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
         <text
           x={sideW / 2} y={26}
           textAnchor="middle" fontSize={9} fill={t.textFaint}
-          fontFamily="'DM Mono', monospace"
+          fontFamily="'Pliant', sans-serif"
         >{totalL} pitches</text>
         <text
           x={sideW + centerW + sideW / 2} y={26}
           textAnchor="middle" fontSize={9} fill={t.textFaint}
-          fontFamily="'DM Mono', monospace"
+          fontFamily="'Pliant', sans-serif"
         >{totalR} pitches</text>
 
         {/* Center divider */}
@@ -1929,14 +1929,14 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                     x={4} y={midY - 1}
                     fontSize={9} fontWeight={800}
                     fill={t.textSecondary}
-                    fontFamily="'DM Mono', monospace"
+                    fontFamily="'Pliant', sans-serif"
                   >{totalL > 0 ? Math.round(lCount / totalL * 100) : 0}%</text>
                   {lPp != null && (
                     <text
                       x={4} y={midY + 9}
                       fontSize={8} fontWeight={700}
                       fill={t.textSecondary}
-                      fontFamily="'DM Mono', monospace"
+                      fontFamily="'Pliant', sans-serif"
                     >{Math.round(lPp)} Stuff+</text>
                   )}
                 </>
@@ -1955,7 +1955,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                     textAnchor="end"
                     fontSize={9} fontWeight={800}
                     fill={t.textSecondary}
-                    fontFamily="'DM Mono', monospace"
+                    fontFamily="'Pliant', sans-serif"
                   >{totalR > 0 ? Math.round(rCount / totalR * 100) : 0}%</text>
                   {rPp != null && (
                     <text
@@ -1963,7 +1963,7 @@ export function PlatoonUsageBars({ pitches, pitchPlus, width = 260, height = 400
                       textAnchor="end"
                       fontSize={8} fontWeight={700}
                       fill={t.textSecondary}
-                      fontFamily="'DM Mono', monospace"
+                      fontFamily="'Pliant', sans-serif"
                     >{Math.round(rPp)} Stuff+</text>
                   )}
                 </>
