@@ -295,7 +295,7 @@ function addRow(acc, r, keys) {
     const v = r[k];
     if (Array.isArray(v)) {
       acc[k] = (acc[k] || []).concat(v);
-    } else {
+    } else if (!Array.isArray(acc[k])) {
       acc[k] = (acc[k] || 0) + (v || 0);
     }
   }
@@ -307,7 +307,7 @@ function subRow(acc, r, keys) {
     if (Array.isArray(v)) {
       const removeN = v.length;
       if (removeN) acc[k] = (acc[k] || []).slice(removeN);
-    } else {
+    } else if (!Array.isArray(acc[k])) {
       acc[k] = (acc[k] || 0) - (v || 0);
     }
   }
