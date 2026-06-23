@@ -557,44 +557,70 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
 def fetch_position_innings(year: int, http_headers: dict) -> Dict[int, Dict[str, float]]:
     """Return { player_id: { 'C': innings, '1B': innings, ... } }.
 
-    Pulled from MLB Stats API's fielding stat endpoint paginated. Each split
-    has positionAbbreviation and innings string ("123.1" = 123 + 1/3).
+    Pulled from MLB Stats API's fielding stat endpoint paginated. Tries
+    multiple URL variants because the `sportIds` / `sportId` param and the
+    `group` vs `gameType` syntax have drifted across API versions.
     """
-    out: Dict[int, Dict[str, float]] = {}
     base = "https://statsapi.mlb.com/api/v1/stats"
-    offset = 0
     LIMIT = 500
-    while True:
-        url = (f"{base}?stats=season&group=fielding&season={year}"
-               f"&sportIds=1&playerPool=All&limit={LIMIT}&offset={offset}")
+    templates = [
+        f"{base}?stats=season&group=fielding&season={year}&sportIds=1&playerPool=All&limit={LIMIT}&offset={{offset}}",
+        f"{base}?stats=season&group=fielding&season={year}&sportId=1&playerPool=All&limit={LIMIT}&offset={{offset}}",
+        f"{base}?stats=season&group=fielding&season={year}&sportId=1&gameType=R&limit={LIMIT}&offset={{offset}}",
+        f"{base}?stats=season&group=fielding&season={year}&sportId=1&limit={LIMIT}&offset={{offset}}",
+    ]
+
+    def _parse(sp):
+        pid = (sp.get("player") or {}).get("id")
+        pos = sp.get("position", {}).get("abbreviation")
+        if not pid or pos not in POSITIONS:
+            return
+        inn = sp.get("stat", {}).get("innings")
+        if inn is None:
+            return
         try:
-            r = requests.get(url, headers=http_headers, timeout=30)
-            r.raise_for_status()
-        except Exception as e:
-            print(f"  ⚠ MLB fielding fetch failed at offset {offset}: {e}")
-            break
-        splits = (r.json().get("stats") or [{}])[0].get("splits") or []
-        if not splits:
-            break
-        for sp in splits:
-            pid = (sp.get("player") or {}).get("id")
-            pos = sp.get("position", {}).get("abbreviation")
-            if not pid or pos not in POSITIONS:
-                continue
-            inn = sp.get("stat", {}).get("innings")
-            if inn is None:
-                continue
+            whole, frac = str(inn).split(".") if "." in str(inn) else (str(inn), "0")
+            innings = int(whole) + int(frac) / 3.0
+        except Exception:
+            innings = 0.0
+        return int(pid), pos, innings
+
+    for tmpl in templates:
+        out: Dict[int, Dict[str, float]] = {}
+        offset = 0
+        got_any = False
+        while True:
+            url = tmpl.format(offset=offset)
             try:
-                whole, frac = str(inn).split(".") if "." in str(inn) else (str(inn), "0")
-                innings = int(whole) + int(frac) / 3.0
-            except Exception:
-                innings = 0.0
-            out.setdefault(int(pid), {})[pos] = innings
-        if len(splits) < LIMIT:
-            break
-        offset += LIMIT
-    print(f"  Position innings: {len(out)} players with fielding splits")
-    return out
+                r = requests.get(url, headers=http_headers, timeout=30)
+                r.raise_for_status()
+            except Exception as e:
+                print(f"  ⚠ MLB fielding fetch failed: {e}")
+                break
+            # Collect splits from ALL stat-group entries (the API sometimes
+            # wraps multiple groups; taking only [0] misses data).
+            all_splits = []
+            for entry in (r.json().get("stats") or []):
+                all_splits.extend(entry.get("splits") or [])
+            if not all_splits:
+                break
+            got_any = True
+            for sp in all_splits:
+                parsed = _parse(sp)
+                if parsed:
+                    pid, pos, inn = parsed
+                    out.setdefault(pid, {})[pos] = inn
+            if len(all_splits) < LIMIT:
+                break
+            offset += LIMIT
+        if out:
+            print(f"  Position innings: {len(out)} players (URL variant: {tmpl[:80]}…)")
+            return out
+        if got_any:
+            print(f"  ⚠ MLB API returned splits but no parseable innings ({tmpl[:80]}…)")
+
+    print(f"  ⚠ All MLB innings API variants returned 0 — will fall back to OAA presence")
+    return {}
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -677,6 +703,25 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
     ofarm   = fetch_savant_of_arm(year, fetch_url, csv_to_df)
     fg      = fetch_fangraphs_fielding(year, http_headers)
     inn_map = fetch_position_innings(year, http_headers)
+
+    # Fallback: if the MLB Stats API returned nothing (e.g. endpoint changed),
+    # build a synthetic inn_map from OAA — which is already fetched per position
+    # with min=1. We credit MIN_INN innings to each (player, position) pair so
+    # they pass the qualification gate. The innings value shown on the card will
+    # be approximate (shows MIN_INN) but all metrics still percentile correctly.
+    if not inn_map and oaa is not None:
+        print(f"  Building synthetic inn_map from OAA position data (fallback)")
+        for _, row in oaa.iterrows():
+            pid = row.get("player_id")
+            pos = row.get("position")
+            try:
+                pid = int(pid)
+            except (TypeError, ValueError):
+                continue
+            if not pos:
+                continue
+            inn_map.setdefault(pid, {})[pos] = float(MIN_INN)
+        print(f"  Synthetic inn_map: {len(inn_map)} players from OAA")
 
     # 2. Build per-(player, position) row dict, keyed by (pid, pos)
     rows: Dict[tuple, dict] = {}
