@@ -288,9 +288,40 @@ export function BubblePercentileBar({ label, pctile, display }) {
 // PLAYER HEADER
 // ═══════════════════════════════════════════════════════════
 
+// player_id → resolved team id (or null), cached for the session so each
+// player is looked up at most once.
+const _fallbackTeamIdCache = new Map();
+
+// Resolve a player's current team id from the MLB Stats API. Used only as a
+// fallback when the pipeline data carries no team (IL stints / AAA options
+// strip the abbreviation), so the card still shows a logo. Prefers the MLB
+// parent org when the player is on a minor-league roster.
+function useFallbackTeamId(playerId, needed) {
+  const [tid, setTid] = useState(() => _fallbackTeamIdCache.get(playerId) ?? null);
+  useEffect(() => {
+    if (!needed || !playerId) return;
+    if (_fallbackTeamIdCache.has(playerId)) { setTid(_fallbackTeamIdCache.get(playerId)); return; }
+    setTid(null); // clear any prior player's value while we resolve
+    let alive = true;
+    fetch(`/mlb-api/api/v1/people/${playerId}?hydrate=currentTeam`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        const ct = d?.people?.[0]?.currentTeam;
+        const id = ct?.parentOrgId || ct?.id || null;
+        _fallbackTeamIdCache.set(playerId, id);
+        if (alive) setTid(id);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [playerId, needed]);
+  return tid;
+}
+
 export function PlayerHeader({ name, team, teamId, season, playerId, subtitle }) {
   const headshot = getHeadshotUrl(playerId);
-  const logo = getLogoUrl(team, teamId);
+  const directLogo = getLogoUrl(team, teamId);
+  const fallbackTeamId = useFallbackTeamId(playerId, !directLogo);
+  const logo = directLogo || getLogoUrl(null, fallbackTeamId);
 
   const bgColor = MLB_TEAM_PRIMARY[team] || "#1e293b";
   const light = hexLuminance(bgColor) > 0.179;
