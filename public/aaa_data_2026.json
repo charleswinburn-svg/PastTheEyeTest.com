@@ -33036,7 +33036,7 @@
     {
       "name": "Dayne Leonard",
       "player_id": 802143,
-      "team": "CIN",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -39535,7 +39535,7 @@
     {
       "name": "Trace Willhoite",
       "player_id": 688875,
-      "team": "NYM",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -74166,7 +74166,7 @@
     {
       "name": "Michael Darrell-Hicks",
       "player_id": 690382,
-      "team": "PIT",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -97068,7 +97068,7 @@
     {
       "name": "Nick Sando",
       "player_id": 805311,
-      "team": "CIN",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -99972,7 +99972,7 @@
     {
       "name": "Jake Curtis",
       "player_id": 813268,
-      "team": "CWS",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -101226,7 +101226,7 @@
     {
       "name": "Evan Gates",
       "player_id": 688753,
-      "team": "PHI",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -106883,6 +106883,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-06-27 19:41:04 UTC"
+    "generated_at": "2026-06-27 19:50:29 UTC"
   }
 }
