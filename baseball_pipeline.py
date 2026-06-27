@@ -783,19 +783,18 @@ def format_value(value, metric):
 # MLB API TEAM LOOKUP
 # ============================================================
 
-# Per-team roster scan → player_id → (abbreviation, team_id), cached.
+# Team lookup: player_id → (abbreviation, team_id), cached. Two stages so no
+# active player is left without a club (the missing-team/logo bug):
+#   1. a per-team roster scan (full roster: active + 40-man + most IL) for the bulk;
+#   2. a single-player currentTeam lookup for whoever the scan misses — chiefly
+#      60-day IL players, who are off the 40-man and so absent from every roster.
 #
-# Uses the FULL roster (40-man + 60-day IL) rather than the active 26-man, so
-# players on the IL or optioned to AAA keep their MLB club instead of dropping
-# out (that was the missing-team/logo bug). An optioned player stays on his MLB
-# 40-man, so this maps him to the big-league team automatically; a true free
-# agent resolves to nothing and falls back to the card's per-player lookup.
-#
-# (A batched /people?personIds=...&hydrate=currentTeam call would be fewer
-# requests, but statsapi returns 406 for that multi-id form — the per-team
-# roster endpoint is the one that works.)
-_ROSTER_ABBR = None   # player_id → abbreviation
+# (A batched /people?personIds=... call would be fewer requests, but statsapi
+# 406s that multi-id form, so the fallback uses the single-id endpoint.)
+_ROSTER_ABBR = None   # player_id → abbreviation (from the roster scan)
 _ROSTER_TID  = {}     # player_id → team_id
+_ABBR_BY_ID  = {}     # team_id → abbreviation (for parent-org resolution)
+_PTEAM_CACHE = {}     # player_id → (abbr, team_id), incl. per-player fallbacks
 
 def _scan_rosters():
     global _ROSTER_ABBR
@@ -810,11 +809,11 @@ def _scan_rosters():
     except Exception as e:
         print(f"    ✗ Failed to fetch teams: {e}")
         return
+    for t in teams:
+        _ABBR_BY_ID[t.get("id")] = t.get("abbreviation", "")
 
     print("  Fetching MLB full rosters for team lookup...")
-    for t in teams:
-        tid = t.get("id")
-        abbr = t.get("abbreviation", "")
+    for tid, abbr in _ABBR_BY_ID.items():
         roster = []
         # Prefer the full roster (IL + optioned); fall back to the active roster
         # if a club rejects the rosterType, so we never do worse than before.
@@ -835,28 +834,63 @@ def _scan_rosters():
                 _ROSTER_ABBR[pid] = abbr
                 _ROSTER_TID[pid] = tid
         time.sleep(0.1)
-    print(f"    ✓ {len(_ROSTER_ABBR)} players mapped to teams")
+    print(f"    ✓ {len(_ROSTER_ABBR)} players on team rosters")
+
+
+def _resolve_current_team(pid):
+    """Single-player currentTeam lookup (the multi-id form 406s). Catches IL /
+    off-roster players; maps a minor-league assignment up to its MLB parent."""
+    try:
+        r = requests.get(
+            f"https://statsapi.mlb.com/api/v1/people/{pid}?hydrate=currentTeam",
+            headers=HTTP_HEADERS, timeout=15)
+        r.raise_for_status()
+        ct = ((r.json().get("people") or [{}])[0] or {}).get("currentTeam") or {}
+    except Exception:
+        return None
+    tid = ct.get("id")
+    if not tid:
+        return None
+    parent = ct.get("parentOrgId")
+    if parent and parent in _ABBR_BY_ID:
+        return (_ABBR_BY_ID[parent], parent)
+    return (ct.get("abbreviation") or _ABBR_BY_ID.get(tid), tid)
 
 
 def fetch_mlb_team_map():
-    """player_id → team abbreviation (full roster, cached). Used by the fielding
+    """player_id → team abbreviation (roster scan, cached). Used by the fielding
     and AAA sub-pipelines."""
     _scan_rosters()
     return _ROSTER_ABBR or {}
 
 
 def fetch_player_teams(player_ids):
-    """player_id → (team_abbr, team_id) for the requested ids, from the
-    full-roster scan. IL / optioned players keep their MLB club; players not on
-    any current roster (free agents) are omitted and fall back to the frontend
-    card's per-player currentTeam lookup."""
+    """player_id → (team_abbr, team_id). Roster scan for the bulk, then a
+    per-player currentTeam lookup for anyone the scan misses (60-day IL /
+    between assignments) so IL players keep their MLB club on the leaderboard."""
     _scan_rosters()
     out = {}
+    missing = []
     for p in player_ids:
-        if pd.notna(p):
-            pid = int(p)
-            if pid in _ROSTER_ABBR:
-                out[pid] = (_ROSTER_ABBR[pid], _ROSTER_TID.get(pid))
+        if pd.isna(p):
+            continue
+        pid = int(p)
+        if pid in _PTEAM_CACHE:
+            out[pid] = _PTEAM_CACHE[pid]
+        elif pid in _ROSTER_ABBR:
+            out[pid] = _PTEAM_CACHE[pid] = (_ROSTER_ABBR[pid], _ROSTER_TID.get(pid))
+        else:
+            missing.append(pid)
+    if missing:
+        print(f"  Resolving current team for {len(missing)} off-roster players (IL/etc.)...")
+        found = 0
+        for pid in missing:
+            rec = _resolve_current_team(pid)
+            if rec:
+                out[pid] = _PTEAM_CACHE[pid] = rec
+                found += 1
+            time.sleep(0.05)
+        print(f"    ✓ resolved {found}/{len(missing)} off-roster players")
     return out
 
 
