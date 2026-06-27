@@ -808,11 +808,12 @@ def fetch_mlb_team_map():
     for t in teams:
         team_abbrs[t["id"]] = t.get("abbreviation", "")
 
-    # Step 2: Fetch each team's active roster
+    # Step 2: Fetch each team's 40-man roster (the active roster drops anyone on
+    # the IL or optioned to AAA — exactly the players whose logos go missing).
     player_team = {}  # player_id → abbreviation
     for tid, abbr in team_abbrs.items():
         try:
-            r = requests.get(f"https://statsapi.mlb.com/api/v1/teams/{tid}/roster", headers=HTTP_HEADERS, timeout=15)
+            r = requests.get(f"https://statsapi.mlb.com/api/v1/teams/{tid}/roster?rosterType=40Man", headers=HTTP_HEADERS, timeout=15)
             r.raise_for_status()
             roster = r.json().get("roster", [])
             for p in roster:
@@ -826,6 +827,60 @@ def fetch_mlb_team_map():
     print(f"    ✓ {len(player_team)} players mapped to teams")
     _TEAM_MAP_CACHE = player_team
     return player_team
+
+
+_PLAYER_TEAMS_CACHE = {}  # player_id -> (team_abbr, team_id)
+
+def fetch_player_teams(player_ids):
+    """Map player_id -> (team_abbr, team_id) via the MLB Stats API
+    people/currentTeam hydrate — authoritative per player, and resilient.
+
+    Unlike the active/40-man roster scan, currentTeam is correct for players on
+    the IL, optioned to AAA, or traded mid-season; minor-league assignments are
+    mapped up to the MLB parent org so the big-league club shows on the
+    card/leaderboard. Batched (~100 ids/request, ~5 calls instead of 30) and
+    cached per id, so hitter and pitcher passes share resolved players.
+    """
+    want = [int(p) for p in player_ids if pd.notna(p)]
+    todo = sorted({p for p in want if p not in _PLAYER_TEAMS_CACHE})
+    if todo:
+        print(f"  Resolving current team for {len(todo)} players (MLB Stats API)...")
+        # MLB team_id -> abbreviation, used to label AAA assignments by parent org.
+        abbr_by_id = {}
+        try:
+            r = requests.get("https://statsapi.mlb.com/api/v1/teams?sportId=1",
+                             headers=HTTP_HEADERS, timeout=30)
+            r.raise_for_status()
+            for t in r.json().get("teams", []):
+                abbr_by_id[t["id"]] = t.get("abbreviation", "")
+        except Exception as e:
+            print(f"    ✗ team abbreviation fetch failed: {e}")
+
+        for i in range(0, len(todo), 100):
+            chunk = todo[i:i + 100]
+            url = ("https://statsapi.mlb.com/api/v1/people"
+                   f"?personIds={','.join(map(str, chunk))}&hydrate=currentTeam")
+            try:
+                r = requests.get(url, headers=HTTP_HEADERS, timeout=30)
+                r.raise_for_status()
+                people = r.json().get("people", [])
+            except Exception as e:
+                print(f"    ✗ people batch failed: {e}")
+                continue
+            for p in people:
+                ct = p.get("currentTeam") or {}
+                tid = ct.get("id")
+                if not tid:
+                    continue
+                parent_id = ct.get("parentOrgId")
+                if parent_id and parent_id in abbr_by_id:
+                    _PLAYER_TEAMS_CACHE[p["id"]] = (abbr_by_id[parent_id], parent_id)  # AAA → MLB org
+                else:
+                    _PLAYER_TEAMS_CACHE[p["id"]] = (ct.get("abbreviation") or abbr_by_id.get(tid), tid)
+            time.sleep(0.1)
+        print(f"    ✓ resolved {sum(1 for p in want if p in _PLAYER_TEAMS_CACHE)}/{len(want)} players")
+
+    return {p: _PLAYER_TEAMS_CACHE[p] for p in want if p in _PLAYER_TEAMS_CACHE}
 
 
 # ============================================================
@@ -864,9 +919,6 @@ def process_hitters(year):
                 break
         except Exception:
             continue
-
-    # --- Fetch team info from MLB API ---
-    team_map = fetch_mlb_team_map()
 
     if df_expected is None and df_statcast is None:
         print("  ✗ No hitter data available — skipping")
@@ -1002,9 +1054,13 @@ def process_hitters(year):
         else:
             print("  ⚠ Cannot merge CSV — missing player_id column")
 
-    # --- Merge team info ---
-    if team_map and "player_id" in merged.columns:
-        merged["team"] = merged["player_id"].apply(lambda pid: team_map.get(int(pid)) if pd.notna(pid) else None)
+    # --- Merge team info: per-player current team (handles IL / AAA / trades) ---
+    if "player_id" in merged.columns:
+        pteams = fetch_player_teams(merged["player_id"].dropna().unique())
+        merged["team"]    = merged["player_id"].apply(
+            lambda pid: (pteams.get(int(pid)) or (None, None))[0] if pd.notna(pid) else None)
+        merged["team_id"] = merged["player_id"].apply(
+            lambda pid: (pteams.get(int(pid)) or (None, None))[1] if pd.notna(pid) else None)
         team_count = merged["team"].notna().sum()
         print(f"  Team info: {team_count}/{len(merged)} hitters have team")
 
@@ -1064,11 +1120,13 @@ def process_hitters(year):
             if tcol in row.index and pd.notna(row.get(tcol)):
                 team = str(row[tcol])
                 break
+        team_id = int(row["team_id"]) if "team_id" in row.index and pd.notna(row.get("team_id")) else None
 
         results.append({
             "name": player_name,
             "player_id": player_id,
             "team": team,
+            "team_id": team_id,
             "pa": int(row.get("pa", 0)) if pd.notna(row.get("pa")) else None,
             "categories": cats,
         })
@@ -1371,6 +1429,7 @@ def process_pitchers(year):
 
     # --- Compute percentiles ---
     results = []
+    pteams = fetch_player_teams(merged["player_id"].dropna().unique()) if "player_id" in merged.columns else {}
     for _, row in merged.iterrows():
         cats = {}
         for m in PITCHER_METRICS:
@@ -1400,10 +1459,12 @@ def process_pitchers(year):
             if tcol in row.index and pd.notna(row.get(tcol)):
                 team = str(row[tcol])
                 break
-        # Fallback to MLB API roster lookup
-        if team is None and player_id is not None:
-            tm = fetch_mlb_team_map()
-            team = tm.get(player_id)
+        # Current-team lookup (covers IL / AAA / trades); also yields team_id.
+        team_id = None
+        if player_id is not None and player_id in pteams:
+            _abbr, team_id = pteams[player_id]
+            if team is None:
+                team = _abbr
 
         vaa_pt = row.get("vaa_pitch_type")
         if pd.isna(vaa_pt) if isinstance(vaa_pt, float) else vaa_pt is None:
@@ -1413,6 +1474,7 @@ def process_pitchers(year):
             "name": player_name,
             "player_id": player_id,
             "team": team,
+            "team_id": team_id,
             "ip": round(float(row.get("ip", 0)), 1) if pd.notna(row.get("ip")) else None,
             "vaa_pitch_type": vaa_pt,
             "categories": cats,
