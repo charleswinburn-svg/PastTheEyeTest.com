@@ -85,6 +85,7 @@ const TABS = [
     label: "LEADERBOARD",
     dropdown: [
       { id: "hitter_lb",  label: "Hitter" },
+      { id: "hitter_xrv_lb", label: "Hitter xRV" },
       { id: "pitcher_lb", label: "Pitcher" },
       { id: "pitch_modeling_lb", label: "Pitch Modeling" },
     ]
@@ -95,6 +96,16 @@ const TABS = [
 ];
 
 const SEASONS = ["2026", "2025", "2024", "2023"];
+
+// Ordered xRV/600 PA metric labels for the hitter xRV leaderboard (mirrors the
+// HitterCard right column / build_hitter_xrv.py). xRV/600 leads so the board
+// defaults to sorting by overall expected run value.
+const HITTER_XRV_METRICS = [
+  "xRV/600", "Contact Quality", "Whiff", "Decision",
+  "Fastball", "Breaking", "Offspeed",
+  "Inner", "Middle (vertical)", "Outer",
+  "Upper", "Middle (horizontal)", "Lower", "Chase",
+].map(label => ({ label }));
 
 // ── Wrapped export with ThemeProvider ──
 export default function BaseballAppWrapper() {
@@ -229,6 +240,12 @@ function BaseballApp() {
     });
   }, [hitters, iswingData, xrvData, season]);
   const pitchersFull = useMemo(() => disambiguate(pitchers), [pitchers]);
+  // Hitter xRV leaderboard rows: hitters carrying merged xRV metrics, reshaped so
+  // the generic Leaderboard reads the xRV components through its `categories` path.
+  const hitterXrvPlayers = useMemo(
+    () => hittersFull.filter(h => h.xrv && Object.keys(h.xrv).length).map(h => ({ ...h, categories: h.xrv })),
+    [hittersFull],
+  );
   const hitterNames = useMemo(() => hittersFull.map(h => h.displayName).sort(), [hittersFull]);
   const pitcherNames = useMemo(() => pitchersFull.map(p => p.displayName).sort(), [pitchersFull]);
 
@@ -272,7 +289,7 @@ function BaseballApp() {
   const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_counts", "hitter_game", "hitter_season", "hitter_counts"].includes(id);
   const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
   const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
-  const isLeaderboardTab = (id) => ["hitter_lb", "pitcher_lb", "pitch_modeling_lb"].includes(id);
+  const isLeaderboardTab = (id) => ["hitter_lb", "hitter_xrv_lb", "pitcher_lb", "pitch_modeling_lb"].includes(id);
   const isTabActive = (tabId) => {
     if (tabId === "summaries") return isSummaryTab(tab);
     if (tabId === "leaderboard") return isLeaderboardTab(tab);
@@ -709,6 +726,26 @@ function BaseballApp() {
             </div>
           )
         )}
+        {tab === "hitter_xrv_lb" && (
+          pipelineReady ? (
+            hitterXrvPlayers.length ? (
+              <Leaderboard
+                players={hitterXrvPlayers}
+                metrics={HITTER_XRV_METRICS}
+                type="hitter"
+                defaultSortCol="xRV/600"
+              />
+            ) : (
+              <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
+                No hitter xRV for {season}. Run: python3 build_hitter_xrv.py --season {season}
+              </div>
+            )
+          ) : (
+            <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
+              {loading ? `Loading ${season} data...` : `No pipeline data for ${season}.`}
+            </div>
+          )
+        )}
         {tab === "pitcher_lb" && (
           pipelineReady ? (
             <Leaderboard
@@ -741,10 +778,10 @@ function BaseballApp() {
 
 
 // ── Leaderboard (themed) ──
-function Leaderboard({ players, metrics, type }) {
+function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSortDir = "desc" }) {
   const { theme: t } = useTheme();
-  const [sortCol, setSortCol] = useState(null);
-  const [sortDir, setSortDir] = useState("desc");
+  const [sortCol, setSortCol] = useState(defaultSortCol);
+  const [sortDir, setSortDir] = useState(defaultSortDir);
   const [search, setSearch] = useState("");
 
   const columns = useMemo(() => {
