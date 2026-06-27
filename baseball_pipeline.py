@@ -783,104 +783,81 @@ def format_value(value, metric):
 # MLB API TEAM LOOKUP
 # ============================================================
 
-_TEAM_MAP_CACHE = None
+# Per-team roster scan → player_id → (abbreviation, team_id), cached.
+#
+# Uses the FULL roster (40-man + 60-day IL) rather than the active 26-man, so
+# players on the IL or optioned to AAA keep their MLB club instead of dropping
+# out (that was the missing-team/logo bug). An optioned player stays on his MLB
+# 40-man, so this maps him to the big-league team automatically; a true free
+# agent resolves to nothing and falls back to the card's per-player lookup.
+#
+# (A batched /people?personIds=...&hydrate=currentTeam call would be fewer
+# requests, but statsapi returns 406 for that multi-id form — the per-team
+# roster endpoint is the one that works.)
+_ROSTER_ABBR = None   # player_id → abbreviation
+_ROSTER_TID  = {}     # player_id → team_id
 
-def fetch_mlb_team_map():
-    """Fetch all MLB rosters and build player_id → team abbreviation map."""
-    global _TEAM_MAP_CACHE
-    if _TEAM_MAP_CACHE is not None:
-        return _TEAM_MAP_CACHE
-
-    print("  Fetching MLB team rosters for team lookup...")
-
-    # Step 1: Get all teams with abbreviations
-    teams_url = "https://statsapi.mlb.com/api/v1/teams?sportId=1"
+def _scan_rosters():
+    global _ROSTER_ABBR
+    if _ROSTER_ABBR is not None:
+        return
+    _ROSTER_ABBR = {}
     try:
-        r = requests.get(teams_url, headers=HTTP_HEADERS, timeout=30)
+        r = requests.get("https://statsapi.mlb.com/api/v1/teams?sportId=1",
+                         headers=HTTP_HEADERS, timeout=30)
         r.raise_for_status()
         teams = r.json().get("teams", [])
     except Exception as e:
         print(f"    ✗ Failed to fetch teams: {e}")
-        _TEAM_MAP_CACHE = {}
-        return {}
+        return
 
-    team_abbrs = {}  # team_id → abbreviation
+    print("  Fetching MLB full rosters for team lookup...")
     for t in teams:
-        team_abbrs[t["id"]] = t.get("abbreviation", "")
+        tid = t.get("id")
+        abbr = t.get("abbreviation", "")
+        roster = []
+        # Prefer the full roster (IL + optioned); fall back to the active roster
+        # if a club rejects the rosterType, so we never do worse than before.
+        for suffix in ("?rosterType=fullRoster", ""):
+            try:
+                r = requests.get(
+                    f"https://statsapi.mlb.com/api/v1/teams/{tid}/roster{suffix}",
+                    headers=HTTP_HEADERS, timeout=15)
+                r.raise_for_status()
+                roster = r.json().get("roster", [])
+                if roster:
+                    break
+            except Exception:
+                continue
+        for p in roster:
+            pid = p.get("person", {}).get("id")
+            if pid:
+                _ROSTER_ABBR[pid] = abbr
+                _ROSTER_TID[pid] = tid
+        time.sleep(0.1)
+    print(f"    ✓ {len(_ROSTER_ABBR)} players mapped to teams")
 
-    # Step 2: Fetch each team's 40-man roster (the active roster drops anyone on
-    # the IL or optioned to AAA — exactly the players whose logos go missing).
-    player_team = {}  # player_id → abbreviation
-    for tid, abbr in team_abbrs.items():
-        try:
-            r = requests.get(f"https://statsapi.mlb.com/api/v1/teams/{tid}/roster?rosterType=40Man", headers=HTTP_HEADERS, timeout=15)
-            r.raise_for_status()
-            roster = r.json().get("roster", [])
-            for p in roster:
-                pid = p.get("person", {}).get("id")
-                if pid:
-                    player_team[pid] = abbr
-        except Exception:
-            pass  # Skip failed teams silently
-        time.sleep(0.1)  # Light rate limiting
 
-    print(f"    ✓ {len(player_team)} players mapped to teams")
-    _TEAM_MAP_CACHE = player_team
-    return player_team
+def fetch_mlb_team_map():
+    """player_id → team abbreviation (full roster, cached). Used by the fielding
+    and AAA sub-pipelines."""
+    _scan_rosters()
+    return _ROSTER_ABBR or {}
 
-
-_PLAYER_TEAMS_CACHE = {}  # player_id -> (team_abbr, team_id)
 
 def fetch_player_teams(player_ids):
-    """Map player_id -> (team_abbr, team_id) via the MLB Stats API
-    people/currentTeam hydrate — authoritative per player, and resilient.
-
-    Unlike the active/40-man roster scan, currentTeam is correct for players on
-    the IL, optioned to AAA, or traded mid-season; minor-league assignments are
-    mapped up to the MLB parent org so the big-league club shows on the
-    card/leaderboard. Batched (~100 ids/request, ~5 calls instead of 30) and
-    cached per id, so hitter and pitcher passes share resolved players.
-    """
-    want = [int(p) for p in player_ids if pd.notna(p)]
-    todo = sorted({p for p in want if p not in _PLAYER_TEAMS_CACHE})
-    if todo:
-        print(f"  Resolving current team for {len(todo)} players (MLB Stats API)...")
-        # MLB team_id -> abbreviation, used to label AAA assignments by parent org.
-        abbr_by_id = {}
-        try:
-            r = requests.get("https://statsapi.mlb.com/api/v1/teams?sportId=1",
-                             headers=HTTP_HEADERS, timeout=30)
-            r.raise_for_status()
-            for t in r.json().get("teams", []):
-                abbr_by_id[t["id"]] = t.get("abbreviation", "")
-        except Exception as e:
-            print(f"    ✗ team abbreviation fetch failed: {e}")
-
-        for i in range(0, len(todo), 100):
-            chunk = todo[i:i + 100]
-            url = ("https://statsapi.mlb.com/api/v1/people"
-                   f"?personIds={','.join(map(str, chunk))}&hydrate=currentTeam")
-            try:
-                r = requests.get(url, headers=HTTP_HEADERS, timeout=30)
-                r.raise_for_status()
-                people = r.json().get("people", [])
-            except Exception as e:
-                print(f"    ✗ people batch failed: {e}")
-                continue
-            for p in people:
-                ct = p.get("currentTeam") or {}
-                tid = ct.get("id")
-                if not tid:
-                    continue
-                parent_id = ct.get("parentOrgId")
-                if parent_id and parent_id in abbr_by_id:
-                    _PLAYER_TEAMS_CACHE[p["id"]] = (abbr_by_id[parent_id], parent_id)  # AAA → MLB org
-                else:
-                    _PLAYER_TEAMS_CACHE[p["id"]] = (ct.get("abbreviation") or abbr_by_id.get(tid), tid)
-            time.sleep(0.1)
-        print(f"    ✓ resolved {sum(1 for p in want if p in _PLAYER_TEAMS_CACHE)}/{len(want)} players")
-
-    return {p: _PLAYER_TEAMS_CACHE[p] for p in want if p in _PLAYER_TEAMS_CACHE}
+    """player_id → (team_abbr, team_id) for the requested ids, from the
+    full-roster scan. IL / optioned players keep their MLB club; players not on
+    any current roster (free agents) are omitted and fall back to the frontend
+    card's per-player currentTeam lookup."""
+    _scan_rosters()
+    out = {}
+    for p in player_ids:
+        if pd.notna(p):
+            pid = int(p)
+            if pid in _ROSTER_ABBR:
+                out[pid] = (_ROSTER_ABBR[pid], _ROSTER_TID.get(pid))
+    return out
 
 
 # ============================================================
