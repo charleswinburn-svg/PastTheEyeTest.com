@@ -103,6 +103,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
         <PlayerHeader
           name={player.name}
           team={player.team}
+          teamId={player.team_id}
           season={season}
           playerId={player.player_id}
           subtitle={subtitle}
