@@ -29284,7 +29284,7 @@
     {
       "name": "Jose Fernandez",
       "player_id": 699912,
-      "team": null,
+      "team": "AZ",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -53508,7 +53508,7 @@
     {
       "name": "Jack Anderson",
       "player_id": 681252,
-      "team": null,
+      "team": "BOS",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -106883,6 +106883,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-06-27 17:59:46 UTC"
+    "generated_at": "2026-06-27 19:35:19 UTC"
   }
 }
