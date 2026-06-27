@@ -29284,7 +29284,7 @@
     {
       "name": "Jose Fernandez",
       "player_id": 699912,
-      "team": "AZ",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -33036,7 +33036,7 @@
     {
       "name": "Dayne Leonard",
       "player_id": 802143,
-      "team": null,
+      "team": "CIN",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -39535,7 +39535,7 @@
     {
       "name": "Trace Willhoite",
       "player_id": 688875,
-      "team": null,
+      "team": "NYM",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -44895,7 +44895,7 @@
     {
       "name": "Carter Garate",
       "player_id": 804466,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -53508,7 +53508,7 @@
     {
       "name": "Jack Anderson",
       "player_id": 681252,
-      "team": "BOS",
+      "team": null,
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -74166,7 +74166,7 @@
     {
       "name": "Michael Darrell-Hicks",
       "player_id": 690382,
-      "team": null,
+      "team": "PIT",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -79116,7 +79116,7 @@
     {
       "name": "Austin Bergner",
       "player_id": 666123,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -97068,7 +97068,7 @@
     {
       "name": "Nick Sando",
       "player_id": 805311,
-      "team": null,
+      "team": "CIN",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -99972,7 +99972,7 @@
     {
       "name": "Jake Curtis",
       "player_id": 813268,
-      "team": null,
+      "team": "CWS",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -101226,7 +101226,7 @@
     {
       "name": "Evan Gates",
       "player_id": 688753,
-      "team": null,
+      "team": "PHI",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -103338,7 +103338,7 @@
     {
       "name": "Cole Stasio",
       "player_id": 801453,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -104724,7 +104724,7 @@
     {
       "name": "Cole Roland",
       "player_id": 813401,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -106242,7 +106242,7 @@
     {
       "name": "Jacob Stretch",
       "player_id": 811710,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -106883,6 +106883,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-06-27 19:35:19 UTC"
+    "generated_at": "2026-06-27 19:41:04 UTC"
   }
 }

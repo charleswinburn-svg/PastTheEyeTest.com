@@ -4,8 +4,8 @@
     {
       "name": "James Wood",
       "player_id": 695578,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 386,
       "categories": {
         "xSLG": {
@@ -88,8 +88,8 @@
     {
       "name": "Taylor Ward",
       "player_id": 621493,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 378,
       "categories": {
         "xSLG": {
@@ -172,8 +172,8 @@
     {
       "name": "Gunnar Henderson",
       "player_id": 683002,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 376,
       "categories": {
         "xSLG": {
@@ -256,8 +256,8 @@
     {
       "name": "Nick Kurtz",
       "player_id": 701762,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 371,
       "categories": {
         "xSLG": {
@@ -340,8 +340,8 @@
     {
       "name": "Alex Bregman",
       "player_id": 608324,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 365,
       "categories": {
         "xSLG": {
@@ -424,8 +424,8 @@
     {
       "name": "Nico Hoerner",
       "player_id": 663538,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 364,
       "categories": {
         "xSLG": {
@@ -508,8 +508,8 @@
     {
       "name": "Zach Neto",
       "player_id": 687263,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 363,
       "categories": {
         "xSLG": {
@@ -592,8 +592,8 @@
     {
       "name": "Michael Busch",
       "player_id": 683737,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 361,
       "categories": {
         "xSLG": {
@@ -676,8 +676,8 @@
     {
       "name": "Yordan Alvarez",
       "player_id": 670541,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 361,
       "categories": {
         "xSLG": {
@@ -760,8 +760,8 @@
     {
       "name": "Pete Alonso",
       "player_id": 624413,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 359,
       "categories": {
         "xSLG": {
@@ -844,8 +844,8 @@
     {
       "name": "Bo Bichette",
       "player_id": 666182,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 358,
       "categories": {
         "xSLG": {
@@ -928,8 +928,8 @@
     {
       "name": "Julio Rodr\u00edguez",
       "player_id": 677594,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 358,
       "categories": {
         "xSLG": {
@@ -1096,8 +1096,8 @@
     {
       "name": "Pete Crow-Armstrong",
       "player_id": 691718,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 354,
       "categories": {
         "xSLG": {
@@ -1180,8 +1180,8 @@
     {
       "name": "Bryan Reynolds",
       "player_id": 668804,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 353,
       "categories": {
         "xSLG": {
@@ -1264,8 +1264,8 @@
     {
       "name": "Trea Turner",
       "player_id": 607208,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 352,
       "categories": {
         "xSLG": {
@@ -1348,8 +1348,8 @@
     {
       "name": "Daylen Lile",
       "player_id": 695734,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 349,
       "categories": {
         "xSLG": {
@@ -1516,8 +1516,8 @@
     {
       "name": "Kevin McGonigle",
       "player_id": 805808,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 348,
       "categories": {
         "xSLG": {
@@ -1600,8 +1600,8 @@
     {
       "name": "Sal Stewart",
       "player_id": 701398,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 347,
       "categories": {
         "xSLG": {
@@ -1684,8 +1684,8 @@
     {
       "name": "Andy Pages",
       "player_id": 681624,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 347,
       "categories": {
         "xSLG": {
@@ -1768,8 +1768,8 @@
     {
       "name": "Kyle Schwarber",
       "player_id": 656941,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 347,
       "categories": {
         "xSLG": {
@@ -1936,8 +1936,8 @@
     {
       "name": "Jo Adell",
       "player_id": 666176,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 346,
       "categories": {
         "xSLG": {
@@ -2020,8 +2020,8 @@
     {
       "name": "Brandon Nimmo",
       "player_id": 607043,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 345,
       "categories": {
         "xSLG": {
@@ -2104,8 +2104,8 @@
     {
       "name": "Freddie Freeman",
       "player_id": 518692,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 345,
       "categories": {
         "xSLG": {
@@ -2188,8 +2188,8 @@
     {
       "name": "Rafael Devers",
       "player_id": 646240,
-      "team": null,
-      "team_id": null,
+      "team": "SF",
+      "team_id": 137,
       "pa": 344,
       "categories": {
         "xSLG": {
@@ -2272,8 +2272,8 @@
     {
       "name": "Cody Bellinger",
       "player_id": 641355,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 344,
       "categories": {
         "xSLG": {
@@ -2356,8 +2356,8 @@
     {
       "name": "Shohei Ohtani",
       "player_id": 660271,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 344,
       "categories": {
         "xSLG": {
@@ -2524,8 +2524,8 @@
     {
       "name": "Riley Greene",
       "player_id": 682985,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 343,
       "categories": {
         "xSLG": {
@@ -2608,8 +2608,8 @@
     {
       "name": "Fernando Tatis Jr.",
       "player_id": 665487,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 343,
       "categories": {
         "xSLG": {
@@ -2692,8 +2692,8 @@
     {
       "name": "Miguel Vargas",
       "player_id": 678246,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 343,
       "categories": {
         "xSLG": {
@@ -2944,8 +2944,8 @@
     {
       "name": "Bryce Harper",
       "player_id": 547180,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 342,
       "categories": {
         "xSLG": {
@@ -3112,8 +3112,8 @@
     {
       "name": "Ian Happ",
       "player_id": 664023,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 341,
       "categories": {
         "xSLG": {
@@ -3364,8 +3364,8 @@
     {
       "name": "Bobby Witt Jr.",
       "player_id": 677951,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 341,
       "categories": {
         "xSLG": {
@@ -3448,8 +3448,8 @@
     {
       "name": "Christian Walker",
       "player_id": 572233,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 341,
       "categories": {
         "xSLG": {
@@ -3616,8 +3616,8 @@
     {
       "name": "Shea Langeliers",
       "player_id": 669127,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 339,
       "categories": {
         "xSLG": {
@@ -3700,8 +3700,8 @@
     {
       "name": "Ketel Marte",
       "player_id": 606466,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 339,
       "categories": {
         "xSLG": {
@@ -3784,8 +3784,8 @@
     {
       "name": "Luis Arraez",
       "player_id": 650333,
-      "team": null,
-      "team_id": null,
+      "team": "SF",
+      "team_id": 137,
       "pa": 337,
       "categories": {
         "xSLG": {
@@ -3868,8 +3868,8 @@
     {
       "name": "Matt Chapman",
       "player_id": 656305,
-      "team": null,
-      "team_id": null,
+      "team": "SF",
+      "team_id": 137,
       "pa": 337,
       "categories": {
         "xSLG": {
@@ -3952,8 +3952,8 @@
     {
       "name": "CJ Abrams",
       "player_id": 682928,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 337,
       "categories": {
         "xSLG": {
@@ -4036,8 +4036,8 @@
     {
       "name": "Wilyer Abreu",
       "player_id": 677800,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 337,
       "categories": {
         "xSLG": {
@@ -4120,8 +4120,8 @@
     {
       "name": "Brandon Lowe",
       "player_id": 664040,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 336,
       "categories": {
         "xSLG": {
@@ -4288,8 +4288,8 @@
     {
       "name": "Willy Adames",
       "player_id": 642715,
-      "team": null,
-      "team_id": null,
+      "team": "SF",
+      "team_id": 137,
       "pa": 335,
       "categories": {
         "xSLG": {
@@ -4540,8 +4540,8 @@
     {
       "name": "Tyler Soderstrom",
       "player_id": 691016,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 334,
       "categories": {
         "xSLG": {
@@ -4624,8 +4624,8 @@
     {
       "name": "Corbin Carroll",
       "player_id": 682998,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 333,
       "categories": {
         "xSLG": {
@@ -4708,8 +4708,8 @@
     {
       "name": "Cole Young",
       "player_id": 702284,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 332,
       "categories": {
         "xSLG": {
@@ -4876,8 +4876,8 @@
     {
       "name": "Chase Meidroth",
       "player_id": 805367,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 331,
       "categories": {
         "xSLG": {
@@ -4960,8 +4960,8 @@
     {
       "name": "Vladimir Guerrero Jr.",
       "player_id": 665489,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 330,
       "categories": {
         "xSLG": {
@@ -5044,8 +5044,8 @@
     {
       "name": "Geraldo Perdomo",
       "player_id": 672695,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 329,
       "categories": {
         "xSLG": {
@@ -5128,8 +5128,8 @@
     {
       "name": "Josh Naylor",
       "player_id": 647304,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 328,
       "categories": {
         "xSLG": {
@@ -5212,8 +5212,8 @@
     {
       "name": "Kazuma Okamoto",
       "player_id": 672960,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 328,
       "categories": {
         "xSLG": {
@@ -5380,8 +5380,8 @@
     {
       "name": "Manny Machado",
       "player_id": 592518,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 327,
       "categories": {
         "xSLG": {
@@ -5464,8 +5464,8 @@
     {
       "name": "Josh Jung",
       "player_id": 673962,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 326,
       "categories": {
         "xSLG": {
@@ -5548,8 +5548,8 @@
     {
       "name": "Ben Rice",
       "player_id": 700250,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 326,
       "categories": {
         "xSLG": {
@@ -5632,8 +5632,8 @@
     {
       "name": "Jarren Duran",
       "player_id": 680776,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 326,
       "categories": {
         "xSLG": {
@@ -5716,8 +5716,8 @@
     {
       "name": "Willson Contreras",
       "player_id": 575929,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 325,
       "categories": {
         "xSLG": {
@@ -5800,8 +5800,8 @@
     {
       "name": "Jackson Merrill",
       "player_id": 701538,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 325,
       "categories": {
         "xSLG": {
@@ -5968,8 +5968,8 @@
     {
       "name": "Salvador Perez",
       "player_id": 521692,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 323,
       "categories": {
         "xSLG": {
@@ -6052,8 +6052,8 @@
     {
       "name": "Kyle Tucker",
       "player_id": 663656,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 321,
       "categories": {
         "xSLG": {
@@ -6136,8 +6136,8 @@
     {
       "name": "Isaac Paredes",
       "player_id": 670623,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 321,
       "categories": {
         "xSLG": {
@@ -6220,8 +6220,8 @@
     {
       "name": "Colson Montgomery",
       "player_id": 695657,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 320,
       "categories": {
         "xSLG": {
@@ -6388,8 +6388,8 @@
     {
       "name": "Carson Benge",
       "player_id": 701807,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 320,
       "categories": {
         "xSLG": {
@@ -6472,8 +6472,8 @@
     {
       "name": "TJ Rumfield",
       "player_id": 681198,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 319,
       "categories": {
         "xSLG": {
@@ -6556,8 +6556,8 @@
     {
       "name": "Hunter Goodman",
       "player_id": 696100,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 319,
       "categories": {
         "xSLG": {
@@ -6640,8 +6640,8 @@
     {
       "name": "Marcus Semien",
       "player_id": 543760,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 318,
       "categories": {
         "xSLG": {
@@ -6724,8 +6724,8 @@
     {
       "name": "Jake Burger",
       "player_id": 669394,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 318,
       "categories": {
         "xSLG": {
@@ -6892,8 +6892,8 @@
     {
       "name": "Randy Arozarena",
       "player_id": 668227,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 317,
       "categories": {
         "xSLG": {
@@ -6976,8 +6976,8 @@
     {
       "name": "Jazz Chisholm Jr.",
       "player_id": 665862,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 316,
       "categories": {
         "xSLG": {
@@ -7060,8 +7060,8 @@
     {
       "name": "Ernie Clement",
       "player_id": 676391,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 315,
       "categories": {
         "xSLG": {
@@ -7144,8 +7144,8 @@
     {
       "name": "Spencer Torkelson",
       "player_id": 679529,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 314,
       "categories": {
         "xSLG": {
@@ -7312,8 +7312,8 @@
     {
       "name": "Alec Bohm",
       "player_id": 664761,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 313,
       "categories": {
         "xSLG": {
@@ -7480,8 +7480,8 @@
     {
       "name": "Dillon Dingler",
       "player_id": 693307,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 313,
       "categories": {
         "xSLG": {
@@ -7564,8 +7564,8 @@
     {
       "name": "Cam Smith",
       "player_id": 701358,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 310,
       "categories": {
         "xSLG": {
@@ -7648,8 +7648,8 @@
     {
       "name": "Casey Schmitt",
       "player_id": 669477,
-      "team": null,
-      "team_id": null,
+      "team": "SF",
+      "team_id": 137,
       "pa": 309,
       "categories": {
         "xSLG": {
@@ -7816,8 +7816,8 @@
     {
       "name": "Nick Gonzales",
       "player_id": 693304,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 307,
       "categories": {
         "xSLG": {
@@ -7984,8 +7984,8 @@
     {
       "name": "Spencer Steer",
       "player_id": 668715,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 305,
       "categories": {
         "xSLG": {
@@ -8068,8 +8068,8 @@
     {
       "name": "Dansby Swanson",
       "player_id": 621020,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 303,
       "categories": {
         "xSLG": {
@@ -8152,8 +8152,8 @@
     {
       "name": "Xander Bogaerts",
       "player_id": 593428,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 303,
       "categories": {
         "xSLG": {
@@ -8236,8 +8236,8 @@
     {
       "name": "Ceddanne Rafaela",
       "player_id": 678882,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 303,
       "categories": {
         "xSLG": {
@@ -8404,8 +8404,8 @@
     {
       "name": "Steven Kwan",
       "player_id": 680757,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 302,
       "categories": {
         "xSLG": {
@@ -8488,8 +8488,8 @@
     {
       "name": "Brandon Marsh",
       "player_id": 669016,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 301,
       "categories": {
         "xSLG": {
@@ -8572,8 +8572,8 @@
     {
       "name": "Brayan Rocchio",
       "player_id": 677587,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 300,
       "categories": {
         "xSLG": {
@@ -8740,8 +8740,8 @@
     {
       "name": "Jung Hoo Lee",
       "player_id": 808982,
-      "team": null,
-      "team_id": null,
+      "team": "SF",
+      "team_id": 137,
       "pa": 297,
       "categories": {
         "xSLG": {
@@ -8824,8 +8824,8 @@
     {
       "name": "Spencer Horwitz",
       "player_id": 687462,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 295,
       "categories": {
         "xSLG": {
@@ -8908,8 +8908,8 @@
     {
       "name": "Maikel Garcia",
       "player_id": 672580,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 294,
       "categories": {
         "xSLG": {
@@ -8992,8 +8992,8 @@
     {
       "name": "Jac Caglianone",
       "player_id": 695506,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 293,
       "categories": {
         "xSLG": {
@@ -9076,8 +9076,8 @@
     {
       "name": "Nolan Arenado",
       "player_id": 571448,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 292,
       "categories": {
         "xSLG": {
@@ -9160,8 +9160,8 @@
     {
       "name": "Matt McLain",
       "player_id": 680574,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 292,
       "categories": {
         "xSLG": {
@@ -9244,8 +9244,8 @@
     {
       "name": "Vinnie Pasquantino",
       "player_id": 686469,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 291,
       "categories": {
         "xSLG": {
@@ -9328,8 +9328,8 @@
     {
       "name": "Carter Jensen",
       "player_id": 695600,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 291,
       "categories": {
         "xSLG": {
@@ -9412,8 +9412,8 @@
     {
       "name": "Bryson Stott",
       "player_id": 681082,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 290,
       "categories": {
         "xSLG": {
@@ -9496,8 +9496,8 @@
     {
       "name": "Ezequiel Tovar",
       "player_id": 678662,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 289,
       "categories": {
         "xSLG": {
@@ -9664,8 +9664,8 @@
     {
       "name": "Max Muncy",
       "player_id": 571970,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 285,
       "categories": {
         "xSLG": {
@@ -9832,8 +9832,8 @@
     {
       "name": "Oneil Cruz",
       "player_id": 665833,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 283,
       "categories": {
         "xSLG": {
@@ -10000,8 +10000,8 @@
     {
       "name": "Seiya Suzuki",
       "player_id": 673548,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 279,
       "categories": {
         "xSLG": {
@@ -10084,8 +10084,8 @@
     {
       "name": "Andr\u00e9s Gim\u00e9nez",
       "player_id": 665926,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 276,
       "categories": {
         "xSLG": {
@@ -10168,8 +10168,8 @@
     {
       "name": "Willi Castro",
       "player_id": 650489,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 275,
       "categories": {
         "xSLG": {
@@ -10252,8 +10252,8 @@
     {
       "name": "Troy Johnston",
       "player_id": 687859,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 274,
       "categories": {
         "xSLG": {
@@ -10336,8 +10336,8 @@
     {
       "name": "Ryan O'Hearn",
       "player_id": 656811,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 274,
       "categories": {
         "xSLG": {
@@ -10420,8 +10420,8 @@
     {
       "name": "J.P. Crawford",
       "player_id": 641487,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 272,
       "categories": {
         "xSLG": {
@@ -10504,8 +10504,8 @@
     {
       "name": "Isaac Collins",
       "player_id": 686555,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 272,
       "categories": {
         "xSLG": {
@@ -10756,8 +10756,8 @@
     {
       "name": "Elly De La Cruz",
       "player_id": 682829,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 270,
       "categories": {
         "xSLG": {
@@ -10840,8 +10840,8 @@
     {
       "name": "Nolan Schanuel",
       "player_id": 694384,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 270,
       "categories": {
         "xSLG": {
@@ -10924,8 +10924,8 @@
     {
       "name": "Ezequiel Duran",
       "player_id": 677649,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 269,
       "categories": {
         "xSLG": {
@@ -11092,8 +11092,8 @@
     {
       "name": "Brett Baty",
       "player_id": 683146,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 268,
       "categories": {
         "xSLG": {
@@ -11176,8 +11176,8 @@
     {
       "name": "Juan Soto",
       "player_id": 665742,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 268,
       "categories": {
         "xSLG": {
@@ -11260,8 +11260,8 @@
     {
       "name": "George Springer",
       "player_id": 543807,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 267,
       "categories": {
         "xSLG": {
@@ -11344,8 +11344,8 @@
     {
       "name": "Nasim Nu\u00f1ez",
       "player_id": 683083,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 267,
       "categories": {
         "xSLG": {
@@ -11428,8 +11428,8 @@
     {
       "name": "Ildemaro Vargas",
       "player_id": 545121,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 265,
       "categories": {
         "xSLG": {
@@ -11512,8 +11512,8 @@
     {
       "name": "Jeff McNeil",
       "player_id": 643446,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 264,
       "categories": {
         "xSLG": {
@@ -11764,8 +11764,8 @@
     {
       "name": "Jacob Young",
       "player_id": 696285,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 262,
       "categories": {
         "xSLG": {
@@ -11848,8 +11848,8 @@
     {
       "name": "Gavin Sheets",
       "player_id": 657757,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 261,
       "categories": {
         "xSLG": {
@@ -12016,8 +12016,8 @@
     {
       "name": "Jose Altuve",
       "player_id": 514888,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 260,
       "categories": {
         "xSLG": {
@@ -12100,8 +12100,8 @@
     {
       "name": "Jorge Soler",
       "player_id": 624585,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 260,
       "categories": {
         "xSLG": {
@@ -12184,8 +12184,8 @@
     {
       "name": "Luis Garc\u00eda Jr.",
       "player_id": 671277,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 260,
       "categories": {
         "xSLG": {
@@ -12268,8 +12268,8 @@
     {
       "name": "Caleb Durbin",
       "player_id": 702332,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 259,
       "categories": {
         "xSLG": {
@@ -12352,8 +12352,8 @@
     {
       "name": "Daulton Varsho",
       "player_id": 662139,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 259,
       "categories": {
         "xSLG": {
@@ -12436,8 +12436,8 @@
     {
       "name": "Adolis Garc\u00eda",
       "player_id": 666969,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 259,
       "categories": {
         "xSLG": {
@@ -12520,8 +12520,8 @@
     {
       "name": "Kyle Manzardo",
       "player_id": 700932,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 257,
       "categories": {
         "xSLG": {
@@ -12604,8 +12604,8 @@
     {
       "name": "Leody Taveras",
       "player_id": 665750,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 256,
       "categories": {
         "xSLG": {
@@ -12688,8 +12688,8 @@
     {
       "name": "Kyle Karros",
       "player_id": 691720,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 255,
       "categories": {
         "xSLG": {
@@ -12772,8 +12772,8 @@
     {
       "name": "Joc Pederson",
       "player_id": 592626,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 253,
       "categories": {
         "xSLG": {
@@ -12856,8 +12856,8 @@
     {
       "name": "Samuel Basallo",
       "player_id": 694212,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 253,
       "categories": {
         "xSLG": {
@@ -13108,8 +13108,8 @@
     {
       "name": "Jos\u00e9 Caballero",
       "player_id": 676609,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 250,
       "categories": {
         "xSLG": {
@@ -13192,8 +13192,8 @@
     {
       "name": "Sam Antonacci",
       "player_id": 803011,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 249,
       "categories": {
         "xSLG": {
@@ -13360,8 +13360,8 @@
     {
       "name": "Andrew Benintendi",
       "player_id": 643217,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 247,
       "categories": {
         "xSLG": {
@@ -13444,8 +13444,8 @@
     {
       "name": "Oswald Peraza",
       "player_id": 672724,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 247,
       "categories": {
         "xSLG": {
@@ -13528,8 +13528,8 @@
     {
       "name": "Justin Crawford",
       "player_id": 702222,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 246,
       "categories": {
         "xSLG": {
@@ -13612,8 +13612,8 @@
     {
       "name": "Munetaka Murakami",
       "player_id": 808959,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 246,
       "categories": {
         "xSLG": {
@@ -13864,8 +13864,8 @@
     {
       "name": "Curtis Mead",
       "player_id": 678554,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 241,
       "categories": {
         "xSLG": {
@@ -14032,8 +14032,8 @@
     {
       "name": "Jake McCarthy",
       "player_id": 664983,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 239,
       "categories": {
         "xSLG": {
@@ -14200,8 +14200,8 @@
     {
       "name": "Mark Vientos",
       "player_id": 668901,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 235,
       "categories": {
         "xSLG": {
@@ -14284,8 +14284,8 @@
     {
       "name": "Rhys Hoskins",
       "player_id": 656555,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 234,
       "categories": {
         "xSLG": {
@@ -14368,8 +14368,8 @@
     {
       "name": "Colt Keith",
       "player_id": 690993,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 234,
       "categories": {
         "xSLG": {
@@ -14452,8 +14452,8 @@
     {
       "name": "Jes\u00fas S\u00e1nchez",
       "player_id": 660821,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 234,
       "categories": {
         "xSLG": {
@@ -14620,8 +14620,8 @@
     {
       "name": "Evan Carter",
       "player_id": 694497,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 229,
       "categories": {
         "xSLG": {
@@ -14788,8 +14788,8 @@
     {
       "name": "Daniel Schneemann",
       "player_id": 682177,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 229,
       "categories": {
         "xSLG": {
@@ -15208,8 +15208,8 @@
     {
       "name": "Tristan Peters",
       "player_id": 671976,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 226,
       "categories": {
         "xSLG": {
@@ -15292,8 +15292,8 @@
     {
       "name": "Marcell Ozuna",
       "player_id": 542303,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 225,
       "categories": {
         "xSLG": {
@@ -15376,8 +15376,8 @@
     {
       "name": "Lawrence Butler",
       "player_id": 671732,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 224,
       "categories": {
         "xSLG": {
@@ -15460,8 +15460,8 @@
     {
       "name": "Coby Mayo",
       "player_id": 691723,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 224,
       "categories": {
         "xSLG": {
@@ -15544,8 +15544,8 @@
     {
       "name": "Luke Raley",
       "player_id": 670042,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 223,
       "categories": {
         "xSLG": {
@@ -15628,8 +15628,8 @@
     {
       "name": "Matt Vierling",
       "player_id": 663837,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 223,
       "categories": {
         "xSLG": {
@@ -15712,8 +15712,8 @@
     {
       "name": "JJ Bleday",
       "player_id": 668709,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 223,
       "categories": {
         "xSLG": {
@@ -15796,8 +15796,8 @@
     {
       "name": "Cal Raleigh",
       "player_id": 663728,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 222,
       "categories": {
         "xSLG": {
@@ -15880,8 +15880,8 @@
     {
       "name": "Tyler Stephenson",
       "player_id": 663886,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 221,
       "categories": {
         "xSLG": {
@@ -16048,8 +16048,8 @@
     {
       "name": "Paul Goldschmidt",
       "player_id": 502671,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 220,
       "categories": {
         "xSLG": {
@@ -16384,8 +16384,8 @@
     {
       "name": "Travis Bazzana",
       "player_id": 683953,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 217,
       "categories": {
         "xSLG": {
@@ -16468,8 +16468,8 @@
     {
       "name": "Edouard Julien",
       "player_id": 666397,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 216,
       "categories": {
         "xSLG": {
@@ -16552,8 +16552,8 @@
     {
       "name": "J.T. Realmuto",
       "player_id": 592663,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 215,
       "categories": {
         "xSLG": {
@@ -16636,8 +16636,8 @@
     {
       "name": "Jacob Wilson",
       "player_id": 805779,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 214,
       "categories": {
         "xSLG": {
@@ -16720,8 +16720,8 @@
     {
       "name": "Gabriel Moreno",
       "player_id": 672515,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 214,
       "categories": {
         "xSLG": {
@@ -16804,8 +16804,8 @@
     {
       "name": "Carson Kelly",
       "player_id": 608348,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 213,
       "categories": {
         "xSLG": {
@@ -16888,8 +16888,8 @@
     {
       "name": "Konnor Griffin",
       "player_id": 804606,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 213,
       "categories": {
         "xSLG": {
@@ -17056,8 +17056,8 @@
     {
       "name": "Lane Thomas",
       "player_id": 657041,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 210,
       "categories": {
         "xSLG": {
@@ -17308,8 +17308,8 @@
     {
       "name": "Corey Seager",
       "player_id": 608369,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 209,
       "categories": {
         "xSLG": {
@@ -17392,8 +17392,8 @@
     {
       "name": "Dominic Canzone",
       "player_id": 686527,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 209,
       "categories": {
         "xSLG": {
@@ -17476,8 +17476,8 @@
     {
       "name": "Eugenio Su\u00e1rez",
       "player_id": 553993,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 209,
       "categories": {
         "xSLG": {
@@ -17560,8 +17560,8 @@
     {
       "name": "Carlos Cortes",
       "player_id": 666126,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 206,
       "categories": {
         "xSLG": {
@@ -17728,8 +17728,8 @@
     {
       "name": "Miguel Andujar",
       "player_id": 609280,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 205,
       "categories": {
         "xSLG": {
@@ -17896,8 +17896,8 @@
     {
       "name": "Mookie Betts",
       "player_id": 605141,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 204,
       "categories": {
         "xSLG": {
@@ -17980,8 +17980,8 @@
     {
       "name": "Tyler Freeman",
       "player_id": 671289,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 204,
       "categories": {
         "xSLG": {
@@ -18232,8 +18232,8 @@
     {
       "name": "Jeremiah Jackson",
       "player_id": 669236,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 202,
       "categories": {
         "xSLG": {
@@ -18316,8 +18316,8 @@
     {
       "name": "Brice Matthews",
       "player_id": 694728,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 202,
       "categories": {
         "xSLG": {
@@ -18484,8 +18484,8 @@
     {
       "name": "Colton Cowser",
       "player_id": 681297,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 201,
       "categories": {
         "xSLG": {
@@ -18652,8 +18652,8 @@
     {
       "name": "Michael Massey",
       "player_id": 686681,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 200,
       "categories": {
         "xSLG": {
@@ -18736,8 +18736,8 @@
     {
       "name": "Nathaniel Lowe",
       "player_id": 663993,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 200,
       "categories": {
         "xSLG": {
@@ -18820,8 +18820,8 @@
     {
       "name": "Blaze Alexander",
       "player_id": 677942,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 198,
       "categories": {
         "xSLG": {
@@ -19072,8 +19072,8 @@
     {
       "name": "Logan O'Hoppe",
       "player_id": 681351,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 194,
       "categories": {
         "xSLG": {
@@ -19240,8 +19240,8 @@
     {
       "name": "Jake Mangum",
       "player_id": 663968,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 192,
       "categories": {
         "xSLG": {
@@ -19408,8 +19408,8 @@
     {
       "name": "Jeremy Pe\u00f1a",
       "player_id": 665161,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 192,
       "categories": {
         "xSLG": {
@@ -19492,8 +19492,8 @@
     {
       "name": "Alex Freeland",
       "player_id": 690976,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 191,
       "categories": {
         "xSLG": {
@@ -19660,8 +19660,8 @@
     {
       "name": "Zach McKinstry",
       "player_id": 656716,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 190,
       "categories": {
         "xSLG": {
@@ -19996,8 +19996,8 @@
     {
       "name": "Kerry Carpenter",
       "player_id": 681481,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 186,
       "categories": {
         "xSLG": {
@@ -20080,8 +20080,8 @@
     {
       "name": "Francisco Alvarez",
       "player_id": 682626,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 184,
       "categories": {
         "xSLG": {
@@ -20248,8 +20248,8 @@
     {
       "name": "Kyle Isbel",
       "player_id": 664728,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 183,
       "categories": {
         "xSLG": {
@@ -20332,8 +20332,8 @@
     {
       "name": "Drew Gilbert",
       "player_id": 687551,
-      "team": null,
-      "team_id": null,
+      "team": "SF",
+      "team_id": 137,
       "pa": 183,
       "categories": {
         "xSLG": {
@@ -20416,8 +20416,8 @@
     {
       "name": "Austin Wells",
       "player_id": 669224,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 183,
       "categories": {
         "xSLG": {
@@ -20500,8 +20500,8 @@
     {
       "name": "Ty France",
       "player_id": 664034,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 180,
       "categories": {
         "xSLG": {
@@ -20584,8 +20584,8 @@
     {
       "name": "Keibert Ruiz",
       "player_id": 660688,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 179,
       "categories": {
         "xSLG": {
@@ -20668,8 +20668,8 @@
     {
       "name": "TJ Friedl",
       "player_id": 670770,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 178,
       "categories": {
         "xSLG": {
@@ -20752,8 +20752,8 @@
     {
       "name": "Vaughn Grissom",
       "player_id": 687093,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 177,
       "categories": {
         "xSLG": {
@@ -21424,8 +21424,8 @@
     {
       "name": "Mickey Moniak",
       "player_id": 666160,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 174,
       "categories": {
         "xSLG": {
@@ -21508,8 +21508,8 @@
     {
       "name": "Wyatt Langford",
       "player_id": 694671,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 173,
       "categories": {
         "xSLG": {
@@ -21592,8 +21592,8 @@
     {
       "name": "Masataka Yoshida",
       "player_id": 807799,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 173,
       "categories": {
         "xSLG": {
@@ -21676,8 +21676,8 @@
     {
       "name": "Edgar Quero",
       "player_id": 700337,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 172,
       "categories": {
         "xSLG": {
@@ -21760,8 +21760,8 @@
     {
       "name": "Christian V\u00e1zquez",
       "player_id": 543877,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 171,
       "categories": {
         "xSLG": {
@@ -21844,8 +21844,8 @@
     {
       "name": "Jorbit Vivas",
       "player_id": 678391,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 169,
       "categories": {
         "xSLG": {
@@ -21928,8 +21928,8 @@
     {
       "name": "Brandon Valenzuela",
       "player_id": 678218,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 168,
       "categories": {
         "xSLG": {
@@ -22012,8 +22012,8 @@
     {
       "name": "Patrick Bailey",
       "player_id": 672275,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 164,
       "categories": {
         "xSLG": {
@@ -22096,8 +22096,8 @@
     {
       "name": "Jared Triolo",
       "player_id": 669707,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 164,
       "categories": {
         "xSLG": {
@@ -22180,8 +22180,8 @@
     {
       "name": "A.J. Ewing",
       "player_id": 805999,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 162,
       "categories": {
         "xSLG": {
@@ -22264,8 +22264,8 @@
     {
       "name": "Nathan Lukes",
       "player_id": 664770,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 162,
       "categories": {
         "xSLG": {
@@ -22348,8 +22348,8 @@
     {
       "name": "Nick Loftin",
       "player_id": 679845,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "pa": 161,
       "categories": {
         "xSLG": {
@@ -22432,8 +22432,8 @@
     {
       "name": "Dalton Rushing",
       "player_id": 687221,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 160,
       "categories": {
         "xSLG": {
@@ -22516,8 +22516,8 @@
     {
       "name": "Bryce Eldridge",
       "player_id": 805811,
-      "team": null,
-      "team_id": null,
+      "team": "SF",
+      "team_id": 137,
       "pa": 160,
       "categories": {
         "xSLG": {
@@ -22600,8 +22600,8 @@
     {
       "name": "Jos\u00e9 Tena",
       "player_id": 677588,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 158,
       "categories": {
         "xSLG": {
@@ -22684,8 +22684,8 @@
     {
       "name": "Henry Davis",
       "player_id": 680779,
-      "team": null,
-      "team_id": null,
+      "team": "PIT",
+      "team_id": 134,
       "pa": 157,
       "categories": {
         "xSLG": {
@@ -22768,8 +22768,8 @@
     {
       "name": "Blake Dunn",
       "player_id": 694362,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 155,
       "categories": {
         "xSLG": {
@@ -22936,8 +22936,8 @@
     {
       "name": "Kyle Higashioka",
       "player_id": 543309,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 152,
       "categories": {
         "xSLG": {
@@ -23020,8 +23020,8 @@
     {
       "name": "Tyler O'Neill",
       "player_id": 641933,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 152,
       "categories": {
         "xSLG": {
@@ -23104,8 +23104,8 @@
     {
       "name": "Max Muncy",
       "player_id": 691777,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 151,
       "categories": {
         "xSLG": {
@@ -23188,8 +23188,8 @@
     {
       "name": "Adrian Del Castillo",
       "player_id": 680728,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 150,
       "categories": {
         "xSLG": {
@@ -23440,8 +23440,8 @@
     {
       "name": "Carlos Narv\u00e1ez",
       "player_id": 665966,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 149,
       "categories": {
         "xSLG": {
@@ -23524,8 +23524,8 @@
     {
       "name": "Henry Bolte",
       "player_id": 703607,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 148,
       "categories": {
         "xSLG": {
@@ -23608,8 +23608,8 @@
     {
       "name": "Alejandro Osuna",
       "player_id": 696030,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 148,
       "categories": {
         "xSLG": {
@@ -23692,8 +23692,8 @@
     {
       "name": "Luis Torrens",
       "player_id": 620443,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 148,
       "categories": {
         "xSLG": {
@@ -23860,8 +23860,8 @@
     {
       "name": "Luisangel Acu\u00f1a",
       "player_id": 682668,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 147,
       "categories": {
         "xSLG": {
@@ -23944,8 +23944,8 @@
     {
       "name": "Freddy Fermin",
       "player_id": 666023,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 146,
       "categories": {
         "xSLG": {
@@ -24028,8 +24028,8 @@
     {
       "name": "Myles Straw",
       "player_id": 664702,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 145,
       "categories": {
         "xSLG": {
@@ -24112,8 +24112,8 @@
     {
       "name": "MJ Melendez",
       "player_id": 669004,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 144,
       "categories": {
         "xSLG": {
@@ -24280,8 +24280,8 @@
     {
       "name": "Danny Jansen",
       "player_id": 643376,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 142,
       "categories": {
         "xSLG": {
@@ -24364,8 +24364,8 @@
     {
       "name": "Matt Shaw",
       "player_id": 807713,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 142,
       "categories": {
         "xSLG": {
@@ -24532,8 +24532,8 @@
     {
       "name": "Edmundo Sosa",
       "player_id": 624641,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 141,
       "categories": {
         "xSLG": {
@@ -24616,8 +24616,8 @@
     {
       "name": "Josh Lowe",
       "player_id": 666139,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 141,
       "categories": {
         "xSLG": {
@@ -24784,8 +24784,8 @@
     {
       "name": "Lourdes Gurriel Jr.",
       "player_id": 666971,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 136,
       "categories": {
         "xSLG": {
@@ -24868,8 +24868,8 @@
     {
       "name": "Yohendrick Pi\u00f1ango",
       "player_id": 682818,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 136,
       "categories": {
         "xSLG": {
@@ -25036,8 +25036,8 @@
     {
       "name": "Amed Rosario",
       "player_id": 642708,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 135,
       "categories": {
         "xSLG": {
@@ -25120,8 +25120,8 @@
     {
       "name": "Jake Meyers",
       "player_id": 676694,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 135,
       "categories": {
         "xSLG": {
@@ -25372,8 +25372,8 @@
     {
       "name": "Andruw Monasterio",
       "player_id": 655316,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 133,
       "categories": {
         "xSLG": {
@@ -25456,8 +25456,8 @@
     {
       "name": "Miguel Amaya",
       "player_id": 665804,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 133,
       "categories": {
         "xSLG": {
@@ -25624,8 +25624,8 @@
     {
       "name": "Dylan Crews",
       "player_id": 686611,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 132,
       "categories": {
         "xSLG": {
@@ -25792,8 +25792,8 @@
     {
       "name": "Yainer Diaz",
       "player_id": 673237,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 132,
       "categories": {
         "xSLG": {
@@ -25876,8 +25876,8 @@
     {
       "name": "Miguel Rojas",
       "player_id": 500743,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 131,
       "categories": {
         "xSLG": {
@@ -26044,8 +26044,8 @@
     {
       "name": "Dane Myers",
       "player_id": 667472,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 131,
       "categories": {
         "xSLG": {
@@ -26128,8 +26128,8 @@
     {
       "name": "Drew Millas",
       "player_id": 686452,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "pa": 130,
       "categories": {
         "xSLG": {
@@ -26380,8 +26380,8 @@
     {
       "name": "David Fry",
       "player_id": 681807,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 129,
       "categories": {
         "xSLG": {
@@ -26548,8 +26548,8 @@
     {
       "name": "Ke'Bryan Hayes",
       "player_id": 663647,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 128,
       "categories": {
         "xSLG": {
@@ -26632,8 +26632,8 @@
     {
       "name": "Jonah Heim",
       "player_id": 641680,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 128,
       "categories": {
         "xSLG": {
@@ -26800,8 +26800,8 @@
     {
       "name": "Michael Conforto",
       "player_id": 624424,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "pa": 126,
       "categories": {
         "xSLG": {
@@ -26884,8 +26884,8 @@
     {
       "name": "Alex Call",
       "player_id": 669743,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "pa": 125,
       "categories": {
         "xSLG": {
@@ -26968,8 +26968,8 @@
     {
       "name": "Anthony Volpe",
       "player_id": 683011,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 124,
       "categories": {
         "xSLG": {
@@ -27304,8 +27304,8 @@
     {
       "name": "Austin Hedges",
       "player_id": 595978,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 121,
       "categories": {
         "xSLG": {
@@ -27388,8 +27388,8 @@
     {
       "name": "Hao-Yu Lee",
       "player_id": 701678,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 121,
       "categories": {
         "xSLG": {
@@ -27556,8 +27556,8 @@
     {
       "name": "Jorge Barrosa",
       "player_id": 678489,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 120,
       "categories": {
         "xSLG": {
@@ -27640,8 +27640,8 @@
     {
       "name": "Mickey Gasper",
       "player_id": 681508,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 119,
       "categories": {
         "xSLG": {
@@ -27808,8 +27808,8 @@
     {
       "name": "Rob Refsnyder",
       "player_id": 608701,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 119,
       "categories": {
         "xSLG": {
@@ -27892,8 +27892,8 @@
     {
       "name": "Randal Grichuk",
       "player_id": 545341,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 118,
       "categories": {
         "xSLG": {
@@ -27976,8 +27976,8 @@
     {
       "name": "Davis Schneider",
       "player_id": 676914,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 118,
       "categories": {
         "xSLG": {
@@ -28060,8 +28060,8 @@
     {
       "name": "Derek Hill",
       "player_id": 656537,
-      "team": null,
-      "team_id": null,
+      "team": "PHI",
+      "team_id": 143,
       "pa": 118,
       "categories": {
         "xSLG": {
@@ -28144,8 +28144,8 @@
     {
       "name": "Lenyn Sosa",
       "player_id": 672820,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "pa": 117,
       "categories": {
         "xSLG": {
@@ -28228,8 +28228,8 @@
     {
       "name": "Josh Smith",
       "player_id": 669701,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "pa": 117,
       "categories": {
         "xSLG": {
@@ -28312,8 +28312,8 @@
     {
       "name": "Colt Emerson",
       "player_id": 806068,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 116,
       "categories": {
         "xSLG": {
@@ -28396,8 +28396,8 @@
     {
       "name": "Mitch Garver",
       "player_id": 641598,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 116,
       "categories": {
         "xSLG": {
@@ -28564,8 +28564,8 @@
     {
       "name": "Will Benson",
       "player_id": 666181,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 114,
       "categories": {
         "xSLG": {
@@ -28732,8 +28732,8 @@
     {
       "name": "Francisco Lindor",
       "player_id": 596019,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 114,
       "categories": {
         "xSLG": {
@@ -28900,8 +28900,8 @@
     {
       "name": "Brett Sullivan",
       "player_id": 664954,
-      "team": null,
-      "team_id": null,
+      "team": "COL",
+      "team_id": 115,
       "pa": 113,
       "categories": {
         "xSLG": {
@@ -29236,8 +29236,8 @@
     {
       "name": "Jared Young",
       "player_id": 676724,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 110,
       "categories": {
         "xSLG": {
@@ -29320,8 +29320,8 @@
     {
       "name": "Joey Loperfido",
       "player_id": 694388,
-      "team": null,
-      "team_id": null,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 109,
       "categories": {
         "xSLG": {
@@ -29404,8 +29404,8 @@
     {
       "name": "Connor Wong",
       "player_id": 657136,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 107,
       "categories": {
         "xSLG": {
@@ -29488,8 +29488,8 @@
     {
       "name": "Drew Romo",
       "player_id": 691011,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "pa": 106,
       "categories": {
         "xSLG": {
@@ -29572,8 +29572,8 @@
     {
       "name": "Wade Meckler",
       "player_id": 685133,
-      "team": null,
-      "team_id": null,
+      "team": "LAA",
+      "team_id": 108,
       "pa": 105,
       "categories": {
         "xSLG": {
@@ -29656,8 +29656,8 @@
     {
       "name": "Tyrone Taylor",
       "player_id": 621438,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "pa": 104,
       "categories": {
         "xSLG": {
@@ -29740,8 +29740,8 @@
     {
       "name": "Jackson Holliday",
       "player_id": 702616,
-      "team": null,
-      "team_id": null,
+      "team": "BAL",
+      "team_id": 110,
       "pa": 103,
       "categories": {
         "xSLG": {
@@ -30076,8 +30076,8 @@
     {
       "name": "Jahmai Jones",
       "player_id": 663330,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 100,
       "categories": {
         "xSLG": {
@@ -30163,7 +30163,7 @@
       "name": "Kenley Jansen",
       "player_id": 445276,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 19.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -30243,7 +30243,7 @@
       "name": "Max Scherzer",
       "player_id": 453286,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 22.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -30323,7 +30323,7 @@
       "name": "Chris Martin",
       "player_id": 455119,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 10.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -30563,7 +30563,7 @@
       "name": "Kirby Yates",
       "player_id": 489446,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 16.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -30723,7 +30723,7 @@
       "name": "Fernando Cruz",
       "player_id": 518585,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 34.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -30803,7 +30803,7 @@
       "name": "Merrill Kelly",
       "player_id": 518876,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 75.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31203,7 +31203,7 @@
       "name": "Shawn Armstrong",
       "player_id": 542888,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 23.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31283,7 +31283,7 @@
       "name": "Gerrit Cole",
       "player_id": 543037,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 32.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31363,7 +31363,7 @@
       "name": "Danny Coulombe",
       "player_id": 543056,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 18.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31443,7 +31443,7 @@
       "name": "Nathan Eovaldi",
       "player_id": 543135,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 100.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31523,7 +31523,7 @@
       "name": "Sonny Gray",
       "player_id": 543243,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 76.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31603,7 +31603,7 @@
       "name": "Albert Su\u00e1rez",
       "player_id": 544150,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 33.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31683,7 +31683,7 @@
       "name": "Michael Lorenzen",
       "player_id": 547179,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 76.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31763,7 +31763,7 @@
       "name": "Aroldis Chapman",
       "player_id": 547973,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 22.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -31843,7 +31843,7 @@
       "name": "Brooks Raley",
       "player_id": 548384,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 30.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -31923,7 +31923,7 @@
       "name": "Andrew Kittredge",
       "player_id": 552640,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 18.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -32003,7 +32003,7 @@
       "name": "Zack Wheeler",
       "player_id": 554430,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 75.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -32083,7 +32083,7 @@
       "name": "Matthew Boyd",
       "player_id": 571510,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 28.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -32163,7 +32163,7 @@
       "name": "Patrick Corbin",
       "player_id": 571578,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 69.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -32323,7 +32323,7 @@
       "name": "Miles Mikolas",
       "player_id": 571945,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 77.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -32403,7 +32403,7 @@
       "name": "Hoby Milner",
       "player_id": 571948,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 35.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -32563,7 +32563,7 @@
       "name": "Pierce Johnson",
       "player_id": 572955,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 23.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -32643,7 +32643,7 @@
       "name": "Joe Mantiply",
       "player_id": 573009,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 17.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -32803,7 +32803,7 @@
       "name": "Caleb Thielbar",
       "player_id": 573204,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 22.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -32963,7 +32963,7 @@
       "name": "Jason Adam",
       "player_id": 592094,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 30.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -33043,7 +33043,7 @@
       "name": "Kevin Gausman",
       "player_id": 592332,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 95.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -33123,7 +33123,7 @@
       "name": "Robbie Ray",
       "player_id": 592662,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 87.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -33443,7 +33443,7 @@
       "name": "Eduardo Rodriguez",
       "player_id": 593958,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 95.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -33523,7 +33523,7 @@
       "name": "Wandy Peralta",
       "player_id": 593974,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 40.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -33603,7 +33603,7 @@
       "name": "Tyron Guerrero",
       "player_id": 594027,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 13.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -33683,7 +33683,7 @@
       "name": "Sam Moll",
       "player_id": 594580,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 33.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -33763,7 +33763,7 @@
       "name": "Jacob deGrom",
       "player_id": 594798,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 88.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -33923,7 +33923,7 @@
       "name": "Steven Okert",
       "player_id": 595345,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 38.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -34003,7 +34003,7 @@
       "name": "Jakob Junis",
       "player_id": 596001,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 34.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -34083,7 +34083,7 @@
       "name": "Luke Weaver",
       "player_id": 596133,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 34.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -34403,7 +34403,7 @@
       "name": "Clay Holmes",
       "player_id": 605280,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 52.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -34483,7 +34483,7 @@
       "name": "Adrian Houser",
       "player_id": 605288,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 68.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -34563,7 +34563,7 @@
       "name": "Aaron Nola",
       "player_id": 605400,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 80.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -34642,8 +34642,8 @@
     {
       "name": "Joe Ross",
       "player_id": 605452,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "ip": 10.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -34723,7 +34723,7 @@
       "name": "Jeffrey Springs",
       "player_id": 605488,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 88.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -34883,7 +34883,7 @@
       "name": "Kyle Hart",
       "player_id": 606996,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 24.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -34963,7 +34963,7 @@
       "name": "Colin Rea",
       "player_id": 607067,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 84.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -35043,7 +35043,7 @@
       "name": "Carlos Rod\u00f3n",
       "player_id": 607074,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 41.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -35203,7 +35203,7 @@
       "name": "Erick Fedde",
       "player_id": 607200,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 74.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -35523,7 +35523,7 @@
       "name": "Kyle Freeland",
       "player_id": 607536,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 72.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -35603,7 +35603,7 @@
       "name": "Seth Lugo",
       "player_id": 607625,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 90.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -35843,7 +35843,7 @@
       "name": "Lucas Sims",
       "player_id": 608371,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 10.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -35923,7 +35923,7 @@
       "name": "Tomoyuki Sugano",
       "player_id": 608372,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 84.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -36003,7 +36003,7 @@
       "name": "Michael Wacha",
       "player_id": 608379,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 101.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -36243,7 +36243,7 @@
       "name": "Brent Suter",
       "player_id": 608718,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 48.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -36403,7 +36403,7 @@
       "name": "Cal Quantrill",
       "player_id": 615698,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 31.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -36483,7 +36483,7 @@
       "name": "Walker Buehler",
       "player_id": 621111,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 78.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -36563,7 +36563,7 @@
       "name": "Paul Blackburn",
       "player_id": 621112,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 36.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -36723,7 +36723,7 @@
       "name": "Jos\u00e9 Alvarado",
       "player_id": 621237,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 29.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -36803,7 +36803,7 @@
       "name": "A.J. Minter",
       "player_id": 621345,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 11.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -36963,7 +36963,7 @@
       "name": "Matt Strahm",
       "player_id": 621381,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 25.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37043,7 +37043,7 @@
       "name": "Tanner Banks",
       "player_id": 621383,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 27.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37123,7 +37123,7 @@
       "name": "Tejay Antone",
       "player_id": 622088,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 22.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37203,7 +37203,7 @@
       "name": "Luis Castillo",
       "player_id": 622491,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 76.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37283,7 +37283,7 @@
       "name": "Seranthony Dom\u00ednguez",
       "player_id": 622554,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 28.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37363,7 +37363,7 @@
       "name": "Antonio Senzatela",
       "player_id": 622608,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 43.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37523,7 +37523,7 @@
       "name": "Paul Sewald",
       "player_id": 623149,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 29.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37603,7 +37603,7 @@
       "name": "Huascar Brazob\u00e1n",
       "player_id": 623211,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 40.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37683,7 +37683,7 @@
       "name": "Josh Hader",
       "player_id": 623352,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 10.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -37763,7 +37763,7 @@
       "name": "Justin Topa",
       "player_id": 623437,
       "team": "MIN",
-      "team_id": null,
+      "team_id": 141,
       "ip": 19.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -37843,7 +37843,7 @@
       "name": "Drew Anderson",
       "player_id": 623454,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 49.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -37923,7 +37923,7 @@
       "name": "Jimmy Herget",
       "player_id": 623474,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 19.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -38003,7 +38003,7 @@
       "name": "Ranger Suarez",
       "player_id": 624133,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 82.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -38323,7 +38323,7 @@
       "name": "Kyle Finnegan",
       "player_id": 640448,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 38.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -38403,7 +38403,7 @@
       "name": "Sean Manaea",
       "player_id": 640455,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 57.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -38483,7 +38483,7 @@
       "name": "Tyler Alexander",
       "player_id": 641302,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 32.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -38803,7 +38803,7 @@
       "name": "Anthony Kay",
       "player_id": 641743,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 76.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -38883,7 +38883,7 @@
       "name": "Brad Keller",
       "player_id": 641745,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 30.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -39042,8 +39042,8 @@
     {
       "name": "Eric Lauer",
       "player_id": 641778,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "ip": 64.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -39123,7 +39123,7 @@
       "name": "Zack Littell",
       "player_id": 641793,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 75.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -39203,7 +39203,7 @@
       "name": "Tyler Mahle",
       "player_id": 641816,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 62.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -39283,7 +39283,7 @@
       "name": "Tim Mayza",
       "player_id": 641835,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 35.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -39443,7 +39443,7 @@
       "name": "Emilio Pag\u00e1n",
       "player_id": 641941,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 14.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -39523,7 +39523,7 @@
       "name": "Gabe Speier",
       "player_id": 642100,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 20.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -39683,7 +39683,7 @@
       "name": "Devin Williams",
       "player_id": 642207,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 26.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -39763,7 +39763,7 @@
       "name": "Ryan Yarbrough",
       "player_id": 642232,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 31.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -39843,7 +39843,7 @@
       "name": "Gregory Soto",
       "player_id": 642397,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 33.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -39923,7 +39923,7 @@
       "name": "Jonathan Lo\u00e1isiga",
       "player_id": 642528,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 29.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -40003,7 +40003,7 @@
       "name": "Jonathan Hern\u00e1ndez",
       "player_id": 642546,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 16.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -40083,7 +40083,7 @@
       "name": "Freddy Peralta",
       "player_id": 642547,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 91.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -40163,7 +40163,7 @@
       "name": "Dennis Santana",
       "player_id": 642701,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 33.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -40403,7 +40403,7 @@
       "name": "Tyler Rogers",
       "player_id": 643511,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 37.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -40563,7 +40563,7 @@
       "name": "Enmanuel De Jesus",
       "player_id": 646241,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 31.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -40723,7 +40723,7 @@
       "name": "Bryan Abreu",
       "player_id": 650556,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 26.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -40803,7 +40803,7 @@
       "name": "Michael King",
       "player_id": 650633,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 92.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -40883,7 +40883,7 @@
       "name": "Aaron Civale",
       "player_id": 650644,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 62.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -40963,7 +40963,7 @@
       "name": "Cristopher S\u00e1nchez",
       "player_id": 650911,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 110.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -41043,7 +41043,7 @@
       "name": "Jalen Beeks",
       "player_id": 656222,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 26.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41203,7 +41203,7 @@
       "name": "Brock Burke",
       "player_id": 656271,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 38.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41283,7 +41283,7 @@
       "name": "Griffin Canning",
       "player_id": 656288,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 42.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41363,7 +41363,7 @@
       "name": "Dylan Cease",
       "player_id": 656302,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 78.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41523,7 +41523,7 @@
       "name": "Kevin Ginkel",
       "player_id": 656464,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 30.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41603,7 +41603,7 @@
       "name": "Foster Griffin",
       "player_id": 656492,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 91.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41683,7 +41683,7 @@
       "name": "Sam Hentges",
       "player_id": 656529,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 13.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41763,7 +41763,7 @@
       "name": "Jeff Hoffman",
       "player_id": 656546,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 35.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41923,7 +41923,7 @@
       "name": "Mitch Keller",
       "player_id": 656605,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 88.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42003,7 +42003,7 @@
       "name": "Alex Lange",
       "player_id": 656638,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 35.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42083,7 +42083,7 @@
       "name": "Jacob Latz",
       "player_id": 656641,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 39.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42243,7 +42243,7 @@
       "name": "Sean Newcomb",
       "player_id": 656794,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 48.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42403,7 +42403,7 @@
       "name": "David Peterson",
       "player_id": 656849,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 112,
       "ip": 68.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42563,7 +42563,7 @@
       "name": "Tanner Scott",
       "player_id": 656945,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 33.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42643,7 +42643,7 @@
       "name": "Ryan Thompson",
       "player_id": 657044,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 28.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -42723,7 +42723,7 @@
       "name": "Jacob Webb",
       "player_id": 657097,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 34.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42803,7 +42803,7 @@
       "name": "Logan Webb",
       "player_id": 657277,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 83.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42883,7 +42883,7 @@
       "name": "Matt Gage",
       "player_id": 657424,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 26.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42963,7 +42963,7 @@
       "name": "Brennan Bernardino",
       "player_id": 657514,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 31.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43043,7 +43043,7 @@
       "name": "Caleb Ferguson",
       "player_id": 657571,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 13.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -43123,7 +43123,7 @@
       "name": "Tim Hill",
       "player_id": 657612,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 30.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43282,8 +43282,8 @@
     {
       "name": "Connor Seabold",
       "player_id": 657756,
-      "team": null,
-      "team_id": null,
+      "team": "KC",
+      "team_id": 118,
       "ip": 23.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43363,7 +43363,7 @@
       "name": "Shohei Ohtani",
       "player_id": 660271,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 79.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43442,8 +43442,8 @@
     {
       "name": "Jos\u00e9 Suarez",
       "player_id": 660761,
-      "team": null,
-      "team_id": null,
+      "team": "ATH",
+      "team_id": 133,
       "ip": 41.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43523,7 +43523,7 @@
       "name": "Eduard Bazardo",
       "player_id": 660825,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 36.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -43603,7 +43603,7 @@
       "name": "Enyel De Los Santos",
       "player_id": 660853,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 35.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43683,7 +43683,7 @@
       "name": "Jhoan Duran",
       "player_id": 661395,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 27.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43843,7 +43843,7 @@
       "name": "Andr\u00e9s Mu\u00f1oz",
       "player_id": 662253,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 29.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44083,7 +44083,7 @@
       "name": "Ryan Feltner",
       "player_id": 663372,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 47.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44163,7 +44163,7 @@
       "name": "Trent Thornton",
       "player_id": 663423,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 22.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44243,7 +44243,7 @@
       "name": "Davis Martin",
       "player_id": 663436,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 87.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44323,7 +44323,7 @@
       "name": "Kris Bubic",
       "player_id": 663460,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 50.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44483,7 +44483,7 @@
       "name": "Bryan Hudson",
       "player_id": 663542,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 37.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44563,7 +44563,7 @@
       "name": "Casey Mize",
       "player_id": 663554,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 58.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44803,7 +44803,7 @@
       "name": "Peter Lambert",
       "player_id": 663567,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 68.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44883,7 +44883,7 @@
       "name": "Stephen Kolek",
       "player_id": 663568,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 52.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -44963,7 +44963,7 @@
       "name": "Tony Santillan",
       "player_id": 663574,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 31.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -45123,7 +45123,7 @@
       "name": "Hogan Harris",
       "player_id": 663687,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 37.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -45203,7 +45203,7 @@
       "name": "Daniel Lynch IV",
       "player_id": 663738,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 33.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -45363,7 +45363,7 @@
       "name": "Chase Shugart",
       "player_id": 663767,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 27.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -45443,7 +45443,7 @@
       "name": "Jordan Hicks",
       "player_id": 663855,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 18.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -45523,7 +45523,7 @@
       "name": "Nate Pearson",
       "player_id": 663878,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 14.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -45603,7 +45603,7 @@
       "name": "Brady Singer",
       "player_id": 663903,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 73.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -45763,7 +45763,7 @@
       "name": "Tyler Holton",
       "player_id": 663947,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 37.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -46002,8 +46002,8 @@
     {
       "name": "Richard Lovelady",
       "player_id": 663992,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "ip": 30.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -46243,7 +46243,7 @@
       "name": "JT Brubaker",
       "player_id": 664141,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 39.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -46323,7 +46323,7 @@
       "name": "Taylor Clarke",
       "player_id": 664199,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 34.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -46483,7 +46483,7 @@
       "name": "Framber Valdez",
       "player_id": 664285,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 89.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -46563,7 +46563,7 @@
       "name": "Ryan Helsley",
       "player_id": 664854,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 14.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -46642,8 +46642,8 @@
     {
       "name": "Justin Lawrence",
       "player_id": 664875,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "ip": 28.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -46723,7 +46723,7 @@
       "name": "Grant Wolfram",
       "player_id": 664991,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 23.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -46883,7 +46883,7 @@
       "name": "Luis Medina",
       "player_id": 665622,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 37.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -46963,7 +46963,7 @@
       "name": "Elvis Alvarado",
       "player_id": 665660,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 21.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -47123,7 +47123,7 @@
       "name": "Javier Assad",
       "player_id": 665871,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 49.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -47203,7 +47203,7 @@
       "name": "Cole Ragans",
       "player_id": 666142,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 35.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -47283,7 +47283,7 @@
       "name": "Nick Lodolo",
       "player_id": 666157,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 46.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -47363,7 +47363,7 @@
       "name": "Ryan Zeferjahn",
       "player_id": 666171,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 36.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -47443,7 +47443,7 @@
       "name": "Jes\u00fas Luzardo",
       "player_id": 666200,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 92.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -47683,7 +47683,7 @@
       "name": "Juan Morillo",
       "player_id": 666661,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 30.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -47843,7 +47843,7 @@
       "name": "Camilo Doval",
       "player_id": 666808,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 30.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -47923,7 +47923,7 @@
       "name": "Yennier Cano",
       "player_id": 666974,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 26.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -48003,7 +48003,7 @@
       "name": "Tommy Nance",
       "player_id": 667297,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 28.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -48163,7 +48163,7 @@
       "name": "Jos\u00e9 Soriano",
       "player_id": 667755,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 95.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -48243,7 +48243,7 @@
       "name": "Cole Winn",
       "player_id": 668390,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 24.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -48323,7 +48323,7 @@
       "name": "Lucas Erceg",
       "player_id": 668674,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 30.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -48403,7 +48403,7 @@
       "name": "Zac Gallen",
       "player_id": 668678,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 86.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -48483,7 +48483,7 @@
       "name": "Caleb Kilian",
       "player_id": 668873,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 34.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -48563,7 +48563,7 @@
       "name": "Gavin Williams",
       "player_id": 668909,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 96.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -48643,7 +48643,7 @@
       "name": "Graham Ashcraft",
       "player_id": 668933,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 27.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -48803,7 +48803,7 @@
       "name": "Tobias Myers",
       "player_id": 668964,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 39.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -48963,7 +48963,7 @@
       "name": "Ryan Rolison",
       "player_id": 669020,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 29.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -49043,7 +49043,7 @@
       "name": "MacKenzie Gore",
       "player_id": 669022,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 91.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -49123,7 +49123,7 @@
       "name": "Erik Miller",
       "player_id": 669062,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 21.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -49443,7 +49443,7 @@
       "name": "Kyle Hurt",
       "player_id": 669165,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 26.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -49683,7 +49683,7 @@
       "name": "Keegan Akin",
       "player_id": 669211,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 23.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -49763,7 +49763,7 @@
       "name": "Eli Morgan",
       "player_id": 669212,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 17.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50003,7 +50003,7 @@
       "name": "Logan Gilbert",
       "player_id": 669302,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 93.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50083,7 +50083,7 @@
       "name": "Tyler Wells",
       "player_id": 669330,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 36.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50163,7 +50163,7 @@
       "name": "Shane Baz",
       "player_id": 669358,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 94.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50323,7 +50323,7 @@
       "name": "J.T. Ginn",
       "player_id": 669372,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 88.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50403,7 +50403,7 @@
       "name": "Tarik Skubal",
       "player_id": 669373,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 59.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50483,7 +50483,7 @@
       "name": "Carmen Mlodzinski",
       "player_id": 669387,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 70.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50563,7 +50563,7 @@
       "name": "Trevor Rogers",
       "player_id": 669432,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 79.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50963,7 +50963,7 @@
       "name": "Chris Murphy",
       "player_id": 669684,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 15.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51043,7 +51043,7 @@
       "name": "Greg Weissert",
       "player_id": 669711,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 30.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51283,7 +51283,7 @@
       "name": "George Kirby",
       "player_id": 669923,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 96.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51443,7 +51443,7 @@
       "name": "Matt Festa",
       "player_id": 670036,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 33.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51523,7 +51523,7 @@
       "name": "Colin Holderman",
       "player_id": 670059,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 28.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -51603,7 +51603,7 @@
       "name": "John Schreiber",
       "player_id": 670167,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 32.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51683,7 +51683,7 @@
       "name": "Ryan Watson",
       "player_id": 670245,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 44.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51763,7 +51763,7 @@
       "name": "David Bednar",
       "player_id": 670280,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 33.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51843,7 +51843,7 @@
       "name": "Rico Garcia",
       "player_id": 670329,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 33.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51922,8 +51922,8 @@
     {
       "name": "Trevor Richards",
       "player_id": 670950,
-      "team": null,
-      "team_id": null,
+      "team": "CWS",
+      "team_id": 145,
       "ip": 27.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52003,7 +52003,7 @@
       "name": "Adrian Morejon",
       "player_id": 670970,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 42.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52083,7 +52083,7 @@
       "name": "Yohan Ram\u00edrez",
       "player_id": 670990,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 44.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52163,7 +52163,7 @@
       "name": "Andrew Abbott",
       "player_id": 671096,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 90.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52403,7 +52403,7 @@
       "name": "Cade Smith",
       "player_id": 671922,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 36.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52483,7 +52483,7 @@
       "name": "Adam Macko",
       "player_id": 671936,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 13.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -52563,7 +52563,7 @@
       "name": "Reid Detmers",
       "player_id": 672282,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 94.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52642,8 +52642,8 @@
     {
       "name": "Cionel P\u00e9rez",
       "player_id": 672335,
-      "team": null,
-      "team_id": null,
+      "team": "NYM",
+      "team_id": 121,
       "ip": 30.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52723,7 +52723,7 @@
       "name": "Keider Montero",
       "player_id": 672456,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 87.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52963,7 +52963,7 @@
       "name": "Yuki Matsui",
       "player_id": 673513,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 27.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -53043,7 +53043,7 @@
       "name": "Kodai Senga",
       "player_id": 673540,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 27.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -53123,7 +53123,7 @@
       "name": "Jordan Leasure",
       "player_id": 673929,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 18.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -53283,7 +53283,7 @@
       "name": "Steven Cruz",
       "player_id": 674444,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 24.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -53363,7 +53363,7 @@
       "name": "Andrew Alvarez",
       "player_id": 674841,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 36.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -53443,7 +53443,7 @@
       "name": "Troy Melton",
       "player_id": 675512,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 37.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -53603,7 +53603,7 @@
       "name": "Juan Mejia",
       "player_id": 675848,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 35.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -53923,7 +53923,7 @@
       "name": "Emerson Hancock",
       "player_id": 676106,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 85.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -54003,7 +54003,7 @@
       "name": "Ryan Walker",
       "player_id": 676254,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 20.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -54083,7 +54083,7 @@
       "name": "Jack Dreyer",
       "player_id": 676263,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 31.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -54163,7 +54163,7 @@
       "name": "Joey Cantillo",
       "player_id": 676282,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 86.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -54323,7 +54323,7 @@
       "name": "Tanner Bibee",
       "player_id": 676440,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 95.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -54403,7 +54403,7 @@
       "name": "Garrett Whitlock",
       "player_id": 676477,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 25.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -54563,7 +54563,7 @@
       "name": "PJ Poulin",
       "player_id": 676571,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 31.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -54723,7 +54723,7 @@
       "name": "Will Vest",
       "player_id": 676684,
       "team": "DET",
-      "team_id": null,
+      "team_id": 116,
       "ip": 25.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -54803,7 +54803,7 @@
       "name": "Isaac Mattson",
       "player_id": 676755,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 24.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -54883,7 +54883,7 @@
       "name": "Ron Marinaccio",
       "player_id": 676760,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 38.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -55123,7 +55123,7 @@
       "name": "Cade Cavalli",
       "player_id": 676917,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 83.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -55683,7 +55683,7 @@
       "name": "Slade Cecconi",
       "player_id": 677944,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 84.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -55763,7 +55763,7 @@
       "name": "Braxton Ashcraft",
       "player_id": 677952,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 96.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -55923,7 +55923,7 @@
       "name": "Kumar Rocker",
       "player_id": 677958,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 74.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -56003,7 +56003,7 @@
       "name": "Ryan Weathers",
       "player_id": 677960,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 86.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -56163,7 +56163,7 @@
       "name": "Seth Halvorsen",
       "player_id": 678020,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 17.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -56243,7 +56243,7 @@
       "name": "Jack Perkins",
       "player_id": 678022,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 46.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -56483,7 +56483,7 @@
       "name": "Jos\u00e9 A. Ferrer",
       "player_id": 678606,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 34.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -56563,7 +56563,7 @@
       "name": "Kai-Wei Teng",
       "player_id": 678906,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 60.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -56723,7 +56723,7 @@
       "name": "Kyle Backhus",
       "player_id": 679775,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 10.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -56803,7 +56803,7 @@
       "name": "Luinder Avila",
       "player_id": 679883,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 42.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -56962,8 +56962,8 @@
     {
       "name": "Simeon Woods Richardson",
       "player_id": 680573,
-      "team": null,
-      "team_id": null,
+      "team": "TOR",
+      "team_id": 141,
       "ip": 57.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57123,7 +57123,7 @@
       "name": "Kyle Bradish",
       "player_id": 680694,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 89.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57203,7 +57203,7 @@
       "name": "Mitchell Parker",
       "player_id": 680730,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 38.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57283,7 +57283,7 @@
       "name": "Sean Burke",
       "player_id": 680732,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 87.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57363,7 +57363,7 @@
       "name": "Justin Wrobleski",
       "player_id": 680736,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 86.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57443,7 +57443,7 @@
       "name": "Jonathan Bowlan",
       "player_id": 680742,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 23.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57603,7 +57603,7 @@
       "name": "Braydon Fisher",
       "player_id": 680755,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 43.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57683,7 +57683,7 @@
       "name": "Victor Vodnik",
       "player_id": 680767,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 21.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57843,7 +57843,7 @@
       "name": "Christian Scott",
       "player_id": 681035,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 40.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57922,8 +57922,8 @@
     {
       "name": "Jayden Murray",
       "player_id": 681151,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "ip": 16.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58003,7 +58003,7 @@
       "name": "Randy V\u00e1squez",
       "player_id": 681190,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 77.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58083,7 +58083,7 @@
       "name": "Chase Silseth",
       "player_id": 681217,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 30.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58163,7 +58163,7 @@
       "name": "Spencer Arrighetti",
       "player_id": 681293,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 72.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58243,7 +58243,7 @@
       "name": "Mike Burrows",
       "player_id": 681347,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 85.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58483,7 +58483,7 @@
       "name": "Ethan Roberts",
       "player_id": 681799,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 25.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -58563,7 +58563,7 @@
       "name": "Austin Warren",
       "player_id": 681810,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 31.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58723,7 +58723,7 @@
       "name": "Erik Sabrowski",
       "player_id": 681870,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 22.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58883,7 +58883,7 @@
       "name": "Evan Sisk",
       "player_id": 681895,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 35.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58963,7 +58963,7 @@
       "name": "Alex Vesia",
       "player_id": 681911,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 26.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59203,7 +59203,7 @@
       "name": "Tim Herrin",
       "player_id": 682120,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 27.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59283,7 +59283,7 @@
       "name": "Brandon Williamson",
       "player_id": 682227,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 28.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59363,7 +59363,7 @@
       "name": "Bryce Miller",
       "player_id": 682243,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 45.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59443,7 +59443,7 @@
       "name": "Mason Montgomery",
       "player_id": 682254,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 31.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59523,7 +59523,7 @@
       "name": "Peyton Gray",
       "player_id": 682608,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 26.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59683,7 +59683,7 @@
       "name": "Hunter Barco",
       "player_id": 682995,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 11.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -59763,7 +59763,7 @@
       "name": "Jared Jones",
       "player_id": 683003,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 20.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59843,7 +59843,7 @@
       "name": "Jack Leiter",
       "player_id": 683004,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 80.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59923,7 +59923,7 @@
       "name": "Connor Phillips",
       "player_id": 683175,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 27.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60003,7 +60003,7 @@
       "name": "Nick Mears",
       "player_id": 683232,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 19.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60083,7 +60083,7 @@
       "name": "Edgardo Henriquez",
       "player_id": 683618,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 31.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60163,7 +60163,7 @@
       "name": "Jose Franco",
       "player_id": 683742,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 16.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60243,7 +60243,7 @@
       "name": "Hunter Gaddis",
       "player_id": 683769,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 22.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60323,7 +60323,7 @@
       "name": "Shota Imanaga",
       "player_id": 684007,
       "team": "CHC",
-      "team_id": null,
+      "team_id": 112,
       "ip": 92.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60403,7 +60403,7 @@
       "name": "Brandan Bidois",
       "player_id": 684049,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 15.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60483,7 +60483,7 @@
       "name": "Brandon Eisert",
       "player_id": 685126,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 20.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60723,7 +60723,7 @@
       "name": "Emmet Sheehan",
       "player_id": 686218,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 67.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60803,7 +60803,7 @@
       "name": "Gavin Collyer",
       "player_id": 686560,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 17.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60883,7 +60883,7 @@
       "name": "Justin Slaten",
       "player_id": 686580,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 16.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -60963,7 +60963,7 @@
       "name": "Hunter Brown",
       "player_id": 686613,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 19.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -61043,7 +61043,7 @@
       "name": "Trevor McDonald",
       "player_id": 686790,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 51.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -61203,7 +61203,7 @@
       "name": "Mason Barnett",
       "player_id": 686930,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 14.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -61283,7 +61283,7 @@
       "name": "Louis Varland",
       "player_id": 686973,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 44.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -61363,7 +61363,7 @@
       "name": "Justin Sterner",
       "player_id": 686993,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 36.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -61443,7 +61443,7 @@
       "name": "Brandon Young",
       "player_id": 687064,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 67.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -61603,7 +61603,7 @@
       "name": "Zach Maxwell",
       "player_id": 687209,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 10.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -61763,7 +61763,7 @@
       "name": "Orlando Ribalta",
       "player_id": 687377,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 23.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -61843,7 +61843,7 @@
       "name": "Brent Headrick",
       "player_id": 687396,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 38.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -62003,7 +62003,7 @@
       "name": "Jake Bennett",
       "player_id": 687562,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 26.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -62242,8 +62242,8 @@
     {
       "name": "Zak Kent",
       "player_id": 687849,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "ip": 10.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -62323,7 +62323,7 @@
       "name": "Bryan King",
       "player_id": 687911,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 34.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -62483,7 +62483,7 @@
       "name": "David Morgan",
       "player_id": 688158,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 21.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -62563,7 +62563,7 @@
       "name": "Zach Agnos",
       "player_id": 688642,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 48.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -62643,7 +62643,7 @@
       "name": "Peyton Pallette",
       "player_id": 688883,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 145,
       "ip": 20.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -62723,7 +62723,7 @@
       "name": "Orion Kerkering",
       "player_id": 689147,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 31.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -62803,7 +62803,7 @@
       "name": "Mason Fluharty",
       "player_id": 689254,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 31.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -63203,7 +63203,7 @@
       "name": "Nick Davila",
       "player_id": 689546,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 13.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -63283,7 +63283,7 @@
       "name": "David Sandlin",
       "player_id": 689818,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 19.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -63363,7 +63363,7 @@
       "name": "Clayton Beeter",
       "player_id": 690925,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 24.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -63683,7 +63683,7 @@
       "name": "Nolan McLean",
       "player_id": 690997,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 89.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -63843,7 +63843,7 @@
       "name": "Andrew Painter",
       "player_id": 691725,
       "team": "PHI",
-      "team_id": null,
+      "team_id": 143,
       "ip": 65.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -63923,7 +63923,7 @@
       "name": "Grant Taylor",
       "player_id": 691799,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 39.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -64003,7 +64003,7 @@
       "name": "Sam Aldegheri",
       "player_id": 691951,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 24.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -64083,7 +64083,7 @@
       "name": "Bryan Woo",
       "player_id": 693433,
       "team": "SEA",
-      "team_id": null,
+      "team_id": 136,
       "ip": 93.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -64163,7 +64163,7 @@
       "name": "Cam Schlittler",
       "player_id": 693645,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 100.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -64243,7 +64243,7 @@
       "name": "Spencer Miles",
       "player_id": 693686,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 51.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -64723,7 +64723,7 @@
       "name": "Trey Gibson",
       "player_id": 694346,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 30.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -64803,7 +64803,7 @@
       "name": "Beck Way",
       "player_id": 694360,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 12.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -64883,7 +64883,7 @@
       "name": "Will Klein",
       "player_id": 694361,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 31.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -65123,7 +65123,7 @@
       "name": "Landen Roupp",
       "player_id": 694738,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 86.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -65443,7 +65443,7 @@
       "name": "Paul Skenes",
       "player_id": 694973,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 93.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -65603,7 +65603,7 @@
       "name": "Rhett Lowder",
       "player_id": 695076,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 58.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -65683,7 +65683,7 @@
       "name": "Mason Miller",
       "player_id": 695243,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 34.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -65843,7 +65843,7 @@
       "name": "Brad Lord",
       "player_id": 695418,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 54.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -65923,7 +65923,7 @@
       "name": "Chase Burns",
       "player_id": 695505,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 85.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -66003,7 +66003,7 @@
       "name": "Chase Petty",
       "player_id": 695534,
       "team": "CIN",
-      "team_id": null,
+      "team_id": 113,
       "ip": 18.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -66083,7 +66083,7 @@
       "name": "Gage Jump",
       "player_id": 695611,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 35.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -66243,7 +66243,7 @@
       "name": "Wilber Dotel",
       "player_id": 696062,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 18.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -66403,7 +66403,7 @@
       "name": "Mason Black",
       "player_id": 696131,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 17.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -66483,7 +66483,7 @@
       "name": "Sam Bachman",
       "player_id": 696147,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 36.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -66563,7 +66563,7 @@
       "name": "Bubba Chandler",
       "player_id": 696149,
       "team": "PIT",
-      "team_id": null,
+      "team_id": 134,
       "ip": 79.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -66643,7 +66643,7 @@
       "name": "Ryan Johnson",
       "player_id": 696270,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 19.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -66723,7 +66723,7 @@
       "name": "Joe Rock",
       "player_id": 697812,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 10.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -66883,7 +66883,7 @@
       "name": "Tyler Davis",
       "player_id": 699823,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 23.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -67203,7 +67203,7 @@
       "name": "Walbert Ure\u00f1a",
       "player_id": 700712,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 71.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -67363,7 +67363,7 @@
       "name": "Will Warren",
       "player_id": 701542,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 84.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -67683,7 +67683,7 @@
       "name": "Trey Yesavage",
       "player_id": 702056,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 60.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -67763,7 +67763,7 @@
       "name": "Noah Cameron",
       "player_id": 702070,
       "team": "KCR",
-      "team_id": null,
+      "team_id": 118,
       "ip": 80.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -67923,7 +67923,7 @@
       "name": "Noah Schultz",
       "player_id": 702273,
       "team": "CHW",
-      "team_id": null,
+      "team_id": 145,
       "ip": 38.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -68163,7 +68163,7 @@
       "name": "Jonathan Pintaro",
       "player_id": 702752,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 12.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -68243,7 +68243,7 @@
       "name": "Parker Messick",
       "player_id": 800048,
       "team": "CLE",
-      "team_id": null,
+      "team_id": 114,
       "ip": 94.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -68403,7 +68403,7 @@
       "name": "Payton Tolle",
       "player_id": 801139,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 71.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -68563,7 +68563,7 @@
       "name": "Zach Thornton",
       "player_id": 804267,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 10.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -68643,7 +68643,7 @@
       "name": "Jonah Tong",
       "player_id": 804636,
       "team": "NYM",
-      "team_id": null,
+      "team_id": 121,
       "ip": 10.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -68723,7 +68723,7 @@
       "name": "AJ Blubaugh",
       "player_id": 805123,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 51.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -68803,7 +68803,7 @@
       "name": "Brandyn Garcia",
       "player_id": 805299,
       "team": "ARI",
-      "team_id": null,
+      "team_id": 109,
       "ip": 18.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -69043,7 +69043,7 @@
       "name": "Sean Sullivan",
       "player_id": 807743,
       "team": "COL",
-      "team_id": null,
+      "team_id": 115,
       "ip": 12.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -69123,7 +69123,7 @@
       "name": "Roki Sasaki",
       "player_id": 808963,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 72.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -69203,7 +69203,7 @@
       "name": "Yoshinobu Yamamoto",
       "player_id": 808967,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 119,
       "ip": 91.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -69283,7 +69283,7 @@
       "name": "Connelly Early",
       "player_id": 813349,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 87.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -69363,7 +69363,7 @@
       "name": "Mitch Farris",
       "player_id": 815083,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 31.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -69443,7 +69443,7 @@
       "name": "Jos\u00e9 Fermin",
       "player_id": 820862,
       "team": "LAA",
-      "team_id": null,
+      "team_id": 108,
       "ip": 21.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -69523,7 +69523,7 @@
       "name": "Tatsuya Imai",
       "player_id": 837227,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 47.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -69752,6 +69752,6 @@
   "meta": {
     "min_pa": 100,
     "min_ip": 10,
-    "generated_at": "2026-06-27 19:33:57 UTC"
+    "generated_at": "2026-06-27 19:39:57 UTC"
   }
 }
