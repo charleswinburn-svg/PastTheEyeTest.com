@@ -761,7 +761,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
             vX0: p.vX0, vY0: p.vY0, vZ0: p.vZ0,
             aX: p.aX, aY: p.aY, aZ: p.aZ,
           },
-          breaks: { spinRate: p.spin, spinDirection: p.spinDirection },
+          breaks: { spinRate: p.spin, spinDirection: p.spinDirection,
+                    breakHorizontal: p.hBreak, breakVerticalInduced: p.vBreak },
         },
       });
 
