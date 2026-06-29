@@ -107,6 +107,19 @@ const HITTER_XRV_METRICS = [
   "Upper", "Middle (horizontal)", "Lower", "Chase",
 ].map(label => ({ label }));
 
+// Team abbreviation → league, including the abbreviation variants the pipeline
+// can emit (FanGraphs/MLB/Savant don't all agree on every code).
+const TEAM_LEAGUE = {
+  BAL:"AL", BOS:"AL", NYY:"AL", TB:"AL", TBR:"AL", TOR:"AL",
+  CWS:"AL", CHW:"AL", CLE:"AL", DET:"AL", KC:"AL", KCR:"AL", MIN:"AL",
+  HOU:"AL", LAA:"AL", ANA:"AL", OAK:"AL", ATH:"AL", SEA:"AL", TEX:"AL",
+  ATL:"NL", MIA:"NL", FLA:"NL", NYM:"NL", PHI:"NL", WSH:"NL", WSN:"NL", WAS:"NL",
+  CHC:"NL", CIN:"NL", MIL:"NL", PIT:"NL", STL:"NL",
+  ARI:"NL", AZ:"NL", COL:"NL", LAD:"NL", SD:"NL", SDP:"NL", SF:"NL", SFG:"NL",
+};
+// Display order for the primary-position filter.
+const POS_ORDER = ["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "OF", "DH", "P", "—"];
+
 // ── Wrapped export with ThemeProvider ──
 export default function BaseballAppWrapper() {
   return (
@@ -250,6 +263,21 @@ function BaseballApp() {
   const pitcherNames = useMemo(() => pitchersFull.map(p => p.displayName).sort(), [pitchersFull]);
 
   const fielders = useMemo(() => fieldingData?.fielders || [], [fieldingData]);
+  // player_id → primary fielding position (the position with the most innings).
+  // Sourced from fielding data (already loaded) so the leaderboard position
+  // filter needs no pipeline change.
+  const positionByPid = useMemo(() => {
+    const m = {};
+    for (const f of (fieldingData?.fielders || [])) {
+      let best = null, bestInn = -Infinity;
+      for (const [pos, info] of Object.entries(f.positions || {})) {
+        const inn = info?.innings ?? 0;
+        if (inn > bestInn) { bestInn = inn; best = pos; }
+      }
+      if (best && f.player_id != null) m[String(f.player_id)] = best;
+    }
+    return m;
+  }, [fieldingData]);
   const fielderNames = useMemo(() => fielders.map(f => f.name).filter(Boolean).sort(), [fielders]);
   const curFielder = useMemo(
     () => fielders.find(f => f.name === selectedFielder) || null,
@@ -719,6 +747,7 @@ function BaseballApp() {
               players={hittersFull}
               metrics={iswingData ? [{ label: "iSwing+" }, ...(data?.hitter_metrics || [])] : data?.hitter_metrics}
               type="hitter"
+              positionByPid={positionByPid}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -734,6 +763,7 @@ function BaseballApp() {
                 metrics={HITTER_XRV_METRICS}
                 type="hitter"
                 defaultSortCol="xRV/600"
+                positionByPid={positionByPid}
               />
             ) : (
               <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -777,12 +807,102 @@ function BaseballApp() {
 }
 
 
+// Multi-select dropdown (button + checkbox panel) for the leaderboard filters.
+function MultiSelect({ label, options, selected, onChange }) {
+  const { theme: t } = useTheme();
+  const [open, setOpen] = useState(false);
+  const n = selected.size;
+  const mini = {
+    flex: 1, padding: "3px 6px", fontSize: 10, fontWeight: 600, fontFamily: "inherit",
+    background: t.inputBg, color: t.textMuted, border: `1px solid ${t.inputBorder}`,
+    borderRadius: 4, cursor: "pointer",
+  };
+  return (
+    <div style={{ position: "relative" }} onClick={e => e.stopPropagation()}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          padding: "7px 10px", fontSize: 11, fontWeight: 600, fontFamily: "inherit",
+          background: t.inputBg, color: n ? t.accent : t.textMuted,
+          border: `1px solid ${n ? t.accent : t.inputBorder}`, borderRadius: 6,
+          cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5,
+        }}
+      >
+        {label}{n ? ` · ${n}` : ""}<span style={{ fontSize: 8 }}>▾</span>
+      </button>
+      {open && (
+        <>
+          <div style={{ position: "fixed", inset: 0, zIndex: 40 }} onClick={() => setOpen(false)} />
+          <div style={{
+            position: "absolute", top: "calc(100% + 4px)", left: 0, zIndex: 50,
+            background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 8,
+            boxShadow: `0 8px 24px ${t.shadow}`, minWidth: 150, maxHeight: 280,
+            overflowY: "auto", padding: 4,
+          }}>
+            <div style={{ display: "flex", gap: 4, padding: "2px 4px 6px" }}>
+              <button onClick={() => onChange(new Set(options))} style={mini}>All</button>
+              <button onClick={() => onChange(new Set())} style={mini}>Clear</button>
+            </div>
+            {options.length === 0 && (
+              <div style={{ padding: 6, fontSize: 11, color: t.textFaint }}>none</div>
+            )}
+            {options.map(opt => (
+              <label key={opt} style={{
+                display: "flex", alignItems: "center", gap: 6, padding: "5px 6px",
+                fontSize: 12, color: t.textSecondary, cursor: "pointer", borderRadius: 4,
+              }}>
+                <input
+                  type="checkbox" checked={selected.has(opt)}
+                  onChange={() => {
+                    const next = new Set(selected);
+                    next.has(opt) ? next.delete(opt) : next.add(opt);
+                    onChange(next);
+                  }}
+                />
+                {opt}
+              </label>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Leaderboard (themed) ──
-function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSortDir = "desc" }) {
+function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSortDir = "desc", positionByPid = null }) {
   const { theme: t } = useTheme();
   const [sortCol, setSortCol] = useState(defaultSortCol);
   const [sortDir, setSortDir] = useState(defaultSortDir);
   const [search, setSearch] = useState("");
+  const [league, setLeague] = useState("All");           // All | AL | NL
+  const [selTeams, setSelTeams] = useState(() => new Set());
+  const [selPos, setSelPos] = useState(() => new Set());
+  const [colorOn, setColorOn] = useState(true);
+
+  const showPos = type !== "pitcher" && !!positionByPid;
+  const posOf = (p) => (positionByPid && positionByPid[String(p.player_id)]) || "—";
+
+  // Team options scoped to the chosen league; position options from the fielding map.
+  const teamOptions = useMemo(() => {
+    const s = new Set();
+    for (const p of players) {
+      if (!p.team) continue;
+      if (league !== "All" && TEAM_LEAGUE[p.team] !== league) continue;
+      s.add(p.team);
+    }
+    return [...s].sort();
+  }, [players, league]);
+
+  const posOptions = useMemo(() => {
+    if (!showPos) return [];
+    const s = new Set();
+    for (const p of players) s.add(posOf(p));
+    return [...s].sort((a, b) => {
+      const ia = POS_ORDER.indexOf(a), ib = POS_ORDER.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+  }, [players, showPos, positionByPid]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const columns = useMemo(() => {
     if (!metrics) return [];
@@ -795,11 +915,14 @@ function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSor
   }, [metrics, type]);
 
   const filtered = useMemo(() => {
-    let arr = [...players];
-    if (search) {
-      const q = norm(search);
-      arr = arr.filter(p => norm(p.displayName||p.name).includes(q) || norm(p.team || "").includes(q));
-    }
+    const q = search ? norm(search) : null;
+    let arr = players.filter(p => {
+      if (league !== "All" && TEAM_LEAGUE[p.team] !== league) return false;
+      if (selTeams.size && !selTeams.has(p.team)) return false;
+      if (showPos && selPos.size && !selPos.has(posOf(p))) return false;
+      if (q && !(norm(p.displayName || p.name).includes(q) || norm(p.team || "").includes(q))) return false;
+      return true;
+    });
     if (sortCol) {
       arr.sort((a, b) => {
         let av, bv;
@@ -814,7 +937,7 @@ function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSor
       });
     }
     return arr;
-  }, [players, sortCol, sortDir, search]);
+  }, [players, league, selTeams, selPos, search, sortCol, sortDir, showPos, positionByPid]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggle = (col) => {
     if (sortCol === col) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -832,18 +955,59 @@ function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSor
     borderBottom: `1px solid ${t.tableBorder}`, whiteSpace: "nowrap",
   };
 
+  const filtersActive = selTeams.size || selPos.size || league !== "All";
+
   return (
     <div>
-      <input
-        type="text" value={search} onChange={e => setSearch(e.target.value)}
-        placeholder="Search player or team..."
-        style={{
-          width: "100%", maxWidth: 300, padding: "7px 12px",
-          background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
-          color: t.text, fontSize: 12, marginBottom: 10, outline: "none",
-          fontFamily: "inherit",
-        }}
-      />
+      {/* ── Filter bar (above the full leaderboard) ── */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <input
+          type="text" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search player or team..."
+          style={{
+            flex: "1 1 180px", maxWidth: 240, padding: "7px 12px",
+            background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+            color: t.text, fontSize: 12, outline: "none", fontFamily: "inherit",
+          }}
+        />
+        {/* League segmented control (also resets the team picks) */}
+        <div style={{ display: "flex", border: `1px solid ${t.inputBorder}`, borderRadius: 6, overflow: "hidden" }}>
+          {["All", "AL", "NL"].map(lg => (
+            <button
+              key={lg}
+              onClick={() => { setLeague(lg); setSelTeams(new Set()); }}
+              style={{
+                padding: "7px 12px", fontSize: 11, fontWeight: 700, fontFamily: "inherit",
+                cursor: "pointer", border: "none",
+                background: league === lg ? t.accent : t.inputBg,
+                color: league === lg ? "#fff" : t.textMuted,
+              }}
+            >{lg}</button>
+          ))}
+        </div>
+        <MultiSelect label="Teams" options={teamOptions} selected={selTeams} onChange={setSelTeams} />
+        {showPos && (
+          <MultiSelect label="Position" options={posOptions} selected={selPos} onChange={setSelPos} />
+        )}
+        <label style={{
+          display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600,
+          color: t.textMuted, cursor: "pointer", marginLeft: "auto", whiteSpace: "nowrap",
+        }}>
+          <input type="checkbox" checked={colorOn} onChange={e => setColorOn(e.target.checked)} />
+          Color cells
+        </label>
+        {filtersActive ? (
+          <button
+            onClick={() => { setLeague("All"); setSelTeams(new Set()); setSelPos(new Set()); }}
+            style={{
+              padding: "6px 10px", fontSize: 11, fontWeight: 600, background: "transparent",
+              color: t.textMuted, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+              cursor: "pointer", fontFamily: "inherit",
+            }}
+          >✕ Reset</button>
+        ) : null}
+      </div>
+
       <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${t.cardBorder}`, maxHeight: "70vh", overflowY: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", background: t.tableRowA }}>
           <thead>
@@ -873,11 +1037,12 @@ function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSor
                   } else {
                     const cat = p.categories[c.key];
                     val = cat?.display || "—";
-                    if (cat?.pctile != null) {
-                      // Red-blue percentile coloring stays the same in both modes
+                    if (cat?.pctile != null && colorOn) {
                       st.background = binColor(cat.pctile);
                       st.color = textOnBin(cat.pctile);
                       st.fontWeight = 600;
+                    } else if (cat?.pctile != null) {
+                      st.color = t.textSecondary; st.fontWeight = 600;
                     } else {
                       st.color = t.textFaint;
                     }
