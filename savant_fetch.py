@@ -27,7 +27,8 @@ import requests
 
 FETCH_DELAY = 3.0
 MAX_RETRIES = 3
-CHUNK_DAYS = 14  # race2k_pipeline: "~2-week chunks to avoid Savant row limits"
+CHUNK_DAYS = 4          # small enough that a window rarely hits the row cap
+SAVANT_ROW_CAP = 25000  # statcast_search/csv silently truncates at 25k rows/query
 
 SAVANT_BASE = "https://baseballsavant.mlb.com"
 
@@ -94,24 +95,50 @@ def iter_chunks(start, end, days=CHUNK_DAYS):
         s = chunk_end + timedelta(days=1)
 
 
+def _fetch_one(season, start, end, player_type, game_type):
+    gt = "R%7C" if game_type == "R" else "E%7C"
+    url = (
+        f"{SAVANT_BASE}/statcast_search/csv?all=true&type=detail"
+        f"&player_type={player_type}&hfGT={gt}&hfSea={season}%7C"
+        f"&game_date_gt={start}&game_date_lt={end}"
+    )
+    return csv_to_df(fetch_url(url))
+
+
+def _fetch_window(season, s, e, player_type, game_type):
+    """Fetch [s, e] (date objects). Savant truncates a single query at
+    SAVANT_ROW_CAP rows, so if we come back at the cap, split the window in half
+    and recurse — that way no pitches are silently dropped on busy stretches."""
+    df = _fetch_one(season, s.isoformat(), e.isoformat(), player_type, game_type)
+    n = 0 if df is None else len(df)
+    if n >= SAVANT_ROW_CAP and s < e:
+        mid = s + (e - s) // 2
+        print(f"    ↳ {s}→{e} hit the {SAVANT_ROW_CAP:,}-row cap; splitting", flush=True)
+        left = _fetch_window(season, s, mid, player_type, game_type)
+        right = _fetch_window(season, mid + timedelta(days=1), e, player_type, game_type)
+        parts = [d for d in (left, right) if d is not None and len(d)]
+        return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
+    if n >= SAVANT_ROW_CAP:  # single day already at the cap — can't split further
+        print(f"    ⚠ {s} alone returned {n:,} rows (at cap) — may be truncated", flush=True)
+    return df if df is not None else pd.DataFrame()
+
+
 def fetch_savant_range(season, start, end, player_type="batter", game_type="R"):
     """Fetch every statcast_search detail row for [start, end], chunked.
 
-    Returns a single concatenated DataFrame (empty DataFrame if nothing came back).
-    `player_type` is "batter" or "pitcher" (row volume is identical either way; it
-    only changes which player the row is keyed to). `game_type` "R" = regular
-    season, "E" = exhibition / spring training.
+    Windows that hit Savant's 25k-row cap are split and refetched, so the result
+    is complete even mid-season. `end` is clamped to today (no future data exists,
+    and it avoids a long tail of empty requests on an in-season run).
+
+    Returns one concatenated, de-duplicated DataFrame (empty if nothing came back).
+    `player_type` is "batter" or "pitcher" (same row set either way; it only
+    changes the keyed player). `game_type` "R" = regular season, "E" = spring.
     """
-    gt = "R%7C" if game_type == "R" else "E%7C"
+    end_d = min(_to_date(end), date.today())
     frames = []
-    for c_start, c_end in iter_chunks(start, end):
-        url = (
-            f"{SAVANT_BASE}/statcast_search/csv?all=true&type=detail"
-            f"&player_type={player_type}&hfGT={gt}&hfSea={season}%7C"
-            f"&game_date_gt={c_start}&game_date_lt={c_end}"
-        )
+    for c_start, c_end in iter_chunks(start, end_d):
         print(f"  Savant {player_type} {c_start} → {c_end} ...", flush=True)
-        df = csv_to_df(fetch_url(url))
+        df = _fetch_window(season, _to_date(c_start), _to_date(c_end), player_type, game_type)
         if df is not None and len(df):
             frames.append(df)
             print(f"    {len(df):,} rows", flush=True)
@@ -119,4 +146,10 @@ def fetch_savant_range(season, start, end, player_type="batter", game_type="R"):
             print("    (no rows)", flush=True)
     if not frames:
         return pd.DataFrame()
-    return pd.concat(frames, ignore_index=True)
+    out = pd.concat(frames, ignore_index=True)
+    # Safety net: a unique pitch is (game_pk, at_bat_number, pitch_number); drop
+    # any exact dupes in case a split landed on a boundary.
+    keys = [c for c in ("game_pk", "at_bat_number", "pitch_number") if c in out.columns]
+    if len(keys) == 3:
+        out = out.drop_duplicates(subset=keys).reset_index(drop=True)
+    return out
