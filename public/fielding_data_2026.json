@@ -12832,7 +12832,7 @@
     {
       "player_id": 667472,
       "name": "Dane Myers",
-      "team": "CIN",
+      "team": "",
       "positions": {
         "CF": {
           "innings": 50.0,
@@ -26163,7 +26163,7 @@
     {
       "player_id": 665161,
       "name": "Jeremy Pe\u00f1a",
-      "team": "HOU",
+      "team": "",
       "positions": {
         "SS": {
           "innings": 50.0,
@@ -46349,7 +46349,7 @@
     {
       "player_id": 669384,
       "name": "Raynel Delgado",
-      "team": "",
+      "team": "HOU",
       "positions": {
         "2B": {
           "innings": 50.0,
@@ -59134,6 +59134,6 @@
   ],
   "meta": {
     "min_innings": 50,
-    "generated_at": "2026-06-30 18:30:55 UTC"
+    "generated_at": "2026-06-30 20:50:20 UTC"
   }
 }
