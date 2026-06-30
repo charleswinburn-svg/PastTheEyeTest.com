@@ -115,13 +115,13 @@ def load_season_df(season: int, parquet: str | None) -> pd.DataFrame:
         log(f"  Loading {path} ...")
         df = pd.read_parquet(path)
     else:
-        log(f"  {path} not found — fetching {season} from Statcast (pybaseball) ...")
+        log(f"  {path} not found — fetching {season} from Baseball Savant ...")
         try:
-            from pybaseball import statcast
-        except ImportError:
-            log("ERROR: pybaseball not installed and no parquet present. pip install pybaseball")
+            from savant_fetch import fetch_savant_range
+        except ImportError as e:
+            log(f"ERROR: cannot import savant_fetch ({e}) and no parquet present.")
             sys.exit(1)
-        df = statcast(start_dt=f"{season}-03-15", end_dt=f"{season}-11-15")
+        df = fetch_savant_range(season, f"{season}-03-15", f"{season}-11-15", player_type="batter")
         if df is None or len(df) == 0:
             log(f"ERROR: no Statcast data returned for {season}.")
             sys.exit(1)

@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-fetch_statcast.py — Pull a full season of Statcast pitch data via pybaseball
-and save as the parquet format score_pitches.py expects.
+fetch_statcast.py — Pull a full season of Statcast pitch data directly from
+Baseball Savant and save as the parquet format score_pitches.py expects.
+
+Uses savant_fetch instead of pybaseball.statcast(): pybaseball hits the same
+endpoint without browser headers and was returning empty on the droplet, so the
+xRV parquet (pitch_xrv_{year}.parquet) was never being rebuilt. The Savant detail
+CSV is column-for-column what pybaseball returned, so the parquet is unchanged.
 
 Usage:
     python fetch_statcast.py --year 2025 --out pitch_xrv_2025.parquet
@@ -9,7 +14,7 @@ Usage:
 import argparse
 from pathlib import Path
 import pandas as pd
-from pybaseball import statcast
+from savant_fetch import fetch_savant_range
 
 
 def main():
@@ -20,8 +25,10 @@ def main():
 
     start = f'{args.year}-03-15'
     end = f'{args.year}-11-15'
-    print(f"Fetching Statcast {start} to {end}...")
-    df = statcast(start_dt=start, end_dt=end)
+    print(f"Fetching Statcast {start} to {end} (Savant)...")
+    df = fetch_savant_range(args.year, start, end, player_type='pitcher')
+    if df is None or len(df) == 0:
+        raise SystemExit("ERROR: no Statcast rows returned from Savant.")
     print(f"  {len(df):,} pitches")
 
     # Drop rows missing core trajectory features
