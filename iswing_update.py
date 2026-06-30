@@ -58,16 +58,23 @@ def check_models():
 
 
 def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
-    """Fetch Statcast data for a date range and filter to competitive swings."""
+    """Fetch Statcast data for a date range (direct from Baseball Savant) and
+    filter to competitive swings.
+
+    Uses savant_fetch instead of pybaseball.statcast(): pybaseball hits the same
+    endpoint without browser headers and was returning empty on the droplet,
+    freezing the iSwing CSV. The Savant detail CSV carries the same columns,
+    including the bat-tracking ones (bat_speed, attack_angle, ...)."""
     try:
-        from pybaseball import statcast
-    except ImportError:
-        log('ERROR: pybaseball not installed. Run: pip install pybaseball')
+        from savant_fetch import fetch_savant_range
+    except ImportError as e:
+        log(f'ERROR: cannot import savant_fetch ({e}). It must sit next to this script.')
         sys.exit(1)
 
-    log(f'  Fetching Statcast {start_date} -> {end_date}...')
+    season = int(str(start_date)[:4])
+    log(f'  Fetching Statcast {start_date} -> {end_date} (Savant)...')
     try:
-        raw = statcast(start_dt=start_date, end_dt=end_date)
+        raw = fetch_savant_range(season, start_date, end_date, player_type='batter')
     except Exception as e:
         log(f'  Statcast fetch error: {e}')
         return pd.DataFrame()
@@ -80,6 +87,9 @@ def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
     swings = raw[raw['description'].isin(SWING_DESCRIPTIONS)].copy()
 
     if 'bat_speed' in swings.columns:
+        swings['bat_speed'] = pd.to_numeric(swings['bat_speed'], errors='coerce')
+        if 'launch_speed' in swings.columns:
+            swings['launch_speed'] = pd.to_numeric(swings['launch_speed'], errors='coerce')
         swings = swings.dropna(subset=['bat_speed']).copy()
         if len(swings) == 0:
             return pd.DataFrame()
