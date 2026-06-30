@@ -39,6 +39,12 @@ def main():
     df = df.dropna(subset=needed)
     print(f"  {before - len(df):,} dropped (missing features)")
 
+    # game_date comes from the Savant CSV as 'YYYY-MM-DD' strings; keep it string
+    # so pyarrow can't choke on mixed Timestamp objects. (The pybaseball path
+    # failed here: ArrowTypeError "Expected bytes, got a 'Timestamp' object".)
+    if 'game_date' in df.columns:
+        df['game_date'] = df['game_date'].astype(str)
+
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(out, index=False)
