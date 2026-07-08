@@ -61,7 +61,10 @@ def process_csv(csv_path, season):
     return players
 
 
-def run_pipeline(seasons, csv_paths, output_dir):
+def run_pipeline(jobs, output_dir):
+    """jobs: list of (season, csv_path). Each CSV is merged into the shared,
+    name-keyed prospect_xwoba.json. AAA and FCL both feed this one file — the
+    live Summaries view looks up xwOBA by player name regardless of level."""
     os.makedirs(output_dir, exist_ok=True)
     out_path = os.path.join(output_dir, "prospect_xwoba.json")
 
@@ -69,7 +72,7 @@ def run_pipeline(seasons, csv_paths, output_dir):
     data = load_existing(out_path)
     print(f"Existing prospect_xwoba.json: {len(data)} players")
 
-    for season, csv_path in zip(seasons, csv_paths):
+    for season, csv_path in jobs:
         yr = str(season)
         print(f"\n{'='*50}")
         print(f"Processing season {yr}: {csv_path}")
@@ -113,7 +116,8 @@ if __name__ == "__main__":
     parser.add_argument("season", nargs="?", default="2026",
                         help="Comma-separated seasons (default: 2026)")
     parser.add_argument("--csv", default=None,
-                        help="Path to CSV file (default: ./public/aaa_hitter_summaries_{season}.csv)")
+                        help="Explicit CSV path; overrides the default AAA+FCL lookup "
+                             "(default: ./public/{aaa,fcl}_hitter_summaries_{season}.csv)")
     parser.add_argument("--output-dir", default="./public",
                         help="Output directory (default: ./public)")
     args = parser.parse_args()
@@ -121,11 +125,13 @@ if __name__ == "__main__":
     seasons = [int(s.strip()) for s in args.season.split(",")]
 
     if args.csv:
-        csv_paths = [args.csv] * len(seasons)
+        jobs = [(s, args.csv) for s in seasons]
     else:
-        csv_paths = [
-            os.path.join(args.output_dir, f"aaa_hitter_summaries_{s}.csv")
-            for s in seasons
-        ]
+        # AAA + FCL summary exports both merge into prospect_xwoba.json. Either
+        # file may be absent — run_pipeline skips missing paths.
+        jobs = []
+        for s in seasons:
+            jobs.append((s, os.path.join(args.output_dir, f"aaa_hitter_summaries_{s}.csv")))
+            jobs.append((s, os.path.join(args.output_dir, f"fcl_hitter_summaries_{s}.csv")))
 
-    run_pipeline(seasons, csv_paths, args.output_dir)
+    run_pipeline(jobs, args.output_dir)
