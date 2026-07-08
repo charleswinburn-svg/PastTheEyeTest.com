@@ -1473,14 +1473,52 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
   );
 }
 
+// MLB team id → primary color, so a minor-league player can be colored by their
+// MLB parent org id (reverse of TEAM_IDS via MLB_TEAM_PRIMARY).
+const TEAM_ID_TO_PRIMARY = Object.entries(TEAM_IDS).reduce((m, [abbr, id]) => {
+  if (MLB_TEAM_PRIMARY[abbr] && !(id in m)) m[id] = MLB_TEAM_PRIMARY[abbr];
+  return m;
+}, {});
+
+// Resolve a minor-league player's MLB parent org id: prefer the roster-provided
+// parentOrgId, else look it up once via the Stats API (cached). Mirrors the
+// parent-org resolution the AAA cards use so minor headers color by parent org.
+const _parentOrgIdCache = new Map();
+function useParentOrgId(player, enabled) {
+  const pid = player?.id ?? null;
+  const preset = player?.parentOrgId ?? null;
+  const [resolved, setResolved] = useState(() => preset ?? (pid != null ? _parentOrgIdCache.get(pid) : null) ?? null);
+  useEffect(() => {
+    if (!enabled || pid == null || preset != null) { setResolved(preset); return; }
+    if (_parentOrgIdCache.has(pid)) { setResolved(_parentOrgIdCache.get(pid)); return; }
+    let alive = true;
+    fetch(`/mlb-api/api/v1/people/${pid}?hydrate=currentTeam`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        const id = d?.people?.[0]?.currentTeam?.parentOrgId ?? null;
+        _parentOrgIdCache.set(pid, id);
+        if (alive) setResolved(id);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [pid, enabled, preset]);
+  return preset ?? resolved;
+}
+
 function SummaryHeader({ player, subtitle, seasonType, isAAA }) {
+  // isAAA here means "minor level" (isMinor). Color + logo by the player's MLB
+  // parent org for minor levels, matching the AAA cards; MLB path is unchanged.
+  const parentOrgId = useParentOrgId(player, isAAA);
+  const parentColor = parentOrgId != null ? TEAM_ID_TO_PRIMARY[parentOrgId] : null;
   const headshot = player.id ? `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,h_213,c_thumb,g_face,q_auto:best/v1/people/${player.id}/headshot/67/current` : null;
-  const logo = getLogoUrl(player.team, player.teamId);
+  const logo = (isAAA && parentOrgId != null)
+    ? getLogoUrl(null, parentOrgId)
+    : getLogoUrl(player.team, player.teamId);
   const flag = (!isAAA && seasonType === "W") ? getWbcFlag(player.team) : null;
   const showFlag = seasonType === "W" ? (flag || null) : null;
   const showLogo = seasonType === "W" ? (!flag ? logo : null) : logo;
 
-  const bgColor = MLB_TEAM_PRIMARY[player.team] || "#1e293b";
+  const bgColor = parentColor || MLB_TEAM_PRIMARY[player.team] || "#1e293b";
   const light = hexLuminance(bgColor) > 0.179;
   const textColor = light ? "#111111" : "#ffffff";
   const subColor = light ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.72)";
