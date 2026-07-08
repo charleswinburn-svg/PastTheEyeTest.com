@@ -655,7 +655,7 @@ function BaseballApp() {
       {/* ── Content ── */}
       <div style={{
         padding: isSummaryTab(tab) ? 0 : isMobile ? "12px 24px" : 24,
-        maxWidth: tab.includes("lb") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : tab === "hitter" ? 1100 : 640,
+        maxWidth: tab.includes("lb") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : (tab === "hitter" || tab === "pitcher" || tab === "pitcher_aaa") ? 1100 : 640,
         margin: "0 auto",
       }}>
         {tab === "hitter" && (
