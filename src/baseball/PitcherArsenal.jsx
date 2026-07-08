@@ -40,9 +40,12 @@ function normalizeSavant(rows) {
         isSwing: SAVANT_SWING.has(desc),
         isWhiff: SAVANT_WHIFF.has(desc),
         ev: num(r.launch_speed),
+        zone: num(r.zone),                                 // Savant zone 1-9 = strike zone
         terminalEvent: (r.events || "").trim() || null,   // set only on the PA-ending pitch
         xwoba: num(r.estimated_woba_using_speedangle),
         xba: num(r.estimated_ba_using_speedangle),
+        wobaValue: num(r.woba_value),                     // actual wOBA weight (K=0, BB≈.69, …)
+        wobaDenom: num(r.woba_denom),                     // 1 for PA that count toward wOBA
       };
     });
 }
@@ -78,21 +81,40 @@ const mean = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length :
 
 // ── Aggregate per pitch type + usage-by-hand ────────────────────────────────
 function aggregate(pitches) {
+  // Expected stats (xwOBA/xBA) only exist for MLB (Savant); AAA leaves them null.
+  const hasExpected = pitches.some(p => p.xwoba != null || p.xba != null || p.wobaValue != null);
   const byType = {};
   const usage = { L: {}, R: {} };
   for (const p of pitches) {
     const g = (byType[p.pitchType] ||= {
       type: p.pitchType, n: 0, swings: 0, whiffs: 0, zone: 0,
-      ev: [], xwoba: [], xba: [], pa: 0, k: 0,
+      ev: [], wobaSum: 0, wobaN: 0, baSum: 0, baN: 0, pa: 0, k: 0,
     });
     g.n++;
     if (p.isSwing) g.swings++;
     if (p.isWhiff) g.whiffs++;
-    if (inZone(p.pX, p.pZ, p.szTop, p.szBot)) g.zone++;
+    // Zone%: use Savant's `zone` field (1-9 = strike zone) when present (MLB), else
+    // a geometric check (AAA play-by-play carries no zone field).
+    const isInZone = p.zone != null ? (p.zone >= 1 && p.zone <= 9) : inZone(p.pX, p.pZ, p.szTop, p.szBot);
+    if (isInZone) g.zone++;
     if (p.ev != null) g.ev.push(p.ev);
-    if (p.xwoba != null) g.xwoba.push(p.xwoba);
-    if (p.xba != null) g.xba.push(p.xba);
-    if (p.terminalEvent) { g.pa++; if (K_EVENTS.has(p.terminalEvent)) g.k++; }
+    if (p.terminalEvent) {
+      g.pa++;
+      const isK = K_EVENTS.has(p.terminalEvent);
+      if (isK) g.k++;
+      if (hasExpected) {
+        // xwOBA over ALL plate-appearance outcomes (not just balls in play):
+        // estimated_woba for batted balls, actual woba_value for K/BB/HBP.
+        if (p.wobaDenom != null && p.wobaDenom >= 1) {
+          const w = p.xwoba != null ? p.xwoba : p.wobaValue;
+          if (w != null) { g.wobaSum += w; g.wobaN += 1; }
+        }
+        // xBA over at-bats: estimated_ba for batted balls, 0 for strikeouts.
+        // (walks / HBP / sacs aren't at-bats, so they're excluded.)
+        if (p.xba != null) { g.baSum += p.xba; g.baN += 1; }
+        else if (isK) { g.baN += 1; }
+      }
+    }
     if (p.batHand === "L" || p.batHand === "R") {
       usage[p.batHand][p.pitchType] = (usage[p.batHand][p.pitchType] || 0) + 1;
     }
@@ -103,9 +125,9 @@ function aggregate(pitches) {
     name: PITCH_NAMES[g.type] || g.type,
     color: PITCH_COLORS[g.type] || "#888",
     n: g.n,
-    xwoba: g.xwoba.length ? mean(g.xwoba) : null,
+    xwoba: g.wobaN ? g.wobaSum / g.wobaN : null,
     ev: g.ev.length ? Math.round(mean(g.ev) * 10) / 10 : null,
-    xba: g.xba.length ? mean(g.xba) : null,
+    xba: g.baN ? g.baSum / g.baN : null,
     whiffPct: pct(g.whiffs, g.swings),
     zonePct: pct(g.zone, g.n),
     kPct: pct(g.k, g.pa),
