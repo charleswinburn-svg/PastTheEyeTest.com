@@ -100,12 +100,14 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   }, [season]);
 
   const isAAA = level === "AAA" && seasonType === "R";
-  // FCL (Florida Complex League, sportId=16). isMinor = any non-MLB level; it
+  // Minor levels: FCL = Florida Complex League (sportId=16, Florida-filtered),
+  // A = Single-A (sportId=14, whole level). isMinor = any non-MLB level; it
   // drives the shared "not MLB" behavior (skip Savant, use prospect xwOBA,
-  // team-based game filter, hardcoded league avgs). FCL reuses AAA's display
+  // team-based game filter, hardcoded league avgs). All reuse AAA's display
   // baselines/thresholds, so children receive isAAA={isMinor}.
   const isFCL = level === "FCL" && seasonType === "R";
-  const isMinor = isAAA || isFCL;
+  const isA = level === "A" && seasonType === "R";
+  const isMinor = isAAA || isFCL || isA;
 
   // Merge: computed leagueAvgs (from loaded games) takes priority, baseline fills gaps
   // Don't use MLB baseline JSON for minor levels — CountTool/PitchTable use hardcoded defaults
@@ -132,7 +134,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   const isGame = subTab.endsWith("game");
   const isCounts = subTab.endsWith("counts");
   const currentSeason = parseInt(season) || 2026;
-  const sportId = isFCL ? 16 : isAAA ? 11 : 1;
+  const sportId = isFCL ? 16 : isA ? 14 : isAAA ? 11 : 1;
 
   // Fetch bulk Savant xwOBA for the season (RS/PS/AAA — Savant has no expected stats for ST/WBC)
   useEffect(() => {
@@ -993,7 +995,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         {seasonType === "R" && (
           <>
             <div style={{ width: 1, height: 22, background: t.divider, margin: "0 4px" }} />
-            {["MLB", "AAA", "FCL"].map(lv => (
+            {["MLB", "AAA", "A", "FCL"].map(lv => (
               <button key={lv} onClick={() => setLevel(lv)} style={{
                 padding: "4px 10px", fontSize: 10, fontWeight: level === lv ? 700 : 400,
                 background: level === lv ? "#2563eb" : "transparent",

@@ -116,8 +116,8 @@ if __name__ == "__main__":
     parser.add_argument("season", nargs="?", default="2026",
                         help="Comma-separated seasons (default: 2026)")
     parser.add_argument("--csv", default=None,
-                        help="Explicit CSV path; overrides the default AAA+FCL lookup "
-                             "(default: ./public/{aaa,fcl}_hitter_summaries_{season}.csv)")
+                        help="Explicit CSV path; overrides the default AAA+FCL+A lookup "
+                             "(default: ./public/{aaa,fcl,a}_hitter_summaries_{season}.csv)")
     parser.add_argument("--output-dir", default="./public",
                         help="Output directory (default: ./public)")
     args = parser.parse_args()
@@ -127,11 +127,12 @@ if __name__ == "__main__":
     if args.csv:
         jobs = [(s, args.csv) for s in seasons]
     else:
-        # AAA + FCL summary exports both merge into prospect_xwoba.json. Either
-        # file may be absent — run_pipeline skips missing paths.
+        # AAA + FCL + Single-A summary exports all merge into prospect_xwoba.json.
+        # Any file may be absent — run_pipeline skips missing paths.
         jobs = []
         for s in seasons:
             jobs.append((s, os.path.join(args.output_dir, f"aaa_hitter_summaries_{s}.csv")))
             jobs.append((s, os.path.join(args.output_dir, f"fcl_hitter_summaries_{s}.csv")))
+            jobs.append((s, os.path.join(args.output_dir, f"a_hitter_summaries_{s}.csv")))
 
     run_pipeline(jobs, args.output_dir)
