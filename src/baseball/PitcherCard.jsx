@@ -165,7 +165,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
         />
         <ProBubblesRow data={pitchPlusData} theme={t} />
         {/* Two fluid columns (no divider): percentile bars + pitch arsenal */}
-        <div style={{ display: "flex", gap: 16, flexWrap: "wrap", padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
+        <div style={{ display: "flex", gap: 36, flexWrap: "wrap", padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
           {/* Left column — percentile bars */}
           <div style={{ flex: "1 1 320px", minWidth: 280 }}>
             {rangeLoading ? (
