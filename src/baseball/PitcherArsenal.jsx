@@ -199,7 +199,7 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
       <div style={box}>
         <div style={heading}>Pitch Movement</div>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <MovementPlot pitches={movement} width={300} height={190} maxPitches={150} />
+          <MovementPlot pitches={movement} width={320} height={215} maxPitches={160} />
         </div>
         <PitchTypeLegend types={types} />
       </div>
@@ -223,7 +223,7 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
 }
 
 // ── Donut pie of pitch usage ─────────────────────────────────────────────────
-function UsagePie({ label, counts, theme, size = 82 }) {
+function UsagePie({ label, counts, theme, size = 70 }) {
   const t = theme;
   const entries = Object.entries(counts || {}).sort((a, b) => b[1] - a[1]);
   const total = entries.reduce((s, [, n]) => s + n, 0);
@@ -274,8 +274,10 @@ function ArsenalTable({ rows, theme, isAAA }) {
     { key: "zonePct", label: "Zone",  fmt: v => v == null ? "—" : `${Math.round(v)}%` },
     { key: "kPct",    label: "K",     fmt: v => v == null ? "—" : `${Math.round(v)}%` },
   ];
-  const th = { fontSize: 8, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.03em", padding: "1px 2px", textAlign: "right" };
-  const td = { fontSize: 9.5, color: t.text, padding: "1px 2px", textAlign: "right", fontFamily: "'DM Mono', monospace" };
+  const th = { fontSize: 8, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.03em", padding: "1px 3px", textAlign: "right" };
+  // Mirror the percentile-bar fonts: pitch name in the sans label font, numbers in DM Mono.
+  const nameTd = { fontSize: 11, fontWeight: 500, color: t.text, padding: "1px 3px", textAlign: "left", whiteSpace: "nowrap" };
+  const td = { fontSize: 11, fontWeight: 600, color: t.textSecondary, padding: "1px 3px", textAlign: "right", fontFamily: "'DM Mono', monospace" };
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 300 }}>
@@ -291,7 +293,7 @@ function ArsenalTable({ rows, theme, isAAA }) {
             const totalN = rows.reduce((s, x) => s + x.n, 0);
             return (
               <tr key={r.type} style={{ borderTop: i ? `1px solid ${t.divider}` : "none" }}>
-                <td style={{ ...td, textAlign: "left", whiteSpace: "nowrap" }}>
+                <td style={nameTd}>
                   <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: r.color, marginRight: 5 }} />
                   {r.name}
                 </td>
