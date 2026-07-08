@@ -171,7 +171,7 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
   // Pitch types present, ordered by usage (from the arsenal rows).
   const types = rows.map(r => r.type);
 
-  const box = { border: `1px solid ${t.divider}`, borderRadius: 8, padding: "6px 8px", background: t.cardBg };
+  const box = { padding: "2px 4px 8px" };
   const heading = { fontSize: 9, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textMuted, marginBottom: 4, textAlign: "center" };
 
   if (loading) {
