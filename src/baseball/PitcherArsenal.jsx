@@ -300,14 +300,14 @@ function ArsenalTable({ rows, theme, isAAA }) {
   ];
   const th = { fontSize: 8, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.03em", padding: "1px 3px", textAlign: "right" };
   // Mirror the percentile-bar fonts: pitch name in the sans label font, numbers in DM Mono.
-  const nameTd = { fontSize: 11, fontWeight: 500, color: t.text, padding: "1px 3px", textAlign: "left", whiteSpace: "nowrap" };
+  const nameTd = { fontSize: 11, fontWeight: 500, color: t.text, padding: "1px 3px", textAlign: "left", whiteSpace: "nowrap", width: "1%" };
   const td = { fontSize: 11, fontWeight: 600, color: t.textSecondary, padding: "1px 3px", textAlign: "right", fontFamily: "'DM Mono', monospace" };
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 300 }}>
         <thead>
           <tr>
-            <th style={{ ...th, textAlign: "left" }}>Pitch</th>
+            <th style={{ ...th, textAlign: "left", width: "1%" }}>Pitch</th>
             <th style={{ ...th, textAlign: "right" }}>%</th>
             {cols.map(c => <th key={c.key} style={th}>{c.label}</th>)}
           </tr>
