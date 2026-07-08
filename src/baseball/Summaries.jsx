@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import {
-  fetchSchedule, fetchPlayByPlay, fetchBoxscore, fetchAllPlayers, fetchWbcPlayers, fetchGameLog, fetchLeagueStatLeaders,
+  fetchSchedule, fetchPlayByPlay, fetchBoxscore, fetchAllPlayers, fetchWbcPlayers, fetchGameLog, fetchLeagueStatLeaders, fetchFclTeamIds,
   extractPitcherData, extractBatterData, aggregateByPitchType,
   fetchSavantGameData, enrichWithSavant, fetchSavantBulkXwoba,
   PITCH_COLORS, PITCH_NAMES, GAME_TYPE_LABELS, getWbcFlag, scorePitchCode,
@@ -44,7 +44,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   }, [initialSubTab]);
   
   const [seasonType, setSeasonType] = useState("S");
-  const [level, setLevel] = useState("MLB"); // "MLB" or "AAA"
+  const [level, setLevel] = useState("MLB"); // "MLB" | "AAA" | "FCL"
   const [players, setPlayers] = useState(null);
   const [loadingPlayers, setLoadingPlayers] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
@@ -100,12 +100,18 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   }, [season]);
 
   const isAAA = level === "AAA" && seasonType === "R";
+  // FCL (Florida Complex League, sportId=16). isMinor = any non-MLB level; it
+  // drives the shared "not MLB" behavior (skip Savant, use prospect xwOBA,
+  // team-based game filter, hardcoded league avgs). FCL reuses AAA's display
+  // baselines/thresholds, so children receive isAAA={isMinor}.
+  const isFCL = level === "FCL" && seasonType === "R";
+  const isMinor = isAAA || isFCL;
 
   // Merge: computed leagueAvgs (from loaded games) takes priority, baseline fills gaps
-  // Don't use MLB baseline JSON for AAA — let CountTool/PitchTable use AAA hardcoded defaults
+  // Don't use MLB baseline JSON for minor levels — CountTool/PitchTable use hardcoded defaults
   const effectiveLeagueAvgs = useMemo(() => {
     if (leagueAvgs) return leagueAvgs;
-    if (isAAA) return null; // AAA uses LEAGUE_AVG_AAA hardcoded in SummaryComponents
+    if (isMinor) return null; // minor levels use LEAGUE_AVG_AAA hardcoded in SummaryComponents
     if (!baselineAvgs?.pitch_types) return null;
     // Convert baseline JSON format to the leagueAvgs format used by CountTool/PitchTable
     const ptAvgs = {};
@@ -120,32 +126,32 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       };
     }
     return { byPitchType: ptAvgs, byGroup: {} };
-  }, [leagueAvgs, baselineAvgs, isAAA]);
+  }, [leagueAvgs, baselineAvgs, isMinor]);
 
   const isPitcher = subTab.startsWith("pitcher");
   const isGame = subTab.endsWith("game");
   const isCounts = subTab.endsWith("counts");
   const currentSeason = parseInt(season) || 2026;
-  const sportId = isAAA ? 11 : 1;
+  const sportId = isFCL ? 16 : isAAA ? 11 : 1;
 
   // Fetch bulk Savant xwOBA for the season (RS/PS/AAA — Savant has no expected stats for ST/WBC)
   useEffect(() => {
     setBulkXwoba(null);
     if (seasonType !== "R" && seasonType !== "P") return;
     const type = isPitcher ? "pitcher" : "batter";
-    fetchSavantBulkXwoba(currentSeason, seasonType, type, isAAA)
+    fetchSavantBulkXwoba(currentSeason, seasonType, type, isMinor)
       .then(data => setBulkXwoba(data))
       .catch(() => {});
-  }, [currentSeason, seasonType, isPitcher, isAAA]);
+  }, [currentSeason, seasonType, isPitcher, isMinor]);
 
-  // Load prospect xwOBA for AAA
+  // Load prospect xwOBA for minor levels (AAA + FCL share the name-keyed file)
   useEffect(() => {
-    if (!isAAA) { setProspectXwoba(null); return; }
+    if (!isMinor) { setProspectXwoba(null); return; }
     fetch("/prospect_xwoba.json")
       .then(r => r.json())
       .then(d => { setProspectXwoba(d); console.log(`[Prospect xwOBA] Loaded ${Object.keys(d).length} players`); })
       .catch(() => setProspectXwoba(null));
-  }, [isAAA]);
+  }, [isMinor]);
 
   // Load players: start with roster, then supplement from game boxscores AND league stats
   useEffect(() => {
@@ -161,10 +167,14 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     // Fetch roster + MLB stats leaders in parallel. The stats endpoint
     // returns EVERYONE who threw a pitch / had a PA in the league this season,
     // including DFA'd, released, AAA-to-MLB guys. This is the source of truth.
-    Promise.all([
-      fetchAllPlayers(currentSeason, sportId),
-      fetchLeagueStatLeaders(currentSeason, seasonType, sportId),
-    ])
+    // FCL (sportId=16) mixes the Florida + Arizona complex leagues; fetch the
+    // FCL team-id set first and pass it as a filter so only Florida players load.
+    const teamFilterP = sportId === 16 ? fetchFclTeamIds(currentSeason) : Promise.resolve(null);
+    teamFilterP
+      .then(teamFilter => Promise.all([
+        fetchAllPlayers(currentSeason, sportId, teamFilter),
+        fetchLeagueStatLeaders(currentSeason, seasonType, sportId, teamFilter),
+      ]))
       .then(([roster, leaders]) => {
         // Per-group dedup so two-way players (Ohtani etc.) appear in both lists.
         const seenPitchers = new Set(roster.pitchers.map(x => x.id));
@@ -243,18 +253,27 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
   useEffect(() => {
     setLoadingGames(true);
-    fetchSchedule(currentSeason, seasonType, isAAA ? 11 : null)
-      .then(g => {
-        const playable = g.filter(x => {
-          const s = (x.status || "").toLowerCase();
-          if (s.includes("scheduled") || s.includes("preview") || s.includes("postponed") || s.includes("cancelled") || s.includes("suspended")) return false;
-          return true;
-        });
-        setGames(playable.reverse());
-        setLoadingGames(false);
-      })
+    // FCL (sportId=16) mixes the Florida + Arizona complex leagues; fetch the
+    // FCL team set and keep only games with an FCL team so the game selector
+    // and the boxscore-scan (which supplements the player list) exclude ACL.
+    const fclP = sportId === 16 ? fetchFclTeamIds(currentSeason) : Promise.resolve(null);
+    fclP.then(fclSet =>
+      fetchSchedule(currentSeason, seasonType, sportId === 1 ? null : sportId)
+        .then(g => {
+          let playable = g.filter(x => {
+            const s = (x.status || "").toLowerCase();
+            if (s.includes("scheduled") || s.includes("preview") || s.includes("postponed") || s.includes("cancelled") || s.includes("suspended")) return false;
+            return true;
+          });
+          if (fclSet && fclSet.size) {
+            playable = playable.filter(x => fclSet.has(x.home?.id) || fclSet.has(x.away?.id));
+          }
+          setGames(playable.reverse());
+          setLoadingGames(false);
+        })
+    )
       .catch(e => { setError(e.message); setLoadingGames(false); });
-  }, [currentSeason, seasonType, isAAA]);
+  }, [currentSeason, seasonType, sportId]);
 
   useEffect(() => {
     if (!selectedGame || !isGame) return;
@@ -329,8 +348,9 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     if (seasonType === "W") {
       return games.filter(g => !g.isExhibition);
     }
-    // AAA: team-based filter (player.teamId should match AAA team)
-    if (isAAA) {
+    // Minor levels (AAA/FCL): team-based filter (player.teamId matches their
+    // club). For FCL this also drops ACL games, since the player's team is FCL.
+    if (isMinor) {
       return games.filter(g =>
         g.away?.id === selectedPlayer.teamId ||
         g.home?.id === selectedPlayer.teamId
@@ -342,7 +362,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       g.home?.id === selectedPlayer.teamId ||
       (g.isExhibition && seasonType === "S")
     );
-  }, [selectedPlayer, games, isGame, playerGamePks, seasonType, isAAA]);
+  }, [selectedPlayer, games, isGame, playerGamePks, seasonType, isMinor]);
 
   const loadSeasonData = useCallback(async () => {
     if (!selectedPlayer || !playerGames.length || isGame) return;
@@ -657,8 +677,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       const type = isPitcher ? "pitcher" : "batter";
       const { xwoba, pitchVAAs } = enrichWithSavant(savRows, selectedPlayer.id, type);
 
-      // Skip Savant xwOBA for AAA (returns wrong MLB-level data); use prospect CSV instead
-      if (xwoba != null && !isAAA) result.xwoba = xwoba;
+      // Skip Savant xwOBA for minor levels (returns wrong MLB-level data); use prospect CSV instead
+      if (xwoba != null && !isMinor) result.xwoba = xwoba;
       if (Object.keys(pitchVAAs).length > 0) result.pitchVAAs = pitchVAAs;
 
       if (result.pitches && Object.keys(pitchVAAs).length > 0) {
@@ -670,12 +690,12 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     }
 
     // Fallback: use bulk Savant xwOBA if per-game enrichment didn't provide it
-    if (result.xwoba == null && !isAAA && bulkXwoba && selectedPlayer.id) {
+    if (result.xwoba == null && !isMinor && bulkXwoba && selectedPlayer.id) {
       const bx = bulkXwoba.get(selectedPlayer.id);
       if (bx != null) result.xwoba = Math.round(bx * 1000) / 1000;
     }
 
-    // AAA: use prospect xwOBA CSV data as primary source
+    // Minor levels (AAA/FCL): use prospect xwOBA CSV data as primary source
     if (result.xwoba == null && prospectXwoba && selectedPlayer?.name) {
       const playerName = selectedPlayer.name;
       const yr = String(currentSeason);
@@ -713,7 +733,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     }
 
     return result;
-  }, [extractedData, savantData, seasonSavant, selectedPlayer, isGame, isPitcher, isAAA, boxscoreData, bulkXwoba, prospectXwoba, currentSeason, pitchOverrides, typeOverrides]);
+  }, [extractedData, savantData, seasonSavant, selectedPlayer, isGame, isPitcher, isMinor, boxscoreData, bulkXwoba, prospectXwoba, currentSeason, pitchOverrides, typeOverrides]);
 
   const hasData = enrichedData && (isPitcher ? enrichedData.totalPitches > 0 : enrichedData.pas > 0);
 
@@ -887,13 +907,13 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       );
     })();
     return () => { cancelled = true; };
-  }, [enrichedData, selectedPlayer, isPitcher, isAAA, savantData, isGame]);
+  }, [enrichedData, selectedPlayer, isPitcher, isMinor, savantData, isGame]);
 
   // For Regular Season MLB, fetch pre-computed per-pitch-type Plus grades from /leaderboard.
   // Season view: these override live /score_aggregate values (leaderboard is authoritative).
   // Game view: these serve as fallback when Savant data is not yet available for the game.
   useEffect(() => {
-    if (seasonType !== "R" || isAAA || !selectedPlayer?.id) {
+    if (seasonType !== "R" || isMinor || !selectedPlayer?.id) {
       setLeaderboardPlus(null);
       return;
     }
@@ -908,7 +928,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       })
       .catch(() => setLeaderboardPlus(null));
     return () => { cancelled = true; };
-  }, [seasonType, isAAA, selectedPlayer?.id, currentSeason]);
+  }, [seasonType, isMinor, selectedPlayer?.id, currentSeason]);
 
   // Compute effective Pitch+ depending on view:
   //  Game view + Savant scores:  use per-game Savant scores as-is (model trained on Statcast).
@@ -973,7 +993,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         {seasonType === "R" && (
           <>
             <div style={{ width: 1, height: 22, background: t.divider, margin: "0 4px" }} />
-            {["MLB", "AAA"].map(lv => (
+            {["MLB", "AAA", "FCL"].map(lv => (
               <button key={lv} onClick={() => setLevel(lv)} style={{
                 padding: "4px 10px", fontSize: 10, fontWeight: level === lv ? 700 : 400,
                 background: level === lv ? "#2563eb" : "transparent",
@@ -1124,7 +1144,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           data={enrichedData} player={selectedPlayer}
           game={isGame ? selectedGame : null}
           season={currentSeason} seasonType={seasonType}
-          isGame={isGame} isAAA={isAAA}
+          isGame={isGame} isAAA={isMinor}
           leagueAvgs={effectiveLeagueAvgs} pitchPlus={effectivePitchPlus}
           perPitchScores={perPitchScores} pitchKey={pitchKey}
           reclassifyMode={reclassifyMode}
@@ -1133,15 +1153,15 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           onTypeClick={(type, count) => setReclassifyTarget({ kind: "bulk", type, count })}
         />
       )}
-      {hasData && !isPitcher && !isCounts && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isAAA} leagueAvgs={effectiveLeagueAvgs} dateFrom={dateFrom} dateTo={dateTo} />}
+      {hasData && !isPitcher && !isCounts && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isMinor} leagueAvgs={effectiveLeagueAvgs} dateFrom={dateFrom} dateTo={dateTo} />}
       {hasData && isPitcher && isCounts && (
-        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={true} dateFrom={dateFrom} dateTo={dateTo}>
-          <PitcherCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isAAA} />
+        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isMinor} isPitcher={true} dateFrom={dateFrom} dateTo={dateTo}>
+          <PitcherCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isMinor} />
         </CountsCard>
       )}
       {hasData && !isPitcher && isCounts && (
-        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isAAA} isPitcher={false} dateFrom={dateFrom} dateTo={dateTo}>
-          <HitterCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isAAA} />
+        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isMinor} isPitcher={false} dateFrom={dateFrom} dateTo={dateTo}>
+          <HitterCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isMinor} />
         </CountsCard>
       )}
 

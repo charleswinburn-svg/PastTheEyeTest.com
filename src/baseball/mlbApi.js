@@ -300,7 +300,7 @@ export async function fetchGameLog(playerId, season, group = "pitching", sportId
 // Fetch every pitcher/hitter in the league with a stat line this season.
 // Source of truth: /stats with seasonStatType, paginated. Returns everyone
 // who has recorded any action, including DFA'd, released, traded, call-ups.
-export async function fetchLeagueStatLeaders(season, seasonType = "R", sportId = 1) {
+export async function fetchLeagueStatLeaders(season, seasonType = "R", sportId = 1, teamIdFilter = null) {
   const gameType = seasonType;
   const result = { pitchers: [], hitters: [] };
   // Per-group seen sets so two-way players (Ohtani, etc.) appear in both
@@ -323,7 +323,12 @@ export async function fetchLeagueStatLeaders(season, seasonType = "R", sportId =
       if (splits.length === 0) break;
       for (const sp of splits) {
         const person = sp.player;
-        if (!person || seen.has(person.id)) continue;
+        if (!person) continue;
+        // FCL (sportId=16) mixes the Florida + Arizona complex leagues; keep
+        // only the caller's allowed teams so ACL players are excluded. Checked
+        // before `seen` so an ACL split doesn't suppress a later FCL split.
+        if (teamIdFilter && !teamIdFilter.has(sp.team?.id)) continue;
+        if (seen.has(person.id)) continue;
         seen.add(person.id);
         const entry = {
           id: person.id,
@@ -343,12 +348,13 @@ export async function fetchLeagueStatLeaders(season, seasonType = "R", sportId =
   return result;
 }
 
-export async function fetchAllPlayers(season, sportId = 1) {
+export async function fetchAllPlayers(season, sportId = 1, teamIdFilter = null) {
   const teams = await fetchJson(`${API}/teams?sportId=${sportId}&season=${season}&hydrate=parentOrg`);
   const players = { pitchers: [], hitters: [] };
   const seen = new Set();
 
   for (const team of (teams.teams || [])) {
+    if (teamIdFilter && !teamIdFilter.has(team.id)) continue;
     try {
       const r = await fetch(`${API}/teams/${team.id}/roster?season=${season}&rosterType=fullRoster`);
       if (!r.ok) continue;
@@ -374,6 +380,26 @@ export async function fetchAllPlayers(season, sportId = 1) {
   players.pitchers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   players.hitters.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   return players;
+}
+
+// ── FCL (Florida Complex League) team ids ──
+// sportId=16 covers BOTH the Florida (FCL) and Arizona (ACL) complex leagues.
+// Filter to Florida so the FCL level excludes Arizona players. Match on the
+// league name or the "FCL " team-name prefix for robustness.
+export async function fetchFclTeamIds(season) {
+  try {
+    const d = await fetchJson(`${API}/teams?sportId=16&season=${season}`);
+    const ids = new Set();
+    for (const t of (d.teams || [])) {
+      const lg = (t.league?.name || "").toLowerCase();
+      const nm = t.name || "";
+      if (lg.includes("florida") || nm.startsWith("FCL")) ids.add(t.id);
+    }
+    if (ids.size === 0) console.warn(`[FCL] No Florida Complex League teams matched for ${season}`);
+    return ids;
+  } catch {
+    return new Set();
+  }
 }
 
 // ── Fetch WBC rosters (sportId=51) ──
