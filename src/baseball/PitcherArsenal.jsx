@@ -235,11 +235,13 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
         </div>
       </div>
 
-      {/* ── Bottom: arsenal metrics table ── */}
-      <div style={box}>
-        <div style={heading}>Arsenal by Pitch Type</div>
-        <ArsenalTable rows={rows} theme={t} isAAA={isAAA} />
-      </div>
+      {/* ── Bottom: arsenal metrics table (MLB only — AAA has no expected stats) ── */}
+      {!isAAA && (
+        <div style={box}>
+          <div style={heading}>Arsenal by Pitch Type</div>
+          <ArsenalTable rows={rows} theme={t} isAAA={isAAA} />
+        </div>
+      )}
     </div>
   );
 }
