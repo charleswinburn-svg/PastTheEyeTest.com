@@ -2,6 +2,7 @@ import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
+import PitcherArsenal from "./PitcherArsenal.jsx";
 import { useDateRangeStats } from "./statsCompute.js";
 import { fetchSavantPlayerDateRange, scorePitchCode } from "./mlbApi.js";
 
@@ -150,49 +151,64 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           border: `1px solid ${t.cardBorder}`,
           overflow: "hidden",
           boxShadow: `0 4px 24px ${t.shadow}`,
-          maxWidth: 600,
+          maxWidth: 1040,
           margin: "0 auto",
         }}
       >
-        <PlayerHeader
-          name={player.name}
-          team={player.team}
-          teamId={player.team_id}
-          season={season}
-          playerId={player.player_id}
-          subtitle={subtitle}
-        />
-        <ProBubblesRow data={pitchPlusData} theme={t} />
-        <div style={{ padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
-          {rangeLoading ? (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 80 }}>
-              <style>{`@keyframes ptet-spin3{to{transform:rotate(360deg)}}`}</style>
-              <div style={{
-                width: 24, height: 24,
-                border: `2px solid ${t.divider}`,
-                borderTopColor: t.accent,
-                borderRadius: "50%",
-                animation: "ptet-spin3 0.8s linear infinite",
-              }} />
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch" }}>
+          {/* LEFT: percentile content */}
+          <div style={{ flex: "1 1 520px", minWidth: 300 }}>
+            <PlayerHeader
+              name={player.name}
+              team={player.team}
+              teamId={player.team_id}
+              season={season}
+              playerId={player.player_id}
+              subtitle={subtitle}
+            />
+            <ProBubblesRow data={pitchPlusData} theme={t} />
+            <div style={{ padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
+              {rangeLoading ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 80 }}>
+                  <style>{`@keyframes ptet-spin3{to{transform:rotate(360deg)}}`}</style>
+                  <div style={{
+                    width: 24, height: 24,
+                    border: `2px solid ${t.divider}`,
+                    borderTopColor: t.accent,
+                    borderRadius: "50%",
+                    animation: "ptet-spin3 0.8s linear infinite",
+                  }} />
+                </div>
+              ) : (
+                cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
+                  <BubblePercentileBar
+                    key={label}
+                    label={label}
+                    pctile={cat.pctile}
+                    display={cat.display}
+                  />
+                ))
+              )}
             </div>
-          ) : (
-            cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
-              <BubblePercentileBar
-                key={label}
-                label={label}
-                pctile={cat.pctile}
-                display={cat.display}
-              />
-            ))
-          )}
-        </div>
-        <div style={{
-          padding: "8px 16px 10px",
-          display: "flex", justifyContent: "space-between",
-          fontSize: 10, color: t.textFaint,
-        }}>
-          <span>{isDateRange ? "Date range" : `${season} Season`}</span>
-          <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
+            <div style={{
+              padding: "8px 16px 10px",
+              display: "flex", justifyContent: "space-between",
+              fontSize: 10, color: t.textFaint,
+            }}>
+              <span>{isDateRange ? "Date range" : `${season} Season`}</span>
+              <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
+            </div>
+          </div>
+          {/* RIGHT: pitch arsenal figures */}
+          <div style={{ flex: "1 1 360px", minWidth: 300, borderLeft: `1px solid ${t.divider}`, padding: 10 }}>
+            <PitcherArsenal
+              playerId={player.player_id}
+              season={season}
+              isAAA={isAAA}
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+            />
+          </div>
         </div>
       </div>
 
