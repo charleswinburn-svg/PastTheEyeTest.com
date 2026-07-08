@@ -40,6 +40,7 @@ function normalizeSavant(rows) {
         isSwing: SAVANT_SWING.has(desc),
         isWhiff: SAVANT_WHIFF.has(desc),
         ev: num(r.launch_speed),
+        inPlay: desc === "hit_into_play",                  // ball in play (excludes fouls)
         zone: num(r.zone),                                 // Savant zone 1-9 = strike zone
         terminalEvent: (r.events || "").trim() || null,   // set only on the PA-ending pitch
         xwoba: num(r.estimated_woba_using_speedangle),
@@ -71,6 +72,7 @@ function normalizePbp(raw) {
       isSwing: !!p.isSwing,
       isWhiff: !!p.isWhiff,
       ev: p.hitData?.launchSpeed ?? null,
+      inPlay: !!p.isInPlay,                                  // ball in play (excludes fouls)
       terminalEvent: terminals.has(p) ? (p.result || null) : null,
       xwoba: null, xba: null,   // no expected stats at AAA
     }));
@@ -97,7 +99,7 @@ function aggregate(pitches) {
     // a geometric check (AAA play-by-play carries no zone field).
     const isInZone = p.zone != null ? (p.zone >= 1 && p.zone <= 9) : inZone(p.pX, p.pZ, p.szTop, p.szBot);
     if (isInZone) g.zone++;
-    if (p.ev != null) g.ev.push(p.ev);
+    if (p.inPlay && p.ev != null) g.ev.push(p.ev);   // Avg EV over balls in play only
     if (p.terminalEvent) {
       g.pa++;
       const isK = K_EVENTS.has(p.terminalEvent);
