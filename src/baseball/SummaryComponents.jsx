@@ -1173,6 +1173,7 @@ function bucketPitches(pitches) {
 }
 
 function inZone(p) {
+  if (p.zone != null) return p.zone >= 1 && p.zone <= 9;   // gameday zones 1-9 = strike zone
   if (p.pX == null || p.pZ == null) return false;
   return Math.abs(p.pX) <= 0.88 && p.pZ >= (p.szBot || 1.5) && p.pZ <= (p.szTop || 3.5);
 }

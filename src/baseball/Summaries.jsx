@@ -407,7 +407,9 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     ];
     const GROUPS = { Fastball: ["FF","SI","FC","FA"], Breaking: ["SL","CU","KC","CS","SV","ST","KN"], Offspeed: ["CH","FS","SC","FO"] };
     const getGroup = c => { for (const [g, codes] of Object.entries(GROUPS)) if (codes.includes(c)) return g; return "Other"; };
-    const inZone = (pX, pZ, szT, szB) => Math.abs(pX) <= 0.88 && pZ >= (szB||1.5) && pZ <= (szT||3.5);
+    const inZone = (p) => p.zone != null
+      ? (p.zone >= 1 && p.zone <= 9)
+      : (p.pX != null && p.pZ != null && Math.abs(p.pX) <= 0.88 && p.pZ >= (p.szB||1.5) && p.pZ <= (p.szT||3.5));
 
     // Extract ALL pitches from ALL plays in ALL loaded games
     const allPitches = [];
@@ -423,6 +425,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
               pZ: evt.pitchData.coordinates?.pZ,
               szT: evt.pitchData.strikeZoneTop,
               szB: evt.pitchData.strikeZoneBottom,
+              zone: evt.pitchData.zone,
               isSwing: ["S","D","E","F","L","M","O","T","W","X"].includes(evt.details?.call?.code),
               isWhiff: ["S","W","T"].includes(evt.details?.call?.code),
               ev: evt.hitData?.launchSpeed || null,
@@ -451,8 +454,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           : allPitches.filter(p => p.pt === pt && getBucket(p.b, p.s) === bk);
         const swings = pool.filter(p => p.isSwing);
         const whiffs = pool.filter(p => p.isWhiff);
-        const zoned = pool.filter(p => p.pX != null && p.pZ != null);
-        const inZ = zoned.filter(p => inZone(p.pX, p.pZ, p.szT, p.szB));
+        const zoned = pool.filter(p => p.zone != null || (p.pX != null && p.pZ != null));
+        const inZ = zoned.filter(inZone);
         const evs = pool.filter(p => p.isInPlay && p.ev).map(p => p.ev);
         ptAvgs[pt][bk] = {
           zone: zoned.length > 0 ? inZ.length / zoned.length * 100 : null,
