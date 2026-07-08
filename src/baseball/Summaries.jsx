@@ -1506,14 +1506,12 @@ function useParentOrgId(player, enabled) {
 }
 
 function SummaryHeader({ player, subtitle, seasonType, isAAA }) {
-  // isAAA here means "minor level" (isMinor). Color + logo by the player's MLB
-  // parent org for minor levels, matching the AAA cards; MLB path is unchanged.
+  // isAAA here means "minor level" (isMinor). Color the header by the player's
+  // MLB parent org, but keep the actual (minor-league) team logo. MLB unchanged.
   const parentOrgId = useParentOrgId(player, isAAA);
   const parentColor = parentOrgId != null ? TEAM_ID_TO_PRIMARY[parentOrgId] : null;
   const headshot = player.id ? `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,h_213,c_thumb,g_face,q_auto:best/v1/people/${player.id}/headshot/67/current` : null;
-  const logo = (isAAA && parentOrgId != null)
-    ? getLogoUrl(null, parentOrgId)
-    : getLogoUrl(player.team, player.teamId);
+  const logo = getLogoUrl(player.team, player.teamId);
   const flag = (!isAAA && seasonType === "W") ? getWbcFlag(player.team) : null;
   const showFlag = seasonType === "W" ? (flag || null) : null;
   const showLogo = seasonType === "W" ? (!flag ? logo : null) : logo;
