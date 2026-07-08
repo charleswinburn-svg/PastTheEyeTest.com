@@ -562,6 +562,7 @@ export function extractPitcherData(pbp, pitcherId) {
           pZ: coords.pZ,
           szTop: pd.strikeZoneTop,
           szBot: pd.strikeZoneBottom,
+          zone: pd.zone,
           relHeight: coords.z0,
           relX: coords.x0,
           extension: pd.extension,
@@ -646,6 +647,7 @@ export function extractBatterData(pbp, batterId) {
           pZ: pd.coordinates?.pZ,
           szTop: pd.strikeZoneTop,
           szBot: pd.strikeZoneBottom,
+          zone: pd.zone,
           balls: prevBalls,
           strikes: prevStrikes,
           isStrike: evt.details?.isStrike,
@@ -734,7 +736,11 @@ export function aggregateByPitchType(pitches) {
     const vaas = group.map(p => p.vaa).filter(v => v != null);
     const relHts = group.map(p => p.relHeight).filter(Boolean);
     const exts = group.map(p => p.extension).filter(Boolean);
-    const inZone = group.filter(p => p.pX != null && p.pZ != null && Math.abs(p.pX) <= 0.88 && p.pZ <= (p.szTop || 3.5) && p.pZ >= (p.szBot || 1.5));
+    // Zone%: prefer the gameday `zone` field (1-9 = strike zone) so it matches
+    // Savant / the pitcher card; fall back to a geometric check when absent.
+    const inZone = group.filter(p => p.zone != null
+      ? (p.zone >= 1 && p.zone <= 9)
+      : (p.pX != null && p.pZ != null && Math.abs(p.pX) <= 0.88 && p.pZ <= (p.szTop || 3.5) && p.pZ >= (p.szBot || 1.5)));
     const swings = group.filter(p => p.isSwing);
     const whiffs = group.filter(p => p.isWhiff);
 
