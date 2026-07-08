@@ -31,7 +31,8 @@ function normalizeSavant(rows) {
       const desc = r.description || "";
       return {
         pitchType: r.pitch_type,
-        hBreak: pfxX != null ? pfxX * 12 : null,
+        // negate pfx_x → pitcher's-perspective horizontal break (arm-side right for RHP)
+        hBreak: pfxX != null ? -pfxX * 12 : null,
         vBreak: pfxZ != null ? pfxZ * 12 : null,
         pX: num(r.plate_x), pZ: num(r.plate_z),
         szTop: num(r.sz_top), szBot: num(r.sz_bot),
@@ -60,8 +61,8 @@ function normalizePbp(raw) {
     .filter(p => p.pitchType && p.pitchType !== "UN" && p.pitchType !== "PO")
     .map(p => ({
       pitchType: p.pitchType,
-      hBreak: p.pfxX_raw != null ? p.pfxX_raw * 12 : (p.hBreak ?? null),
-      vBreak: p.pfxZ_raw != null ? p.pfxZ_raw * 12 : (p.vBreak ?? null),
+      hBreak: p.pfxX_raw != null ? -p.pfxX_raw * 12 : null,   // pitcher's perspective
+      vBreak: p.pfxZ_raw != null ? p.pfxZ_raw * 12 : null,
       pX: p.pX, pZ: p.pZ, szTop: p.szTop, szBot: p.szBot,
       batHand: p.batSide || null,
       isSwing: !!p.isSwing,
@@ -171,8 +172,8 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
   // Pitch types present, ordered by usage (from the arsenal rows).
   const types = rows.map(r => r.type);
 
-  const box = { padding: "2px 4px 8px" };
-  const heading = { fontSize: 9, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textMuted, marginBottom: 4, textAlign: "center" };
+  const box = { padding: "0 2px 4px" };
+  const heading = { fontSize: 9, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textMuted, marginBottom: 2, textAlign: "center" };
 
   if (loading) {
     return (
@@ -193,11 +194,13 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {/* ── Top: movement ── */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      {/* ── Top: movement (centered in the panel) ── */}
       <div style={box}>
         <div style={heading}>Pitch Movement</div>
-        <MovementPlot pitches={movement} width={300} height={300} maxPitches={180} />
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <MovementPlot pitches={movement} width={300} height={190} maxPitches={150} />
+        </div>
         <PitchTypeLegend types={types} />
       </div>
 
@@ -220,7 +223,7 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
 }
 
 // ── Donut pie of pitch usage ─────────────────────────────────────────────────
-function UsagePie({ label, counts, theme, size = 118 }) {
+function UsagePie({ label, counts, theme, size = 82 }) {
   const t = theme;
   const entries = Object.entries(counts || {}).sort((a, b) => b[1] - a[1]);
   const total = entries.reduce((s, [, n]) => s + n, 0);
@@ -271,8 +274,8 @@ function ArsenalTable({ rows, theme, isAAA }) {
     { key: "zonePct", label: "Zone",  fmt: v => v == null ? "—" : `${Math.round(v)}%` },
     { key: "kPct",    label: "K",     fmt: v => v == null ? "—" : `${Math.round(v)}%` },
   ];
-  const th = { fontSize: 8.5, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.04em", padding: "2px 3px", textAlign: "right" };
-  const td = { fontSize: 10, color: t.text, padding: "2px 3px", textAlign: "right", fontFamily: "'DM Mono', monospace" };
+  const th = { fontSize: 8, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.03em", padding: "1px 2px", textAlign: "right" };
+  const td = { fontSize: 9.5, color: t.text, padding: "1px 2px", textAlign: "right", fontFamily: "'DM Mono', monospace" };
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 300 }}>
