@@ -4,7 +4,7 @@ import { MovementPlot, PitchTypeLegend } from "./SummaryComponents.jsx";
 import {
   PITCH_COLORS, PITCH_NAMES,
   fetchSavantPlayerSeason, fetchSavantPlayerDateRange,
-  fetchGameLog, fetchPlayByPlay, extractPitcherData,
+  fetchGameLog, fetchPlayByPlay, extractPitcherData, fetchSchedule,
 } from "./mlbApi.js";
 
 // ── Pitch-outcome classifiers ───────────────────────────────────────────────
@@ -143,9 +143,24 @@ async function loadPitches({ playerId, season, isAAA, dateFrom, dateTo, onProgre
       : await fetchSavantPlayerSeason(playerId, season, "pitcher");
     return normalizeSavant(rows);
   }
-  // AAA: game log → batched play-by-play → extractPitcherData
+  // AAA: find the pitcher's games — the game log first (their exact games), else
+  // fall back to the team's schedule (the game log is empty for many minor
+  // leaguers — same reason the live Summaries view keeps a team-based fallback).
   const splits = await fetchGameLog(playerId, season, "pitching", 11).catch(() => []);
-  const gamePks = [...new Set((splits || []).map(s => s.game?.gamePk).filter(Boolean))];
+  let gamePks = [...new Set((splits || []).map(s => s.game?.gamePk).filter(Boolean))];
+  if (!gamePks.length) {
+    onProgress("Finding games…");
+    const teamId = await fetch(`/mlb-api/api/v1/people/${playerId}?hydrate=currentTeam`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => d?.people?.[0]?.currentTeam?.id ?? null)
+      .catch(() => null);
+    if (teamId) {
+      const games = await fetchSchedule(season, "R", 11).catch(() => []);
+      gamePks = [...new Set(games
+        .filter(g => g.home?.id === teamId || g.away?.id === teamId)
+        .map(g => g.gamePk).filter(Boolean))];
+    }
+  }
   const all = [];
   const BATCH = 6;
   for (let i = 0; i < gamePks.length; i += BATCH) {
@@ -154,12 +169,13 @@ async function loadPitches({ playerId, season, isAAA, dateFrom, dateTo, onProgre
     const pbps = await Promise.all(gamePks.slice(i, i + BATCH).map(pk => fetchPlayByPlay(pk).catch(() => null)));
     pbps.forEach((pbp, j) => {
       if (!pbp) return;
-      const ps = extractPitcherData(pbp, playerId);
+      const ps = extractPitcherData(pbp, Number(playerId));
       const gk = gamePks[i + j];
       ps.forEach(p => { p._gameKey = gk; });
       all.push(...ps);
     });
   }
+  console.log(`[AAA arsenal] player ${playerId}: ${gamePks.length} games, ${all.length} pitches extracted`);
   return normalizePbp(all);
 }
 

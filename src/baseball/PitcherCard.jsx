@@ -17,6 +17,9 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   useEffect(() => {
     setPitchPlusData(null);
     if (!player?.player_id) return;
+    // AAA has no pitch-modeling grades (Stuff+/Loc+/Tun+/Pitch+ models are
+    // MLB-only) — show "n/a" instead of a perpetual "scoring…" spinner.
+    if (isAAA) { setPitchPlusData({ qualified: false }); return; }
     const isDateRange = !!(dateFrom || dateTo);
     let cancelled = false;
 
