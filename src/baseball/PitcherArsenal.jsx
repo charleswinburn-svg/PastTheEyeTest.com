@@ -181,6 +181,40 @@ async function loadPitches({ playerId, season, isAAA, dateFrom, dateTo, onProgre
   return normalizePbp(all);
 }
 
+// ── Precomputed season arsenal (public/pitcher_arsenal_{season}.json) ─────────
+// Built daily by build_pitcher_arsenal.py from the season Statcast parquet, so
+// MLB full-season cards render instantly instead of live-fetching Savant. The
+// aggregation there mirrors aggregate() below, so the shapes are interchangeable.
+const arsenalCache = new Map();   // season -> Promise<{[pid]: entry} | null>
+function loadPrecomputed(season) {
+  if (!arsenalCache.has(season)) {
+    arsenalCache.set(season, fetch(`/pitcher_arsenal_${season}.json`)
+      .then(r => (r.ok ? r.json() : null))
+      .catch(() => null));
+  }
+  return arsenalCache.get(season);
+}
+
+// Expand a precomputed entry into the same {rows, usage, movement} state the live
+// path produces (re-attaching pitch names/colors and the MovementPlot shape).
+function fromPrecomputed(entry) {
+  const rows = (entry.arsenal || []).map(a => ({
+    type: a.type,
+    name: PITCH_NAMES[a.type] || a.type,
+    color: PITCH_COLORS[a.type] || "#888",
+    n: a.n,
+    xwoba: a.xwoba ?? null,
+    ev: a.ev ?? null,
+    xba: a.xba ?? null,
+    whiffPct: a.whiffPct ?? null,
+    zonePct: a.zonePct ?? null,
+    kPct: a.kPct ?? null,
+  })).sort((a, b) => b.n - a.n);
+  const movement = (entry.movement || []).map(([pitchType, hBreak, vBreak]) => ({ pitchType, hBreak, vBreak }));
+  const usage = entry.usage || { L: {}, R: {} };
+  return { rows, usage, movement };
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 export default function PitcherArsenal({ playerId, season, isAAA = false, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
@@ -192,6 +226,17 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
     setState(s => ({ ...s, loading: true, progress: "" }));
     (async () => {
       try {
+        // MLB full season → try the daily precompute first (instant); fall back to
+        // live Savant fetch on a miss. AAA and date-range always live-fetch.
+        if (!isAAA && !dateFrom && !dateTo) {
+          const map = await loadPrecomputed(season);
+          if (cancelled) return;
+          const entry = map && map[String(playerId)];
+          if (entry) {
+            setState({ loading: false, progress: "", ...fromPrecomputed(entry) });
+            return;
+          }
+        }
         const pitches = await loadPitches({
           playerId, season, isAAA, dateFrom, dateTo,
           onProgress: (p) => { if (!cancelled) setState(s => ({ ...s, progress: p })); },
