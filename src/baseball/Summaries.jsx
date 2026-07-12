@@ -18,6 +18,7 @@ const SEASON_TYPES = [
   { id: "W", label: "WBC" },
   { id: "R", label: "Regular Season" },
   { id: "P", label: "Postseason" },
+  { id: "E", label: "Exhibition" },
 ];
 
 const fmtDate = (s) => {
@@ -343,6 +344,12 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
   const playerGames = useMemo(() => {
     if (!selectedPlayer || !games.length || isGame) return [];
+    // Exhibition (sportId=21): few games, and the sportId=1 game log / MLB team
+    // ids don't line up with All-Star/Futures games — include them all and let
+    // the extract functions filter by player ID (same as WBC below).
+    if (seasonType === "E") {
+      return games.filter(g => g.isExhibition);
+    }
     if (playerGamePks && playerGamePks.size > 0) {
       return games.filter(g => playerGamePks.has(g.gamePk) || (g.isExhibition && seasonType === "S"));
     }
