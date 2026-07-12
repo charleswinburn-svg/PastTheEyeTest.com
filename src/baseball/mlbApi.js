@@ -39,6 +39,7 @@ export const GAME_TYPES = {
 };
 export const GAME_TYPE_LABELS = {
   S: "Spring Training", R: "Regular Season", P: "Postseason", W: "World Baseball Classic",
+  E: "Exhibition",
 };
 
 // ── MLB team IDs (for distinguishing MLB vs WBC teams) ──
@@ -248,6 +249,48 @@ export async function fetchSchedule(season, gameType = "S", sportId = null) {
     } catch (e) { /* WBC schedule may not exist */ }
 
     allGames.sort((a, b) => b.date.localeCompare(a.date));
+    return allGames;
+  }
+
+  // ── EXHIBITION: sportId=21 — All-Star Game, Futures Game, Spring Breakout ──
+  // Queried season-wide with no gameType filter so it captures whatever MLB
+  // classifies these under. Prospect squads ("… Prospects", from Spring
+  // Breakout) get remapped to their parent MLB org for logos/colors; All-Star
+  // and Futures team names don't match, so they pass through unchanged.
+  if (gameType === "E") {
+    const mlbNameMap = {};
+    try {
+      const mlbTeams = await fetchJson(`${API}/teams?sportId=1`);
+      for (const t of (mlbTeams.teams || [])) {
+        if (t.name) mlbNameMap[t.name.toLowerCase()] = t;
+        if (t.teamName) mlbNameMap[t.teamName.toLowerCase()] = t;
+      }
+    } catch (e) { /* remap is best-effort */ }
+    const remapTeam = (t) => {
+      if (!t) return t;
+      const cleaned = (t.name || t.teamName || "").replace(/\s*Prospects?\s*/i, "").trim().toLowerCase();
+      const mlb = mlbNameMap[cleaned];
+      return mlb ? { ...t, id: mlb.id, abbreviation: mlb.abbreviation, teamName: mlb.teamName, name: mlb.name } : t;
+    };
+    const d = await fetchJson(
+      `${API}/schedule?sportId=21&season=${season}&hydrate=team,probablePitcher`
+    );
+    const allGames = [];
+    for (const date of (d.dates || [])) {
+      for (const g of date.games) {
+        const patched = {
+          ...g,
+          teams: {
+            away: { ...g.teams?.away, team: remapTeam(g.teams?.away?.team) },
+            home: { ...g.teams?.home, team: remapTeam(g.teams?.home?.team) },
+          },
+        };
+        allGames.push(parseGame(patched, date.date, { isExhibition: true }));
+      }
+    }
+    // Ascending here; the caller reverses the schedule, so the dropdown ends up
+    // newest-first (All-Star/Futures on top, Spring Breakout below).
+    allGames.sort((a, b) => a.date.localeCompare(b.date));
     return allGames;
   }
 
