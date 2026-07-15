@@ -252,44 +252,48 @@ export async function fetchSchedule(season, gameType = "S", sportId = null) {
     return allGames;
   }
 
-  // ── EXHIBITION: sportId=21 — All-Star Game, Futures Game, Spring Breakout ──
-  // Queried season-wide with no gameType filter so it captures whatever MLB
-  // classifies these under. Prospect squads ("… Prospects", from Spring
-  // Breakout) get remapped to their parent MLB org for logos/colors; All-Star
-  // and Futures team names don't match, so they pass through unchanged.
+  // ── EXHIBITION: Spring Breakout + Futures (sportId=21) and the All-Star Game (sportId=1) ──
+  // The prospect showcases live at sportId=21; the MLB All-Star Game lives at
+  // sportId=1 with gameType=A, so it's fetched separately and merged in. Prospect
+  // squads ("… Prospects") get remapped to their parent MLB org for logos/colors;
+  // All-Star team names ("AL/NL All-Stars") don't match, so they pass through.
   if (gameType === "E") {
+    const [teamsRes, sportId21, allStar] = await Promise.all([
+      fetchJson(`${API}/teams?sportId=1`).catch(() => ({ teams: [] })),
+      fetchJson(`${API}/schedule?sportId=21&season=${season}&hydrate=team,probablePitcher`).catch(() => ({ dates: [] })),
+      fetchJson(`${API}/schedule?sportId=1&gameType=A&season=${season}&hydrate=team,probablePitcher`).catch(() => ({ dates: [] })),
+    ]);
     const mlbNameMap = {};
-    try {
-      const mlbTeams = await fetchJson(`${API}/teams?sportId=1`);
-      for (const t of (mlbTeams.teams || [])) {
-        if (t.name) mlbNameMap[t.name.toLowerCase()] = t;
-        if (t.teamName) mlbNameMap[t.teamName.toLowerCase()] = t;
-      }
-    } catch (e) { /* remap is best-effort */ }
+    for (const t of (teamsRes.teams || [])) {
+      if (t.name) mlbNameMap[t.name.toLowerCase()] = t;
+      if (t.teamName) mlbNameMap[t.teamName.toLowerCase()] = t;
+    }
     const remapTeam = (t) => {
       if (!t) return t;
       const cleaned = (t.name || t.teamName || "").replace(/\s*Prospects?\s*/i, "").trim().toLowerCase();
       const mlb = mlbNameMap[cleaned];
       return mlb ? { ...t, id: mlb.id, abbreviation: mlb.abbreviation, teamName: mlb.teamName, name: mlb.name } : t;
     };
-    const d = await fetchJson(
-      `${API}/schedule?sportId=21&season=${season}&hydrate=team,probablePitcher`
-    );
     const allGames = [];
-    for (const date of (d.dates || [])) {
-      for (const g of date.games) {
-        const patched = {
-          ...g,
-          teams: {
-            away: { ...g.teams?.away, team: remapTeam(g.teams?.away?.team) },
-            home: { ...g.teams?.home, team: remapTeam(g.teams?.home?.team) },
-          },
-        };
-        allGames.push(parseGame(patched, date.date, { isExhibition: true }));
+    const seenPks = new Set();
+    for (const src of [sportId21, allStar]) {
+      for (const date of (src.dates || [])) {
+        for (const g of date.games) {
+          if (seenPks.has(g.gamePk)) continue;
+          seenPks.add(g.gamePk);
+          const patched = {
+            ...g,
+            teams: {
+              away: { ...g.teams?.away, team: remapTeam(g.teams?.away?.team) },
+              home: { ...g.teams?.home, team: remapTeam(g.teams?.home?.team) },
+            },
+          };
+          allGames.push(parseGame(patched, date.date, { isExhibition: true }));
+        }
       }
     }
     // Ascending here; the caller reverses the schedule, so the dropdown ends up
-    // newest-first (All-Star/Futures on top, Spring Breakout below).
+    // newest-first (All-Star Game / Futures on top, Spring Breakout below).
     allGames.sort((a, b) => a.date.localeCompare(b.date));
     return allGames;
   }
