@@ -723,6 +723,29 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
             inn_map.setdefault(pid, {})[pos] = float(MIN_INN)
         print(f"  Synthetic inn_map: {len(inn_map)} players from OAA")
 
+    # Savant OAA carries no catcher rows, so neither the Stats-API innings feed
+    # (when it drops catchers) nor the OAA-based synthetic fallback ever lets a
+    # catcher clear the innings gate below — which is why catcher cards were
+    # empty. Backfill: credit MIN_INN at "C" to every player who shows up in a
+    # catcher leaderboard (framing / pop time / CSAA / blocks) and isn't already
+    # carrying real C innings. Runs on every path, so catchers populate whether
+    # or not the Stats-API innings feed succeeded.
+    n_catch = 0
+    for cdf in (framing, poptime, csaa, blocks):
+        if cdf is None or "player_id" not in cdf.columns:
+            continue
+        for pid in cdf["player_id"].dropna().tolist():
+            try:
+                pid = int(pid)
+            except (TypeError, ValueError):
+                continue
+            pos_map = inn_map.setdefault(pid, {})
+            if "C" not in pos_map:
+                pos_map["C"] = float(MIN_INN)
+                n_catch += 1
+    if n_catch:
+        print(f"  Credited synthetic C innings to {n_catch} catchers (catcher leaderboards)")
+
     # 2. Build per-(player, position) row dict, keyed by (pid, pos)
     rows: Dict[tuple, dict] = {}
 
