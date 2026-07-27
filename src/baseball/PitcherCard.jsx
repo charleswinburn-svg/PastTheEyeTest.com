@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
+import PitcherDistributions from "./PitcherDistributions.jsx";
 import { useDateRangeStats } from "./statsCompute.js";
 import { fetchSavantPlayerDateRange, scorePitchCode } from "./mlbApi.js";
 
@@ -230,6 +231,13 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           📥 Save as PNG
         </button>
       </div>
+
+      {/* === GRADE DISTRIBUTIONS (8 KDE figures, LHH/RHH) — MLB only === */}
+      <PitcherDistributions
+        playerId={player.player_id}
+        season={season}
+        isAAA={isAAA}
+      />
 
       {/* === ROLLING 10-IP CHART === */}
       <RollingChart

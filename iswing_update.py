@@ -41,6 +41,11 @@ CORE_COLS = [
     'plate_x', 'plate_z', 'balls', 'strikes', 'description', 'events',
     'launch_speed', 'launch_angle', 'estimated_woba_using_speedangle',
     'bat_speed', 'swing_length', 'attack_angle', 'attack_direction', 'swing_path_tilt',
+    # Bat-tracking intercept point (contact location vs batter) — for the hitter-card
+    # intercept heatmap. Exact Savant names confirmed on the droplet; fetch_new_swings
+    # also broad-captures any column containing "intercept"/"contact" so a name drift
+    # never silently drops them.
+    'intercept_ball_minus_batter_pos_x_inches', 'intercept_ball_minus_batter_pos_y_inches',
     'sz_top', 'sz_bot',
 ]
 
@@ -100,7 +105,13 @@ def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
         swings = swings[mask].drop(columns=['p10']).copy()
 
     available = [c for c in CORE_COLS if c in swings.columns]
-    return swings[available].copy()
+    # Broad-capture any bat-tracking intercept/contact columns even if their exact
+    # Savant name isn't in CORE_COLS, so a name drift never silently drops them.
+    extra = [c for c in swings.columns
+             if ('intercept' in c.lower() or 'contact' in c.lower()) and c not in available]
+    if extra:
+        log(f'  Keeping bat-tracking columns: {extra}')
+    return swings[available + extra].copy()
 
 
 def enrich(df: pd.DataFrame) -> pd.DataFrame:
@@ -270,6 +281,94 @@ def build_json(scored_df: pd.DataFrame, existing_json: dict) -> dict:
     return out
 
 
+# ── Distribution / heatmap outputs for the hitter card ──────────────────────
+KDE_LO, KDE_HI, KDE_N = 40.0, 160.0, 64
+
+
+def _kde_curve(vals):
+    """Gaussian KDE density on a fixed [KDE_LO,KDE_HI] grid (numpy, Silverman bw).
+    Returns a length-KDE_N list of rounded densities (area ~1)."""
+    s = np.asarray(vals, dtype=float)
+    s = s[np.isfinite(s)]
+    n = s.size
+    if n < 2:
+        return None
+    std = s.std(ddof=1)
+    if not np.isfinite(std) or std <= 0:
+        std = 1.0
+    h = 1.06 * std * n ** (-1 / 5)
+    if h <= 0:
+        h = 1.0
+    grid = np.linspace(KDE_LO, KDE_HI, KDE_N)
+    d = np.exp(-0.5 * ((grid[:, None] - s[None, :]) / h) ** 2).sum(axis=1)
+    d /= (n * h * np.sqrt(2 * np.pi))
+    return [round(float(v), 5) for v in d]
+
+
+def write_iswing_dist(scored_df, season, min_swings=25):
+    """public/iswing_dist_{season}.json — per hitter, a KDE curve of their own
+    per-swing iSwing+ (league-per-swing scale: mean 100, ~15 sd), plus their mean.
+    Keyed by batter id so the card can look it up by player_id."""
+    df = scored_df.copy()
+    df['year'] = pd.to_datetime(df['game_date'], errors='coerce').dt.year
+    df = df[(df['year'] == season) & df['raw_value'].notna() & df['batter'].notna()]
+    if len(df) == 0:
+        log('  iswing_dist: no swings this season — skipping')
+        return
+    lr = np.log(df['raw_value'].clip(lower=1e-10))
+    m, sd = float(lr.mean()), float(lr.std())
+    if not np.isfinite(sd) or sd <= 0:
+        sd = 1.0
+    df = df.assign(_isw=(100 + 15 * ((lr - m) / sd).clip(-4, 4)))
+    out = {'meta': {'season': season, 'xLo': KDE_LO, 'xHi': KDE_HI, 'nPts': KDE_N, 'leagueMean': 100}}
+    for bid, g in df.groupby('batter'):
+        vals = g['_isw'].to_numpy()
+        if len(vals) < min_swings:
+            continue
+        curve = _kde_curve(vals)
+        if curve is None:
+            continue
+        out[str(int(bid))] = {'curve': curve, 'mean': round(float(vals.mean()), 1), 'n': int(len(vals))}
+    path = os.path.join(ROOT, 'public', f'iswing_dist_{season}.json')
+    with open(path, 'w') as f:
+        json.dump(out, f, separators=(',', ':'))
+    log(f'  Wrote {path}: {len(out) - 1} hitters')
+
+
+_INT_X = ['intercept_ball_minus_batter_pos_x_inches', 'intercept_ball_minus_batter_pos_x', 'contact_x']
+_INT_Y = ['intercept_ball_minus_batter_pos_y_inches', 'intercept_ball_minus_batter_pos_y', 'contact_y']
+
+
+def write_intercept(scored_df, season, min_pts=20):
+    """public/intercept_{season}.json — per hitter, bat-ball contact points
+    [x_side, y_depth] (inches) for the top-down intercept heatmap. Keyed by
+    batter id. Skips (with a diagnostic) if Savant's intercept columns aren't
+    present, so the rest of the pipeline is unaffected."""
+    xcol = next((c for c in _INT_X if c in scored_df.columns), None)
+    ycol = next((c for c in _INT_Y if c in scored_df.columns), None)
+    if not xcol or not ycol:
+        cand = [c for c in scored_df.columns if 'intercept' in c.lower() or 'contact' in c.lower()]
+        log(f'  intercept: no known intercept columns found; skipping. Present intercept/contact cols: {cand}')
+        return
+    df = scored_df.copy()
+    df['year'] = pd.to_datetime(df['game_date'], errors='coerce').dt.year
+    df['_x'] = pd.to_numeric(df[xcol], errors='coerce')
+    df['_y'] = pd.to_numeric(df[ycol], errors='coerce')
+    df = df[(df['year'] == season) & df['_x'].notna() & df['_y'].notna() & df['batter'].notna()]
+    if len(df) == 0:
+        log('  intercept: columns present but no valid points this season — skipping')
+        return
+    out = {'meta': {'season': season, 'xField': xcol, 'yField': ycol, 'units': 'inches'}}
+    for bid, g in df.groupby('batter'):
+        if len(g) < min_pts:
+            continue
+        out[str(int(bid))] = [[round(float(a), 1), round(float(b), 1)] for a, b in zip(g['_x'], g['_y'])]
+    path = os.path.join(ROOT, 'public', f'intercept_{season}.json')
+    with open(path, 'w') as f:
+        json.dump(out, f, separators=(',', ':'))
+    log(f'  Wrote {path}: {len(out) - 1} hitters (x={xcol}, y={ycol})')
+
+
 def main():
     log('=== iSwing+ daily update ===')
     check_models()
@@ -364,6 +463,12 @@ def main():
     with open(PUBLIC_JSON, 'w') as f:
         json.dump(updated_json, f)
     log(f'Wrote {len(updated_json)} entries -> {PUBLIC_JSON}')
+
+    # ── Hitter-card distribution + intercept-heatmap files (current season) ──
+    season = date.today().year
+    log('Building hitter-card distribution files...')
+    write_iswing_dist(all_2026, season)
+    write_intercept(all_2026, season)
 
     # ── Summary ──
     current_year = str(date.today().year)

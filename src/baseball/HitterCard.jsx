@@ -2,6 +2,7 @@ import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
+import HitterDistributions from "./HitterDistributions.jsx";
 import { useDateRangeStats, computeXrvDateRange, buildXrvPctileLookup, interpolatePctile } from "./statsCompute.js";
 
 // Fixed display order for the xRV / 600 PA column (matches build_hitter_xrv.py).
@@ -96,7 +97,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           border: `1px solid ${t.cardBorder}`,
           overflow: "hidden",
           boxShadow: `0 4px 24px ${t.shadow}`,
-          maxWidth: hasXrv ? 1040 : 600,
+          maxWidth: 1040,   // match the pitcher card so both share the same dimensions
           margin: "0 auto",
         }}
       >
@@ -194,6 +195,14 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           📥 Save as PNG
         </button>
       </div>
+
+      {/* === DISTRIBUTIONS (iSwing+ KDE + intercept heatmap) — MLB only === */}
+      <HitterDistributions
+        playerId={player.player_id}
+        team={player.team}
+        season={season}
+        isAAA={isAAA}
+      />
 
       {/* === ROLLING 50-PA CHART === */}
       <RollingChart
