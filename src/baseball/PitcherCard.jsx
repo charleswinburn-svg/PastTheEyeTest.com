@@ -205,6 +205,12 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
             />
           </div>
         </div>
+        {/* === GRADE DISTRIBUTIONS (8 KDE figures) — inside cardRef so Save-as-PNG captures them === */}
+        <PitcherDistributions
+          playerId={player.player_id}
+          season={season}
+          isAAA={isAAA}
+        />
         <div style={{
           padding: "8px 16px 10px",
           display: "flex", justifyContent: "space-between",
@@ -231,13 +237,6 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           📥 Save as PNG
         </button>
       </div>
-
-      {/* === GRADE DISTRIBUTIONS (8 KDE figures, LHH/RHH) — MLB only === */}
-      <PitcherDistributions
-        playerId={player.player_id}
-        season={season}
-        isAAA={isAAA}
-      />
 
       {/* === ROLLING 10-IP CHART === */}
       <RollingChart

@@ -35,7 +35,7 @@ export default function KdeCurve({
     }).join(" ");
   };
 
-  const ticks = (xTicks || [60, 80, 100, 120, 140]).filter(v => v >= xLo && v <= xHi);
+  const ticks = (xTicks || [60, 80, 100, 120, 140, 160]).filter(v => v >= xLo && v <= xHi);
 
   return (
     <div style={{ width: "100%", maxWidth: width }}>

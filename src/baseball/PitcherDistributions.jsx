@@ -44,16 +44,17 @@ export default function PitcherDistributions({ playerId, season, isAAA = false }
   for (const [m] of METRICS) for (const [h] of HANDS) Object.keys(entry[m]?.[h] || {}).forEach(pt => typeSet.add(pt));
   const types = [...typeSet];
 
-  const fig = (m, mLabel, h, hLabel) => {
+  const fig = (m, mLabel, h) => {
     const byType = entry[m]?.[h] || {};
     const curves = Object.entries(byType).map(([pt, densities]) => ({ densities, color: PITCH_COLORS[pt] || "#888", label: pt }));
     return (
       <KdeCurve
         curves={curves}
         xLo={xLo} xHi={xHi}
-        width={480} height={128}
+        width={240} height={124}
+        fill
         refLines={[{ x: 100, dashed: true, color: t.textFaint }]}
-        title={`${mLabel} ${hLabel}`}
+        title={mLabel}
       />
     );
   };
@@ -64,13 +65,21 @@ export default function PitcherDistributions({ playerId, season, isAAA = false }
         Grade Distributions by Pitch Type
       </div>
       <PitchTypeLegend types={types} />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "12px 20px", marginTop: 8, justifyItems: "center" }}>
-        {METRICS.map(([m, mLabel]) => HANDS.map(([h, hLabel]) => (
-          <div key={m + h} style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-            {fig(m, mLabel, h, hLabel)}
+      {/* 4 metrics across × 2 rows: vs LHH on top, vs RHH below */}
+      {HANDS.map(([h, hLabel]) => (
+        <div key={h} style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", color: t.textSecondary, textAlign: "center", margin: "2px 0 4px" }}>
+            {hLabel}
           </div>
-        )))}
-      </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "8px 14px", justifyItems: "center" }}>
+            {METRICS.map(([m, mLabel]) => (
+              <div key={m} style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+                {fig(m, mLabel, h)}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
