@@ -1,6 +1,8 @@
-"""Baseball Savant swing-path / bat-tracking leaderboard — per (player, bat side,
-season) intercept-point and batter-position geometry, used to place home plate
-exactly relative to the batter's center of mass on the hitter card:
+"""Baseball Savant swing-path / bat-tracking leaderboard — intercept-point and
+batter-position geometry used to place home plate exactly relative to the batter's
+center of mass on the hitter card. NOTE: this endpoint returns ONE row per player
+(it does not split switch hitters by side), so callers reuse a player's single row
+for both L/R panels — a switch hitter's stances are ~mirror images.
 
   avg_intercept_y_vs_plate  - avg intercept depth vs the FRONT of the plate (inches, +toward pitcher)
   avg_intercept_y_vs_batter - avg intercept depth vs the batter's center of mass
