@@ -285,8 +285,8 @@ def build_json(scored_df: pd.DataFrame, existing_json: dict) -> dict:
 KDE_LO, KDE_HI, KDE_N = 40.0, 160.0, 64
 
 
-def _kde_curve(vals):
-    """Gaussian KDE density on a fixed [KDE_LO,KDE_HI] grid (numpy, Silverman bw).
+def _kde_curve(vals, lo=KDE_LO, hi=KDE_HI):
+    """Gaussian KDE density on a fixed [lo,hi] grid (numpy, Silverman bw).
     Returns a length-KDE_N list of rounded densities (area ~1)."""
     s = np.asarray(vals, dtype=float)
     s = s[np.isfinite(s)]
@@ -299,15 +299,20 @@ def _kde_curve(vals):
     h = 1.06 * std * n ** (-1 / 5)
     if h <= 0:
         h = 1.0
-    grid = np.linspace(KDE_LO, KDE_HI, KDE_N)
+    grid = np.linspace(lo, hi, KDE_N)
     d = np.exp(-0.5 * ((grid[:, None] - s[None, :]) / h) ** 2).sum(axis=1)
     d /= (n * h * np.sqrt(2 * np.pi))
     return [round(float(v), 5) for v in d]
 
 
+ISW_LO, ISW_HI = 40.0, 180.0
+
+
 def write_iswing_dist(scored_df, season, min_swings=25):
-    """public/iswing_dist_{season}.json — per hitter, a KDE curve of their own
-    per-swing iSwing+ (league-per-swing scale: mean 100, ~15 sd), plus their mean.
+    """public/iswing_dist_{season}.json — per hitter, a KDE curve of their per-swing
+    iSwing+ CENTERED on the hitter's published iSwing+ (the player-mean normalization
+    build_json uses), so the curve's average matches the card's headline number.
+    The spread comes from the per-swing league scale; league line stays at 100.
     Keyed by batter id so the card can look it up by player_id."""
     df = scored_df.copy()
     df['year'] = pd.to_datetime(df['game_date'], errors='coerce').dt.year
@@ -315,20 +320,37 @@ def write_iswing_dist(scored_df, season, min_swings=25):
     if len(df) == 0:
         log('  iswing_dist: no swings this season — skipping')
         return
+
+    # Per-swing SHAPE: z-score each swing's log raw_value against the league
+    # per-swing distribution -> a readable spread (~15 sd), on a 100 scale.
     lr = np.log(df['raw_value'].clip(lower=1e-10))
-    m, sd = float(lr.mean()), float(lr.std())
-    if not np.isfinite(sd) or sd <= 0:
-        sd = 1.0
-    df = df.assign(_isw=(100 + 15 * ((lr - m) / sd).clip(-4, 4)))
-    out = {'meta': {'season': season, 'xLo': KDE_LO, 'xHi': KDE_HI, 'nPts': KDE_N, 'leagueMean': 100}}
+    m_sw, s_sw = float(lr.mean()), float(lr.std())
+    if not np.isfinite(s_sw) or s_sw <= 0:
+        s_sw = 1.0
+    df = df.assign(_shape=100 + 15 * (lr - m_sw) / s_sw)
+
+    # Headline iSwing+ per hitter: log of the hitter's MEAN raw_value, normalized
+    # against the pool of qualified hitters' log-means (identical to build_json).
+    grp = df.groupby('batter')
+    cnt = grp.size()
+    log_mean = np.log(grp['raw_value'].mean().clip(lower=1e-10))
+    pool = log_mean.loc[cnt[cnt >= min_swings].index]
+    mu, sig = float(pool.mean()), float(pool.std())
+    if not np.isfinite(sig) or sig <= 0:
+        sig = 1.0
+    headline = 100 + 15 * (log_mean - mu) / sig
+
+    out = {'meta': {'season': season, 'xLo': ISW_LO, 'xHi': ISW_HI, 'nPts': KDE_N, 'leagueMean': 100}}
     for bid, g in df.groupby('batter'):
-        vals = g['_isw'].to_numpy()
-        if len(vals) < min_swings:
+        if len(g) < min_swings:
             continue
-        curve = _kde_curve(vals)
+        H = float(headline.loc[bid])
+        vals = g['_shape'].to_numpy()
+        vals = vals - vals.mean() + H          # recenter the per-swing shape on the headline
+        curve = _kde_curve(vals, ISW_LO, ISW_HI)
         if curve is None:
             continue
-        out[str(int(bid))] = {'curve': curve, 'mean': round(float(vals.mean()), 1), 'n': int(len(vals))}
+        out[str(int(bid))] = {'curve': curve, 'mean': round(H, 0), 'n': int(len(g))}
     path = os.path.join(ROOT, 'public', f'iswing_dist_{season}.json')
     with open(path, 'w') as f:
         json.dump(out, f, separators=(',', ':'))

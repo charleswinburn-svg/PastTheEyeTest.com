@@ -169,6 +169,13 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
             </div>
           )}
         </div>
+        {/* === DISTRIBUTIONS (iSwing+ KDE + intercept heatmap) — inside cardRef so Save-as-PNG captures them === */}
+        <HitterDistributions
+          playerId={player.player_id}
+          team={player.team}
+          season={season}
+          isAAA={isAAA}
+        />
         <div style={{
           padding: "8px 16px 10px",
           display: "flex", justifyContent: "space-between",
@@ -195,14 +202,6 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           📥 Save as PNG
         </button>
       </div>
-
-      {/* === DISTRIBUTIONS (iSwing+ KDE + intercept heatmap) — MLB only === */}
-      <HitterDistributions
-        playerId={player.player_id}
-        team={player.team}
-        season={season}
-        isAAA={isAAA}
-      />
 
       {/* === ROLLING 50-PA CHART === */}
       <RollingChart

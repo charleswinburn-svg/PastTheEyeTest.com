@@ -20,13 +20,14 @@ function loadJson(cache, url) {
 export default function HitterDistributions({ playerId, team, season, isAAA = false }) {
   const { theme: t } = useTheme();
   const [dist, setDist] = useState(undefined);   // undefined=loading, null=none
+  const [distMeta, setDistMeta] = useState(null);
   const [icpt, setIcpt] = useState(undefined);
 
   useEffect(() => {
     if (isAAA || !playerId) { setDist(null); setIcpt(null); return; }
     let cancelled = false;
     setDist(undefined); setIcpt(undefined);
-    loadJson(distCache, `/iswing_dist_${season}.json`).then(m => { if (!cancelled) setDist((m && m[String(playerId)]) || null); });
+    loadJson(distCache, `/iswing_dist_${season}.json`).then(m => { if (!cancelled) { setDist((m && m[String(playerId)]) || null); setDistMeta(m?.meta || null); } });
     loadJson(icptCache, `/intercept_${season}.json`).then(m => { if (!cancelled) setIcpt((m && m[String(playerId)]) || null); });
     return () => { cancelled = true; };
   }, [playerId, season, isAAA]);
@@ -57,9 +58,9 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
       {hasCurve && (
         <div style={{ flex: "1 1 520px", maxWidth: 640 }}>
           <KdeCurve
-            title={`iSwing+ Distribution  ·  swing avg ${Math.round(dist.mean)}`}
+            title={`iSwing+ Distribution  ·  avg ${Math.round(dist.mean)}`}
             curves={[{ densities: dist.curve, color: teamColor, label: "iSwing+" }]}
-            xLo={40} xHi={160}
+            xLo={distMeta?.xLo ?? 40} xHi={distMeta?.xHi ?? 180}
             width={640} height={200}
             fill
             refLines={[
