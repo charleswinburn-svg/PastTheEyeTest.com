@@ -544,7 +544,7 @@ def write_intercept(scored_df, season, min_pts=20):
             side_sign = 1.0 if med_ix >= 0 else -1.0
             entry = {'pts': [[round(float(a), 1), round(float(b), 1)]
                              for a, b in zip(gs['_x'], gs['_y'])],
-                     'avgIx': round(med_ix, 1)}
+                     'avgIy': round(float(gs['_y'].median()), 1)}   # avg y-intercept (depth) → dashed line
             s = stance.get((int(bid), st))
             if s:
                 entry['plateX'] = round(side_sign * (s['avg_batter_x_position'] + 8.5), 1)
