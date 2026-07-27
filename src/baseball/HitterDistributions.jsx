@@ -19,12 +19,12 @@ function loadJson(cache, url) {
 const HAND_LABEL = { R: "Bats Right", L: "Bats Left", "?": "" };
 const PLATE_OFFSET = 30;   // fallback plate-center offset if the derived value is missing
 
-// Aerial (top-down) heatmap of a batter's ball-in-play contact, PLATE-CENTERED: home
-// plate sits at the origin (the fixed reference), contact is shifted into plate coords
-// (contact_x = intercept_x − plateX), and the batter's feet + COM sit off to the side at
-// their derived stance distance. Orientation is forced by hand — RHH on the left, LHH on
-// the right (standard aerial view), so it can't mirror the wrong way. Flat plate edge up
-// (pitcher), point down (catcher); equal inches-per-pixel so nothing is stretched.
+// Aerial (top-down) heatmap of a batter's ball-in-play contact, PLATE-CENTERED using
+// EXACT Savant stance geometry: home plate at the origin, its depth from plateFrontDepth
+// (plate front = that far in front of the COM); contact shifted into plate coords; the
+// batter's feet + COM at their true position (lower-side, deep in the box); a dashed line
+// at the average x-intercept. Orientation forced by hand (RHH left / LHH right) so it
+// can't mirror wrong. Flat plate edge up (pitcher), point down (catcher); equal in/px.
 function makeHeat(entry, stand) {
   const pts = Array.isArray(entry) ? entry : entry?.pts;
   if (!Array.isArray(pts) || pts.length < 8) return null;
@@ -32,38 +32,39 @@ function makeHeat(entry, stand) {
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   const dataHand = q(xs, 0.5) >= 0 ? 1 : -1;
   const plateX = (entry && typeof entry.plateX === "number") ? entry.plateX : dataHand * PLATE_OFFSET;
+  const pcDepth = (entry && typeof entry.plateFrontDepth === "number") ? entry.plateFrontDepth - 8.5 : 0; // plate CENTER depth in COM frame
+  const avgIx = (entry && typeof entry.avgIx === "number") ? entry.avgIx : q(xs, 0.5);
 
-  // Shift to plate frame (plate at origin) and force the batter onto the standard side:
-  // RHH left (−), LHH right (+). flip fixes the sign so it never mirrors wrong.
+  // Plate-centered + oriented: shift so plate center → origin, force RHH left / LHH right.
   const want = stand === "L" ? 1 : -1;
   const flip = ((-plateX >= 0 ? 1 : -1) === want) ? 1 : -1;
-  const cxOf = ix => flip * (ix - plateX);          // contact → plate frame, oriented
-  // Feet marker on the correct side, at a realistic stance distance (the raw derived
-  // distance is a reference-point offset that reads too far for a feet glyph).
-  const batterX = want * Math.min(26, Math.max(16, Math.abs(plateX)));
-  const cxs = xs.map(cxOf);
+  const dx = ix => flip * (ix - plateX);
+  const dy = iy => iy - pcDepth;
+  const cxs = xs.map(dx), cys = ys.map(dy);
 
-  const plateV = [[-8.5, 8.5], [8.5, 8.5], [8.5, 0], [0, -8.5], [-8.5, 0]];   // at origin
-  // Batter's feet: two ellipses straddling the COM in depth, toes toward the plate.
-  const toeDir = batterX >= 0 ? -1 : 1, sh = 10, fl = 5, fw = 2.2;
-  const feetC = [[batterX + toeDir * 3, sh], [batterX + toeDir * 3, -sh]];
+  const plateV = [[-8.5, 8.5], [8.5, 8.5], [8.5, 0], [0, -8.5], [-8.5, 0]];   // 17" plate at origin
+  const comX = dx(0), comY = dy(0);                 // batter COM (true position)
+  const dashX = dx(avgIx);                          // average x-intercept line
+  // Feet: two ellipses straddling the COM in depth, toes toward the plate.
+  const toeDir = comX >= 0 ? -1 : 1, sh = 10, fl = 5, fw = 2.2;
+  const feetC = [[comX + toeDir * 3, comY + sh], [comX + toeDir * 3, comY - sh]];
 
   // Frame: contact cloud (2–98 pctile + pad) expanded to include plate + feet/COM.
-  let xMin = q(cxs, 0.02), xMax = q(cxs, 0.98), yMin = q(ys, 0.02), yMax = q(ys, 0.98);
+  let xMin = q(cxs, 0.02), xMax = q(cxs, 0.98), yMin = q(cys, 0.02), yMax = q(cys, 0.98);
   const padX = (xMax - xMin) * 0.1 + 1, padY = (yMax - yMin) * 0.1 + 1;
   xMin -= padX; xMax += padX; yMin -= padY; yMax += padY;
-  const incl = [[-8.5, 8.5], [8.5, -8.5], [batterX + toeDir * 3 - fl, sh + fw], [batterX + toeDir * 3 + fl, -sh - fw]];
+  const incl = [[-8.5, 8.5], [8.5, -8.5], [comX + toeDir * 3 - fl, comY + sh + fw], [comX + toeDir * 3 + fl, comY - sh - fw], [dashX, 0]];
   for (const [px, py] of incl) { xMin = Math.min(xMin, px); xMax = Math.max(xMax, px); yMin = Math.min(yMin, py); yMax = Math.max(yMax, py); }
   yMin -= 3;
 
   let spanX = xMax - xMin, spanY = yMax - yMin;
-  const aspect = Math.min(1.3, Math.max(0.6, spanX / spanY));
+  const aspect = Math.min(1.35, Math.max(0.6, spanX / spanY));
   if (spanX / spanY < aspect) { const need = spanY * aspect - spanX; xMin -= need / 2; xMax += need / 2; }
   else if (spanX / spanY > aspect) { const need = spanX / aspect - spanY; yMin -= need / 2; yMax += need / 2; }
   spanX = xMax - xMin; spanY = yMax - yMin;
-  const H = 196, W = Math.max(110, Math.round(H * spanX / spanY));
+  const H = 200, W = Math.max(120, Math.round(H * spanX / spanY));
 
-  const P = pts.map(([x, y]) => ({ pX: cxOf(x), pZ: y }));
+  const P = pts.map(([x, y]) => ({ pX: dx(x), pZ: dy(y) }));
   const sigma = Math.max(1.4, spanX * 0.03);
   let url;
   try { url = renderHeatmapCanvas(P, xMin, xMax, yMin, yMax, W, H, sigma); } catch { return null; }
@@ -73,8 +74,9 @@ function makeHeat(entry, stand) {
   const scl = W / spanX;   // equal inches-per-pixel
   const plate = plateV.map(([x, y]) => `${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join(" ");
   const feet = feetC.map(([x, y]) => ({ cx: sx(x), cy: sy(y), rx: fl * scl, ry: fw * scl }));
-  const com = { cx: sx(batterX), cy: sy(0), r: Math.max(2, 1.7 * scl) };
-  return { url, n: pts.length, W, H, plate, feet, com };
+  const com = { cx: sx(comX), cy: sy(comY), r: Math.max(2, 1.7 * scl) };
+  const dash = { x: sx(dashX), y1: 4, y2: H - 4 };
+  return { url, n: pts.length, W, H, plate, feet, com, dash };
 }
 
 // Two figures below the hitter card: (1) a large KDE of the hitter's own per-swing
@@ -148,6 +150,9 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
                        style={{ borderRadius: 8, border: `1px solid ${t.divider}`, background: t.inputBg, display: "block" }} />
                   <svg width={h.W} height={h.H} viewBox={`0 0 ${h.W} ${h.H}`}
                        style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+                    {/* dashed line: average x-intercept */}
+                    <line x1={h.dash.x} y1={h.dash.y1} x2={h.dash.x} y2={h.dash.y2}
+                          stroke={teamColor} strokeWidth={1.3} strokeDasharray="4 3" opacity={0.9} />
                     {/* home plate (white halo + dark line so it reads on any color) */}
                     <polygon points={h.plate} fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.75)" strokeWidth={2.6} strokeLinejoin="round" />
                     <polygon points={h.plate} fill="none" stroke="rgba(15,15,15,0.82)" strokeWidth={1.2} strokeLinejoin="round" />
@@ -166,7 +171,7 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
             ))}
           </div>
           <div style={{ fontSize: 8, color: t.textFaint, marginTop: 4 }}>
-            ● = batter (feet) · outline = home plate (17″) · aerial view · pitcher ↑
+            ● = batter (feet) · plate = 17″ · dashed = avg contact · aerial · pitcher ↑
           </div>
         </div>
       )}

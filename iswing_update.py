@@ -515,44 +515,43 @@ def write_intercept(scored_df, season, min_pts=20):
         log('  intercept: columns present but no valid in-play points this season — skipping')
         return
 
-    # ── Derive the home-plate position from the batter's stance ──
-    # Contact points stay batter-relative (COM at the origin). Savant has no plate-
-    # relative field, so we DERIVE where the plate sits in the batter frame: the plate
-    # center is the intercept_x you'd get for a ball over the plate's middle, i.e.
-    # median(intercept_x − s·plate_x·12), where s aligns plate_x to the intercept
-    # orientation per hand (their sign conventions may differ). Emitted per hand as
-    # plateX so the card can draw the plate + the batter's feet. Depth isn't derivable
-    # (no ball-depth-at-plate field), so the card centers the plate on the COM depth.
-    plate_offset = {}   # (batter_id, stand) -> plate-center x in the batter frame (inches)
-    if 'plate_x' in df.columns:
-        df['_px'] = pd.to_numeric(df['plate_x'], errors='coerce') * 12.0
-        sign = {}
-        for st in ('L', 'R'):
-            cm = (df['_stand'] == st) & df['_px'].notna()
-            if cm.sum() >= 30:
-                c = df.loc[cm, '_px'].corr(df.loc[cm, '_x'])
-                sign[st] = -1.0 if (pd.notna(c) and c < 0) else 1.0
-                log(f'   plate-cal {st}: sign={sign[st]:+.0f}  median(plate_x_in)={df.loc[cm,"_px"].median():.1f}  median(intercept_x)={df.loc[cm,"_x"].median():.1f}')
-        for (bid, st), g in df.dropna(subset=['_px']).groupby(['batter', '_stand']):
-            if st in ('L', 'R') and len(g) >= min_pts:
-                s = sign.get(st, 1.0)
-                plate_offset[(int(bid), st)] = round(float((g['_x'] - s * g['_px']).median()), 1)
+    # ── Exact home-plate position from Savant's batting-stance leaderboard ──
+    # Contact points stay batter-relative (COM at origin). The stance leaderboard gives
+    # exact geometry per (player, hand): plate FRONT is avg_batter_y_position in front of
+    # the COM (depth), plate CENTER is (avg_batter_x_position + 8.5) to the contact side.
+    # We emit plateX (lateral, COM frame), plateFrontDepth (COM frame) and avgIx (average
+    # x-intercept, for the dashed line). If the fetch fails we fall back to a per-pitch
+    # estimate of plateX (median intercept_x) so the pipeline never breaks.
+    try:
+        from batting_stance import fetch_batting_stance
+        stance = fetch_batting_stance(season)
+        log(f'  intercept: fetched batting-stance geometry for {len(stance)} (player,hand) rows')
+    except Exception as e:
+        stance = {}
+        log(f'  intercept: batting-stance fetch failed ({e}); falling back to per-pitch estimate')
 
     out = {'meta': {'season': season, 'xField': xcol, 'yField': ycol, 'units': 'inches',
                     'splitByStand': True, 'frame': 'batter', 'ballsInPlay': True,
-                    'derivedPlate': bool(plate_offset)}}
-    n_hitters = n_switch = 0
+                    'exactPlate': bool(stance)}}
+    n_hitters = n_switch = n_exact = 0
     for bid, g in df.groupby('batter'):
         stands = {}
         for st, gs in g.groupby('_stand'):
             gs = gs.dropna(subset=['_x', '_y'])
             if st not in ('L', 'R') or len(gs) < min_pts:
                 continue
+            med_ix = float(gs['_x'].median())
+            side_sign = 1.0 if med_ix >= 0 else -1.0
             entry = {'pts': [[round(float(a), 1), round(float(b), 1)]
-                             for a, b in zip(gs['_x'], gs['_y'])]}
-            po = plate_offset.get((int(bid), st))
-            if po is not None:
-                entry['plateX'] = po
+                             for a, b in zip(gs['_x'], gs['_y'])],
+                     'avgIx': round(med_ix, 1)}
+            s = stance.get((int(bid), st))
+            if s:
+                entry['plateX'] = round(side_sign * (s['avg_batter_x_position'] + 8.5), 1)
+                entry['plateFrontDepth'] = round(s['avg_batter_y_position'], 1)
+                n_exact += 1
+            else:
+                entry['plateX'] = round(med_ix, 1)   # fallback: plate ≈ contact median
             stands[st] = entry
         if not stands:
             continue
@@ -562,7 +561,7 @@ def write_intercept(scored_df, season, min_pts=20):
     path = os.path.join(ROOT, 'public', f'intercept_{season}.json')
     with open(path, 'w') as f:
         json.dump(out, f, separators=(',', ':'))
-    log(f'  Wrote {path}: {n_hitters} hitters ({n_switch} switch, {len(plate_offset)} plate-cal) (x={xcol}, y={ycol})')
+    log(f'  Wrote {path}: {n_hitters} hitters ({n_switch} switch, {n_exact} exact-plate) (x={xcol}, y={ycol})')
 
 
 def main():
