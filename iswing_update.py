@@ -475,9 +475,11 @@ _INT_Y = ['intercept_ball_minus_batter_pos_y_inches', 'intercept_ball_minus_batt
 
 def write_intercept(scored_df, season, min_pts=20):
     """public/intercept_{season}.json — per hitter, bat-ball contact points
-    [x_side, y_depth] (inches) for the top-down intercept heatmap. Keyed by
-    batter id. Skips (with a diagnostic) if Savant's intercept columns aren't
-    present, so the rest of the pipeline is unaffected."""
+    [x_side, y_depth] (inches) for the top-down (aerial) intercept heatmap, SPLIT
+    by batting hand (stand): {batterId: {"L": [[x,y],…], "R": [[x,y],…]}}. Switch
+    hitters (>= min_pts from both sides) get both; everyone else gets one. The card
+    renders one labeled panel per stand. Skips (with a diagnostic) if Savant's
+    intercept columns aren't present, so the rest of the pipeline is unaffected."""
     xcol = next((c for c in _INT_X if c in scored_df.columns), None)
     ycol = next((c for c in _INT_Y if c in scored_df.columns), None)
     if not xcol or not ycol:
@@ -488,19 +490,30 @@ def write_intercept(scored_df, season, min_pts=20):
     df['year'] = pd.to_datetime(df['game_date'], errors='coerce').dt.year
     df['_x'] = pd.to_numeric(df[xcol], errors='coerce')
     df['_y'] = pd.to_numeric(df[ycol], errors='coerce')
+    df['_stand'] = (df['stand'].astype(str).str.upper().str[0]
+                    if 'stand' in df.columns else '?')
     df = df[(df['year'] == season) & df['_x'].notna() & df['_y'].notna() & df['batter'].notna()]
     if len(df) == 0:
         log('  intercept: columns present but no valid points this season — skipping')
         return
-    out = {'meta': {'season': season, 'xField': xcol, 'yField': ycol, 'units': 'inches'}}
+    out = {'meta': {'season': season, 'xField': xcol, 'yField': ycol, 'units': 'inches', 'splitByStand': True}}
+    n_hitters = n_switch = 0
     for bid, g in df.groupby('batter'):
-        if len(g) < min_pts:
+        stands = {}
+        for st, gs in g.groupby('_stand'):
+            if st not in ('L', 'R') or len(gs) < min_pts:
+                continue
+            stands[st] = [[round(float(a), 1), round(float(b), 1)]
+                          for a, b in zip(gs['_x'], gs['_y'])]
+        if not stands:
             continue
-        out[str(int(bid))] = [[round(float(a), 1), round(float(b), 1)] for a, b in zip(g['_x'], g['_y'])]
+        out[str(int(bid))] = stands
+        n_hitters += 1
+        n_switch += (len(stands) > 1)
     path = os.path.join(ROOT, 'public', f'intercept_{season}.json')
     with open(path, 'w') as f:
         json.dump(out, f, separators=(',', ':'))
-    log(f'  Wrote {path}: {len(out) - 1} hitters (x={xcol}, y={ycol})')
+    log(f'  Wrote {path}: {n_hitters} hitters ({n_switch} switch) (x={xcol}, y={ycol})')
 
 
 def main():
