@@ -12,12 +12,29 @@ Cron (daily at 8 AM):
     0 8 * * * cd /path/to/PastTheEyeTest.com && python3 iswing_update.py >> logs/iswing_update.log 2>&1
 """
 
-import os, sys, json, time, warnings
+import os, sys, json, time, warnings, re, unicodedata
 warnings.filterwarnings('ignore')
 
 import pandas as pd
 import numpy as np
 from datetime import date, datetime, timedelta
+
+
+# Name normalization — MUST match the frontend's nameKey() (SharedComponents.jsx)
+# so build_json writes/overwrites the exact keys fuzzyLookup resolves to. Recent
+# pybaseball returns lowercase names; without this, fresh lowercase keys ("pete
+# alonso") never overwrite legacy capitalized ones ("Pete Alonso"), freezing the
+# card headline. _name_key collapses case/accents/punctuation/suffixes to one key.
+_SUFFIX_RE = re.compile(r'\b(jr|sr|ii|iii|iv)\b')
+
+def _name_key(s):
+    s = unicodedata.normalize('NFD', str(s))
+    s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')  # strip accents
+    s = s.lower()
+    s = re.sub(r'[.\-,]', '', s)
+    s = _SUFFIX_RE.sub('', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
 
 # ── Paths ──
 ROOT        = os.path.dirname(os.path.abspath(__file__))
@@ -240,18 +257,75 @@ def resolve_batter_names(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _title_name(name):
+    """pybaseball "Last, First" (any case) -> "First Last" display. Only capitalizes
+    all-lower/all-upper tokens so intentional mixed case (McCutchen, O'Neill) survives."""
+    name = str(name)
+    if ', ' in name:
+        last, first = name.split(', ', 1)
+    else:
+        parts = name.split()
+        first, last = (parts[0], ' '.join(parts[1:])) if len(parts) > 1 else (name, '')
+    disp = f'{first} {last}'.strip()
+    return ' '.join(w if any(c.isupper() for c in w[1:]) else w.capitalize()
+                    for w in disp.split() if w)
+
+
+def _canon_rank(k):
+    """Sort key for choosing the canonical display key among case/format variants:
+    prefer a capitalized First-Last (no comma) key — that's what the frontend's
+    h.name lookup hits."""
+    has_comma = ',' in k
+    cap = bool(k) and k[:1].isupper()
+    return (cap and not has_comma, cap, not has_comma, len(k))
+
+
+def _dedupe_by_namekey(existing):
+    """Collapse case/format-variant duplicate keys (e.g. the legacy 'Pete Alonso'
+    and pybaseball's new lowercase 'pete alonso') into ONE canonical key per player,
+    merging all years so history is preserved. Returns (out, canon_map) where
+    canon_map maps _name_key(display) -> canonical key."""
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for k in existing:
+        groups[_name_key(k)].append(k)
+    out, canon_map = {}, {}
+    for nk, keys in groups.items():
+        canon = max(keys, key=_canon_rank)
+        merged = {}
+        for k in sorted(keys, key=_canon_rank):   # least→most preferred: canonical wins conflicts
+            merged.update(existing[k])
+        out[canon] = merged
+        canon_map[nk] = canon
+    return out, canon_map
+
+
+def _drop_redundant_lf_keys(out, canon_map):
+    """Remove leftover 'Last, First' duplicate keys whose data is already fully
+    contained in the canonical 'First Last' entry (so nothing is lost)."""
+    for k in [k for k in list(out) if ', ' in k]:
+        last, first = k.split(', ', 1)
+        canon = canon_map.get(_name_key(f'{first} {last}'))
+        if canon and canon != k and canon in out and set(out[k]) <= set(out[canon]):
+            del out[k]
+
+
 def build_json(scored_df: pd.DataFrame, existing_json: dict) -> dict:
     """
-    Compute per-year iSwing+ (within-year normalized) for all years present
-    in scored_df, then merge with existing_json (preserving historical years
-    from prior notebook runs for any player not in current data).
+    Compute per-year iSwing+ (within-year normalized) for all years present in
+    scored_df, then merge into existing_json — OVERWRITING each player's entry in
+    place under a canonical First-Last key (resolved via _name_key, matching the
+    frontend's nameKey/fuzzyLookup). This replaces stale values instead of letting
+    fresh lowercase pybaseball names ("pete alonso") pile up beside legacy
+    capitalized ones ("Pete Alonso") and freeze the card headline.
     """
     name_col = 'batter_name'
     scored_df = scored_df[scored_df[name_col].notna()].copy()
     scored_df['year'] = pd.to_datetime(scored_df['game_date'], errors='coerce').dt.year
 
     current_year = date.today().year
-    out = dict(existing_json)  # start from existing — preserves 2023/2024/2025
+    # Start from existing, collapsing case/format-variant duplicates into one key/player.
+    out, canon_map = _dedupe_by_namekey(existing_json)
 
     years = sorted(scored_df['year'].dropna().unique())
     for yr in years:
@@ -275,22 +349,21 @@ def build_json(scored_df: pd.DataFrame, existing_json: dict) -> dict:
         yr_key  = str(yr)
         pct_key = f'{yr}_pct'
         for _, row in yr_agg.iterrows():
-            name = row[name_col]
+            name  = row[name_col]                 # pybaseball, e.g. "alonso, pete" (lowercase)
             score = int(row['score'])
             pct   = int(row['pct'])
 
-            # Write under "First Last" format
-            ff_name = name
-            if ', ' in name:
-                parts = name.split(', ', 1)
-                ff_name = f'{parts[1]} {parts[0]}'
+            # Canonical First-Last display key (what the frontend h.name lookup hits).
+            ff_name = _title_name(name)           # "Pete Alonso"
+            nk = _name_key(ff_name)
+            canon = canon_map.get(nk)
+            if canon is None:                     # brand-new player — register canonical
+                canon = ff_name
+                canon_map[nk] = canon
+            out.setdefault(canon, {})[yr_key]  = score
+            out[canon][pct_key] = pct
 
-            for n in [ff_name, name]:
-                if n not in out:
-                    out[n] = {}
-                out[n][yr_key]  = score
-                out[n][pct_key] = pct
-
+    _drop_redundant_lf_keys(out, canon_map)
     return out
 
 
@@ -354,16 +427,28 @@ def write_iswing_dist(scored_df, season, updated_json=None, min_swings=25):
         sig = 1.0
     fallback_headline = 100 + 15 * (log_mean - mu) / sig
 
-    # Map each batter id -> the exact published iSwing+ from updated_json. build_json
-    # keys by batter_name ("Last, First" and "First Last"); resolve via batter_name.
+    # Map each batter id -> the exact published iSwing+ from updated_json, resolving
+    # names the SAME way the frontend does: match on _name_key (case/accent-insensitive)
+    # and try the "First Last" reorder of the batter_name, so the curve centers on the
+    # value the card headline actually shows regardless of key case/order.
     published = {}
     if updated_json:
         yr_key = str(season)
+        nk_index = {}
+        for k, v in updated_json.items():
+            if isinstance(v, dict) and v.get(yr_key) is not None:
+                nk_index.setdefault(_name_key(k), v[yr_key])
         names = df.dropna(subset=['batter_name']).groupby('batter')['batter_name'].first()
         for bid, nm in names.items():
-            entry = updated_json.get(nm)
-            if entry and yr_key in entry:
-                published[bid] = float(entry[yr_key])
+            nm = str(nm)
+            cand = [_name_key(nm)]
+            if ', ' in nm:
+                last, first = nm.split(', ', 1)
+                cand.append(_name_key(f'{first} {last}'))
+            for nk in cand:
+                if nk in nk_index:
+                    published[bid] = float(nk_index[nk])
+                    break
 
     out = {'meta': {'season': season, 'xLo': ISW_LO, 'xHi': ISW_HI, 'nPts': KDE_N, 'leagueMean': 100}}
     for bid, g in df.groupby('batter'):
