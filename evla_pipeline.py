@@ -27,6 +27,8 @@ import time
 import unicodedata
 from io import StringIO
 
+from savant_fetch import fetch_savant_range  # robust chunked fetch (handles the 25k cap)
+
 # ============================================================
 # CONFIG
 # ============================================================
@@ -128,13 +130,14 @@ def get_date_ranges(season, season_type="R"):
 
 
 def fetch_savant_chunk(season, start, end, game_type="R"):
-    gt = "R%7C" if game_type == "R" else "E%7C"
-    url = (
-        f"{SAVANT_BASE}/statcast_search/csv?all=true&type=detail"
-        f"&player_type=batter&hfGT={gt}&hfSea={season}%7C"
-        f"&game_date_gt={start}&game_date_lt={end}"
-    )
-    return csv_to_df(fetch_url(url))
+    """Fetch a date range of Savant pitches (batter-keyed).
+
+    Delegates to savant_fetch.fetch_savant_range, which chunks into 4-day windows
+    and recursively splits any window that hits Savant's 25k-row cap — so a
+    ~2-week span returns COMPLETE instead of truncated at 25,000 rows (the old
+    single-request path was capping busy windows and dropping batted balls)."""
+    return fetch_savant_range(season, start, end,
+                              player_type="batter", game_type=game_type)
 
 
 # ============================================================
