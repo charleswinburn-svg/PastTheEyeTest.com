@@ -1441,14 +1441,15 @@ export function HitterCountTool({ pitches, leagueAvgs, isAAA }) {
 // Game = colored dots, Season = heatmap
 // ═══════════════════════════════════════════════════════════
 
-// Render smooth KDE heatmap to canvas, return data URL
-function renderHeatmapCanvas(pitches, xMin, xMax, zMin, zMax, canvasW, canvasH) {
+// Render smooth KDE heatmap to canvas, return data URL. `sigmaFt` is the Gaussian
+// blob radius in the SAME units as xMin..xMax (feet for the strike zone; pass a
+// larger value for coarser coordinate systems like inches).
+export function renderHeatmapCanvas(pitches, xMin, xMax, zMin, zMax, canvasW, canvasH, sigmaFt = 0.35) {
   const cols = canvasW, rows = canvasH;
   const grid = Array.from({ length: rows }, () => new Array(cols).fill(0));
   const cw = (xMax - xMin) / cols, ch = (zMax - zMin) / rows;
 
   // KDE with wide Gaussian kernel for smooth blobs
-  const sigmaFt = 0.35; // sigma in feet — controls blob size
   const sigmaC = sigmaFt / cw, sigmaR = sigmaFt / ch;
   const radiusC = Math.ceil(sigmaC * 3), radiusR = Math.ceil(sigmaR * 3);
   const invSigC2 = 1 / (2 * sigmaC * sigmaC);
