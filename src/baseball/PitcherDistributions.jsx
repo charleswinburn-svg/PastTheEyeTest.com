@@ -39,7 +39,7 @@ export default function PitcherDistributions({ playerId, season, isAAA = false }
   const { loading, entry, meta } = state;
   if (isAAA || loading || !entry) return null;   // quiet if AAA / loading / no data
 
-  const xLo = meta?.xLo ?? 40, xHi = meta?.xHi ?? 160;
+  const xLo = meta?.xLo ?? 70, xHi = meta?.xHi ?? 130;
   const typeSet = new Set();
   for (const [m] of METRICS) for (const [h] of HANDS) Object.keys(entry[m]?.[h] || {}).forEach(pt => typeSet.add(pt));
   const types = [...typeSet];

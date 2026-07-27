@@ -31,9 +31,9 @@ import score_pitches as sp   # production feature-engineering + models
 ROOT = Path(__file__).resolve().parent
 DEFAULT_SEASON = 2026
 
-# All grades render on one shared x-scale (they're ~100-centered; compute_plus
-# clips z to +-4 so Stuff+ spans ~[52,146], the others ~[60,140]).
-X_LO, X_HI, N_PTS = 40.0, 160.0, 64
+# All grades render on one shared x-scale, clamped to [70, 130] (grades are
+# ~100-centered; the curve is plotted only over this window, tails outside clipped).
+X_LO, X_HI, N_PTS = 70.0, 130.0, 64
 GRID = np.linspace(X_LO, X_HI, N_PTS)
 
 MIN_PER_CURVE = 20        # min pitches for a (pitcher, metric, hand, type) curve
