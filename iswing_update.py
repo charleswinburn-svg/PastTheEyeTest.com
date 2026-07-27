@@ -116,6 +116,19 @@ def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
 
 def enrich(df: pd.DataFrame) -> pd.DataFrame:
     """Add derived features needed by the model."""
+    # A full-season re-fetch (or a raw CSV load) can leave numeric Savant columns as
+    # object dtype, which breaks np.sqrt / arithmetic below ("'float' object has no
+    # attribute 'sqrt'"). Coerce every column the derived features touch up front.
+    NUMERIC_COLS = [
+        'plate_x', 'plate_z', 'sz_top', 'sz_bot', 'pfx_x', 'pfx_z',
+        'balls', 'strikes', 'attack_direction', 'attack_angle',
+        'bat_speed', 'release_speed', 'launch_speed', 'launch_angle',
+        'estimated_woba_using_speedangle',
+    ]
+    for c in NUMERIC_COLS:
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors='coerce')
+
     if 'attack_angle' in df.columns:
         df['ideal_attack_angle'] = df['attack_angle'].between(5, 20).fillna(False).astype(int)
 
@@ -308,10 +321,10 @@ def _kde_curve(vals, lo=KDE_LO, hi=KDE_HI):
 ISW_LO, ISW_HI = 40.0, 180.0
 
 
-def write_iswing_dist(scored_df, season, min_swings=25):
+def write_iswing_dist(scored_df, season, updated_json=None, min_swings=25):
     """public/iswing_dist_{season}.json — per hitter, a KDE curve of their per-swing
-    iSwing+ CENTERED on the hitter's published iSwing+ (the player-mean normalization
-    build_json uses), so the curve's average matches the card's headline number.
+    iSwing+ CENTERED on the hitter's PUBLISHED iSwing+ (the exact number the card's
+    headline shows, read from updated_json), so the curve's average matches the card.
     The spread comes from the per-swing league scale; league line stays at 100.
     Keyed by batter id so the card can look it up by player_id."""
     df = scored_df.copy()
@@ -329,8 +342,9 @@ def write_iswing_dist(scored_df, season, min_swings=25):
         s_sw = 1.0
     df = df.assign(_shape=100 + 15 * (lr - m_sw) / s_sw)
 
-    # Headline iSwing+ per hitter: log of the hitter's MEAN raw_value, normalized
-    # against the pool of qualified hitters' log-means (identical to build_json).
+    # Fallback headline (only used when a hitter isn't in the published JSON): log of
+    # the hitter's MEAN raw_value, normalized against qualified hitters' log-means —
+    # the same math build_json uses. Preferred source is the published iSwing+ below.
     grp = df.groupby('batter')
     cnt = grp.size()
     log_mean = np.log(grp['raw_value'].mean().clip(lower=1e-10))
@@ -338,13 +352,26 @@ def write_iswing_dist(scored_df, season, min_swings=25):
     mu, sig = float(pool.mean()), float(pool.std())
     if not np.isfinite(sig) or sig <= 0:
         sig = 1.0
-    headline = 100 + 15 * (log_mean - mu) / sig
+    fallback_headline = 100 + 15 * (log_mean - mu) / sig
+
+    # Map each batter id -> the exact published iSwing+ from updated_json. build_json
+    # keys by batter_name ("Last, First" and "First Last"); resolve via batter_name.
+    published = {}
+    if updated_json:
+        yr_key = str(season)
+        names = df.dropna(subset=['batter_name']).groupby('batter')['batter_name'].first()
+        for bid, nm in names.items():
+            entry = updated_json.get(nm)
+            if entry and yr_key in entry:
+                published[bid] = float(entry[yr_key])
 
     out = {'meta': {'season': season, 'xLo': ISW_LO, 'xHi': ISW_HI, 'nPts': KDE_N, 'leagueMean': 100}}
     for bid, g in df.groupby('batter'):
         if len(g) < min_swings:
             continue
-        H = float(headline.loc[bid])
+        H = published.get(bid)
+        if H is None:
+            H = float(fallback_headline.loc[bid])   # not in published JSON — recompute
         vals = g['_shape'].to_numpy()
         vals = vals - vals.mean() + H          # recenter the per-swing shape on the headline
         curve = _kde_curve(vals, ISW_LO, ISW_HI)
@@ -354,7 +381,7 @@ def write_iswing_dist(scored_df, season, min_swings=25):
     path = os.path.join(ROOT, 'public', f'iswing_dist_{season}.json')
     with open(path, 'w') as f:
         json.dump(out, f, separators=(',', ':'))
-    log(f'  Wrote {path}: {len(out) - 1} hitters')
+    log(f'  Wrote {path}: {len(out) - 1} hitters  ({len(published)} from published JSON)')
 
 
 _INT_X = ['intercept_ball_minus_batter_pos_x_inches', 'intercept_ball_minus_batter_pos_x', 'contact_x']
@@ -489,7 +516,7 @@ def main():
     # ── Hitter-card distribution + intercept-heatmap files (current season) ──
     season = date.today().year
     log('Building hitter-card distribution files...')
-    write_iswing_dist(all_2026, season)
+    write_iswing_dist(all_2026, season, updated_json=updated_json)
     write_intercept(all_2026, season)
 
     # ── Summary ──
