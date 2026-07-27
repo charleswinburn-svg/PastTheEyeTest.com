@@ -469,23 +469,34 @@ def write_iswing_dist(scored_df, season, updated_json=None, min_swings=25):
     log(f'  Wrote {path}: {len(out) - 1} hitters  ({len(published)} from published JSON)')
 
 
-_INT_X = ['intercept_ball_minus_batter_pos_x_inches', 'intercept_ball_minus_batter_pos_x', 'contact_x']
-_INT_Y = ['intercept_ball_minus_batter_pos_y_inches', 'intercept_ball_minus_batter_pos_y', 'contact_y']
+# Intercept-point columns. Prefer "relative to home plate" (a true aerial view w.r.t.
+# the plate → the plate sits at the origin) when Savant exposes it; otherwise fall back
+# to the batter-relative fields. Exact plate-relative names confirmed via a live dump.
+_INT_X_PLATE  = ['intercept_ball_minus_plate_pos_x_inches', 'intercept_ball_minus_homeplate_pos_x_inches', 'intercept_ball_minus_home_plate_pos_x_inches']
+_INT_Y_PLATE  = ['intercept_ball_minus_plate_pos_y_inches', 'intercept_ball_minus_homeplate_pos_y_inches', 'intercept_ball_minus_home_plate_pos_y_inches']
+_INT_X_BATTER = ['intercept_ball_minus_batter_pos_x_inches', 'intercept_ball_minus_batter_pos_x', 'contact_x']
+_INT_Y_BATTER = ['intercept_ball_minus_batter_pos_y_inches', 'intercept_ball_minus_batter_pos_y', 'contact_y']
+_INT_X = _INT_X_PLATE + _INT_X_BATTER
+_INT_Y = _INT_Y_PLATE + _INT_Y_BATTER
+
+# Balls in play only — the description values Statcast uses for a ball put in play.
+_INPLAY = {'hit_into_play', 'hit_into_play_no_out', 'hit_into_play_score'}
 
 
 def write_intercept(scored_df, season, min_pts=20):
-    """public/intercept_{season}.json — per hitter, bat-ball contact points
-    [x_side, y_depth] (inches) for the top-down (aerial) intercept heatmap, SPLIT
-    by batting hand (stand): {batterId: {"L": [[x,y],…], "R": [[x,y],…]}}. Switch
-    hitters (>= min_pts from both sides) get both; everyone else gets one. The card
-    renders one labeled panel per stand. Skips (with a diagnostic) if Savant's
-    intercept columns aren't present, so the rest of the pipeline is unaffected."""
+    """public/intercept_{season}.json — per hitter, BALL-IN-PLAY contact points
+    [x, y] (inches) for the top-down (aerial) intercept heatmap, SPLIT by batting
+    hand (stand): {batterId: {"L": [[x,y],…], "R": [[x,y],…]}}. Switch hitters
+    (>= min_pts from both sides) get both; everyone else gets one. meta.frame is
+    'plate' when plate-relative columns are used (plate at origin) else 'batter'.
+    Skips (with a diagnostic) if Savant's intercept columns aren't present."""
     xcol = next((c for c in _INT_X if c in scored_df.columns), None)
     ycol = next((c for c in _INT_Y if c in scored_df.columns), None)
     if not xcol or not ycol:
         cand = [c for c in scored_df.columns if 'intercept' in c.lower() or 'contact' in c.lower()]
         log(f'  intercept: no known intercept columns found; skipping. Present intercept/contact cols: {cand}')
         return
+    frame = 'plate' if xcol in _INT_X_PLATE else 'batter'
     df = scored_df.copy()
     df['year'] = pd.to_datetime(df['game_date'], errors='coerce').dt.year
     df['_x'] = pd.to_numeric(df[xcol], errors='coerce')
@@ -493,10 +504,17 @@ def write_intercept(scored_df, season, min_pts=20):
     df['_stand'] = (df['stand'].astype(str).str.upper().str[0]
                     if 'stand' in df.columns else '?')
     df = df[(df['year'] == season) & df['_x'].notna() & df['_y'].notna() & df['batter'].notna()]
+    # Balls in play only (drop fouls / swinging strikes / etc.).
+    before = len(df)
+    if 'description' in df.columns:
+        df = df[df['description'].astype(str).isin(_INPLAY)]
+    elif 'events' in df.columns:
+        df = df[df['events'].notna() & df['events'].astype(str).str.strip().ne('')]
+    log(f'  intercept: balls-in-play filter {before} -> {len(df)} rows (frame={frame}, x={xcol})')
     if len(df) == 0:
-        log('  intercept: columns present but no valid points this season — skipping')
+        log('  intercept: columns present but no valid in-play points this season — skipping')
         return
-    out = {'meta': {'season': season, 'xField': xcol, 'yField': ycol, 'units': 'inches', 'splitByStand': True}}
+    out = {'meta': {'season': season, 'xField': xcol, 'yField': ycol, 'units': 'inches', 'splitByStand': True, 'frame': frame, 'ballsInPlay': True}}
     n_hitters = n_switch = 0
     for bid, g in df.groupby('batter'):
         stands = {}
