@@ -545,7 +545,11 @@ def write_intercept(scored_df, season, min_pts=20):
             entry = {'pts': [[round(float(a), 1), round(float(b), 1)]
                              for a, b in zip(gs['_x'], gs['_y'])],
                      'avgIy': round(float(gs['_y'].median()), 1)}   # avg y-intercept (depth) → dashed line
-            s = stance.get((int(bid), st))
+            # The leaderboard gives ONE stance row per player (it doesn't split switch
+            # hitters), so fall back to the other side's row — a switch hitter's two
+            # stances are ~mirror images and side_sign already flips the lateral — so
+            # both panels stay on the same exact geometry instead of one estimating.
+            s = stance.get((int(bid), st)) or stance.get((int(bid), 'R' if st == 'L' else 'L'))
             if s:
                 entry['plateX'] = round(side_sign * (s['avg_batter_x_position'] + 8.5), 1)
                 entry['plateFrontDepth'] = round(s['avg_batter_y_position'], 1)
