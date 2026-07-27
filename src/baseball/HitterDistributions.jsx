@@ -19,29 +19,40 @@ function loadJson(cache, url) {
 const HAND_LABEL = { R: "Bats Right", L: "Bats Left", "?": "" };
 const PLATE_OFFSET = 30;   // fallback plate-center offset if the derived value is missing
 
-// One aerial (top-down) heatmap of a batter's ball-in-play contact points, relative to
-// the batter's center of mass (at the origin). Overlays the batter's feet + COM and a
-// to-scale (17") home plate at plateX (derived from stance). Flat plate edge toward the
-// pitcher (up), point toward the catcher (down). Equal inches-per-pixel so nothing is
-// stretched. Returns pixel geometry for the SVG overlay (drawn with theme colors).
-function makeHeat(entry) {
+// Aerial (top-down) heatmap of a batter's ball-in-play contact, PLATE-CENTERED: home
+// plate sits at the origin (the fixed reference), contact is shifted into plate coords
+// (contact_x = intercept_x − plateX), and the batter's feet + COM sit off to the side at
+// their derived stance distance. Orientation is forced by hand — RHH on the left, LHH on
+// the right (standard aerial view), so it can't mirror the wrong way. Flat plate edge up
+// (pitcher), point down (catcher); equal inches-per-pixel so nothing is stretched.
+function makeHeat(entry, stand) {
   const pts = Array.isArray(entry) ? entry : entry?.pts;
   if (!Array.isArray(pts) || pts.length < 8) return null;
   const q = (arr, p) => { const s = [...arr].sort((a, b) => a - b); return s[Math.floor((s.length - 1) * p)]; };
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
-  const hand = q(xs, 0.5) >= 0 ? 1 : -1;
+  const dataHand = q(xs, 0.5) >= 0 ? 1 : -1;
+  const plateX = (entry && typeof entry.plateX === "number") ? entry.plateX : dataHand * PLATE_OFFSET;
 
-  const plateCx = (entry && typeof entry.plateX === "number") ? entry.plateX : hand * PLATE_OFFSET;
-  const plateV = [[plateCx - 8.5, 8.5], [plateCx + 8.5, 8.5], [plateCx + 8.5, 0], [plateCx, -8.5], [plateCx - 8.5, 0]];
-  // Batter's feet: two ellipses straddling the origin in depth, toes toward the plate.
-  const toe = 3 * hand, sh = 10, fl = 5, fw = 2.2;
-  const feetC = [[toe, sh], [toe, -sh]];
+  // Shift to plate frame (plate at origin) and force the batter onto the standard side:
+  // RHH left (−), LHH right (+). flip fixes the sign so it never mirrors wrong.
+  const want = stand === "L" ? 1 : -1;
+  const flip = ((-plateX >= 0 ? 1 : -1) === want) ? 1 : -1;
+  const cxOf = ix => flip * (ix - plateX);          // contact → plate frame, oriented
+  // Feet marker on the correct side, at a realistic stance distance (the raw derived
+  // distance is a reference-point offset that reads too far for a feet glyph).
+  const batterX = want * Math.min(26, Math.max(16, Math.abs(plateX)));
+  const cxs = xs.map(cxOf);
 
-  // Frame: contact cloud (2–98 pctile + pad) expanded to include the origin, feet, plate.
-  let xMin = q(xs, 0.02), xMax = q(xs, 0.98), yMin = q(ys, 0.02), yMax = q(ys, 0.98);
+  const plateV = [[-8.5, 8.5], [8.5, 8.5], [8.5, 0], [0, -8.5], [-8.5, 0]];   // at origin
+  // Batter's feet: two ellipses straddling the COM in depth, toes toward the plate.
+  const toeDir = batterX >= 0 ? -1 : 1, sh = 10, fl = 5, fw = 2.2;
+  const feetC = [[batterX + toeDir * 3, sh], [batterX + toeDir * 3, -sh]];
+
+  // Frame: contact cloud (2–98 pctile + pad) expanded to include plate + feet/COM.
+  let xMin = q(cxs, 0.02), xMax = q(cxs, 0.98), yMin = q(ys, 0.02), yMax = q(ys, 0.98);
   const padX = (xMax - xMin) * 0.1 + 1, padY = (yMax - yMin) * 0.1 + 1;
   xMin -= padX; xMax += padX; yMin -= padY; yMax += padY;
-  const incl = [[0, 0], [plateCx - 8.5, 8.5], [plateCx + 8.5, -8.5], [toe, sh + fw], [toe, -sh - fw]];
+  const incl = [[-8.5, 8.5], [8.5, -8.5], [batterX + toeDir * 3 - fl, sh + fw], [batterX + toeDir * 3 + fl, -sh - fw]];
   for (const [px, py] of incl) { xMin = Math.min(xMin, px); xMax = Math.max(xMax, px); yMin = Math.min(yMin, py); yMax = Math.max(yMax, py); }
   yMin -= 3;
 
@@ -52,7 +63,7 @@ function makeHeat(entry) {
   spanX = xMax - xMin; spanY = yMax - yMin;
   const H = 196, W = Math.max(110, Math.round(H * spanX / spanY));
 
-  const P = pts.map(([x, y]) => ({ pX: x, pZ: y }));
+  const P = pts.map(([x, y]) => ({ pX: cxOf(x), pZ: y }));
   const sigma = Math.max(1.4, spanX * 0.03);
   let url;
   try { url = renderHeatmapCanvas(P, xMin, xMax, yMin, yMax, W, H, sigma); } catch { return null; }
@@ -62,7 +73,7 @@ function makeHeat(entry) {
   const scl = W / spanX;   // equal inches-per-pixel
   const plate = plateV.map(([x, y]) => `${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join(" ");
   const feet = feetC.map(([x, y]) => ({ cx: sx(x), cy: sy(y), rx: fl * scl, ry: fw * scl }));
-  const com = { cx: sx(0), cy: sy(0), r: Math.max(2, 1.7 * scl) };
+  const com = { cx: sx(batterX), cy: sy(0), r: Math.max(2, 1.7 * scl) };
   return { url, n: pts.length, W, H, plate, feet, com };
 }
 
@@ -93,7 +104,7 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
     const byStand = Array.isArray(icpt) ? { "?": icpt } : icpt;
     return ["R", "L", "?"]
       .filter(s => byStand[s] && (Array.isArray(byStand[s]) ? byStand[s].length : byStand[s].pts?.length) >= 8)
-      .map(s => { const h = makeHeat(byStand[s]); return h ? { stand: s, ...h } : null; })
+      .map(s => { const h = makeHeat(byStand[s], s); return h ? { stand: s, ...h } : null; })
       .filter(Boolean);
   }, [icpt]);
 
