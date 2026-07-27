@@ -5901,7 +5901,7 @@
     {
       "player_id": 676760,
       "name": "Ron Marinaccio",
-      "team": "SD",
+      "team": "PIT",
       "ip": 48.0,
       "gs": 0,
       "g": 34,
@@ -6141,6 +6141,6 @@
     "min_ip": 20,
     "role_method": "starter_pct_gt_50",
     "total_pitches_analyzed": 462653,
-    "generated_at": "2026-07-27 06:49:43 UTC"
+    "generated_at": "2026-07-27 10:52:36 UTC"
   }
 }
