@@ -19,20 +19,21 @@ const HAND_LABEL = { R: "Bats Right", L: "Bats Left", "?": "" };
 const PLATE_HALF = 8.5;    // home plate is 17" wide
 const PLATE_OFFSET = 30;   // approx. batter-center → plate-center lateral distance (inches)
 
-// One aerial (top-down) intercept heatmap of where the batter makes contact, built
-// from the per-swing intercept x/y (inches, relative to the batter). A home-plate
-// reference is drawn to true 17" scale on the correct side (from the data's x-sign),
-// flat edge toward the pitcher (up), point toward the catcher (down). The canvas keeps
-// equal inches-per-pixel so proportions — and the plate — aren't stretched.
-function makeHeat(pts) {
+// One aerial (top-down) intercept heatmap of where the batter makes contact on balls
+// in play, built from the per-swing intercept x/y (inches). A home-plate reference is
+// drawn to true 17" scale, flat edge toward the pitcher (up), point toward the catcher
+// (down). When coords are plate-relative (frame==="plate") the plate sits at the origin;
+// otherwise it's placed on the correct side (from the data's x-sign) at an estimated
+// offset. The canvas keeps equal inches-per-pixel so the plate isn't stretched.
+function makeHeat(pts, frame) {
   if (!Array.isArray(pts) || pts.length < 8) return null;
   const q = (arr, p) => { const s = [...arr].sort((a, b) => a - b); return s[Math.floor((s.length - 1) * p)]; };
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
 
-  // Home plate, batter-relative: centered laterally toward the contact side, depth
-  // centered on the batter (front edge +8.5 → point −8.5). Vertices clockwise.
-  const hand = q(xs, 0.5) >= 0 ? 1 : -1;
-  const pcx = hand * PLATE_OFFSET;
+  // Home plate lateral center: at the origin when plate-relative (true inside/outside),
+  // else offset toward the contact side (batter-relative estimate). Depth centered
+  // (front edge +8.5 → point −8.5). Vertices clockwise.
+  const pcx = frame === "plate" ? 0 : (q(xs, 0.5) >= 0 ? 1 : -1) * PLATE_OFFSET;
   const plateV = [
     [pcx - PLATE_HALF, 8.5], [pcx + PLATE_HALF, 8.5],
     [pcx + PLATE_HALF, 0], [pcx, -8.5], [pcx - PLATE_HALF, 0],
@@ -74,13 +75,14 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
   const [dist, setDist] = useState(undefined);   // undefined=loading, null=none
   const [distMeta, setDistMeta] = useState(null);
   const [icpt, setIcpt] = useState(undefined);
+  const [icptFrame, setIcptFrame] = useState("batter");
 
   useEffect(() => {
     if (isAAA || !playerId) { setDist(null); setIcpt(null); return; }
     let cancelled = false;
     setDist(undefined); setIcpt(undefined);
     loadJson(distCache, `/iswing_dist_${season}.json`).then(m => { if (!cancelled) { setDist((m && m[String(playerId)]) || null); setDistMeta(m?.meta || null); } });
-    loadJson(icptCache, `/intercept_${season}.json`).then(m => { if (!cancelled) setIcpt((m && m[String(playerId)]) || null); });
+    loadJson(icptCache, `/intercept_${season}.json`).then(m => { if (!cancelled) { setIcpt((m && m[String(playerId)]) || null); setIcptFrame(m?.meta?.frame || "batter"); } });
     return () => { cancelled = true; };
   }, [playerId, season, isAAA]);
 
@@ -93,9 +95,9 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
     const byStand = Array.isArray(icpt) ? { "?": icpt } : icpt;
     return ["R", "L", "?"]
       .filter(s => Array.isArray(byStand[s]) && byStand[s].length >= 8)
-      .map(s => { const h = makeHeat(byStand[s]); return h ? { stand: s, ...h } : null; })
+      .map(s => { const h = makeHeat(byStand[s], icptFrame); return h ? { stand: s, ...h } : null; })
       .filter(Boolean);
-  }, [icpt]);
+  }, [icpt, icptFrame]);
 
   const hasCurve = dist && Array.isArray(dist.curve);
   const isSwitch = heats.length > 1;

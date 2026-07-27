@@ -469,23 +469,34 @@ def write_iswing_dist(scored_df, season, updated_json=None, min_swings=25):
     log(f'  Wrote {path}: {len(out) - 1} hitters  ({len(published)} from published JSON)')
 
 
-_INT_X = ['intercept_ball_minus_batter_pos_x_inches', 'intercept_ball_minus_batter_pos_x', 'contact_x']
-_INT_Y = ['intercept_ball_minus_batter_pos_y_inches', 'intercept_ball_minus_batter_pos_y', 'contact_y']
+# Intercept-point columns. Prefer "relative to home plate" (a true aerial view w.r.t.
+# the plate → the plate sits at the origin) when Savant exposes it; otherwise fall back
+# to the batter-relative fields. Exact plate-relative names confirmed via a live dump.
+_INT_X_PLATE  = ['intercept_ball_minus_plate_pos_x_inches', 'intercept_ball_minus_homeplate_pos_x_inches', 'intercept_ball_minus_home_plate_pos_x_inches']
+_INT_Y_PLATE  = ['intercept_ball_minus_plate_pos_y_inches', 'intercept_ball_minus_homeplate_pos_y_inches', 'intercept_ball_minus_home_plate_pos_y_inches']
+_INT_X_BATTER = ['intercept_ball_minus_batter_pos_x_inches', 'intercept_ball_minus_batter_pos_x', 'contact_x']
+_INT_Y_BATTER = ['intercept_ball_minus_batter_pos_y_inches', 'intercept_ball_minus_batter_pos_y', 'contact_y']
+_INT_X = _INT_X_PLATE + _INT_X_BATTER
+_INT_Y = _INT_Y_PLATE + _INT_Y_BATTER
+
+# Balls in play only — the description values Statcast uses for a ball put in play.
+_INPLAY = {'hit_into_play', 'hit_into_play_no_out', 'hit_into_play_score'}
 
 
 def write_intercept(scored_df, season, min_pts=20):
-    """public/intercept_{season}.json — per hitter, bat-ball contact points
-    [x_side, y_depth] (inches) for the top-down (aerial) intercept heatmap, SPLIT
-    by batting hand (stand): {batterId: {"L": [[x,y],…], "R": [[x,y],…]}}. Switch
-    hitters (>= min_pts from both sides) get both; everyone else gets one. The card
-    renders one labeled panel per stand. Skips (with a diagnostic) if Savant's
-    intercept columns aren't present, so the rest of the pipeline is unaffected."""
+    """public/intercept_{season}.json — per hitter, BALL-IN-PLAY contact points
+    [x, y] (inches) for the top-down (aerial) intercept heatmap, SPLIT by batting
+    hand (stand): {batterId: {"L": [[x,y],…], "R": [[x,y],…]}}. Switch hitters
+    (>= min_pts from both sides) get both; everyone else gets one. meta.frame is
+    'plate' when plate-relative columns are used (plate at origin) else 'batter'.
+    Skips (with a diagnostic) if Savant's intercept columns aren't present."""
     xcol = next((c for c in _INT_X if c in scored_df.columns), None)
     ycol = next((c for c in _INT_Y if c in scored_df.columns), None)
     if not xcol or not ycol:
         cand = [c for c in scored_df.columns if 'intercept' in c.lower() or 'contact' in c.lower()]
         log(f'  intercept: no known intercept columns found; skipping. Present intercept/contact cols: {cand}')
         return
+    frame = 'plate' if xcol in _INT_X_PLATE else 'batter'
     df = scored_df.copy()
     df['year'] = pd.to_datetime(df['game_date'], errors='coerce').dt.year
     df['_x'] = pd.to_numeric(df[xcol], errors='coerce')
@@ -493,18 +504,58 @@ def write_intercept(scored_df, season, min_pts=20):
     df['_stand'] = (df['stand'].astype(str).str.upper().str[0]
                     if 'stand' in df.columns else '?')
     df = df[(df['year'] == season) & df['_x'].notna() & df['_y'].notna() & df['batter'].notna()]
+    # Balls in play only (drop fouls / swinging strikes / etc.).
+    before = len(df)
+    if 'description' in df.columns:
+        df = df[df['description'].astype(str).isin(_INPLAY)]
+    elif 'events' in df.columns:
+        df = df[df['events'].notna() & df['events'].astype(str).str.strip().ne('')]
+    log(f'  intercept: balls-in-play filter {before} -> {len(df)} rows (frame={frame}, x={xcol})')
     if len(df) == 0:
-        log('  intercept: columns present but no valid points this season — skipping')
+        log('  intercept: columns present but no valid in-play points this season — skipping')
         return
-    out = {'meta': {'season': season, 'xField': xcol, 'yField': ycol, 'units': 'inches', 'splitByStand': True}}
+
+    # ── Derive the plate-relative CONTACT point from the batter's stance ──
+    # Savant gives the intercept only relative to the batter's center of mass. Shift
+    # each batter's cloud by their lateral stance offset, calibrated from plate_x (the
+    # ball's plate-crossing lateral, feet→inches): batter_x ≈ median(plate_x − intercept_x),
+    # so contact_x_rel_plate = intercept_x + batter_x. Sign is auto-aligned per hand via
+    # the plate_x↔intercept_x correlation (their orientations may differ). Depth stays
+    # COM-relative (no ball-depth-at-plate field). Lands the plate at the origin.
+    df['_cx'], df['_cy'] = df['_x'], df['_y']
+    if frame == 'batter' and 'plate_x' in df.columns:
+        df['_px'] = pd.to_numeric(df['plate_x'], errors='coerce') * 12.0
+        cal = df.dropna(subset=['_px'])
+        if len(cal) >= 50:
+            df['_ixa'] = df['_x']                      # intercept aligned to plate orientation
+            for st in ('L', 'R'):
+                cm = cal['_stand'] == st
+                if cm.sum() < 30:
+                    continue
+                c = cal.loc[cm, '_px'].corr(cal.loc[cm, '_x'])
+                if pd.notna(c) and c < 0:
+                    df.loc[df['_stand'] == st, '_ixa'] = -df.loc[df['_stand'] == st, '_x']
+            B = (df['_px'] - df['_ixa']).groupby(df['batter']).transform('median')   # batter stance offset
+            df['_cx'] = (df['_ixa'] + B).fillna(df['_x'])
+            frame = 'plate'
+            for st in ('L', 'R'):
+                m = (df['_stand'] == st) & df['_cx'].notna()
+                if m.sum():
+                    p = np.percentile(df.loc[m, '_cx'], [5, 50, 95]).round(1)
+                    log(f'   plate-cal {st}: contact_x p5/50/95={list(p)} (plate edges ±8.5")')
+
+    out = {'meta': {'season': season, 'xField': xcol, 'yField': ycol, 'units': 'inches',
+                    'splitByStand': True, 'frame': frame, 'ballsInPlay': True,
+                    'derived': frame == 'plate' and xcol not in _INT_X_PLATE}}
     n_hitters = n_switch = 0
     for bid, g in df.groupby('batter'):
         stands = {}
         for st, gs in g.groupby('_stand'):
+            gs = gs.dropna(subset=['_cx', '_cy'])
             if st not in ('L', 'R') or len(gs) < min_pts:
                 continue
             stands[st] = [[round(float(a), 1), round(float(b), 1)]
-                          for a, b in zip(gs['_x'], gs['_y'])]
+                          for a, b in zip(gs['_cx'], gs['_cy'])]
         if not stands:
             continue
         out[str(int(bid))] = stands
@@ -513,7 +564,7 @@ def write_intercept(scored_df, season, min_pts=20):
     path = os.path.join(ROOT, 'public', f'intercept_{season}.json')
     with open(path, 'w') as f:
         json.dump(out, f, separators=(',', ':'))
-    log(f'  Wrote {path}: {n_hitters} hitters ({n_switch} switch) (x={xcol}, y={ycol})')
+    log(f'  Wrote {path}: {n_hitters} hitters ({n_switch} switch) frame={frame} (x={xcol}, y={ycol})')
 
 
 def main():
