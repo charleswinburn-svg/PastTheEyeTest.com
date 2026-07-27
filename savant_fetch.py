@@ -26,9 +26,10 @@ import pandas as pd
 import requests
 
 FETCH_DELAY = 3.0
-MAX_RETRIES = 3
+MAX_RETRIES = 5         # transient 403 / rate-limit needs a few tries under load
 CHUNK_DAYS = 4          # small enough that a window rarely hits the row cap
 SAVANT_ROW_CAP = 25000  # statcast_search/csv silently truncates at 25k rows/query
+INTER_WINDOW_DELAY = 1.0  # pause between windows to stay under Savant's rate limiter
 
 SAVANT_BASE = "https://baseballsavant.mlb.com"
 
@@ -106,21 +107,32 @@ def _fetch_one(season, start, end, player_type, game_type):
 
 
 def _fetch_window(season, s, e, player_type, game_type):
-    """Fetch [s, e] (date objects). Savant truncates a single query at
-    SAVANT_ROW_CAP rows, so if we come back at the cap, split the window in half
-    and recurse — that way no pitches are silently dropped on busy stretches."""
+    """Fetch [s, e] (date objects).
+
+    Returns a DataFrame on success — possibly EMPTY for a genuinely game-less
+    window (Savant still returns the CSV header, so csv_to_df yields an empty
+    frame). Returns None if the fetch itself FAILED (HTTP error / HTML / parse
+    after retries), so the caller can tell 'no games' apart from 'Savant didn't
+    answer' and never treats a failed window as empty.
+
+    Savant truncates a single query at SAVANT_ROW_CAP rows, so if we come back at
+    the cap we split the window in half and recurse — no pitches silently dropped
+    on busy stretches. If either half fails, the whole window fails (None) rather
+    than return a partial window."""
     df = _fetch_one(season, s.isoformat(), e.isoformat(), player_type, game_type)
-    n = 0 if df is None else len(df)
-    if n >= SAVANT_ROW_CAP and s < e:
+    if df is None:
+        return None                       # fetch/parse failed — propagate the failure
+    if len(df) >= SAVANT_ROW_CAP and s < e:
         mid = s + (e - s) // 2
         print(f"    ↳ {s}→{e} hit the {SAVANT_ROW_CAP:,}-row cap; splitting", flush=True)
         left = _fetch_window(season, s, mid, player_type, game_type)
         right = _fetch_window(season, mid + timedelta(days=1), e, player_type, game_type)
-        parts = [d for d in (left, right) if d is not None and len(d)]
-        return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
-    if n >= SAVANT_ROW_CAP:  # single day already at the cap — can't split further
-        print(f"    ⚠ {s} alone returned {n:,} rows (at cap) — may be truncated", flush=True)
-    return df if df is not None else pd.DataFrame()
+        if left is None or right is None:
+            return None                   # a half failed — don't return a partial window
+        return pd.concat([left, right], ignore_index=True)
+    if len(df) >= SAVANT_ROW_CAP:  # single day already at the cap — can't split further
+        print(f"    ⚠ {s} alone returned {len(df):,} rows (at cap) — may be truncated", flush=True)
+    return df
 
 
 def fetch_savant_range(season, start, end, player_type="batter", game_type="R"):
@@ -136,14 +148,42 @@ def fetch_savant_range(season, start, end, player_type="batter", game_type="R"):
     """
     end_d = min(_to_date(end), date.today())
     frames = []
+    failed = []
     for c_start, c_end in iter_chunks(start, end_d):
         print(f"  Savant {player_type} {c_start} → {c_end} ...", flush=True)
         df = _fetch_window(season, _to_date(c_start), _to_date(c_end), player_type, game_type)
-        if df is not None and len(df):
+        if df is None:                      # fetch failed (not merely empty)
+            print("    ✗ fetch failed — will retry", flush=True)
+            failed.append((c_start, c_end))
+        elif len(df):
             frames.append(df)
             print(f"    {len(df):,} rows", flush=True)
         else:
-            print("    (no rows)", flush=True)
+            print("    (no games)", flush=True)
+        time.sleep(INTER_WINDOW_DELAY)
+
+    # Second pass: retry the windows that FAILED (transient 403 / timeout), with
+    # extra backoff. Genuinely game-less windows returned an empty frame above, so
+    # they're not retried. Anything still failing raises — we never hand back a
+    # silently-partial season.
+    if failed:
+        print(f"  Retrying {len(failed)} failed window(s) …", flush=True)
+        still_failed = []
+        for c_start, c_end in failed:
+            time.sleep(FETCH_DELAY * 2)
+            df = _fetch_window(season, _to_date(c_start), _to_date(c_end), player_type, game_type)
+            if df is None:
+                still_failed.append((c_start, c_end))
+            elif len(df):
+                frames.append(df)
+                print(f"    ✓ {c_start}→{c_end}: {len(df):,} rows on retry", flush=True)
+        if still_failed:
+            raise RuntimeError(
+                f"Savant fetch incomplete: {len(still_failed)} window(s) failed after retries "
+                f"({', '.join(f'{a}→{b}' for a, b in still_failed)}). Aborting so a partial "
+                "season is not written."
+            )
+
     if not frames:
         return pd.DataFrame()
     out = pd.concat(frames, ignore_index=True)
@@ -152,4 +192,8 @@ def fetch_savant_range(season, start, end, player_type="batter", game_type="R"):
     keys = [c for c in ("game_pk", "at_bat_number", "pitch_number") if c in out.columns]
     if len(keys) == 3:
         out = out.drop_duplicates(subset=keys).reset_index(drop=True)
+    n_games = out["game_pk"].nunique() if "game_pk" in out.columns else 0
+    n_dates = out["game_date"].nunique() if "game_date" in out.columns else 0
+    print(f"  Savant {player_type} complete: {len(out):,} pitches / {n_games:,} games / {n_dates} dates",
+          flush=True)
     return out

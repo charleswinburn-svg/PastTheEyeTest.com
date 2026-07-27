@@ -28,6 +28,8 @@ import time
 from io import StringIO
 from collections import defaultdict
 
+from savant_fetch import fetch_savant_range  # robust chunked fetch (handles the 25k cap)
+
 try:
     from pybaseball import pitching_stats, cache
     cache.enable()
@@ -114,18 +116,15 @@ def csv_to_df(text):
 # ============================================================
 
 def fetch_savant_pitches(season, start_date, end_date, game_type="R"):
-    """Fetch pitch-by-pitch data from Savant statcast_search for a date range."""
-    gt = "R%7C" if game_type == "R" else "E%7C"
-    url = (
-        f"{SAVANT_BASE}/statcast_search/csv?all=true&type=detail"
-        f"&player_type=pitcher"
-        f"&hfGT={gt}"
-        f"&hfSea={season}%7C"
-        f"&game_date_gt={start_date}"
-        f"&game_date_lt={end_date}"
-    )
-    text = fetch_url(url)
-    return csv_to_df(text)
+    """Fetch pitch-by-pitch data from Savant statcast_search for a date range.
+
+    Delegates to savant_fetch.fetch_savant_range, which chunks the range into
+    4-day windows and recursively splits any window that hits Savant's 25k-row
+    cap — so a ~2-week span comes back COMPLETE instead of silently truncated at
+    25,000 rows (the old single-request path here was dropping ~60% of pitches
+    on busy stretches)."""
+    return fetch_savant_range(season, start_date, end_date,
+                              player_type="pitcher", game_type=game_type)
 
 
 def get_date_ranges(season, game_type="R"):
