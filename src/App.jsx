@@ -15,12 +15,15 @@ export default function App() {
   return (
     <div style={{ minHeight: "100vh", background: "#0a0f1a" }}>
       {/* ── Sport Selector Bar ── */}
+      {/* flexWrap so the logo + all sport buttons stay fully visible on narrow
+          screens (they wrap to a second row instead of clipping off the right). */}
       <div style={{
         background: "#0f172a",
         borderBottom: "2px solid #f59e0b",
         padding: "0 16px",
         display: "flex",
         alignItems: "stretch",
+        flexWrap: "wrap",
         gap: 0,
         position: "sticky",
         top: 0,
@@ -59,7 +62,7 @@ export default function App() {
           </span>
         </div>
         {/* Sport buttons — left-aligned next to logo */}
-        <div style={{ display: "flex", alignItems: "stretch" }}>
+        <div style={{ display: "flex", alignItems: "stretch", flexWrap: "wrap" }}>
           {SPORTS.map(s => (
             <button
               key={s.id}
@@ -79,6 +82,7 @@ export default function App() {
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
+                whiteSpace: "nowrap",
               }}
             >
               <span style={{ fontSize: 14 }}>{s.icon}</span>
