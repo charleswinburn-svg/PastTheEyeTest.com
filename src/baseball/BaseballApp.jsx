@@ -372,8 +372,8 @@ function BaseballApp() {
         {isMobile ? (
           // On mobile: wrap scroll container + dropdown as siblings so overflowX
           // doesn't clip the dropdown (overflow:auto implicitly clips cross-axis).
-          <div style={{ position: "relative", flex: 1, overflow: "visible" }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", alignItems: "stretch", overflowX: "auto", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+          <div style={{ position: "relative", flex: 1, minWidth: 0, overflow: "visible" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "stretch", overflowX: "auto", minWidth: 0, msOverflowStyle: "none", scrollbarWidth: "none" }}>
               {TABS.map(tb => (
                 <button
                   key={tb.id}
