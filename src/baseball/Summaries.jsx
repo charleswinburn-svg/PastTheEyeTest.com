@@ -12,6 +12,7 @@ import {
   RollingVeloChart, PlatoonUsageBars, ReclassifyModal,
 } from "./SummaryComponents.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance, SearchableSelect } from "./SharedComponents.jsx";
+import FitToWidth from "../FitToWidth.jsx";
 
 const SEASON_TYPES = [
   { id: "S", label: "Spring Training" },
@@ -1231,6 +1232,7 @@ function CountsCard({ player, season, seasonType, isAAA, isPitcher, children, da
   };
   return (
     <div>
+      <FitToWidth designWidth={900}>
       <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", width: 900, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
         <SummaryHeader player={player} subtitle={subtitle} seasonType={seasonType} isAAA={isAAA} />
         {children}
@@ -1239,6 +1241,7 @@ function CountsCard({ player, season, seasonType, isAAA, isPitcher, children, da
           <span style={{ fontStyle: "italic" }}>Data: Baseball Savant / MLB Stats API{isAAA ? " / Prospect Savant" : ""}</span>
         </div>
       </div>
+      </FitToWidth>
       <div style={{ textAlign: "center", marginTop: 12 }}>
         <button onClick={saveCard} style={{ padding: "6px 16px", fontSize: 11, fontWeight: 600, background: t.inputBg, color: t.textMuted, border: `1px solid ${t.inputBorder}`, borderRadius: 6, cursor: "pointer" }}>📥 Save as PNG</button>
       </div>
@@ -1373,6 +1376,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
         </label>
       </div>
 
+      <FitToWidth designWidth={1000}>
       <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 1000, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
         <SummaryHeader player={player} subtitle={subtitle} seasonType={seasonType} isAAA={isAAA} />
         <StatBar stats={stats} />
@@ -1417,6 +1421,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
           <span style={{ fontStyle: "italic" }}>Data: Baseball Savant / MLB Stats API{isAAA ? " / Prospect Savant" : ""}</span>
         </div>
       </div>
+      </FitToWidth>
       <div style={{ textAlign: "center", marginTop: 12 }}>
         <button onClick={saveCard} style={{ padding: "6px 16px", fontSize: 11, fontWeight: 600, background: t.inputBg, color: t.textMuted, border: `1px solid ${t.inputBorder}`, borderRadius: 6, cursor: "pointer" }}>📥 Save as PNG</button>
       </div>
@@ -1460,6 +1465,7 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
   };
   return (
     <div>
+      <FitToWidth designWidth={700}>
       <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 700, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
         <SummaryHeader player={player} subtitle={subtitle} seasonType={seasonType} isAAA={isAAA} />
         <StatBar stats={stats} />
@@ -1476,6 +1482,7 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
           <span style={{ fontStyle: "italic" }}>Data: Baseball Savant / MLB Stats API{isAAA ? " / Prospect Savant" : ""}</span>
         </div>
       </div>
+      </FitToWidth>
       <div style={{ textAlign: "center", marginTop: 12 }}>
         <button onClick={saveCard} style={{ padding: "6px 16px", fontSize: 11, fontWeight: 600, background: t.inputBg, color: t.textMuted, border: `1px solid ${t.inputBorder}`, borderRadius: 6, cursor: "pointer" }}>📥 Save as PNG</button>
       </div>

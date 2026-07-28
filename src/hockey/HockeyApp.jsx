@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ReferenceLine } from "recharts";
 import { SearchableSelect } from "../baseball/SharedComponents.jsx";
+import FitToWidth from "../FitToWidth.jsx";
 
 function useWindowWidth() {
   const [w, setW] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1024));
@@ -167,6 +168,12 @@ function Card({player,type,trends,mode,headshots,logos}){
   const pname=player?(type==="goalie"?player.name:player.display_name):"";
   const saveCard=useCallback(async()=>{
     if(!cardRef.current)return;
+    // Neutralize any <FitToWidth> ancestor scale for the whole capture, so both the
+    // per-image sizing (getBoundingClientRect below) and html2canvas run at full
+    // resolution instead of the shrunk on-screen size. Restored in finally.
+    const fit=cardRef.current.closest("[data-ptet-fit]");
+    const prevTransform=fit?fit.style.transform:"";
+    if(fit)fit.style.transform="none";
     const imgs=[...cardRef.current.querySelectorAll("img")];
     const originals=[];
     const toDataUrl=(src,w,h)=>new Promise(resolve=>{
@@ -187,24 +194,28 @@ function Card({player,type,trends,mode,headshots,logos}){
       i.onerror=()=>resolve(null);
       i.src=src;
     });
-    await Promise.allSettled(imgs.map(async img=>{
-      if(!img.src||img.src.startsWith("data:"))return;
-      try{
-        const rect=img.getBoundingClientRect();
-        const w=rect.width||64;
-        const h=rect.height||64;
-        const dataUrl=await toDataUrl(img.src,w,h);
-        if(dataUrl){originals.push({img,orig:img.src});img.src=dataUrl;}
-      }catch(e){}
-    }));
-    await new Promise(r=>setTimeout(r,100));
-    const html2canvas=(await import("html2canvas")).default;
-    const canvas=await html2canvas(cardRef.current,{backgroundColor:"#0a0f1a",scale:2,logging:false});
-    const link=document.createElement("a");
-    link.download=`${pname.replace(/\s+/g,"_")}_card.png`;
-    link.href=canvas.toDataURL("image/png");
-    link.click();
-    originals.forEach(({img,orig})=>{img.src=orig});
+    try{
+      await Promise.allSettled(imgs.map(async img=>{
+        if(!img.src||img.src.startsWith("data:"))return;
+        try{
+          const rect=img.getBoundingClientRect();
+          const w=rect.width||64;
+          const h=rect.height||64;
+          const dataUrl=await toDataUrl(img.src,w,h);
+          if(dataUrl){originals.push({img,orig:img.src});img.src=dataUrl;}
+        }catch(e){}
+      }));
+      await new Promise(r=>setTimeout(r,100));
+      const html2canvas=(await import("html2canvas")).default;
+      const canvas=await html2canvas(cardRef.current,{backgroundColor:"#0a0f1a",scale:2,logging:false});
+      const link=document.createElement("a");
+      link.download=`${pname.replace(/\s+/g,"_")}_card.png`;
+      link.href=canvas.toDataURL("image/png");
+      link.click();
+    }finally{
+      originals.forEach(({img,orig})=>{img.src=orig});
+      if(fit)fit.style.transform=prevTransform;
+    }
   },[pname]);
   if(!player)return <div style={{color:"#64748b",padding:40,textAlign:"center"}}>Select a player</div>;
   const cats=Object.entries(player.categories);
@@ -217,6 +228,7 @@ function Card({player,type,trends,mode,headshots,logos}){
   const showTrend=mode==="3-Year Rolling"&&trendData&&trendData.length>0;
   return(
     <div>
+      <FitToWidth designWidth={600}>
       <div ref={cardRef} style={{background:"#111827",borderRadius:12,border:"1px solid #1e3a5f",overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.5)",maxWidth:600,margin:"0 auto"}}>
         <PlayerHeader name={pname} team={player.team} subtitle={subtitle} olympicCountry={player.olympic_country} headshotUrl={headshotUrl} logoSrc={logos?.[player.team]}/>
         <div style={{padding:"8px 12px 4px"}}>
@@ -233,6 +245,7 @@ function Card({player,type,trends,mode,headshots,logos}){
           <span style={{fontStyle:"italic"}}>PastTheEyeTest | NST + EH</span>
         </div>
       </div>
+      </FitToWidth>
       <div style={{maxWidth:600,margin:"8px auto 0",textAlign:"right"}}>
         <button onClick={saveCard} style={{padding:"6px 16px",fontSize:11,fontWeight:600,background:"#0f172a",color:"#94a3b8",border:"1px solid #1e3a5f",borderRadius:6,cursor:"pointer",transition:"all 0.15s"}}
           onMouseEnter={e=>{e.target.style.background="#f59e0b";e.target.style.color="#0f172a";e.target.style.borderColor="#f59e0b"}}

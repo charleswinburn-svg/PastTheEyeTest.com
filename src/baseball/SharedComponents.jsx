@@ -478,6 +478,13 @@ export function restoreImages(originals) {
 export async function saveCardAsPng(cardRef, filename) {
   if (!cardRef.current) return;
   const originals = await convertImagesForCapture(cardRef.current);
+  // If the card is wrapped in a <FitToWidth> scaler (so it fits mobile without
+  // clipping), neutralize that ancestor's transform for the capture only.
+  // html2canvas sizes its output from the element's on-screen (post-transform)
+  // rect, so a scaled ancestor would otherwise shrink the PNG. Restored in finally.
+  const fit = cardRef.current.closest("[data-ptet-fit]");
+  const prevTransform = fit ? fit.style.transform : "";
+  if (fit) fit.style.transform = "none";
   try {
     const html2canvas = (await import("html2canvas")).default;
     const canvas = await html2canvas(cardRef.current, { backgroundColor: "#0d0d0d", scale: 2, logging: false });
@@ -487,8 +494,10 @@ export async function saveCardAsPng(cardRef, filename) {
     link.click();
   } catch (e) {
     console.error("Save failed:", e);
+  } finally {
+    if (fit) fit.style.transform = prevTransform;
+    restoreImages(originals);
   }
-  restoreImages(originals);
 }
 
 

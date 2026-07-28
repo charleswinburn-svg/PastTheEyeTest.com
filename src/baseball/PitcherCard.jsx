@@ -4,6 +4,7 @@ import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, 
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
+import FitToWidth from "../FitToWidth.jsx";
 import { useDateRangeStats } from "./statsCompute.js";
 import { fetchSavantPlayerDateRange, scorePitchCode } from "./mlbApi.js";
 
@@ -146,7 +147,8 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
 
   return (
     <div>
-      {/* === SAVEABLE CARD === */}
+      {/* === SAVEABLE CARD (scaled to fit width so it's never clipped on mobile) === */}
+      <FitToWidth designWidth={1040}>
       <div
         ref={cardRef}
         style={{
@@ -220,6 +222,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
+      </FitToWidth>
 
       {/* === SAVE BUTTON === */}
       <div style={{ textAlign: "center", marginTop: 12 }}>
