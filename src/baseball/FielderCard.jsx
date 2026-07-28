@@ -1,6 +1,7 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
+import FitToWidth from "../FitToWidth.jsx";
 
 const CATCHER_POS  = new Set(["C"]);
 const INFIELD_POS  = new Set(["1B", "2B", "3B", "SS"]);
@@ -86,6 +87,7 @@ export default function FielderCard({ player, season, fieldingData }) {
         </div>
       )}
 
+      <FitToWidth designWidth={600}>
       <div
         ref={cardRef}
         style={{
@@ -125,6 +127,7 @@ export default function FielderCard({ player, season, fieldingData }) {
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
+      </FitToWidth>
 
       <div style={{ textAlign: "center", marginTop: 12 }}>
         <button

@@ -3,6 +3,7 @@ import { useRef, useCallback, useMemo } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
+import FitToWidth from "../FitToWidth.jsx";
 import { useDateRangeStats, computeXrvDateRange, buildXrvPctileLookup, interpolatePctile } from "./statsCompute.js";
 
 // Fixed display order for the xRV / 600 PA column (matches build_hitter_xrv.py).
@@ -88,7 +89,8 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
 
   return (
     <div>
-      {/* === SAVEABLE CARD === */}
+      {/* === SAVEABLE CARD (scaled to fit width so it's never clipped on mobile) === */}
+      <FitToWidth designWidth={1040}>
       <div
         ref={cardRef}
         style={{
@@ -185,6 +187,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
+      </FitToWidth>
 
       {/* === SAVE BUTTON (outside card) === */}
       <div style={{ textAlign: "center", marginTop: 12 }}>

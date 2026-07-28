@@ -1,5 +1,6 @@
 import { useRef, useCallback } from "react";
 import { BubblePercentileBar, saveCardAsPng } from "../baseball/SharedComponents.jsx";
+import FitToWidth from "../FitToWidth.jsx";
 import { buildPlayerCategories } from "./soccerApi.js";
 import { flagCode } from "./flags.jsx";
 
@@ -128,7 +129,8 @@ export default function SoccerPlayerCard({ player, allPlayers }) {
 
   return (
     <div>
-      {/* Saveable card */}
+      {/* Saveable card (scaled to fit width so it's never clipped on mobile) */}
+      <FitToWidth designWidth={600}>
       <div
         ref={cardRef}
         style={{
@@ -169,6 +171,7 @@ export default function SoccerPlayerCard({ player, allPlayers }) {
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | bzzoiro</span>
         </div>
       </div>
+      </FitToWidth>
 
       {/* Save button */}
       <div style={{ textAlign: "center", marginTop: 12 }}>
