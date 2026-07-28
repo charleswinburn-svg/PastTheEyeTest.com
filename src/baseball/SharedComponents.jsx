@@ -475,6 +475,54 @@ export function restoreImages(originals) {
   originals.forEach(({ img, orig }) => { img.src = orig; });
 }
 
+// True for phones/tablets, where a programmatic <a download> is ignored and we
+// must hand the PNG to the OS share sheet instead. iPadOS 13+ reports as desktop
+// Safari on "MacIntel", so detect it via touch points.
+export function isMobileDevice() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  if (/Android|iPhone|iPad|iPod/i.test(ua)) return true;
+  if (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1) return true;
+  return false;
+}
+
+// Deliver a finished canvas to the user as a PNG. Desktop browsers get a normal
+// file download; mobile browsers (where <a download> silently does nothing) get
+// the Web Share sheet with the image file, so the user can "Save Image" to
+// Photos or share it. Falls back to a download if sharing isn't available.
+export async function exportCanvasAsPng(canvas, filename) {
+  const blob = await new Promise(res => { try { canvas.toBlob(res, "image/png"); } catch { res(null); } });
+  const triggerDownload = (href, revoke) => {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = href;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    if (revoke) setTimeout(() => URL.revokeObjectURL(href), 10000);
+  };
+
+  if (blob && isMobileDevice() && typeof navigator !== "undefined" && navigator.canShare) {
+    const file = new File([blob], filename, { type: "image/png" });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: filename });
+        return;                       // shared/saved successfully
+      } catch (e) {
+        if (e && e.name === "AbortError") return;   // user dismissed the sheet
+        // otherwise fall through to a download attempt
+      }
+    }
+  }
+
+  if (blob) {
+    triggerDownload(URL.createObjectURL(blob), true);
+  } else {
+    // Oversized canvases can make toBlob return null — last-ditch data URL.
+    triggerDownload(canvas.toDataURL("image/png"), false);
+  }
+}
+
 export async function saveCardAsPng(cardRef, filename) {
   if (!cardRef.current) return;
   const originals = await convertImagesForCapture(cardRef.current);
@@ -485,19 +533,17 @@ export async function saveCardAsPng(cardRef, filename) {
   const fit = cardRef.current.closest("[data-ptet-fit]");
   const prevTransform = fit ? fit.style.transform : "";
   if (fit) fit.style.transform = "none";
+  let canvas = null;
   try {
     const html2canvas = (await import("html2canvas")).default;
-    const canvas = await html2canvas(cardRef.current, { backgroundColor: "#0d0d0d", scale: 2, logging: false });
-    const link = document.createElement("a");
-    link.download = filename;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    canvas = await html2canvas(cardRef.current, { backgroundColor: "#0d0d0d", scale: 2, logging: false });
   } catch (e) {
-    console.error("Save failed:", e);
+    console.error("Capture failed:", e);
   } finally {
     if (fit) fit.style.transform = prevTransform;
     restoreImages(originals);
   }
+  if (canvas) await exportCanvasAsPng(canvas, filename);
 }
 
 
