@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ReferenceLine } from "recharts";
-import { SearchableSelect } from "../baseball/SharedComponents.jsx";
+import { SearchableSelect, exportCanvasAsPng } from "../baseball/SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 
 function useWindowWidth() {
@@ -194,6 +194,7 @@ function Card({player,type,trends,mode,headshots,logos}){
       i.onerror=()=>resolve(null);
       i.src=src;
     });
+    let capturedCanvas=null;
     try{
       await Promise.allSettled(imgs.map(async img=>{
         if(!img.src||img.src.startsWith("data:"))return;
@@ -207,15 +208,13 @@ function Card({player,type,trends,mode,headshots,logos}){
       }));
       await new Promise(r=>setTimeout(r,100));
       const html2canvas=(await import("html2canvas")).default;
-      const canvas=await html2canvas(cardRef.current,{backgroundColor:"#0a0f1a",scale:2,logging:false});
-      const link=document.createElement("a");
-      link.download=`${pname.replace(/\s+/g,"_")}_card.png`;
-      link.href=canvas.toDataURL("image/png");
-      link.click();
+      capturedCanvas=await html2canvas(cardRef.current,{backgroundColor:"#0a0f1a",scale:2,logging:false});
     }finally{
       originals.forEach(({img,orig})=>{img.src=orig});
       if(fit)fit.style.transform=prevTransform;
     }
+    // Deliver outside the capture block: download on desktop, share sheet on mobile.
+    if(capturedCanvas) await exportCanvasAsPng(capturedCanvas,`${pname.replace(/\s+/g,"_")}_card.png`);
   },[pname]);
   if(!player)return <div style={{color:"#64748b",padding:40,textAlign:"center"}}>Select a player</div>;
   const cats=Object.entries(player.categories);
