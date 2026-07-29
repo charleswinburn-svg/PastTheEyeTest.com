@@ -512,7 +512,9 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
                     ren[c] = canon
                     break
         df = df.rename(columns=ren)
-        keep = ["player_id", "player_name", "position"] + [c for c in value_cols if c in df.columns]
+        # Keep Inn too — per-(player, position) innings used to gate qualification.
+        # The MLB Stats API league endpoint now 406s, so FG's Inn is the source.
+        keep = ["player_id", "player_name", "position"] + [c for c in list(value_cols) + ["Inn"] if c in df.columns]
         return df[keep]
 
     # FG ships the field-value column as "Defense" (not "Def").
@@ -523,7 +525,13 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
     df_def_slim = _slim(df_def, ["Def"])
     df_drs_slim = _slim(df_drs, ["DRS"])
     if df_def_slim is not None and df_drs_slim is not None:
-        df = df_def_slim.merge(df_drs_slim, on=["player_id", "player_name", "position"], how="outer")
+        df = df_def_slim.merge(df_drs_slim, on=["player_id", "player_name", "position"],
+                               how="outer", suffixes=("", "_drs"))
+        # both leaderboards carry Inn → coalesce the suffixed copies back to one
+        if "Inn_drs" in df.columns:
+            df["Inn"] = (df["Inn"].where(df["Inn"].notna(), df["Inn_drs"])
+                         if "Inn" in df.columns else df["Inn_drs"])
+            df = df.drop(columns=["Inn_drs"])
     else:
         df = df_def_slim if df_def_slim is not None else df_drs_slim
     if df is None or df.empty:
@@ -703,6 +711,21 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
     ofarm   = fetch_savant_of_arm(year, fetch_url, csv_to_df)
     fg      = fetch_fangraphs_fielding(year, http_headers)
     inn_map = fetch_position_innings(year, http_headers)
+
+    # Primary innings source: FanGraphs "Inn" per (player, position). The MLB
+    # Stats API league stats endpoint now returns 406 (fetch_position_innings
+    # comes back empty), but the FG fielding pull above already carries real
+    # per-position innings — use them to gate qualification and to show on cards.
+    if not inn_map and fg is not None and "innings_pos" in fg.columns:
+        for _, r in fg.iterrows():
+            pid = r.get("player_id")
+            pos = _normalise_pos(r.get("position"))
+            inn = _value(r, "innings_pos")
+            if pd.isna(pid) or not pos or inn is None:
+                continue
+            inn_map.setdefault(int(pid), {})[pos] = float(inn)
+        if inn_map:
+            print(f"  Position innings from FanGraphs Inn: {len(inn_map)} players")
 
     # Fallback: if the MLB Stats API returned nothing (e.g. endpoint changed),
     # build a synthetic inn_map from OAA — which is already fetched per position
