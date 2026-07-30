@@ -212,6 +212,8 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           playerId={player.player_id}
           season={season}
           isAAA={isAAA}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
         />
         <div style={{
           padding: "8px 16px 10px",
