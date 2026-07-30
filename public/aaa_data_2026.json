@@ -12902,7 +12902,7 @@
           "display": "13.5"
         },
         "LD%": {
-          "pctile": 57,
+          "pctile": 55,
           "value": 18.7,
           "display": "18.7"
         },
@@ -15013,7 +15013,7 @@
     {
       "name": "Jarred Kelenic",
       "player_id": 672284,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -15046,7 +15046,7 @@
           "display": "7.1"
         },
         "LD%": {
-          "pctile": 64,
+          "pctile": 69,
           "value": 19.4,
           "display": "19.4"
         },
@@ -17793,7 +17793,7 @@
           "display": "13.5"
         },
         "LD%": {
-          "pctile": 38,
+          "pctile": 40,
           "value": 17.6,
           "display": "17.6"
         },
@@ -18229,7 +18229,7 @@
     {
       "name": "Matt Koperniak",
       "player_id": 689288,
-      "team": null,
+      "team": "STL",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -19703,7 +19703,7 @@
     {
       "name": "Brock Jones",
       "player_id": 677342,
-      "team": null,
+      "team": "TB",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -21076,9 +21076,9 @@
           "display": "7.2"
         },
         "LD%": {
-          "pctile": 88,
-          "value": 25.3,
-          "display": "25.3"
+          "pctile": 86,
+          "value": 25.0,
+          "display": "25.0"
         },
         "Chase %": {
           "pctile": 89,
@@ -21713,7 +21713,7 @@
     {
       "name": "Jose Fernandez",
       "player_id": 699912,
-      "team": null,
+      "team": "AZ",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -27977,7 +27977,7 @@
           "display": "6.2"
         },
         "LD%": {
-          "pctile": 21,
+          "pctile": 17,
           "value": 12.9,
           "display": "12.9"
         },
@@ -29719,9 +29719,9 @@
           "display": "5.6"
         },
         "LD%": {
-          "pctile": 69,
-          "value": 20.0,
-          "display": "20.0"
+          "pctile": 60,
+          "value": 18.9,
+          "display": "18.9"
         },
         "Chase %": {
           "pctile": 23,
@@ -31361,7 +31361,7 @@
     {
       "name": "Edwin D\u00edaz",
       "player_id": 641521,
-      "team": null,
+      "team": "HOU",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -33170,7 +33170,7 @@
     {
       "name": "Dayne Leonard",
       "player_id": 802143,
-      "team": null,
+      "team": "CIN",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -34208,9 +34208,9 @@
           "display": "4.8"
         },
         "LD%": {
-          "pctile": 81,
-          "value": 25.0,
-          "display": "25.0"
+          "pctile": 76,
+          "value": 24.2,
+          "display": "24.2"
         },
         "Chase %": {
           "pctile": 1,
@@ -34610,7 +34610,7 @@
           "display": "7.5"
         },
         "LD%": {
-          "pctile": 81,
+          "pctile": 86,
           "value": 25.0,
           "display": "25.0"
         },
@@ -35749,9 +35749,9 @@
           "display": "8.8"
         },
         "LD%": {
-          "pctile": 17,
-          "value": 12.0,
-          "display": "12.0"
+          "pctile": 21,
+          "value": 13.2,
+          "display": "13.2"
         },
         "Chase %": {
           "pctile": 51,
@@ -36553,9 +36553,9 @@
           "display": "4.1"
         },
         "LD%": {
-          "pctile": 57,
-          "value": 18.7,
-          "display": "18.7"
+          "pctile": 64,
+          "value": 19.0,
+          "display": "19.0"
         },
         "Chase %": {
           "pctile": 86,
@@ -38530,7 +38530,7 @@
     {
       "name": "Parks Harber",
       "player_id": 692238,
-      "team": null,
+      "team": "SF",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -40138,7 +40138,7 @@
     {
       "name": "Garrett Martin",
       "player_id": 682003,
-      "team": null,
+      "team": "NYY",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -40707,9 +40707,9 @@
           "display": "12.5"
         },
         "LD%": {
-          "pctile": 74,
-          "value": 24.7,
-          "display": "24.7"
+          "pctile": 76,
+          "value": 24.2,
+          "display": "24.2"
         },
         "Chase %": {
           "pctile": 9,
@@ -41779,9 +41779,9 @@
           "display": "5.3"
         },
         "LD%": {
-          "pctile": 38,
-          "value": 17.6,
-          "display": "17.6"
+          "pctile": 36,
+          "value": 17.3,
+          "display": "17.3"
         },
         "Chase %": {
           "pctile": 7,
@@ -42115,8 +42115,8 @@
         },
         "LD%": {
           "pctile": 31,
-          "value": 14.1,
-          "display": "14.1"
+          "value": 13.7,
+          "display": "13.7"
         },
         "Chase %": {
           "pctile": 76,
@@ -43622,7 +43622,7 @@
     {
       "name": "Trace Willhoite",
       "player_id": 688875,
-      "team": null,
+      "team": "NYM",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -49786,7 +49786,7 @@
     {
       "name": "Carter Garate",
       "player_id": 804466,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -50188,7 +50188,7 @@
     {
       "name": "Graham Brown",
       "player_id": 842249,
-      "team": null,
+      "team": "MIN",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -50925,7 +50925,7 @@
     {
       "name": "Matt Mervis",
       "player_id": 670223,
-      "team": null,
+      "team": "WSH",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -51059,7 +51059,7 @@
     {
       "name": "Kaden Hopson",
       "player_id": 687600,
-      "team": null,
+      "team": "LAA",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -58995,7 +58995,7 @@
     {
       "name": "Logan Allen",
       "player_id": 663531,
-      "team": null,
+      "team": "LAD",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -70875,7 +70875,7 @@
     {
       "name": "Michael Sansone",
       "player_id": 806333,
-      "team": null,
+      "team": "BOS",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -83745,7 +83745,7 @@
     {
       "name": "Michael Darrell-Hicks",
       "player_id": 690382,
-      "team": null,
+      "team": "PIT",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -85197,7 +85197,7 @@
     {
       "name": "Grant Kipp",
       "player_id": 805990,
-      "team": null,
+      "team": "CHC",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -89883,7 +89883,7 @@
     {
       "name": "Austin Bergner",
       "player_id": 666123,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -91005,7 +91005,7 @@
     {
       "name": "Yacksel R\u00edos",
       "player_id": 605441,
-      "team": null,
+      "team": "CHC",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -106581,7 +106581,7 @@
     {
       "name": "Nick Sando",
       "player_id": 805311,
-      "team": null,
+      "team": "CIN",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -107109,7 +107109,7 @@
     {
       "name": "Evan Gates",
       "player_id": 688753,
-      "team": null,
+      "team": "PHI",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -109881,7 +109881,7 @@
     {
       "name": "Jake Curtis",
       "player_id": 813268,
-      "team": null,
+      "team": "CWS",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -112587,7 +112587,7 @@
     {
       "name": "Bryson Van Sickle",
       "player_id": 809819,
-      "team": null,
+      "team": "COL",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -113973,7 +113973,7 @@
     {
       "name": "Cole Stasio",
       "player_id": 801453,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -114039,7 +114039,7 @@
     {
       "name": "Zack Lee",
       "player_id": 687033,
-      "team": null,
+      "team": "DET",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -115491,7 +115491,7 @@
     {
       "name": "Cole Roland",
       "player_id": 813401,
-      "team": null,
+      "team": "TEX",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -117980,6 +117980,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-07-29 17:06:04 UTC"
+    "generated_at": "2026-07-30 14:02:33 UTC"
   }
 }
