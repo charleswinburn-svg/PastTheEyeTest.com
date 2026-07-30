@@ -3,12 +3,15 @@ import { useTheme } from "./ThemeContext.jsx";
 import KdeCurve from "./KdeCurve.jsx";
 import { renderHeatmapCanvas } from "./SummaryComponents.jsx";
 import { MLB_TEAM_PRIMARY } from "./SharedComponents.jsx";
+import { gaussianKde, mmddFromDate, filterByWindow, loadSeasonJson } from "./kde.js";
 
 // Precomputed hitter files (iswing_update.py):
-//   /iswing_dist_{season}.json : batterId -> { curve:[density…], mean, n }
-//   /intercept_{season}.json   : batterId -> { L:{pts:[[x,y]…], plateX}, R:{…} }
+//   /iswing_dist_{season}.json    : batterId -> { curve:[density…], mean, n }
+//   /iswing_swings_{season}.json  : batterId -> { v:[iSwing+ per swing], d:[mmdd] }
+//       Per-swing values + dates, so a date window can recompute the curve + avg.
+//   /intercept_{season}.json      : batterId -> { L:{pts:[[x,y,mmdd]…], plateX}, R:{…} }
 //     Balls-in-play contact points relative to the batter's center of mass (inches),
-//     split by hand; plateX = derived home-plate center in that same frame.
+//     split by hand; plateX = derived home-plate center; 3rd point element = mmdd date.
 const distCache = new Map();
 const icptCache = new Map();
 function loadJson(cache, url) {
@@ -82,11 +85,16 @@ function makeHeat(entry, stand) {
 // Two figures below the hitter card: (1) a large KDE of the hitter's own per-swing
 // iSwing+; (2) aerial intercept heatmap(s) with the batter's feet + a derived home
 // plate — one panel per batting hand, so switch hitters get both. MLB only.
-export default function HitterDistributions({ playerId, team, season, isAAA = false }) {
+export default function HitterDistributions({ playerId, team, season, isAAA = false, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
-  const [dist, setDist] = useState(undefined);   // undefined=loading, null=none
+  const [dist, setDist] = useState(undefined);   // season KDE {curve, mean, n}
   const [distMeta, setDistMeta] = useState(null);
   const [icpt, setIcpt] = useState(undefined);
+  const [swings, setSwings] = useState(undefined);   // per-swing {v,d} for windowing
+
+  const active = !!(dateFrom || dateTo);
+  const fromMMDD = mmddFromDate(dateFrom) ?? 0;
+  const toMMDD = mmddFromDate(dateTo) ?? 9999;
 
   useEffect(() => {
     if (isAAA || !playerId) { setDist(null); setIcpt(null); return; }
@@ -97,40 +105,89 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
     return () => { cancelled = true; };
   }, [playerId, season, isAAA]);
 
-  const teamColor = MLB_TEAM_PRIMARY[team] || t.accent;
+  // Per-swing file is large — only fetch it when a date window is actually set.
+  useEffect(() => {
+    if (isAAA || !playerId || !active) { setSwings(undefined); return; }
+    let cancelled = false;
+    loadSeasonJson(`/iswing_swings_${season}.json`).then(m => { if (!cancelled) setSwings((m && m[String(playerId)]) || null); });
+    return () => { cancelled = true; };
+  }, [playerId, season, isAAA, active]);
 
-  // Build one heatmap per batting hand. Normalize the old flat-array format to a
-  // single unlabeled panel so stale data still renders.
+  const teamColor = MLB_TEAM_PRIMARY[team] || t.accent;
+  const xLo = distMeta?.xLo ?? 40, xHi = distMeta?.xHi ?? 180;
+
+  // iSwing+ curve: a date window recomputes it from the filtered per-swing values;
+  // otherwise the precomputed season curve.
+  const curveInfo = useMemo(() => {
+    if (active && swings && Array.isArray(swings.v)) {
+      const fv = filterByWindow(swings.v, swings.d, fromMMDD, toMMDD);
+      const densities = fv.length >= 2 ? gaussianKde(fv, xLo, xHi, distMeta?.nPts ?? 64) : null;
+      if (densities) {
+        const mean = fv.reduce((a, b) => a + b, 0) / fv.length;
+        return { densities, mean, n: fv.length, windowed: true };
+      }
+      return { densities: null, mean: null, n: fv.length, windowed: true };   // window set, too few swings
+    }
+    if (dist && Array.isArray(dist.curve)) return { densities: dist.curve, mean: dist.mean, n: dist.n, windowed: false };
+    return null;
+  }, [active, swings, dist, fromMMDD, toMMDD, xLo, xHi, distMeta]);
+
+  // Intercept heatmap(s): a date window filters the contact cloud by each point's
+  // mmdd (3rd element) and drops the season avgIy so makeHeat recomputes the dashed
+  // line from the window. Normalizes the old flat-array format to one panel.
   const heats = useMemo(() => {
     if (!icpt) return [];
     const byStand = Array.isArray(icpt) ? { "?": icpt } : icpt;
-    return ["R", "L", "?"]
-      .filter(s => byStand[s] && (Array.isArray(byStand[s]) ? byStand[s].length : byStand[s].pts?.length) >= 8)
-      .map(s => { const h = makeHeat(byStand[s], s); return h ? { stand: s, ...h } : null; })
-      .filter(Boolean);
-  }, [icpt]);
+    const build = (raw, s) => {
+      let entry = raw;
+      if (active) {
+        const pts0 = Array.isArray(raw) ? raw : raw?.pts;
+        if (Array.isArray(pts0)) {
+          const pts = pts0.filter(p => { const m = p[2]; return m == null || (m >= fromMMDD && m <= toMMDD); });
+          const base = Array.isArray(raw) ? {} : { ...raw };
+          delete base.avgIy;
+          entry = { ...base, pts };
+        }
+      }
+      const pts = Array.isArray(entry) ? entry : entry?.pts;
+      if (!Array.isArray(pts) || pts.length < 8) return null;
+      const h = makeHeat(entry, s);
+      return h ? { stand: s, ...h } : null;
+    };
+    return ["R", "L", "?"].map(s => (byStand[s] ? build(byStand[s], s) : null)).filter(Boolean);
+  }, [icpt, active, fromMMDD, toMMDD]);
 
-  const hasCurve = dist && Array.isArray(dist.curve);
+  const hasCurve = curveInfo && Array.isArray(curveInfo.densities);
   const isSwitch = heats.length > 1;
-  if (isAAA || (!hasCurve && heats.length === 0)) return null;   // nothing (loading or no data)
+  const emptyWindow = active && !hasCurve && heats.length === 0 && (swings !== undefined || icpt !== undefined);
+  if (isAAA) return null;
+  if (!hasCurve && heats.length === 0) {
+    // In a date window with genuinely no data, say so rather than vanishing.
+    if (emptyWindow) return (
+      <div style={{ maxWidth: 1040, margin: "12px auto 0", textAlign: "center", fontSize: 11, color: t.textFaint }}>
+        No swing / contact data in this date range.
+      </div>
+    );
+    return null;
+  }
 
   return (
     <div style={{ maxWidth: 1040, margin: "16px auto 0", padding: "0 12px", display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "center", alignItems: "flex-start" }}>
       {hasCurve && (
         <div style={{ flex: "1 1 520px", maxWidth: 640 }}>
           <KdeCurve
-            title={`iSwing+ Distribution  ·  avg ${Math.round(dist.mean)}`}
-            curves={[{ densities: dist.curve, color: teamColor, label: "iSwing+" }]}
-            xLo={distMeta?.xLo ?? 40} xHi={distMeta?.xHi ?? 180}
+            title={`iSwing+ Distribution  ·  avg ${Math.round(curveInfo.mean)}${curveInfo.windowed ? "  ·  date range" : ""}`}
+            curves={[{ densities: curveInfo.densities, color: teamColor, label: "iSwing+" }]}
+            xLo={xLo} xHi={xHi}
             width={640} height={200}
             fill
             refLines={[
-              { x: dist.mean, color: teamColor, dashed: false },
+              { x: curveInfo.mean, color: teamColor, dashed: false },
               { x: 100, color: t.textMuted, dashed: true },
             ]}
           />
           <div style={{ fontSize: 9, color: t.textFaint, marginTop: 2 }}>
-            Solid = player avg · dashed = league (100) · {dist.n} swings
+            Solid = player avg · dashed = league (100) · {curveInfo.n} swings{curveInfo.windowed ? " in range" : ""}
           </div>
         </div>
       )}

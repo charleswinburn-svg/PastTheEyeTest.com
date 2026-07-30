@@ -406,6 +406,9 @@ def write_iswing_dist(scored_df, season, updated_json=None, min_swings=25):
     if len(df) == 0:
         log('  iswing_dist: no swings this season — skipping')
         return
+    # Per-swing month*100+day, so the card can filter swings to a date window.
+    _dt = pd.to_datetime(df['game_date'], errors='coerce')
+    df = df.assign(_mmdd=(_dt.dt.month * 100 + _dt.dt.day))
 
     # Per-swing SHAPE: z-score each swing's log raw_value against the league
     # per-swing distribution -> a readable spread (~15 sd), on a 100 scale.
@@ -451,6 +454,9 @@ def write_iswing_dist(scored_df, season, updated_json=None, min_swings=25):
                     break
 
     out = {'meta': {'season': season, 'xLo': ISW_LO, 'xHi': ISW_HI, 'nPts': KDE_N, 'leagueMean': 100}}
+    # Per-swing published-scale iSwing+ + date (mmdd), so the card can recompute the
+    # bubble (mean) and the distribution (KDE) for any date window client-side.
+    swings = {'meta': {'season': season, 'xLo': ISW_LO, 'xHi': ISW_HI, 'leagueMean': 100}}
     for bid, g in df.groupby('batter'):
         if len(g) < min_swings:
             continue
@@ -459,6 +465,10 @@ def write_iswing_dist(scored_df, season, updated_json=None, min_swings=25):
             H = float(fallback_headline.loc[bid])   # not in published JSON — recompute
         vals = g['_shape'].to_numpy()
         vals = vals - vals.mean() + H          # recenter the per-swing shape on the headline
+        swings[str(int(bid))] = {
+            'v': [int(round(x)) for x in vals],
+            'd': [int(m) if np.isfinite(m) else 0 for m in g['_mmdd'].to_numpy()],
+        }
         curve = _kde_curve(vals, ISW_LO, ISW_HI)
         if curve is None:
             continue
@@ -467,6 +477,10 @@ def write_iswing_dist(scored_df, season, updated_json=None, min_swings=25):
     with open(path, 'w') as f:
         json.dump(out, f, separators=(',', ':'))
     log(f'  Wrote {path}: {len(out) - 1} hitters  ({len(published)} from published JSON)')
+    spath = os.path.join(ROOT, 'public', f'iswing_swings_{season}.json')
+    with open(spath, 'w') as f:
+        json.dump(swings, f, separators=(',', ':'))
+    log(f'  Wrote {spath}: {len(swings) - 1} hitters (per-swing iSwing+ + dates for date-range)')
 
 
 # Intercept-point columns. Prefer "relative to home plate" (a true aerial view w.r.t.
@@ -501,6 +515,8 @@ def write_intercept(scored_df, season, min_pts=20):
     df['year'] = pd.to_datetime(df['game_date'], errors='coerce').dt.year
     df['_x'] = pd.to_numeric(df[xcol], errors='coerce')
     df['_y'] = pd.to_numeric(df[ycol], errors='coerce')
+    _dt = pd.to_datetime(df['game_date'], errors='coerce')
+    df['_mmdd'] = (_dt.dt.month * 100 + _dt.dt.day)   # per-point date for window filtering
     df['_stand'] = (df['stand'].astype(str).str.upper().str[0]
                     if 'stand' in df.columns else '?')
     df = df[(df['year'] == season) & df['_x'].notna() & df['_y'].notna() & df['batter'].notna()]
@@ -542,8 +558,8 @@ def write_intercept(scored_df, season, min_pts=20):
                 continue
             med_ix = float(gs['_x'].median())
             side_sign = 1.0 if med_ix >= 0 else -1.0
-            entry = {'pts': [[round(float(a), 1), round(float(b), 1)]
-                             for a, b in zip(gs['_x'], gs['_y'])],
+            entry = {'pts': [[round(float(a), 1), round(float(b), 1), int(m) if pd.notna(m) else 0]
+                             for a, b, m in zip(gs['_x'], gs['_y'], gs['_mmdd'])],
                      'avgIy': round(float(gs['_y'].median()), 1)}   # avg y-intercept (depth) → dashed line
             # The leaderboard gives ONE stance row per player (it doesn't split switch
             # hitters), so fall back to the other side's row — a switch hitter's two

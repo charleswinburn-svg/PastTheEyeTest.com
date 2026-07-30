@@ -1,10 +1,11 @@
 import { useTheme } from "./ThemeContext.jsx";
-import { useRef, useCallback, useMemo } from "react";
+import { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
-import { useDateRangeStats, computeXrvDateRange, buildXrvPctileLookup, interpolatePctile } from "./statsCompute.js";
+import { useDateRangeStats, computeXrvDateRange, buildXrvPctileLookup, buildPctileLookup, interpolatePctile } from "./statsCompute.js";
+import { filterByWindow, mmddFromDate, loadSeasonJson } from "./kde.js";
 
 // Fixed display order for the xRV / 600 PA column (matches build_hitter_xrv.py).
 const XRV_LABELS = [
@@ -44,6 +45,27 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
     return { pa: r.pa, metrics };
   }, [isDateRange, xrvGames, xrvAll, dateFrom, dateTo]);
 
+  // Date-range iSwing+ bubble: recompute the player's windowed average from the
+  // per-swing file and rank it against the season iSwing+ distribution.
+  const [iswingSwings, setIswingSwings] = useState(null);
+  useEffect(() => {
+    if (!isDateRange || !player?.player_id || isAAA) { setIswingSwings(null); return; }
+    let cancelled = false;
+    loadSeasonJson(`/iswing_swings_${season}.json`).then(m => {
+      if (!cancelled) setIswingSwings((m && m[String(player.player_id)]) || null);
+    });
+    return () => { cancelled = true; };
+  }, [isDateRange, player?.player_id, season, isAAA]);
+
+  const windowedIswing = useMemo(() => {
+    if (!isDateRange || !iswingSwings?.v) return null;
+    const fv = filterByWindow(iswingSwings.v, iswingSwings.d, mmddFromDate(dateFrom) ?? 0, mmddFromDate(dateTo) ?? 9999);
+    if (fv.length < 5) return null;
+    const mean = fv.reduce((a, b) => a + b, 0) / fv.length;
+    const pctile = interpolatePctile(buildPctileLookup(allHitters, "iSwing+"), mean);
+    return { value: Math.round(mean), pctile, n: fv.length };
+  }, [isDateRange, iswingSwings, dateFrom, dateTo, allHitters]);
+
   const saveCard = useCallback(async () => {
     if (!player) return;
     const safeName = player.name.replace(/\s+/g, "_");
@@ -58,7 +80,13 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
     );
   }
 
-  const cats = Object.entries(displayCategories || {}).filter(([k]) => !k.startsWith("_"));
+  const cats = Object.entries(displayCategories || {})
+    .filter(([k]) => !k.startsWith("_"))
+    .map(([label, cat]) => (
+      label === "iSwing+" && windowedIswing
+        ? [label, { display: String(windowedIswing.value), pctile: windowedIswing.pctile }]
+        : [label, cat]
+    ));
 
   // xRV/600 PA metrics (season-precomputed, merged onto player.xrv by player_id).
   // Right column only renders when present, so the card stays single-column until
@@ -177,6 +205,8 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           team={player.team}
           season={season}
           isAAA={isAAA}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
         />
         <div style={{
           padding: "8px 16px 10px",
