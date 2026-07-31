@@ -59,18 +59,24 @@ SCORE_COLS = [
 
 
 def compute_plus(df, norm, kind):
-    """Per-pitch + grade from the model's raw xRV columns (mirrors the HR
-    scripts / score_pitches._per_type_plus). NaN where the pitch type has no
-    norm entry."""
-    col, mkey, skey, rkey = PLUS_SPEC[kind]
+    """Per-pitch + grade from the model's raw xRV columns: the natural per-type
+    z-score, 100 = league average for that pitch type, ±10 = 1 per-pitch stdev.
+    NaN where the pitch type has no norm entry.
+
+    NOTE: we deliberately do NOT apply the '_{kind}_plus_rescale' params here.
+    Those rescale the *pitcher-level aggregate* Plus distribution to mean=100/
+    stdev=10 (used for the leaderboard bubbles) — their stdev is the spread of
+    pitcher averages (~2-3 for loc/tun/pitch), which is far smaller than the
+    per-pitch spread. Applying that aggregate rescale to per-pitch values
+    multiplies each pitch's spread by 10/stdev (~5x for loc/tun/pitch) and blows
+    the KDE right off the 70-130 grid. Per-pitch distributions stay on the
+    natural per-type scale."""
+    col, mkey, skey, _rkey = PLUS_SPEC[kind]
     remapped = df["pitch_type"].map(lambda p: sp.PITCH_TYPE_REMAP.get(p, p))
     mean = pd.to_numeric(remapped.map(lambda p: (norm.get(p) or {}).get(mkey)), errors="coerce")
     std = pd.to_numeric(remapped.map(lambda p: (norm.get(p) or {}).get(skey)), errors="coerce")
     z = ((pd.to_numeric(df[col], errors="coerce") - mean) / std).clip(-4, 4)
     plus = 100 - z * 10
-    rz = norm.get(rkey)
-    if rz and rz.get("stdev"):
-        plus = 100 + (plus - rz["mean"]) / rz["stdev"] * 10
     return plus.where(std > 0)
 
 
