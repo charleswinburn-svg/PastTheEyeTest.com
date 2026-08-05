@@ -2,7 +2,7 @@
   "season": 2026,
   "pitch_types": {
     "CH": {
-      "count": 55375,
+      "count": 55855,
       "velo": 86.1,
       "spin": 1751,
       "zone_pct": 32.5,
@@ -10,7 +10,7 @@
       "extension": 6.43
     },
     "CU": {
-      "count": 31687,
+      "count": 31949,
       "velo": 80.2,
       "spin": 2601,
       "zone_pct": 35.6,
@@ -34,39 +34,39 @@
       "extension": 4.67
     },
     "FC": {
-      "count": 39031,
+      "count": 39338,
       "velo": 89.7,
-      "spin": 2387,
-      "zone_pct": 46.8,
+      "spin": 2386,
+      "zone_pct": 46.9,
       "whiff_pct": 22.9,
       "extension": 6.42
     },
     "FF": {
-      "count": 151598,
+      "count": 152911,
       "velo": 94.8,
       "spin": 2314,
       "zone_pct": 47.8,
-      "whiff_pct": 21.9,
+      "whiff_pct": 21.8,
       "extension": 6.51
     },
     "FS": {
-      "count": 15993,
+      "count": 16121,
       "velo": 86.7,
-      "spin": 1381,
+      "spin": 1382,
       "zone_pct": 31.2,
       "whiff_pct": 34.4,
       "extension": 6.58
     },
     "KC": {
-      "count": 8177,
+      "count": 8205,
       "velo": 82.6,
       "spin": 2519,
       "zone_pct": 34.6,
-      "whiff_pct": 34.3,
+      "whiff_pct": 34.2,
       "extension": 6.45
     },
     "SI": {
-      "count": 82407,
+      "count": 83115,
       "velo": 94.1,
       "spin": 2198,
       "zone_pct": 51.1,
@@ -74,7 +74,7 @@
       "extension": 6.42
     },
     "SL": {
-      "count": 66480,
+      "count": 67008,
       "velo": 86.3,
       "spin": 2435,
       "zone_pct": 39.1,
@@ -82,21 +82,21 @@
       "extension": 6.38
     },
     "ST": {
-      "count": 41419,
+      "count": 41807,
       "velo": 82.9,
       "spin": 2597,
       "zone_pct": 38.5,
-      "whiff_pct": 31.2,
+      "whiff_pct": 31.3,
       "extension": 6.33
     },
     "SV": {
-      "count": 2163,
+      "count": 2166,
       "velo": 82.2,
-      "spin": 2557,
+      "spin": 2558,
       "zone_pct": 36.2,
-      "whiff_pct": 28.1,
+      "whiff_pct": 28.0,
       "extension": 6.08
     }
   },
-  "generated_at": "2026-08-04 15:00:02 UTC"
+  "generated_at": "2026-08-05 15:00:54 UTC"
 }
