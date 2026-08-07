@@ -8,9 +8,10 @@ import {
 } from "./mlbApi.js";
 import {
   MovementPlot, SprayChart, ZonePlot, StatBar, PitchTable, PitchTypeLegend,
-  PitcherCountTool, HitterCountTool, LocationZonePanel,
+  LocationZonePanel,
   RollingVeloChart, PlatoonUsageBars, ReclassifyModal,
 } from "./SummaryComponents.jsx";
+import PlinkoView from "./PlinkoViews.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance, SearchableSelect } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 
@@ -134,7 +135,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
   const isPitcher = subTab.startsWith("pitcher");
   const isGame = subTab.endsWith("game");
-  const isCounts = subTab.endsWith("counts");
+  const isPlinko = subTab.endsWith("plinko");
   const currentSeason = parseInt(season) || 2026;
   const sportId = isFCL ? 16 : isA ? 14 : isAAA ? 11 : 1;
 
@@ -858,8 +859,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
             locPlus:    round(v.loc),
             tunnelPlus: round(v.tun),
             pitchPlus:  round(v.pitch),
-            L: { pitchPlus: round(byTypeL[apiPt]?.pitch), stuffPlus: round(byTypeL[apiPt]?.stuff) },
-            R: { pitchPlus: round(byTypeR[apiPt]?.pitch), stuffPlus: round(byTypeR[apiPt]?.stuff) },
+            L: { pitchPlus: round(byTypeL[apiPt]?.pitch), stuffPlus: round(byTypeL[apiPt]?.stuff), locPlus: round(byTypeL[apiPt]?.loc) },
+            R: { pitchPlus: round(byTypeR[apiPt]?.pitch), stuffPlus: round(byTypeR[apiPt]?.stuff), locPlus: round(byTypeR[apiPt]?.loc) },
           };
         }
         console.log(`[Pitch+] Scored ${allPitches.length} pitches via /score_aggregate:`, out);
@@ -1116,7 +1117,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
       {/* Reclassify toggle bar — only visible for pitcher views with data.
           Lives outside cardRef so the saved PNG doesn't include it. */}
-      {hasData && isPitcher && !isCounts && (
+      {hasData && isPitcher && !isPlinko && (
         <div style={{
           maxWidth: 1000, margin: "0 auto 8px",
           display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 12,
@@ -1152,7 +1153,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
         </div>
       )}
 
-      {hasData && isPitcher && !isCounts && (
+      {hasData && isPitcher && !isPlinko && (
         <PitcherView
           data={enrichedData} player={selectedPlayer}
           game={isGame ? selectedGame : null}
@@ -1166,16 +1167,11 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           onTypeClick={(type, count) => setReclassifyTarget({ kind: "bulk", type, count })}
         />
       )}
-      {hasData && !isPitcher && !isCounts && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isMinor} leagueAvgs={effectiveLeagueAvgs} dateFrom={dateFrom} dateTo={dateTo} />}
-      {hasData && isPitcher && isCounts && (
-        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isMinor} isPitcher={true} dateFrom={dateFrom} dateTo={dateTo}>
-          <PitcherCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isMinor} />
-        </CountsCard>
-      )}
-      {hasData && !isPitcher && isCounts && (
-        <CountsCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isMinor} isPitcher={false} dateFrom={dateFrom} dateTo={dateTo}>
-          <HitterCountTool pitches={enrichedData.pitches} leagueAvgs={effectiveLeagueAvgs} isAAA={isMinor} />
-        </CountsCard>
+      {hasData && !isPitcher && !isPlinko && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isMinor} leagueAvgs={effectiveLeagueAvgs} dateFrom={dateFrom} dateTo={dateTo} />}
+      {hasData && isPlinko && (
+        <PlinkoCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isMinor} isPitcher={isPitcher} dateFrom={dateFrom} dateTo={dateTo}>
+          <PlinkoView isPitcher={isPitcher} playerId={selectedPlayer.id} savRows={isGame ? savantData : seasonSavant} pitchPlus={pitchPlus} dateFrom={dateFrom} dateTo={dateTo} />
+        </PlinkoCard>
       )}
 
       {/* Reclassify modal — global so it overlays everything. The target
@@ -1223,12 +1219,12 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
   );
 }
 
-function CountsCard({ player, season, seasonType, isAAA, isPitcher, children, dateFrom = "", dateTo = "" }) {
+function PlinkoCard({ player, season, seasonType, isAAA, isPitcher, children, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
-  const subtitle = `${season} ${GAME_TYPE_LABELS[seasonType]} Counts${dateRangeSuffix(dateFrom, dateTo)}`;
+  const subtitle = `${season} ${GAME_TYPE_LABELS[seasonType]} Plinko${dateRangeSuffix(dateFrom, dateTo)}`;
   const saveCard = async () => {
-    await saveCardAsPng(cardRef, `${player.name.replace(/\s+/g, "_")}_${isPitcher ? "pitching" : "hitting"}_counts.png`);
+    await saveCardAsPng(cardRef, `${player.name.replace(/\s+/g, "_")}_${isPitcher ? "pitching" : "hitting"}_plinko.png`);
   };
   return (
     <div>

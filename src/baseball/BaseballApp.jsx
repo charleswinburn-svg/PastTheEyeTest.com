@@ -74,10 +74,10 @@ const TABS = [
     dropdown: [
       { id: "pitcher_game", label: "Pitcher Game" },
       { id: "pitcher_season", label: "Pitcher Season" },
-      { id: "pitcher_counts", label: "Pitcher Counts" },
+      { id: "pitcher_plinko", label: "Pitcher Plinko" },
       { id: "hitter_game", label: "Hitter Game" },
       { id: "hitter_season", label: "Hitter Season" },
-      { id: "hitter_counts", label: "Hitter Counts" },
+      { id: "hitter_plinko", label: "Hitter Plinko" },
     ]
   },
   {
@@ -315,7 +315,7 @@ function BaseballApp() {
   const aaaReady = !!aaaData;
 
   // Helper to check if tab is active (handles dropdown sub-items)
-  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_counts", "hitter_game", "hitter_season", "hitter_counts"].includes(id);
+  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_plinko", "hitter_game", "hitter_season", "hitter_plinko"].includes(id);
   const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
   const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
   const isLeaderboardTab = (id) => ["hitter_lb", "hitter_xrv_lb", "pitcher_lb", "pitch_modeling_lb"].includes(id);

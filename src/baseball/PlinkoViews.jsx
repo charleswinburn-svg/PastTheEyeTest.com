@@ -1,0 +1,459 @@
+import { useMemo, useState, useEffect } from "react";
+import { useTheme } from "./ThemeContext.jsx";
+import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
+import { GROUP_COLORS, getPitchGroup } from "./SummaryComponents.jsx";
+
+// ════════════════════════════════════════════════════════════════════════════
+// PLINKO VIEWS — count-tree usage donuts + split-aware stat tables, for the
+// Pitcher/Hitter "Plinko" tabs. Consumes RAW SAVANT ROWS (snake_case) so it has
+// the contact outcomes (barrel / xwOBAcon / xSLG) the MLB-API pitch objects lack.
+// Stat formulas mirror RollingChart.jsx / PitcherArsenal.jsx exactly.
+// ════════════════════════════════════════════════════════════════════════════
+
+const num = (v) => { const f = parseFloat(v); return Number.isFinite(f) ? f : null; };
+
+// Savant `description` classifiers (same sets used across the app)
+const SWING = new Set([
+  "swinging_strike", "swinging_strike_blocked", "foul", "foul_tip", "hit_into_play",
+  "foul_bunt", "missed_bunt", "bunt_foul_tip", "swinging_pitchout",
+]);
+const WHIFF = new Set(["swinging_strike", "swinging_strike_blocked", "missed_bunt", "swinging_pitchout"]);
+const NON_AB_EVENTS = new Set([
+  "walk", "hit_by_pitch", "sac_fly", "sac_bunt", "sac_fly_double_play",
+  "intent_walk", "catcher_interf",
+]);
+
+function rowInZone(r) {
+  const z = num(r.zone);
+  if (z != null) return z >= 1 && z <= 9;
+  const pX = num(r.plate_x), pZ = num(r.plate_z);
+  if (pX == null || pZ == null) return false;
+  return Math.abs(pX) <= 0.83 && pZ <= (num(r.sz_top) ?? 3.5) && pZ >= (num(r.sz_bot) ?? 1.5);
+}
+function rowOutZone(r) { const z = num(r.zone); return z != null ? z >= 10 : !rowInZone(r); }
+
+// Date-window filter — matches the inRange predicate in Summaries.jsx (game_date strings)
+function inWindow(date, from, to) {
+  if (!date) return !from && !to;
+  if (from && date < from) return false;
+  if (to && date > to) return false;
+  return true;
+}
+
+// Count-state buckets (overlapping lenses). Last bucket = same counts for both
+// roles (2-0/2-1/3-0/3-1) but labeled "Behind" for pitchers, "Ahead" for hitters.
+function countBuckets(isPitcher) {
+  return [
+    { id: "early", label: "Early",     test: (b, s) => (b === 0 && s === 0) || (b === 1 && s === 0) },
+    { id: "pre2k", label: "Pre-2K",    test: (b, s) => s < 2 },
+    { id: "two",   label: "2 Strikes", test: (b, s) => s === 2 },
+    { id: "bhd",   label: isPitcher ? "Behind" : "Ahead",
+      test: (b, s) => (b === 2 && s === 0) || (b === 2 && s === 1) || (b === 3 && s === 0) || (b === 3 && s === 1) },
+  ];
+}
+
+// ── times-through-the-order (starters) ──────────────────────────────────────
+const MIN_TTO_PITCHES = 25;   // below this a time-through is too sparse to plot / show
+const TTO_LABELS = { "1": "1st Time", "2": "2nd Time", "3": "3rd Time" };
+const ttoBucket = (n) => (n == null ? null : n >= 3 ? "3" : String(n));
+
+// Assign each (game, at-bat) the pitcher's Nth plate appearance vs that batter in
+// that game → { `${game_pk}|${at_bat_number}`: ttoNumber }.
+function assignTTO(rows) {
+  const byGame = {};
+  for (const r of rows) { const g = r.game_pk; if (g != null) (byGame[g] ||= []).push(r); }
+  const abTTO = {};
+  for (const grows of Object.values(byGame)) {
+    const batterOf = {};
+    for (const r of grows) { const ab = parseInt(r.at_bat_number, 10); if (!Number.isNaN(ab)) batterOf[ab] = r.batter; }
+    const seen = {};
+    for (const ab of Object.keys(batterOf).map(Number).sort((a, b) => a - b)) {
+      const bat = batterOf[ab];
+      seen[bat] = (seen[bat] || 0) + 1;
+      abTTO[`${grows[0].game_pk}|${ab}`] = seen[bat];
+    }
+  }
+  return abTTO;
+}
+
+// Annotated rows (+ `_tto`) and which time-throughs have enough pitches to plot.
+function usePitcherTTO(savRows, playerId, dateFrom, dateTo) {
+  const base = useFiltered(savRows, playerId, true, dateFrom, dateTo);
+  return useMemo(() => {
+    const abTTO = assignTTO(base);
+    const rows = base.map(r => ({ ...r, _tto: ttoBucket(abTTO[`${r.game_pk}|${r.at_bat_number}`]) }));
+    const counts = { "1": 0, "2": 0, "3": 0 };
+    for (const r of rows) if (r._tto) counts[r._tto]++;
+    const present = ["1", "2", "3"].filter(k => counts[k] >= MIN_TTO_PITCHES);
+    return { rows, present, counts };
+  }, [base]);
+}
+
+// ── per-split counter accumulation ──────────────────────────────────────────
+function newCtr() {
+  return { n: 0, swings: 0, whiffs: 0, oz: 0, ozSw: 0, iz: 0, strikes: 0,
+           bbe: 0, barrels: 0, xwcSum: 0, xwcN: 0, xslgSum: 0, ab: 0 };
+}
+function addRow(c, r) {
+  c.n++;
+  const desc = (r.description || "").toLowerCase();
+  const sw = SWING.has(desc);
+  if (sw) c.swings++;
+  if (WHIFF.has(desc)) c.whiffs++;
+  if (rowOutZone(r)) { c.oz++; if (sw) c.ozSw++; }
+  if (rowInZone(r)) c.iz++;
+  if (sw || desc === "called_strike") c.strikes++;
+  if (desc === "hit_into_play") {
+    c.bbe++;
+    if (num(r.launch_speed_angle) === 6) c.barrels++;
+    const xwc = num(r.estimated_woba_using_speedangle);
+    if (xwc != null) { c.xwcSum += xwc; c.xwcN++; }
+  }
+  const wDen = num(r.woba_denom);
+  if (wDen && wDen > 0 && !NON_AB_EVENTS.has((r.events || "").toLowerCase())) {
+    c.ab++;
+    if (desc === "hit_into_play") { const x = num(r.estimated_slg_using_speedangle); if (x != null) c.xslgSum += x; }
+  }
+}
+const pct1 = (a, b) => (b > 0 ? Math.round((a / b) * 1000) / 10 : null);
+function finalize(c, splitTotal) {
+  return {
+    n: c.n,
+    usagePct: splitTotal > 0 ? Math.round((c.n / splitTotal) * 1000) / 10 : null,
+    whiffPct: pct1(c.whiffs, c.swings),
+    chasePct: pct1(c.ozSw, c.oz),
+    zonePct:  pct1(c.iz, c.n),
+    strikePct: pct1(c.strikes, c.n),
+    barrelPct: pct1(c.barrels, c.bbe),
+    xwobacon: c.xwcN ? Math.round((c.xwcSum / c.xwcN) * 1000) / 1000 : null,
+    xslg:     c.ab   ? Math.round((c.xslgSum / c.ab) * 1000) / 1000 : null,
+  };
+}
+
+// Aggregate ALREADY-FILTERED rows (player + date + valid pitch) into
+// { data: {group: {split: stats}}, splitTotal } for a dimension.
+function aggregateCounts(rows, { isPitcher, keyOf, dimension }) {
+  const buckets = dimension === "count" ? countBuckets(isPitcher) : null;
+  const splitsOf = dimension === "platoon"
+    ? (r) => { const s = isPitcher ? r.stand : r.p_throws; return (s === "L" || s === "R") ? [s] : []; }
+    : dimension === "tto"
+    ? (r) => (r._tto ? [r._tto] : [])
+    : (r) => {
+        const b = parseInt(r.balls, 10), s = parseInt(r.strikes, 10);
+        if (Number.isNaN(b) || Number.isNaN(s)) return [];
+        return buckets.filter(bk => bk.test(b, s)).map(bk => bk.id);
+      };
+  const acc = {}, splitTotal = {};
+  for (const r of rows) {
+    const group = keyOf(r);
+    if (!group) continue;
+    for (const sid of splitsOf(r)) {
+      const c = ((acc[group] ||= {})[sid] ||= newCtr());
+      addRow(c, r);
+      splitTotal[sid] = (splitTotal[sid] || 0) + 1;
+    }
+  }
+  const data = {};
+  for (const [group, bySplit] of Object.entries(acc)) {
+    data[group] = {};
+    for (const [sid, c] of Object.entries(bySplit)) data[group][sid] = finalize(c, splitTotal[sid]);
+  }
+  return { data, splitTotal };
+}
+
+// ── mini usage donut (SVG <g>) ──────────────────────────────────────────────
+function donutGroup(cx, cy, rows, keyOf, colorOf, rO, rI, t) {
+  const counts = {};
+  let total = 0;
+  for (const r of rows) { const k = keyOf(r); if (!k) continue; counts[k] = (counts[k] || 0) + 1; total++; }
+  const slices = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const els = [];
+  if (total === 0) {
+    els.push(<circle key="e" cx={cx} cy={cy} r={(rO + rI) / 2} fill="none"
+      stroke={t.divider} strokeWidth={rO - rI} strokeDasharray="2 3" opacity={0.5} />);
+  } else if (slices.length === 1) {
+    els.push(<circle key="s" cx={cx} cy={cy} r={(rO + rI) / 2} fill="none"
+      stroke={colorOf(slices[0][0]) || "#888"} strokeWidth={rO - rI} />);
+  } else {
+    let a = -Math.PI / 2;
+    slices.forEach(([k, n], i) => {
+      const a1 = a + (n / total) * 2 * Math.PI;
+      const p = (r, ang) => [cx + r * Math.cos(ang), cy + r * Math.sin(ang)];
+      const [x0, y0] = p(rO, a), [x1, y1] = p(rO, a1), [x2, y2] = p(rI, a1), [x3, y3] = p(rI, a);
+      const large = a1 - a > Math.PI ? 1 : 0;
+      els.push(<path key={i} fill={colorOf(k) || "#888"}
+        d={`M ${x0} ${y0} A ${rO} ${rO} 0 ${large} 1 ${x1} ${y1} L ${x2} ${y2} A ${rI} ${rI} 0 ${large} 0 ${x3} ${y3} Z`} />);
+      a = a1;
+    });
+  }
+  els.push(<text key="n" x={cx} y={cy + 3} textAnchor="middle" fontSize={9} fontWeight={700}
+    fill={t.textMuted} fontFamily="'Pliant', sans-serif">{total}</text>);
+  return els;
+}
+
+// ── count tree: the 12 counts on a 3×4 grid with ball→right / strike→down edges ─
+function CountTree({ rows, keyOf, colorOf, title, cell = 74 }) {
+  const { theme: t } = useTheme();
+  const byCount = useMemo(() => {
+    const m = {};
+    for (const r of rows) {
+      const b = parseInt(r.balls, 10), s = parseInt(r.strikes, 10);
+      if (b >= 0 && b <= 3 && s >= 0 && s <= 2) (m[`${b}-${s}`] ||= []).push(r);
+    }
+    return m;
+  }, [rows]);
+  const top = 16, W = 4 * cell, H = 3 * cell + top + 4;
+  const cx = (b) => b * cell + cell / 2;
+  const cy = (s) => top + s * cell + cell / 2;
+  const rO = Math.min(24, cell * 0.32), rI = rO * 0.52;
+  const edges = [];
+  for (let b = 0; b <= 3; b++) for (let s = 0; s <= 2; s++) {
+    if (b < 3) edges.push(<line key={`h${b}${s}`} x1={cx(b) + rO} y1={cy(s)} x2={cx(b + 1) - rO} y2={cy(s)} stroke={t.divider} strokeWidth={1} />);
+    if (s < 2) edges.push(<line key={`v${b}${s}`} x1={cx(b)} y1={cy(s) + rO} x2={cx(b)} y2={cy(s + 1) - rO} stroke={t.divider} strokeWidth={1} />);
+  }
+  const nodes = [];
+  for (let b = 0; b <= 3; b++) for (let s = 0; s <= 2; s++) {
+    nodes.push(
+      <g key={`n${b}${s}`}>
+        {donutGroup(cx(b), cy(s), byCount[`${b}-${s}`] || [], keyOf, colorOf, rO, rI, t)}
+        <text x={cx(b)} y={cy(s) + rO + 9} textAnchor="middle" fontSize={8.5} fontWeight={700}
+          fill={t.textFaint} fontFamily="'Pliant', sans-serif">{b}-{s}</text>
+      </g>
+    );
+  }
+  return (
+    <div style={{ flex: "0 0 auto" }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ maxWidth: W, display: "block", margin: "0 auto" }}>
+        <text x={W / 2} y={11} textAnchor="middle" fontSize={11} fontWeight={800}
+          fill={t.text} fontFamily="'Pliant', sans-serif" style={{ textTransform: "uppercase", letterSpacing: "0.03em" }}>{title}</text>
+        {edges}{nodes}
+      </svg>
+    </div>
+  );
+}
+
+// ── legend ──────────────────────────────────────────────────────────────────
+function Legend({ items }) {
+  const { theme: t } = useTheme();
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", justifyContent: "center", margin: "6px 0 2px", fontSize: 10.5, color: t.textMuted, fontFamily: "'Pliant', sans-serif" }}>
+      {items.map(it => (
+        <span key={it.label} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: it.color, display: "inline-block" }} />{it.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ── stat table (label + one column per split) ───────────────────────────────
+function StatTable({ title, groups, splits, splitLabels, valueOf, fmt }) {
+  const { theme: t } = useTheme();
+  const th = { padding: "4px 6px", borderBottom: `2px solid ${t.divider}`, color: t.textMuted, fontSize: 10.5, fontWeight: 800, textAlign: "center", whiteSpace: "nowrap", fontFamily: "'Pliant', sans-serif" };
+  const td = { padding: "4px 6px", borderBottom: `1px solid ${t.tableBorder}`, textAlign: "center", fontSize: 13, fontWeight: 700, color: t.textSecondary, fontFamily: "'Pliant', sans-serif" };
+  const lab = { padding: "4px 8px", borderBottom: `1px solid ${t.tableBorder}`, textAlign: "left", fontWeight: 800, color: t.text, fontSize: 12, whiteSpace: "nowrap", fontFamily: "'Pliant', sans-serif" };
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ fontSize: 11, fontWeight: 800, color: t.text, textAlign: "center", margin: "8px 0 3px", textTransform: "uppercase", letterSpacing: "-0.01em", fontFamily: "'Pliant', sans-serif" }}>{title}</div>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+          <colgroup><col style={{ width: 92 }} />{splits.map(s => <col key={s} />)}</colgroup>
+          <thead><tr><th style={{ ...th, textAlign: "left" }}></th>{splits.map(s => <th key={s} style={th}>{splitLabels[s]}</th>)}</tr></thead>
+          <tbody>
+            {groups.map(g => (
+              <tr key={g.key}>
+                <td style={{ ...lab, background: g.color ? g.color + "80" : "transparent" }}>{g.label}</td>
+                {splits.map(s => { const v = valueOf(g.key, s); return <td key={s} style={td}>{v != null ? fmt(v) : "—"}</td>; })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+const fPct = (v) => v.toFixed(1) + "%";
+const f3 = (v) => v.toFixed(3).replace(/^0/, "");   // .273
+const fPlus = (v) => String(Math.round(v));
+
+// ── ordered groups ──────────────────────────────────────────────────────────
+function pitchTypeGroups(agg) {
+  const total = {};
+  for (const [g, bySplit] of Object.entries(agg.data)) total[g] = Object.values(bySplit).reduce((a, c) => a + (c.n || 0), 0);
+  return Object.keys(total).sort((a, b) => total[b] - total[a])
+    .map(pt => ({ key: pt, label: PITCH_NAMES[pt] || pt, color: PITCH_COLORS[pt] || "#888" }));
+}
+const HITTER_GROUP_ROWS = ["Fastball", "Breaking", "Offspeed"].map(g => ({ key: g, label: g, color: GROUP_COLORS[g] }));
+
+// ════════════════════════════════════════════════════════════════════════════
+// The four views
+// ════════════════════════════════════════════════════════════════════════════
+// Filter raw season Savant rows (which contain BOTH teams' pitches) down to the
+// selected player, valid pitch types, and the active date window.
+function useFiltered(savRows, playerId, isPitcher, dateFrom, dateTo) {
+  return useMemo(() => (savRows || []).filter(r =>
+    r.pitch_type && r.pitch_type !== "UN" && r.pitch_type !== "PO" &&
+    String(isPitcher ? r.pitcher : r.batter) === String(playerId) &&
+    inWindow(r.game_date, dateFrom, dateTo)
+  ), [savRows, playerId, isPitcher, dateFrom, dateTo]);
+}
+
+const PLATOON_SPLITS = ["L", "R"];
+
+function PitcherPlatoon({ savRows, playerId, pitchPlus, dateFrom, dateTo }) {
+  const rows = useFiltered(savRows, playerId, true, dateFrom, dateTo);
+  const agg = useMemo(() => aggregateCounts(rows, { isPitcher: true, keyOf: r => r.pitch_type, dimension: "platoon" }), [rows]);
+  const groups = pitchTypeGroups(agg);
+  const labels = { L: "vs LHB", R: "vs RHB" };
+  const keyOf = r => r.pitch_type, colorOf = pt => PITCH_COLORS[pt] || "#888";
+  const st = (title, field, fmt) => <StatTable title={title} groups={groups} splits={PLATOON_SPLITS} splitLabels={labels} valueOf={(k, s) => agg.data[k]?.[s]?.[field] ?? null} fmt={fmt} />;
+  const stPlus = (title, field) => <StatTable title={title} groups={groups} splits={PLATOON_SPLITS} splitLabels={labels} valueOf={(k, s) => pitchPlus?.[k]?.[s]?.[field] ?? null} fmt={fPlus} />;
+  return (
+    <div style={{ padding: "4px 16px 12px" }}>
+      <div style={{ display: "flex", gap: 18, justifyContent: "center", flexWrap: "wrap" }}>
+        <CountTree rows={rows.filter(r => r.stand === "L")} keyOf={keyOf} colorOf={colorOf} title="vs LHB" />
+        <CountTree rows={rows.filter(r => r.stand === "R")} keyOf={keyOf} colorOf={colorOf} title="vs RHB" />
+      </div>
+      <Legend items={groups.map(g => ({ label: g.label, color: g.color }))} />
+      {st("Usage%", "usagePct", fPct)}
+      {st("Barrel% allowed", "barrelPct", fPct)}
+      {st("xwOBAcon", "xwobacon", f3)}
+      {st("Whiff%", "whiffPct", fPct)}
+      {stPlus("Stuff+", "stuffPlus")}
+      {stPlus("Location+", "locPlus")}
+      {stPlus("Pitch+", "pitchPlus")}
+    </div>
+  );
+}
+
+function PitcherCountState({ savRows, playerId, dateFrom, dateTo }) {
+  const rows = useFiltered(savRows, playerId, true, dateFrom, dateTo);
+  const agg = useMemo(() => aggregateCounts(rows, { isPitcher: true, keyOf: r => r.pitch_type, dimension: "count" }), [rows]);
+  const groups = pitchTypeGroups(agg);
+  const buckets = countBuckets(true);
+  const splits = buckets.map(b => b.id);
+  const labels = Object.fromEntries(buckets.map(b => [b.id, b.label]));
+  const st = (title, field, fmt) => <StatTable title={title} groups={groups} splits={splits} splitLabels={labels} valueOf={(k, s) => agg.data[k]?.[s]?.[field] ?? null} fmt={fmt} />;
+  return (
+    <div style={{ padding: "4px 16px 12px" }}>
+      <CountTree rows={rows} keyOf={r => r.pitch_type} colorOf={pt => PITCH_COLORS[pt] || "#888"} title="Usage by count" cell={82} />
+      <Legend items={groups.map(g => ({ label: g.label, color: g.color }))} />
+      {st("Usage%", "usagePct", fPct)}
+      {st("Zone%", "zonePct", fPct)}
+      {st("Whiff%", "whiffPct", fPct)}
+      {st("Strike%", "strikePct", fPct)}
+      {st("Barrel% allowed", "barrelPct", fPct)}
+      {st("xwOBAcon", "xwobacon", f3)}
+    </div>
+  );
+}
+
+// Times through the order — 3 plinkos (only ones with enough pitches) + the same
+// six stat tables as Count State, split by time-through. Starters only.
+function PitcherTTO({ rows, present }) {
+  const agg = useMemo(() => aggregateCounts(rows, { isPitcher: true, keyOf: r => r.pitch_type, dimension: "tto" }), [rows]);
+  const groups = pitchTypeGroups(agg);
+  const st = (title, field, fmt) => <StatTable title={title} groups={groups} splits={present} splitLabels={TTO_LABELS} valueOf={(k, s) => agg.data[k]?.[s]?.[field] ?? null} fmt={fmt} />;
+  return (
+    <div style={{ padding: "4px 16px 12px" }}>
+      <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+        {present.map(k => (
+          <CountTree key={k} rows={rows.filter(r => r._tto === k)} keyOf={r => r.pitch_type} colorOf={pt => PITCH_COLORS[pt] || "#888"} title={TTO_LABELS[k]} cell={62} />
+        ))}
+      </div>
+      <Legend items={groups.map(g => ({ label: g.label, color: g.color }))} />
+      {st("Usage%", "usagePct", fPct)}
+      {st("Zone%", "zonePct", fPct)}
+      {st("Whiff%", "whiffPct", fPct)}
+      {st("Strike%", "strikePct", fPct)}
+      {st("Barrel% allowed", "barrelPct", fPct)}
+      {st("xwOBAcon", "xwobacon", f3)}
+    </div>
+  );
+}
+
+function HitterPlatoon({ savRows, playerId, dateFrom, dateTo }) {
+  const rows = useFiltered(savRows, playerId, false, dateFrom, dateTo);
+  const agg = useMemo(() => aggregateCounts(rows, { isPitcher: false, keyOf: r => getPitchGroup(r.pitch_type), dimension: "platoon" }), [rows]);
+  const groups = HITTER_GROUP_ROWS.filter(g => agg.data[g.key]);
+  const labels = { L: "vs LHP", R: "vs RHP" };
+  const keyOf = r => getPitchGroup(r.pitch_type), colorOf = g => GROUP_COLORS[g] || "#888";
+  const st = (title, field, fmt) => <StatTable title={title} groups={groups} splits={PLATOON_SPLITS} splitLabels={labels} valueOf={(k, s) => agg.data[k]?.[s]?.[field] ?? null} fmt={fmt} />;
+  return (
+    <div style={{ padding: "4px 16px 12px" }}>
+      <div style={{ display: "flex", gap: 18, justifyContent: "center", flexWrap: "wrap" }}>
+        <CountTree rows={rows.filter(r => r.p_throws === "L")} keyOf={keyOf} colorOf={colorOf} title="vs LHP" />
+        <CountTree rows={rows.filter(r => r.p_throws === "R")} keyOf={keyOf} colorOf={colorOf} title="vs RHP" />
+      </div>
+      <Legend items={HITTER_GROUP_ROWS.map(g => ({ label: g.label, color: g.color }))} />
+      {st("Usage% seen", "usagePct", fPct)}
+      {st("Barrel%", "barrelPct", fPct)}
+      {st("xwOBAcon", "xwobacon", f3)}
+      {st("xSLG", "xslg", f3)}
+      {st("Chase%", "chasePct", fPct)}
+      {st("Whiff%", "whiffPct", fPct)}
+    </div>
+  );
+}
+
+function HitterCountState({ savRows, playerId, dateFrom, dateTo }) {
+  const rows = useFiltered(savRows, playerId, false, dateFrom, dateTo);
+  const agg = useMemo(() => aggregateCounts(rows, { isPitcher: false, keyOf: r => getPitchGroup(r.pitch_type), dimension: "count" }), [rows]);
+  const groups = HITTER_GROUP_ROWS.filter(g => agg.data[g.key]);
+  const buckets = countBuckets(false);
+  const splits = buckets.map(b => b.id);
+  const labels = Object.fromEntries(buckets.map(b => [b.id, b.label]));
+  const st = (title, field, fmt) => <StatTable title={title} groups={groups} splits={splits} splitLabels={labels} valueOf={(k, s) => agg.data[k]?.[s]?.[field] ?? null} fmt={fmt} />;
+  return (
+    <div style={{ padding: "4px 16px 12px" }}>
+      <CountTree rows={rows} keyOf={r => getPitchGroup(r.pitch_type)} colorOf={g => GROUP_COLORS[g] || "#888"} title="Usage seen by count" cell={82} />
+      <Legend items={HITTER_GROUP_ROWS.map(g => ({ label: g.label, color: g.color }))} />
+      {st("Usage% seen", "usagePct", fPct)}
+      {st("Barrel%", "barrelPct", fPct)}
+      {st("xwOBAcon", "xwobacon", f3)}
+      {st("xSLG", "xslg", f3)}
+      {st("Chase%", "chasePct", fPct)}
+      {st("Whiff%", "whiffPct", fPct)}
+    </div>
+  );
+}
+
+// ── public entry: subtab switcher + the matching view ───────────────────────
+export default function PlinkoView({ isPitcher, playerId, savRows, pitchPlus, dateFrom = "", dateTo = "" }) {
+  const { theme: t } = useTheme();
+  const [subtab, setSubtab] = useState("platoon");   // "platoon" | "count" | "tto"
+  // Times-through-the-order data (pitchers only). The subtab is offered only when
+  // the pitcher actually has a 2nd time through the order — i.e. a starter.
+  const tto = usePitcherTTO(isPitcher ? savRows : null, playerId, dateFrom, dateTo);
+  const showTTO = isPitcher && tto.present.includes("2");
+  useEffect(() => { if (subtab === "tto" && !showTTO) setSubtab("platoon"); }, [subtab, showTTO]);
+
+  const tabBtn = (id, label) => (
+    <button onClick={() => setSubtab(id)} style={{
+      padding: "5px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+      background: subtab === id ? t.accent : t.inputBg,
+      color: subtab === id ? "#fff" : t.textMuted,
+      border: `1px solid ${subtab === id ? t.accent : t.inputBorder}`,
+      borderRadius: 6, fontFamily: "'Pliant', sans-serif",
+    }}>{label}</button>
+  );
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, justifyContent: "center", padding: "10px 0 2px", flexWrap: "wrap" }}>
+        {tabBtn("platoon", "Platoon")}
+        {tabBtn("count", "Count State")}
+        {showTTO && tabBtn("tto", "Times Order")}
+      </div>
+      {subtab === "tto" && showTTO
+        ? <PitcherTTO rows={tto.rows} present={tto.present} />
+        : subtab === "platoon"
+        ? (isPitcher
+            ? <PitcherPlatoon savRows={savRows} playerId={playerId} pitchPlus={pitchPlus} dateFrom={dateFrom} dateTo={dateTo} />
+            : <HitterPlatoon savRows={savRows} playerId={playerId} dateFrom={dateFrom} dateTo={dateTo} />)
+        : (isPitcher
+            ? <PitcherCountState savRows={savRows} playerId={playerId} dateFrom={dateFrom} dateTo={dateTo} />
+            : <HitterCountState savRows={savRows} playerId={playerId} dateFrom={dateFrom} dateTo={dateTo} />)}
+    </div>
+  );
+}
