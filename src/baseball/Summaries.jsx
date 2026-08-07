@@ -992,6 +992,26 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     return merged;
   }, [pitchPlus, leaderboardPlus, isGame, pitchOverrides, typeOverrides, dateFrom, dateTo]);
 
+  // Plus grades for the Plinko Platoon table. For a full regular season the live
+  // /score_aggregate scoring (pitchPlus) is heavy/flaky, so prefer the leaderboard
+  // (reliable per-type + L/R stuff/pitch) and supplement Loc+ per side from live
+  // scores when present. Spring/date-range/game → live scores (which carry L/R
+  // stuff/pitch/loc directly).
+  const plinkoPitchPlus = useMemo(() => {
+    if (leaderboardPlus && !isGame && !(dateFrom || dateTo) && pitchOverrides.size === 0 && typeOverrides.size === 0) {
+      const out = {};
+      for (const [pt, pg] of Object.entries(leaderboardPlus)) {
+        out[pt] = {
+          stuffPlus: pg.stuff ?? null, locPlus: pg.loc ?? null, pitchPlus: pg.pitch ?? null,
+          L: { stuffPlus: pg.L?.stuff_plus ?? null, pitchPlus: pg.L?.pitch_plus ?? null, locPlus: pitchPlus?.[pt]?.L?.locPlus ?? null },
+          R: { stuffPlus: pg.R?.stuff_plus ?? null, pitchPlus: pg.R?.pitch_plus ?? null, locPlus: pitchPlus?.[pt]?.R?.locPlus ?? null },
+        };
+      }
+      return out;
+    }
+    return pitchPlus;
+  }, [leaderboardPlus, pitchPlus, isGame, dateFrom, dateTo, pitchOverrides, typeOverrides]);
+
   return (
     <div style={{ padding: "16px 20px" }}>
       <div style={{ display: "flex", gap: 2, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
@@ -1170,7 +1190,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
       {hasData && !isPitcher && !isPlinko && <HitterView data={enrichedData} player={selectedPlayer} game={isGame ? selectedGame : null} season={currentSeason} seasonType={seasonType} isGame={isGame} isAAA={isMinor} leagueAvgs={effectiveLeagueAvgs} dateFrom={dateFrom} dateTo={dateTo} />}
       {hasData && isPlinko && (
         <PlinkoCard player={selectedPlayer} season={currentSeason} seasonType={seasonType} isAAA={isMinor} isPitcher={isPitcher} dateFrom={dateFrom} dateTo={dateTo}>
-          <PlinkoView isPitcher={isPitcher} playerId={selectedPlayer.id} savRows={isGame ? savantData : seasonSavant} pitchPlus={pitchPlus} dateFrom={dateFrom} dateTo={dateTo} />
+          <PlinkoView isPitcher={isPitcher} playerId={selectedPlayer.id} savRows={isGame ? savantData : seasonSavant} pitchPlus={plinkoPitchPlus} dateFrom={dateFrom} dateTo={dateTo} />
         </PlinkoCard>
       )}
 
