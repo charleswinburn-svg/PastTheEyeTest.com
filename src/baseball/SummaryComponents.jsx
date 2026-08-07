@@ -1178,14 +1178,14 @@ function inZone(p) {
   return Math.abs(p.pX) <= 0.88 && p.pZ >= (p.szBot || 1.5) && p.pZ <= (p.szTop || 3.5);
 }
 
-const PITCH_GROUPS = {
+export const PITCH_GROUPS = {
   Fastball: ["FF", "SI", "FC", "FA"],
   Breaking: ["SL", "CU", "KC", "CS", "SV", "ST", "KN"],
   Offspeed: ["CH", "FS", "SC", "FO"],
 };
-const GROUP_COLORS = { Fastball: "#dd4444", Breaking: "#4488dd", Offspeed: "#33aa33" };
+export const GROUP_COLORS = { Fastball: "#dd4444", Breaking: "#4488dd", Offspeed: "#33aa33" };
 
-function getPitchGroup(code) {
+export function getPitchGroup(code) {
   for (const [group, codes] of Object.entries(PITCH_GROUPS)) {
     if (codes.includes(code)) return group;
   }
