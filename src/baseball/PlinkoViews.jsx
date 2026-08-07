@@ -189,7 +189,12 @@ function cellBg(v, mean, dir, scale) {
   const a = (0.16 + (Math.abs(d) - 0.08) * 0.55).toFixed(2);
   return d > 0 ? `rgba(34,160,60,${a})` : `rgba(210,55,45,${a})`;
 }
-const meanOf = (arr) => { const v = arr.filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+// Fixed MLB-average baselines for cell coloring (overall league, not within-table).
+const LEAGUE_AVG = {
+  barrelPct: 7.5, xwobacon: 0.370, xslg: 0.400,
+  whiffPct: 25.0, chasePct: 28.0, zonePct: 49.0, strikePct: 63.0,
+  stuffPlus: 100, locPlus: 100, pitchPlus: 100,
+};
 
 // ── mini usage donut arcs (no center label; radius scaled by volume) ────────
 function donutEls(cx, cy, rows, keyOf, colorOf, rO, rI, t) {
@@ -215,20 +220,19 @@ function donutEls(cx, cy, rows, keyOf, colorOf, rO, rI, t) {
 function CountTree({ rows, keyOf, colorOf, title }) {
   const { theme: t } = useTheme();
   const byCount = useMemo(() => {
-    const m = {}; let max = 1;
+    const m = {};
     for (const r of rows) {
       const b = parseInt(r.balls, 10), s = parseInt(r.strikes, 10);
-      if (b >= 0 && b <= 3 && s >= 0 && s <= 2) { const k = `${b}-${s}`; (m[k] ||= []).push(r); if (m[k].length > max) max = m[k].length; }
+      if (b >= 0 && b <= 3 && s >= 0 && s <= 2) (m[`${b}-${s}`] ||= []).push(r);
     }
-    return { m, max };
+    return m;
   }, [rows]);
 
-  const H = 22, VS = 46, HS = 26, BR = 15, PAD = 16, TOP = 18;
+  const VS = 46, HS = 26, BR = 15, PAD = 16, TOP = 18;
   const cxOf = (b, s) => PAD + BR + ((b - s) + 2) * HS;          // x = (balls-strikes), shifted so min(-2) fits
   const cyOf = (b, s) => TOP + BR + (b + s) * VS;                // y = depth (balls+strikes)
   const W = PAD * 2 + BR * 2 + 5 * HS;                            // x spans (b-s) in [-2, 3]
   const HT = TOP + BR * 2 + 5 * VS + 12;
-  const radOf = (n) => Math.max(6.5, BR * Math.sqrt(n / byCount.max));
 
   const edges = [], nodes = [];
   for (let b = 0; b <= 3; b++) for (let s = 0; s <= 2; s++) {
@@ -237,8 +241,8 @@ function CountTree({ rows, keyOf, colorOf, title }) {
     if (s < 2) edges.push(<line key={`s${b}${s}`} x1={x} y1={y + BR * 0.5} x2={cxOf(b, s + 1)} y2={cyOf(b, s + 1) - BR * 0.5} stroke={t.divider} strokeWidth={1} opacity={0.7} />);
   }
   for (let b = 0; b <= 3; b++) for (let s = 0; s <= 2; s++) {
-    const list = byCount.m[`${b}-${s}`] || [];
-    const rO = radOf(list.length), x = cxOf(b, s), y = cyOf(b, s);
+    const list = byCount[`${b}-${s}`] || [];
+    const rO = BR, x = cxOf(b, s), y = cyOf(b, s);
     nodes.push(
       <g key={`n${b}${s}`}>
         {donutEls(x, y, list, keyOf, colorOf, rO, rO * 0.52, t)}
@@ -283,8 +287,6 @@ function tblStyles(t) {
 function PerSplitTable({ title, groups, stats, valueOf, isPitcher }) {
   const { theme: t } = useTheme();
   const s = tblStyles(t);
-  const colMean = {};
-  for (const f of stats) colMean[f] = meanOf(groups.map(g => valueOf(g.key, f)));
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={s.title}>{title}</div>
@@ -298,7 +300,7 @@ function PerSplitTable({ title, groups, stats, valueOf, isPitcher }) {
                 <td style={{ ...s.lab, background: g.color ? g.color + "80" : "transparent" }}>{g.label}</td>
                 {stats.map(f => {
                   const v = valueOf(g.key, f);
-                  const bg = cellBg(v, colMean[f], statDir(f, isPitcher), STAT_META[f].scale);
+                  const bg = cellBg(v, LEAGUE_AVG[f], statDir(f, isPitcher), STAT_META[f].scale);
                   return <td key={f} style={{ ...s.td, background: bg }}>{v != null ? STAT_META[f].fmt(v) : "—"}</td>;
                 })}
               </tr>
@@ -306,41 +308,6 @@ function PerSplitTable({ title, groups, stats, valueOf, isPitcher }) {
           </tbody>
         </table>
       </div>
-    </div>
-  );
-}
-
-// One consolidated table (count state): columns = buckets, a section per stat.
-function StackedStatTable({ groups, stats, splits, splitLabels, valueOf, isPitcher }) {
-  const { theme: t } = useTheme();
-  const s = tblStyles(t);
-  return (
-    <div style={{ overflowX: "auto", marginTop: 6 }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
-        <colgroup><col style={{ width: 108 }} />{splits.map(sp => <col key={sp} />)}</colgroup>
-        <thead><tr><th style={{ ...s.th, textAlign: "left" }}></th>{splits.map(sp => <th key={sp} style={s.th}>{splitLabels[sp]}</th>)}</tr></thead>
-        <tbody>
-          {stats.map(f => {
-            const all = [];
-            for (const g of groups) for (const sp of splits) { const v = valueOf(g.key, sp, f); if (v != null) all.push(v); }
-            const m = meanOf(all), dir = statDir(f, isPitcher), sc = STAT_META[f].scale;
-            return [
-              <tr key={`h-${f}`}>
-                <td colSpan={splits.length + 1} style={{ padding: "6px 8px 2px", fontSize: 10.5, fontWeight: 800, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: "'Pliant', sans-serif" }}>{STAT_META[f].label}</td>
-              </tr>,
-              ...groups.map(g => (
-                <tr key={`${f}-${g.key}`}>
-                  <td style={{ ...s.lab, background: g.color ? g.color + "80" : "transparent" }}>{g.label}</td>
-                  {splits.map(sp => {
-                    const v = valueOf(g.key, sp, f);
-                    return <td key={sp} style={{ ...s.td, background: cellBg(v, m, dir, sc) }}>{v != null ? STAT_META[f].fmt(v) : "—"}</td>;
-                  })}
-                </tr>
-              )),
-            ];
-          })}
-        </tbody>
-      </table>
     </div>
   );
 }
@@ -362,7 +329,7 @@ function useFiltered(savRows, playerId, isPitcher, dateFrom, dateTo) {
   ), [savRows, playerId, isPitcher, dateFrom, dateTo]);
 }
 
-const PITCHER_PLATOON_STATS = ["usagePct", "barrelPct", "xwobacon", "whiffPct", "stuffPlus", "locPlus", "pitchPlus"];
+const PITCHER_PLATOON_STATS = ["usagePct", "barrelPct", "xwobacon", "whiffPct", "stuffPlus", "pitchPlus"];
 const PITCHER_COUNT_STATS   = ["usagePct", "zonePct", "whiffPct", "strikePct", "barrelPct", "xwobacon"];
 const HITTER_PLATOON_STATS  = ["usagePct", "barrelPct", "xwobacon", "xslg", "chasePct", "whiffPct"];
 const HITTER_COUNT_STATS    = HITTER_PLATOON_STATS;
@@ -393,14 +360,15 @@ function PitcherCountState({ savRows, playerId, dateFrom, dateTo }) {
   const rows = useFiltered(savRows, playerId, true, dateFrom, dateTo);
   const agg = useMemo(() => aggregateCounts(rows, { isPitcher: true, keyOf: r => r.pitch_type, dimension: "count" }), [rows]);
   const groups = pitchTypeGroups(agg);
-  const buckets = countBuckets(true), splits = buckets.map(b => b.id);
-  const labels = Object.fromEntries(buckets.map(b => [b.id, b.label]));
+  const buckets = countBuckets(true);
   return (
     <div style={{ padding: "4px 16px 12px" }}>
       <CountTree rows={rows} keyOf={r => r.pitch_type} colorOf={pt => PITCH_COLORS[pt] || "#888"} title="Usage by count" />
       <Legend items={groups.map(g => ({ label: g.label, color: g.color }))} />
-      <StackedStatTable groups={groups} stats={PITCHER_COUNT_STATS} splits={splits} splitLabels={labels}
-        valueOf={(gk, sp, f) => agg.data[gk]?.[sp]?.[f] ?? null} isPitcher />
+      {buckets.map(b => (
+        <PerSplitTable key={b.id} title={b.label} groups={groups} stats={PITCHER_COUNT_STATS}
+          valueOf={splitValueOf(agg, null, b.id)} isPitcher />
+      ))}
     </div>
   );
 }
@@ -446,14 +414,15 @@ function HitterCountState({ savRows, playerId, dateFrom, dateTo }) {
   const rows = useFiltered(savRows, playerId, false, dateFrom, dateTo);
   const agg = useMemo(() => aggregateCounts(rows, { isPitcher: false, keyOf: r => getPitchGroup(r.pitch_type), dimension: "count" }), [rows]);
   const groups = HITTER_GROUP_ROWS.filter(g => agg.data[g.key]);
-  const buckets = countBuckets(false), splits = buckets.map(b => b.id);
-  const labels = Object.fromEntries(buckets.map(b => [b.id, b.label]));
+  const buckets = countBuckets(false);
   return (
     <div style={{ padding: "4px 16px 12px" }}>
       <CountTree rows={rows} keyOf={r => getPitchGroup(r.pitch_type)} colorOf={g => GROUP_COLORS[g] || "#888"} title="Usage seen by count" />
       <Legend items={HITTER_GROUP_ROWS.map(g => ({ label: g.label, color: g.color }))} />
-      <StackedStatTable groups={groups} stats={HITTER_COUNT_STATS} splits={splits} splitLabels={labels}
-        valueOf={(gk, sp, f) => agg.data[gk]?.[sp]?.[f] ?? null} isPitcher={false} />
+      {buckets.map(b => (
+        <PerSplitTable key={b.id} title={b.label} groups={groups} stats={HITTER_COUNT_STATS}
+          valueOf={splitValueOf(agg, null, b.id)} isPitcher={false} />
+      ))}
     </div>
   );
 }
