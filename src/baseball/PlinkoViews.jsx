@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
 import { GROUP_COLORS, getPitchGroup } from "./SummaryComponents.jsx";
@@ -196,29 +196,44 @@ const LEAGUE_AVG = {
   stuffPlus: 100, locPlus: 100, pitchPlus: 100,
 };
 
-// ── mini usage donut arcs (no center label; radius scaled by volume) ────────
-function donutEls(cx, cy, rows, keyOf, colorOf, rO, rI, t) {
+// ── canvas donut (no center label) ──────────────────────────────────────────
+function drawDonut(ctx, cx, cy, list, keyOf, colorOf, rO, rI, t) {
   const counts = {}; let total = 0;
-  for (const r of rows) { const k = keyOf(r); if (!k) continue; counts[k] = (counts[k] || 0) + 1; total++; }
+  for (const r of list) { const k = keyOf(r); if (!k) continue; counts[k] = (counts[k] || 0) + 1; total++; }
+  const mid = (rO + rI) / 2, lw = rO - rI;
+  if (total === 0) {
+    ctx.save(); ctx.setLineDash([2, 3]); ctx.globalAlpha = 0.45; ctx.strokeStyle = t.divider; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.arc(cx, cy, mid, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+    return;
+  }
   const slices = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  if (total === 0) return [<circle key="e" cx={cx} cy={cy} r={(rO + rI) / 2} fill="none" stroke={t.divider} strokeWidth={rO - rI} strokeDasharray="2 3" opacity={0.45} />];
-  if (slices.length === 1) return [<circle key="s" cx={cx} cy={cy} r={(rO + rI) / 2} fill="none" stroke={colorOf(slices[0][0]) || "#888"} strokeWidth={rO - rI} />];
-  const els = []; let a = -Math.PI / 2;
-  slices.forEach(([k, n], i) => {
+  if (slices.length === 1) {
+    ctx.strokeStyle = colorOf(slices[0][0]) || "#888"; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.arc(cx, cy, mid, 0, 2 * Math.PI); ctx.stroke();
+    return;
+  }
+  let a = -Math.PI / 2;
+  for (const [k, n] of slices) {
     const a1 = a + (n / total) * 2 * Math.PI;
-    const p = (r, ang) => [cx + r * Math.cos(ang), cy + r * Math.sin(ang)];
-    const [x0, y0] = p(rO, a), [x1, y1] = p(rO, a1), [x2, y2] = p(rI, a1), [x3, y3] = p(rI, a);
-    const large = a1 - a > Math.PI ? 1 : 0;
-    els.push(<path key={i} fill={colorOf(k) || "#888"} d={`M ${x0} ${y0} A ${rO} ${rO} 0 ${large} 1 ${x1} ${y1} L ${x2} ${y2} A ${rI} ${rI} 0 ${large} 0 ${x3} ${y3} Z`} />);
+    ctx.beginPath();
+    ctx.arc(cx, cy, rO, a, a1, false);
+    ctx.arc(cx, cy, rI, a1, a, true);
+    ctx.closePath();
+    ctx.fillStyle = colorOf(k) || "#888";
+    ctx.fill();
     a = a1;
-  });
-  return els;
+  }
 }
 
-// ── plinko: vertical count tree. Row = pitch depth (balls+strikes); 0-0 on top
-// splits into 1-pitch counts below, then 2-pitch, etc. Donuts sized by volume. ─
+// ── plinko: vertical count tree drawn on a <canvas> (0-0 on top splitting down
+// into 1-pitch, 2-pitch, ... counts). Canvas — not inline SVG — so html2canvas
+// (Save-as-PNG) always rasterizes it. ─────────────────────────────────────────
+const CT = { VS: 46, HS: 26, BR: 15, PAD: 16, TOP: 18, S: 2 };
+const CT_W = CT.PAD * 2 + CT.BR * 2 + 5 * CT.HS;
+const CT_H = CT.TOP + CT.BR * 2 + 5 * CT.VS + 12;
 function CountTree({ rows, keyOf, colorOf, title }) {
   const { theme: t } = useTheme();
+  const ref = useRef(null);
   const byCount = useMemo(() => {
     const m = {};
     for (const r of rows) {
@@ -228,34 +243,42 @@ function CountTree({ rows, keyOf, colorOf, title }) {
     return m;
   }, [rows]);
 
-  const VS = 46, HS = 26, BR = 15, PAD = 16, TOP = 18;
-  const cxOf = (b, s) => PAD + BR + ((b - s) + 2) * HS;          // x = (balls-strikes), shifted so min(-2) fits
-  const cyOf = (b, s) => TOP + BR + (b + s) * VS;                // y = depth (balls+strikes)
-  const W = PAD * 2 + BR * 2 + 5 * HS;                            // x spans (b-s) in [-2, 3]
-  const HT = TOP + BR * 2 + 5 * VS + 12;
+  useEffect(() => {
+    const cv = ref.current; if (!cv) return;
+    const ctx = cv.getContext("2d");
+    const { VS, HS, BR, PAD, TOP, S } = CT;
+    const cxOf = (b, s) => PAD + BR + ((b - s) + 2) * HS;   // x = balls - strikes
+    const cyOf = (b, s) => TOP + BR + (b + s) * VS;         // y = depth (balls + strikes)
+    const draw = () => {
+      ctx.setTransform(S, 0, 0, S, 0, 0);
+      ctx.clearRect(0, 0, CT_W, CT_H);
+      ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = t.text; ctx.font = "800 11px 'Pliant', sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(title.toUpperCase(), CT_W / 2, 12);
+      ctx.strokeStyle = t.divider; ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
+      for (let b = 0; b <= 3; b++) for (let s = 0; s <= 2; s++) {
+        const x = cxOf(b, s), y = cyOf(b, s);
+        if (b < 3) { ctx.beginPath(); ctx.moveTo(x, y + BR * 0.5); ctx.lineTo(cxOf(b + 1, s), cyOf(b + 1, s) - BR * 0.5); ctx.stroke(); }
+        if (s < 2) { ctx.beginPath(); ctx.moveTo(x, y + BR * 0.5); ctx.lineTo(cxOf(b, s + 1), cyOf(b, s + 1) - BR * 0.5); ctx.stroke(); }
+      }
+      ctx.globalAlpha = 1;
+      ctx.font = "700 8px 'Pliant', sans-serif";
+      for (let b = 0; b <= 3; b++) for (let s = 0; s <= 2; s++) {
+        const x = cxOf(b, s), y = cyOf(b, s);
+        drawDonut(ctx, x, y, byCount[`${b}-${s}`] || [], keyOf, colorOf, BR, BR * 0.52, t);
+        ctx.fillStyle = t.textFaint; ctx.textAlign = "left";
+        ctx.fillText(`${b}-${s}`, x + BR + 2, y + 3);
+      }
+    };
+    draw();
+    let cancelled = false;
+    if (document.fonts?.ready) document.fonts.ready.then(() => { if (!cancelled) draw(); });
+    return () => { cancelled = true; };
+  }, [byCount, title, t]);
 
-  const edges = [], nodes = [];
-  for (let b = 0; b <= 3; b++) for (let s = 0; s <= 2; s++) {
-    const x = cxOf(b, s), y = cyOf(b, s);
-    if (b < 3) edges.push(<line key={`b${b}${s}`} x1={x} y1={y + BR * 0.5} x2={cxOf(b + 1, s)} y2={cyOf(b + 1, s) - BR * 0.5} stroke={t.divider} strokeWidth={1} opacity={0.7} />);
-    if (s < 2) edges.push(<line key={`s${b}${s}`} x1={x} y1={y + BR * 0.5} x2={cxOf(b, s + 1)} y2={cyOf(b, s + 1) - BR * 0.5} stroke={t.divider} strokeWidth={1} opacity={0.7} />);
-  }
-  for (let b = 0; b <= 3; b++) for (let s = 0; s <= 2; s++) {
-    const list = byCount[`${b}-${s}`] || [];
-    const rO = BR, x = cxOf(b, s), y = cyOf(b, s);
-    nodes.push(
-      <g key={`n${b}${s}`}>
-        {donutEls(x, y, list, keyOf, colorOf, rO, rO * 0.52, t)}
-        <text x={x + rO + 2} y={y + 3} fontSize={8} fontWeight={700} fill={t.textFaint} fontFamily="'Pliant', sans-serif">{b}-{s}</text>
-      </g>
-    );
-  }
   return (
     <div style={{ flex: "0 0 auto" }}>
-      <svg viewBox={`0 0 ${W} ${HT}`} width={W} height={HT} style={{ display: "block", margin: "0 auto" }}>
-        <text x={W / 2} y={12} textAnchor="middle" fontSize={11} fontWeight={800} fill={t.text} fontFamily="'Pliant', sans-serif" style={{ textTransform: "uppercase", letterSpacing: "0.03em" }}>{title}</text>
-        {edges}{nodes}
-      </svg>
+      <canvas ref={ref} width={CT_W * CT.S} height={CT_H * CT.S} style={{ width: CT_W, height: CT_H, display: "block", margin: "0 auto" }} />
     </div>
   );
 }
