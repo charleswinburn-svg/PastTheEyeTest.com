@@ -252,7 +252,7 @@ function CountTree({ rows, keyOf, colorOf, title }) {
   }
   return (
     <div style={{ flex: "0 0 auto" }}>
-      <svg viewBox={`0 0 ${W} ${HT}`} width="100%" style={{ maxWidth: W, display: "block", margin: "0 auto" }}>
+      <svg viewBox={`0 0 ${W} ${HT}`} width={W} height={HT} style={{ maxWidth: "100%", height: "auto", display: "block", margin: "0 auto" }}>
         <text x={W / 2} y={12} textAnchor="middle" fontSize={11} fontWeight={800} fill={t.text} fontFamily="'Pliant', sans-serif" style={{ textTransform: "uppercase", letterSpacing: "0.03em" }}>{title}</text>
         {edges}{nodes}
       </svg>
