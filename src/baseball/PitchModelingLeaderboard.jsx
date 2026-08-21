@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 // binColor / textOnBin removed — Plus cells use plusCellStyle instead
 import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
+import { exportRowsAsCsv } from "./SharedComponents.jsx";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PITCH MODELING LEADERBOARD
@@ -143,6 +144,17 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
     else { setSortCol(col); setSortDir("desc"); }
   };
 
+  // Export the current metric's table (filters + sort as displayed).
+  const exportCsv = () => {
+    const header = ["Pitcher", "Tm", "N", "Overall", ...PITCH_COLS];
+    const body = filtered.map(r => [
+      r.name, r.team === "—" ? "" : r.team, r.n ?? "",
+      r.overall == null ? "" : Math.round(r.overall),
+      ...PITCH_COLS.map(pt => (r.types[pt] == null ? "" : Math.round(r.types[pt]))),
+    ]);
+    exportRowsAsCsv([header, ...body], `pitch_modeling_${metric}_${season}.csv`);
+  };
+
   const thS = {
     padding: "8px 6px", textAlign: "center", cursor: "pointer", fontSize: 10,
     fontWeight: 700, color: t.textMuted, borderBottom: `2px solid ${t.tableHeaderBorder}`,
@@ -178,16 +190,26 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
         ))}
       </div>
 
-      <input
-        type="text" value={search} onChange={e => setSearch(e.target.value)}
-        placeholder="Search pitcher or team…"
-        style={{
-          width: "100%", maxWidth: 300, padding: "7px 12px",
-          background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
-          color: t.text, fontSize: 12, marginBottom: 10, outline: "none",
-          fontFamily: "inherit",
-        }}
-      />
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
+        <input
+          type="text" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search pitcher or team…"
+          style={{
+            flex: "1 1 200px", maxWidth: 300, padding: "7px 12px",
+            background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+            color: t.text, fontSize: 12, outline: "none", fontFamily: "inherit",
+          }}
+        />
+        <button
+          onClick={exportCsv}
+          title="Download this metric's leaderboard as a CSV"
+          style={{
+            padding: "7px 12px", fontSize: 11, fontWeight: 600, background: t.inputBg,
+            color: t.textMuted, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+            cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
+          }}
+        >⬇ CSV</button>
+      </div>
 
       {err && (
         <div style={{ color: t.textMuted, padding: 24, textAlign: "center", fontSize: 12 }}>

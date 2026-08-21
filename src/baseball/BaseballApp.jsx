@@ -7,7 +7,7 @@ import Summaries from "./Summaries.jsx";
 import RaceToTwoStrikes from "./RaceToTwoStrikes.jsx";
 import EVLAChart from "./EVLAChart.jsx";
 import TeamScatter from "./TeamScatter.jsx";
-import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect } from "./SharedComponents.jsx";
+import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
 // ── Mobile breakpoint ──
@@ -759,6 +759,7 @@ function BaseballApp() {
               metrics={iswingData ? [{ label: "iSwing+" }, ...(data?.hitter_metrics || [])] : data?.hitter_metrics}
               type="hitter"
               positionByPid={positionByPid}
+              csvFilename={`hitters_${season}.csv`}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -775,6 +776,7 @@ function BaseballApp() {
                 type="hitter"
                 defaultSortCol="xRV/600"
                 positionByPid={positionByPid}
+                csvFilename={`hitter_xrv_${season}.csv`}
               />
             ) : (
               <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -793,6 +795,7 @@ function BaseballApp() {
               players={pitchersFull}
               metrics={data?.pitcher_metrics}
               type="pitcher"
+              csvFilename={`pitchers_${season}.csv`}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -881,7 +884,7 @@ function MultiSelect({ label, options, selected, onChange }) {
 }
 
 // ── Leaderboard (themed) ──
-function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSortDir = "desc", positionByPid = null }) {
+function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSortDir = "desc", positionByPid = null, csvFilename = "leaderboard.csv" }) {
   const { theme: t } = useTheme();
   const [sortCol, setSortCol] = useState(defaultSortCol);
   const [sortDir, setSortDir] = useState(defaultSortDir);
@@ -955,6 +958,20 @@ function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSor
     else { setSortCol(col); setSortDir("desc"); }
   };
 
+  // Export the leaderboard exactly as displayed (current filters + sort order).
+  const exportCsv = () => {
+    const header = columns.map(c => c.label);
+    const body = filtered.map(p => columns.map(c => {
+      if (c.key === "name") return p.displayName || p.name;
+      if (c.key === "team") return p.team || "";
+      if (c.key === "pa") return p.pa ?? "";
+      if (c.key === "ip") return p.ip ?? "";
+      if (c.isMetric) return p.categories?.[c.key]?.display ?? "";
+      return "";
+    }));
+    exportRowsAsCsv([header, ...body], csvFilename);
+  };
+
   const thS = {
     padding: "7px 5px", textAlign: "center", cursor: "pointer", fontSize: 9,
     fontWeight: 700, color: t.textMuted, borderBottom: `2px solid ${t.tableHeaderBorder}`,
@@ -1017,6 +1034,15 @@ function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSor
             }}
           >✕ Reset</button>
         ) : null}
+        <button
+          onClick={exportCsv}
+          title="Download the leaderboard as a CSV"
+          style={{
+            padding: "6px 10px", fontSize: 11, fontWeight: 600, background: t.inputBg,
+            color: t.textMuted, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+            cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
+          }}
+        >⬇ CSV</button>
       </div>
 
       <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${t.cardBorder}`, maxHeight: "70vh", overflowY: "auto" }}>

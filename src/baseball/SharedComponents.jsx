@@ -523,6 +523,35 @@ export async function exportCanvasAsPng(canvas, filename) {
   }
 }
 
+// Escape one CSV cell (RFC 4180): quote if it contains a comma, quote, CR or LF.
+function csvCell(v) {
+  const s = v == null ? "" : String(v);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+// Deliver a table as a CSV file. `rows` is an array of arrays; the first row is
+// the header. Same mobile/desktop delivery as exportCanvasAsPng: desktop gets a
+// download, mobile (where <a download> is ignored) gets the OS share sheet.
+export async function exportRowsAsCsv(rows, filename) {
+  const csv = "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");  // BOM so Excel reads UTF-8
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const triggerDownload = () => {
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.download = filename; link.href = href;
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(href), 10000);
+  };
+  if (isMobileDevice() && typeof navigator !== "undefined" && navigator.canShare) {
+    const file = new File([blob], filename, { type: "text/csv" });
+    if (navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: filename }); return; }
+      catch (e) { if (e && e.name === "AbortError") return; }  // else fall through to download
+    }
+  }
+  triggerDownload();
+}
+
 export async function saveCardAsPng(cardRef, filename) {
   if (!cardRef.current) return;
   const originals = await convertImagesForCapture(cardRef.current);
