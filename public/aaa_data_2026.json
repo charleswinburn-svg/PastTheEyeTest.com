@@ -24092,8 +24092,8 @@
         },
         "LD%": {
           "pctile": 77,
-          "value": 22.1,
-          "display": "22.1"
+          "value": 22.4,
+          "display": "22.4"
         },
         "Chase %": {
           "pctile": 90,
@@ -27307,7 +27307,7 @@
           "display": "8.4"
         },
         "LD%": {
-          "pctile": 47,
+          "pctile": 50,
           "value": 17.8,
           "display": "17.8"
         },
@@ -29116,9 +29116,9 @@
           "display": "4.0"
         },
         "LD%": {
-          "pctile": 50,
-          "value": 18.1,
-          "display": "18.1"
+          "pctile": 47,
+          "value": 17.7,
+          "display": "17.7"
         },
         "Chase %": {
           "pctile": 59,
@@ -37223,7 +37223,7 @@
           "display": "2.2"
         },
         "LD%": {
-          "pctile": 55,
+          "pctile": 59,
           "value": 18.6,
           "display": "18.6"
         },
@@ -39635,9 +39635,9 @@
           "display": "4.1"
         },
         "LD%": {
-          "pctile": 61,
-          "value": 18.8,
-          "display": "18.8"
+          "pctile": 59,
+          "value": 18.6,
+          "display": "18.6"
         },
         "Chase %": {
           "pctile": 87,
@@ -40473,7 +40473,7 @@
     {
       "name": "Santiago Espinal",
       "player_id": 669289,
-      "team": null,
+      "team": "AZ",
       "aaa_team": null,
       "aaa_team_id": null,
       "parent_org_abbr": null,
@@ -43186,9 +43186,9 @@
           "display": "17.6"
         },
         "LD%": {
-          "pctile": 58,
-          "value": 18.7,
-          "display": "18.7"
+          "pctile": 55,
+          "value": 18.5,
+          "display": "18.5"
         },
         "Chase %": {
           "pctile": 38,
@@ -126874,6 +126874,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-08-20 14:02:42 UTC"
+    "generated_at": "2026-08-21 14:02:33 UTC"
   }
 }
