@@ -120,13 +120,21 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
 
     (async () => {
       try {
-        const [lb, savRows] = await Promise.all([
+        const [lb, savRowsAll] = await Promise.all([
           loadLeaderboard(season),
           (isDateRange
             ? fetchSavantPlayerDateRange(pid, season, "pitcher", dateFrom, dateTo)
             : fetchSavantPlayerSeason(pid, season, "pitcher")).catch(() => []),
         ]);
         if (cancelled) return;
+
+        // Match Baseball Savant's "Run Value" tab: regular season only. The season
+        // Savant fetch includes spring/exhibition (hfGT=R|S|E|…), which inflates
+        // pitch counts and skews RV/100 away from Savant's numbers. (The date-range
+        // fetch is already hfGT=R|, so this filter is a no-op there.) Fall back to
+        // all rows if game_type is somehow absent, so the card never blanks.
+        const _reg = (savRowsAll || []).filter(r => r.game_type === "R");
+        const savRows = _reg.length ? _reg : (savRowsAll || []);
 
         const dist = buildDistributions(lb?.pitchers);
         const pitches = normalize(savRows, pid);
@@ -162,8 +170,12 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
           perType = me?.by_pitch_type || {};
         }
 
-        // Assemble per-type rows, ordered by usage (Savant pitch count).
-        const typeList = Object.keys(savByType).sort((a, b) => savByType[b].n - savByType[a].n);
+        // Assemble per-type rows, ordered by usage (Savant pitch count). Drop
+        // trivial types (e.g. a single misclassified "FA") that are just noise.
+        const MIN_SHOW = 10;
+        const typeList = Object.keys(savByType)
+          .filter(pt => savByType[pt].n >= MIN_SHOW)
+          .sort((a, b) => savByType[b].n - savByType[a].n);
         const pitchPlus = {};   // for heatmap tooltips
         const types = typeList.map(pt => {
           const g = perType[pt] || {};
