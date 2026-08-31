@@ -4,6 +4,7 @@ import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, 
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
+import PitchModelingCard from "./PitchModelingCard.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { useDateRangeStats } from "./statsCompute.js";
 import { fetchSavantPlayerDateRange, scorePitchCode } from "./mlbApi.js";
@@ -13,6 +14,7 @@ const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 export default function PitcherCard({ player, season, allPitchers, isAAA = false, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const [pitchPlusData, setPitchPlusData] = useState(null);
+  const [view, setView] = useState("results");   // "results" | "modeling"
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
 
@@ -147,6 +149,29 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
 
   return (
     <div>
+      {/* === Results | Pitch Modeling toggle (outside the saved PNG) === */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+        <div style={{ display: "inline-flex", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 8, padding: 2 }}>
+          {[["results", "Results"], ["modeling", "Pitch Modeling"]].map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => setView(id)}
+              style={{
+                padding: "6px 16px", fontSize: 12, fontWeight: 700, borderRadius: 6, cursor: "pointer",
+                border: "none", fontFamily: "inherit",
+                background: view === id ? t.accent : "transparent",
+                color: view === id ? "#fff" : t.textMuted,
+                transition: "all 0.15s",
+              }}
+            >{label}</button>
+          ))}
+        </div>
+      </div>
+
+      {view === "modeling" ? (
+        <PitchModelingCard player={player} season={season} isAAA={isAAA} dateFrom={dateFrom} dateTo={dateTo} />
+      ) : (
+      <>
       {/* === SAVEABLE CARD (scaled to fit width so it's never clipped on mobile) === */}
       <FitToWidth designWidth={1040}>
       <div
@@ -251,6 +276,8 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
         type="pitcher"
         cardMetrics={Object.keys(player.categories || {})}
       />
+      </>
+      )}
     </div>
   );
 }
