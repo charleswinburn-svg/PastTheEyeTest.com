@@ -186,7 +186,7 @@ export function getLogoUrl(teamAbbr, teamId) {
 // BUBBLE PERCENTILE BAR
 // ═══════════════════════════════════════════════════════════
 
-export function BubblePercentileBar({ label, pctile, display }) {
+export function BubblePercentileBar({ label, pctile, display, labelWidth = 110 }) {
   const { theme: t } = useTheme();
   const hasValue = pctile != null && isFinite(pctile);
   const barWidth = hasValue ? Math.max(3, pctile) : 0;
@@ -201,7 +201,7 @@ export function BubblePercentileBar({ label, pctile, display }) {
     }}>
       {/* Label */}
       <div style={{
-        width: 110, textAlign: "right", fontSize: 11, fontWeight: 500,
+        width: labelWidth, textAlign: "right", fontSize: 11, fontWeight: 500,
         color: t.text, flexShrink: 0, lineHeight: 1.2,
       }}>
         {label}

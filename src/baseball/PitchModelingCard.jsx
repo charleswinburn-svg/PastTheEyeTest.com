@@ -10,12 +10,12 @@ const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 // Six per-pitch-type metrics, all oriented "higher = better" so every slider
 // ranks ascending with no per-metric inversion.
 const METRICS = [
-  { key: "runValue",    label: "Run Value",    kind: "rv"   },  // actual, Savant "Run Value" (runs saved/100)
-  { key: "expRunValue", label: "Expected RV",  kind: "rv"   },  // model xRV, shown as runs saved/100
-  { key: "stuff",       label: "Stuff+",       kind: "plus" },
-  { key: "loc",         label: "Location+",    kind: "plus" },
-  { key: "tun",         label: "Tunnel+",      kind: "plus" },
-  { key: "pitch",       label: "Pitch+",       kind: "plus" },
+  { key: "runValue",    label: "Run Value/100",          kind: "rv"   },  // actual, Savant "Run Value" (runs saved/100)
+  { key: "expRunValue", label: "Expected Run Value/100", kind: "rv"   },  // model xRV, shown as runs saved/100
+  { key: "stuff",       label: "Stuff+",                 kind: "plus" },
+  { key: "loc",         label: "Location+",              kind: "plus" },
+  { key: "tun",         label: "Tunnel+",                kind: "plus" },
+  { key: "pitch",       label: "Pitch+",                 kind: "plus" },
 ];
 
 const num = (v) => { const f = parseFloat(v); return isNaN(f) ? null : f; };
@@ -107,12 +107,12 @@ const fmtPlus = (v) => (v == null ? "—" : String(Math.round(v)));
 
 export default function PitchModelingCard({ player, season, isAAA = false, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
-  const [state, setState] = useState({ loading: true, unavailable: false, types: [], pitches: [], pitchPlus: {} });
+  const [state, setState] = useState({ loading: true, unavailable: false, blocks: [], pitches: [], pitchPlus: {} });
   const cardRef = useRef(null);
 
   useEffect(() => {
-    if (!player?.player_id) { setState({ loading: false, unavailable: false, types: [], pitches: [], pitchPlus: {} }); return; }
-    if (isAAA) { setState({ loading: false, unavailable: true, types: [], pitches: [], pitchPlus: {} }); return; }
+    if (!player?.player_id) { setState({ loading: false, unavailable: false, blocks: [], pitches: [], pitchPlus: {} }); return; }
+    if (isAAA) { setState({ loading: false, unavailable: true, blocks: [], pitches: [], pitchPlus: {} }); return; }
     let cancelled = false;
     setState(s => ({ ...s, loading: true, unavailable: false }));
     const pid = player.player_id;
@@ -139,66 +139,101 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
         const dist = buildDistributions(lb?.pitchers);
         const pitches = normalize(savRows, pid);
 
-        // Actual Run Value per pitch type (Savant convention: −mean(delta_run_exp)×100).
+        // Actual Run Value per pitch type + overall (Savant: −mean(delta_run_exp)×100).
         const savByType = {};
+        let dreSumAll = 0, dreNAll = 0;
         for (const p of pitches) {
           const g = (savByType[p.pitchType] ||= { n: 0, dreSum: 0, dreN: 0 });
           g.n++;
-          if (p.dre != null) { g.dreSum += p.dre; g.dreN++; }
+          if (p.dre != null) { g.dreSum += p.dre; g.dreN++; dreSumAll += p.dre; dreNAll += 1; }
         }
         const actualRv = {};   // pt -> runs-saved/100
         for (const pt in savByType) {
           const g = savByType[pt];
           actualRv[pt] = g.dreN ? -(g.dreSum / g.dreN) * 100 : null;
         }
+        const overallActualRv = dreNAll ? -(dreSumAll / dreNAll) * 100 : null;
 
-        // This pitcher's Plus + expected-RV per type: season from /leaderboard,
-        // date-range live from /score_aggregate.
-        let perType = {};   // pt -> { stuff, loc, tun, pitch, xrv }
-        if (isDateRange) {
-          const payload = buildScorePayload(savRows, pid);
-          if (payload.length) {
-            const resp = await fetch(`${PITCH_PLUS_API}/score_aggregate`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ pitches: payload }),
-            }).then(r => (r.ok ? r.json() : null)).catch(() => null);
-            if (cancelled) return;
-            perType = resp?.by_pitch_type || {};
-          }
-        } else {
-          const me = (lb?.pitchers || []).find(p => String(p.player_id) === String(pid));
-          perType = me?.by_pitch_type || {};
-        }
+        // This pitcher's season leaderboard grades (empty in date-range mode).
+        const me = (lb?.pitchers || []).find(p => String(p.player_id) === String(pid));
+        const lbByPt    = (!isDateRange && me?.by_pitch_type) || {};
+        const lbOverall = (!isDateRange && me?.overall) || {};
 
-        // Assemble per-type rows, ordered by usage (Savant pitch count). Drop
-        // trivial types (e.g. a single misclassified "FA") that are just noise.
+        // Displayed pitch types, ordered by usage. Drop trivial types (e.g. a
+        // single misclassified "FA") that are just noise.
         const MIN_SHOW = 10;
         const typeList = Object.keys(savByType)
           .filter(pt => savByType[pt].n >= MIN_SHOW)
           .sort((a, b) => savByType[b].n - savByType[a].n);
+
+        // Live model scoring — the only grade source in date-range mode, and the
+        // fallback for anything the season leaderboard reports as N/A (a pitch
+        // under the 30-pitch per-type cutoff, or a pitcher under the 200-pitch
+        // qualifying line). Skipped when the leaderboard already covers the arsenal.
+        const needLive = isDateRange || !me || typeList.some(pt => !lbByPt[pt]);
+        let liveByPt = {}, liveOverall = {};
+        if (needLive) {
+          const payload = buildScorePayload(savRows, pid);
+          if (payload.length) {
+            const live = await fetch(`${PITCH_PLUS_API}/score_aggregate`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ pitches: payload }),
+            }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+            if (cancelled) return;
+            liveByPt = live?.by_pitch_type || {};
+            liveOverall = live?.overall || {};
+          }
+        }
+
+        // leaderboard grade first, live score as the N/A fallback (per metric).
+        const merge = (a, b) => ({
+          stuff: a.stuff ?? b.stuff ?? null, loc: a.loc ?? b.loc ?? null,
+          tun:   a.tun   ?? b.tun   ?? null, pitch: a.pitch ?? b.pitch ?? null,
+          xrv:   a.xrv   ?? b.xrv   ?? null,
+        });
+        const valsFrom = (g, rvActual) => ({
+          runValue:    rvActual,
+          expRunValue: g.xrv != null ? -g.xrv : null,
+          stuff: g.stuff, loc: g.loc, tun: g.tun, pitch: g.pitch,
+        });
+        const mkRows = (vals, d) => METRICS.map(m => ({
+          key: m.key, label: m.label,
+          display: m.kind === "rv" ? fmtRV(vals[m.key]) : fmtPlus(vals[m.key]),
+          pctile: pctWithinType(d?.[m.key], vals[m.key]),
+        }));
+
         const pitchPlus = {};   // for heatmap tooltips
-        const types = typeList.map(pt => {
-          const g = perType[pt] || {};
-          const d = dist[pt] || {};
-          const rvSaved = actualRv[pt];
-          const xrvSaved = g.xrv != null ? -g.xrv : null;
+        const typeBlocks = typeList.map(pt => {
+          const g = merge(lbByPt[pt] || {}, liveByPt[pt] || {});
           pitchPlus[pt] = { stuff: g.stuff, loc: g.loc, tun: g.tun, pitch: g.pitch };
-          const vals = {
-            runValue:    rvSaved,
-            expRunValue: xrvSaved,
-            stuff: g.stuff ?? null, loc: g.loc ?? null, tun: g.tun ?? null, pitch: g.pitch ?? null,
+          return {
+            pt, name: PITCH_NAMES[pt] || pt, color: PITCH_COLORS[pt] || "#888", n: savByType[pt].n,
+            rows: mkRows(valsFrom(g, actualRv[pt]), dist[pt]),
           };
-          const rows = METRICS.map(m => ({
-            key: m.key, label: m.label,
-            display: m.kind === "rv" ? fmtRV(vals[m.key]) : fmtPlus(vals[m.key]),
-            pctile: pctWithinType(d[m.key], vals[m.key]),
-          }));
-          return { pt, name: PITCH_NAMES[pt] || pt, color: PITCH_COLORS[pt] || "#888", n: savByType[pt].n, rows };
         });
 
-        setState({ loading: false, unavailable: false, types, pitches, pitchPlus });
+        // ── Overall block: percentiles vs ALL pitchers' overall (not within a type) ──
+        const overallDist = { runValue: [], expRunValue: [], stuff: [], loc: [], tun: [], pitch: [] };
+        for (const p of (lb?.pitchers || [])) {
+          const o = p.overall || {};
+          if (o.rv    != null) overallDist.runValue.push(o.rv);
+          if (o.xrv   != null) overallDist.expRunValue.push(-o.xrv);
+          if (o.stuff != null) overallDist.stuff.push(o.stuff);
+          if (o.loc   != null) overallDist.loc.push(o.loc);
+          if (o.tun   != null) overallDist.tun.push(o.tun);
+          if (o.pitch != null) overallDist.pitch.push(o.pitch);
+        }
+        for (const k in overallDist) overallDist[k].sort((a, b) => a - b);
+        const oGrade = merge(lbOverall, liveOverall);
+        const overallBlock = {
+          pt: "__overall__", name: "Overall", overall: true, n: pitches.length,
+          rows: mkRows(valsFrom(oGrade, overallActualRv), overallDist),
+        };
+
+        const blocks = typeBlocks.length ? [overallBlock, ...typeBlocks] : [];
+        setState({ loading: false, unavailable: false, blocks, pitches, pitchPlus });
       } catch {
-        if (!cancelled) setState({ loading: false, unavailable: false, types: [], pitches: [], pitchPlus: {} });
+        if (!cancelled) setState({ loading: false, unavailable: false, blocks: [], pitches: [], pitchPlus: {} });
       }
     })();
 
@@ -213,7 +248,7 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
 
   if (!player) return null;
 
-  const { loading, unavailable, types, pitches, pitchPlus } = state;
+  const { loading, unavailable, blocks, pitches, pitchPlus } = state;
   const isDateRange = !!(dateFrom || dateTo);
   const subtitle = isDateRange
     ? `Pitch Modeling | ${dateFrom || "start"} → ${dateTo || "now"}`
@@ -245,23 +280,23 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
               <div style={{ width: 26, height: 26, border: `2px solid ${t.divider}`, borderTopColor: t.accent, borderRadius: "50%", animation: "ptet-pm 0.8s linear infinite" }} />
               <div>Scoring pitch models…</div>
             </div>
-          ) : !types.length ? (
+          ) : !blocks.length ? (
             <div style={{ padding: 40, textAlign: "center", color: t.textFaint, fontSize: 12 }}>
               No pitch data available for this window.
             </div>
           ) : (
             <>
-              {/* ── Per-pitch-type modeling sliders (percentiles scaled within each pitch type) ── */}
+              {/* ── Per-pitch-type modeling sliders (percentiles scaled within each pitch type; Overall vs all pitchers) ── */}
               <div style={{ padding: "10px 12px 4px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "10px 28px" }}>
-                {types.map(ty => (
+                {blocks.map(ty => (
                   <div key={ty.pt} style={{ padding: "6px 4px 10px", borderBottom: `1px solid ${t.divider}` }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6 }}>
-                      <span style={{ width: 10, height: 10, borderRadius: "50%", background: ty.color, flexShrink: 0 }} />
+                      <span style={{ width: 10, height: 10, borderRadius: "50%", background: ty.overall ? t.accent : ty.color, flexShrink: 0 }} />
                       <span style={{ fontSize: 12, fontWeight: 800, color: t.text, letterSpacing: "0.02em" }}>{ty.name}</span>
                       <span style={{ fontSize: 10, color: t.textFaint, fontFamily: "'DM Mono', monospace" }}>{ty.n} pitches</span>
                     </div>
                     {ty.rows.map(r => (
-                      <BubblePercentileBar key={r.key} label={r.label} pctile={r.pctile} display={r.display} />
+                      <BubblePercentileBar key={r.key} label={r.label} pctile={r.pctile} display={r.display} labelWidth={140} />
                     ))}
                   </div>
                 ))}
@@ -278,7 +313,7 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
               </div>
 
               <div style={{ padding: "8px 16px 10px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
-                <span>{isDateRange ? "Date range" : `${season} Season`} | percentiles within pitch type</span>
+                <span>{isDateRange ? "Date range" : `${season} Season`} | percentiles within pitch type (Overall vs all pitchers)</span>
                 <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Pitch Models + Savant</span>
               </div>
             </>
