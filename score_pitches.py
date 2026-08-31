@@ -306,11 +306,15 @@ def engineer_location_features(df):
     z_t = np.maximum(df['plate_z'] - 3.5, 0)
     z_b = np.maximum(1.5 - df['plate_z'], 0)
     df['out_of_zone_dist'] = np.sqrt(x_e**2 + np.maximum(z_t, z_b)**2)
+    # fillna(False): when plate_x/plate_z (or p_throws/stand) come in as pandas
+    # nullable dtypes, missing values make these comparisons <NA>, which
+    # .astype(np.int8) cannot cast ("cannot convert NA to integer"). Treat a
+    # missing location as out-of-zone. No-op on the float64/NaN scoring path.
     df['in_zone'] = (
         (df['plate_x'].abs() <= 0.83) &
         (df['plate_z'] >= 1.5) & (df['plate_z'] <= 3.5)
-    ).astype(np.int8)
-    df['same_side'] = (df['p_throws'] == df['stand']).astype(np.int8)
+    ).fillna(False).astype(np.int8)
+    df['same_side'] = (df['p_throws'] == df['stand']).fillna(False).astype(np.int8)
     df['stand_cat'] = df['stand'].astype('category')
     return df
 
