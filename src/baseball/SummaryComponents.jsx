@@ -1474,8 +1474,10 @@ export function renderHeatmapCanvas(pitches, xMin, xMax, zMin, zMax, canvasW, ca
     }
   }
 
-  const flat = grid.flat();
-  const maxVal = Math.max(...flat);
+  // Find the peak with a loop, NOT Math.max(...grid.flat()) — spreading a large
+  // grid (hundreds of thousands of cells for big zones) overflows the call stack.
+  let maxVal = -Infinity;
+  for (const rowArr of grid) for (const v of rowArr) if (v > maxVal) maxVal = v;
   if (maxVal <= 0) return null;
 
   const canvas = document.createElement("canvas");
@@ -1569,7 +1571,13 @@ function MiniZone({ pitches, pitchType, color, size, isGame, ptScores }) {
   const useDots = isGame || filtered.length < 10;
   let heatDataUrl = null;
   if (!useDots && filtered.length > 0) {
-    heatDataUrl = renderHeatmapCanvas(filtered, xMin, xMax, zMin, zMax, plotW * 3, plotH * 3);
+    // Cap the KDE canvas resolution: the bitmap is scaled to the zone size by the
+    // <image> below, so big zones don't need a huge (slow) grid. Small zones (e.g.
+    // Summaries at width 260) fall under the cap and are unaffected.
+    heatDataUrl = renderHeatmapCanvas(
+      filtered, xMin, xMax, zMin, zMax,
+      Math.min(plotW * 3, 240), Math.min(plotH * 3, 280),
+    );
   }
 
   const abbr = pitchType;

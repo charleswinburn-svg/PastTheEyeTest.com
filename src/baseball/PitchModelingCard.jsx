@@ -261,7 +261,7 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
                   Pitch Locations
                 </div>
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <LocationZonePanel pitches={pitches} side="ALL" width={720} isGame={false} pitchPlus={pitchPlus} />
+                  <LocationZonePanel pitches={pitches} side="ALL" width={640} isGame={false} pitchPlus={pitchPlus} />
                 </div>
               </div>
 
