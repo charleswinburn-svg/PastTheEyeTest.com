@@ -842,9 +842,9 @@
           "display": "2.5"
         },
         "LD%": {
-          "pctile": 60,
-          "value": 18.9,
-          "display": "18.9"
+          "pctile": 52,
+          "value": 17.9,
+          "display": "17.9"
         },
         "Chase %": {
           "pctile": 49,
@@ -4058,7 +4058,7 @@
           "display": "12.4"
         },
         "LD%": {
-          "pctile": 76,
+          "pctile": 77,
           "value": 20.8,
           "display": "20.8"
         },
@@ -9284,9 +9284,9 @@
           "display": "7.5"
         },
         "LD%": {
-          "pctile": 6,
-          "value": 9.1,
-          "display": "9.1"
+          "pctile": 8,
+          "value": 8.3,
+          "display": "8.3"
         },
         "Chase %": {
           "pctile": 48,
@@ -11964,7 +11964,7 @@
           "display": "4.1"
         },
         "LD%": {
-          "pctile": 2,
+          "pctile": 3,
           "value": 0.0,
           "display": "0.0"
         },
@@ -12031,9 +12031,9 @@
           "display": "4.0"
         },
         "LD%": {
-          "pctile": 97,
-          "value": 34.0,
-          "display": "34.0"
+          "pctile": 96,
+          "value": 33.3,
+          "display": "33.3"
         },
         "Chase %": {
           "pctile": 44,
@@ -12567,7 +12567,7 @@
           "display": "7.8"
         },
         "LD%": {
-          "pctile": 94,
+          "pctile": 96,
           "value": 33.3,
           "display": "33.3"
         },
@@ -14242,9 +14242,9 @@
           "display": "8.4"
         },
         "LD%": {
-          "pctile": null,
-          "value": null,
-          "display": "\u2014"
+          "pctile": 3,
+          "value": 0.0,
+          "display": "0.0"
         },
         "Chase %": {
           "pctile": 92,
@@ -14309,7 +14309,7 @@
           "display": "13.3"
         },
         "LD%": {
-          "pctile": 44,
+          "pctile": 47,
           "value": 17.6,
           "display": "17.6"
         },
@@ -15180,7 +15180,7 @@
           "display": "9.9"
         },
         "LD%": {
-          "pctile": 85,
+          "pctile": 84,
           "value": 25.0,
           "display": "25.0"
         },
@@ -15247,7 +15247,7 @@
           "display": "8.0"
         },
         "LD%": {
-          "pctile": 34,
+          "pctile": 37,
           "value": 16.7,
           "display": "16.7"
         },
@@ -17860,9 +17860,9 @@
           "display": "13.5"
         },
         "LD%": {
-          "pctile": 38,
-          "value": 17.2,
-          "display": "17.2"
+          "pctile": 39,
+          "value": 17.1,
+          "display": "17.1"
         },
         "Chase %": {
           "pctile": 45,
@@ -19468,7 +19468,7 @@
           "display": "4.8"
         },
         "LD%": {
-          "pctile": 71,
+          "pctile": 72,
           "value": 20.0,
           "display": "20.0"
         },
@@ -21009,7 +21009,7 @@
           "display": "4.5"
         },
         "LD%": {
-          "pctile": 8,
+          "pctile": 10,
           "value": 10.7,
           "display": "10.7"
         },
@@ -21746,7 +21746,7 @@
           "display": "5.2"
         },
         "LD%": {
-          "pctile": 13,
+          "pctile": 14,
           "value": 12.9,
           "display": "12.9"
         },
@@ -26369,7 +26369,7 @@
           "display": "7.2"
         },
         "LD%": {
-          "pctile": 80,
+          "pctile": 81,
           "value": 21.6,
           "display": "21.6"
         },
@@ -26570,9 +26570,9 @@
           "display": "16.7"
         },
         "LD%": {
-          "pctile": 91,
-          "value": 25.9,
-          "display": "25.9"
+          "pctile": 92,
+          "value": 26.7,
+          "display": "26.7"
         },
         "Chase %": {
           "pctile": 72,
@@ -29250,7 +29250,7 @@
           "display": "3.7"
         },
         "LD%": {
-          "pctile": 15,
+          "pctile": 17,
           "value": 13.6,
           "display": "13.6"
         },
@@ -30188,7 +30188,7 @@
           "display": "13.2"
         },
         "LD%": {
-          "pctile": 24,
+          "pctile": 28,
           "value": 15.7,
           "display": "15.7"
         },
@@ -30858,9 +30858,9 @@
           "display": "4.0"
         },
         "LD%": {
-          "pctile": 55,
-          "value": 18.4,
-          "display": "18.4"
+          "pctile": 57,
+          "value": 18.2,
+          "display": "18.2"
         },
         "Chase %": {
           "pctile": 59,
@@ -31260,9 +31260,9 @@
           "display": "1.2"
         },
         "LD%": {
-          "pctile": 29,
-          "value": 16.3,
-          "display": "16.3"
+          "pctile": 32,
+          "value": 16.0,
+          "display": "16.0"
         },
         "Chase %": {
           "pctile": 27,
@@ -31528,7 +31528,7 @@
           "display": "5.1"
         },
         "LD%": {
-          "pctile": 60,
+          "pctile": 63,
           "value": 18.9,
           "display": "18.9"
         },
@@ -32332,9 +32332,9 @@
           "display": "11.5"
         },
         "LD%": {
-          "pctile": 48,
-          "value": 17.7,
-          "display": "17.7"
+          "pctile": 54,
+          "value": 18.0,
+          "display": "18.0"
         },
         "Chase %": {
           "pctile": 75,
@@ -36486,7 +36486,7 @@
           "display": "1.9"
         },
         "LD%": {
-          "pctile": 57,
+          "pctile": 61,
           "value": 18.6,
           "display": "18.6"
         },
@@ -36955,7 +36955,7 @@
           "display": "9.7"
         },
         "LD%": {
-          "pctile": 22,
+          "pctile": 26,
           "value": 15.6,
           "display": "15.6"
         },
@@ -38027,7 +38027,7 @@
           "display": "6.7"
         },
         "LD%": {
-          "pctile": 91,
+          "pctile": 90,
           "value": 25.9,
           "display": "25.9"
         },
@@ -39099,7 +39099,7 @@
           "display": "4.8"
         },
         "LD%": {
-          "pctile": 87,
+          "pctile": 88,
           "value": 25.6,
           "display": "25.6"
         },
@@ -40171,9 +40171,9 @@
           "display": "8.3"
         },
         "LD%": {
-          "pctile": 83,
-          "value": 23.5,
-          "display": "23.5"
+          "pctile": 84,
+          "value": 25.0,
+          "display": "25.0"
         },
         "Chase %": {
           "pctile": 8,
@@ -40707,9 +40707,9 @@
           "display": "8.8"
         },
         "LD%": {
-          "pctile": 27,
-          "value": 15.8,
-          "display": "15.8"
+          "pctile": 21,
+          "value": 15.2,
+          "display": "15.2"
         },
         "Chase %": {
           "pctile": 50,
@@ -41310,7 +41310,7 @@
           "display": "4.1"
         },
         "LD%": {
-          "pctile": 64,
+          "pctile": 66,
           "value": 19.2,
           "display": "19.2"
         },
@@ -42315,7 +42315,7 @@
           "display": "17.9"
         },
         "LD%": {
-          "pctile": 69,
+          "pctile": 68,
           "value": 19.4,
           "display": "19.4"
         },
@@ -43655,7 +43655,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 31,
+          "pctile": 34,
           "value": 16.5,
           "display": "16.5"
         },
@@ -45263,9 +45263,9 @@
           "display": "17.6"
         },
         "LD%": {
-          "pctile": 52,
-          "value": 18.2,
-          "display": "18.2"
+          "pctile": 59,
+          "value": 18.4,
+          "display": "18.4"
         },
         "Chase %": {
           "pctile": 37,
@@ -45665,9 +45665,9 @@
           "display": "12.5"
         },
         "LD%": {
-          "pctile": 66,
-          "value": 19.3,
-          "display": "19.3"
+          "pctile": 70,
+          "value": 19.9,
+          "display": "19.9"
         },
         "Chase %": {
           "pctile": 9,
@@ -46938,7 +46938,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 17,
+          "pctile": 19,
           "value": 14.6,
           "display": "14.6"
         },
@@ -47072,7 +47072,7 @@
           "display": "5.3"
         },
         "LD%": {
-          "pctile": 44,
+          "pctile": 47,
           "value": 17.6,
           "display": "17.6"
         },
@@ -47474,7 +47474,7 @@
           "display": "8.3"
         },
         "LD%": {
-          "pctile": 10,
+          "pctile": 12,
           "value": 12.8,
           "display": "12.8"
         },
@@ -48010,9 +48010,9 @@
           "display": "11.8"
         },
         "LD%": {
-          "pctile": 20,
-          "value": 15.2,
-          "display": "15.2"
+          "pctile": 23,
+          "value": 15.5,
+          "display": "15.5"
         },
         "Chase %": {
           "pctile": 95,
@@ -48814,7 +48814,7 @@
           "display": "25.0"
         },
         "LD%": {
-          "pctile": 73,
+          "pctile": 74,
           "value": 20.5,
           "display": "20.5"
         },
@@ -48948,9 +48948,9 @@
           "display": "21.4"
         },
         "LD%": {
-          "pctile": null,
-          "value": null,
-          "display": "\u2014"
+          "pctile": 30,
+          "value": 15.8,
+          "display": "15.8"
         },
         "Chase %": {
           "pctile": 97,
@@ -50020,7 +50020,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 41,
+          "pctile": 43,
           "value": 17.4,
           "display": "17.4"
         },
@@ -51360,9 +51360,9 @@
           "display": "12.5"
         },
         "LD%": {
-          "pctile": 36,
-          "value": 16.9,
-          "display": "16.9"
+          "pctile": 41,
+          "value": 17.2,
+          "display": "17.2"
         },
         "Chase %": {
           "pctile": 72,
@@ -53705,7 +53705,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 78,
+          "pctile": 79,
           "value": 21.2,
           "display": "21.2"
         },
@@ -57457,7 +57457,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 2,
+          "pctile": 3,
           "value": 0.0,
           "display": "0.0"
         },
@@ -132120,6 +132120,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-09-02 14:02:52 UTC"
+    "generated_at": "2026-09-03 14:03:02 UTC"
   }
 }
