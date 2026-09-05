@@ -2,7 +2,7 @@
   "season": 2026,
   "pitch_types": {
     "CH": {
-      "count": 69458,
+      "count": 69923,
       "velo": 86.1,
       "spin": 1753,
       "zone_pct": 32.2,
@@ -10,7 +10,7 @@
       "extension": 6.43
     },
     "CU": {
-      "count": 39599,
+      "count": 39881,
       "velo": 80.2,
       "spin": 2603,
       "zone_pct": 35.6,
@@ -34,39 +34,39 @@
       "extension": 4.65
     },
     "FC": {
-      "count": 49265,
+      "count": 49683,
       "velo": 89.8,
-      "spin": 2389,
+      "spin": 2388,
       "zone_pct": 46.5,
       "whiff_pct": 22.9,
       "extension": 6.42
     },
     "FF": {
-      "count": 189700,
+      "count": 191027,
       "velo": 94.8,
       "spin": 2314,
-      "zone_pct": 47.6,
+      "zone_pct": 47.7,
       "whiff_pct": 21.7,
       "extension": 6.51
     },
     "FS": {
-      "count": 20067,
+      "count": 20218,
       "velo": 86.7,
-      "spin": 1374,
+      "spin": 1373,
       "zone_pct": 30.7,
-      "whiff_pct": 34.2,
-      "extension": 6.57
+      "whiff_pct": 34.3,
+      "extension": 6.56
     },
     "KC": {
-      "count": 9787,
+      "count": 9869,
       "velo": 82.7,
       "spin": 2517,
-      "zone_pct": 34.3,
-      "whiff_pct": 34.3,
+      "zone_pct": 34.4,
+      "whiff_pct": 34.1,
       "extension": 6.45
     },
     "SI": {
-      "count": 103317,
+      "count": 104074,
       "velo": 94.1,
       "spin": 2199,
       "zone_pct": 51.3,
@@ -74,15 +74,15 @@
       "extension": 6.42
     },
     "SL": {
-      "count": 81916,
+      "count": 82696,
       "velo": 86.3,
       "spin": 2436,
       "zone_pct": 39.1,
-      "whiff_pct": 33.4,
+      "whiff_pct": 33.5,
       "extension": 6.38
     },
     "ST": {
-      "count": 51496,
+      "count": 51807,
       "velo": 82.8,
       "spin": 2598,
       "zone_pct": 38.8,
@@ -90,13 +90,13 @@
       "extension": 6.33
     },
     "SV": {
-      "count": 2748,
-      "velo": 82.1,
+      "count": 2752,
+      "velo": 82.2,
       "spin": 2550,
-      "zone_pct": 36.1,
+      "zone_pct": 36.0,
       "whiff_pct": 28.9,
       "extension": 6.1
     }
   },
-  "generated_at": "2026-09-04 15:32:19 UTC"
+  "generated_at": "2026-09-05 15:26:25 UTC"
 }
