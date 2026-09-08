@@ -2,7 +2,7 @@
   "season": 2026,
   "pitch_types": {
     "CH": {
-      "count": 70923,
+      "count": 71285,
       "velo": 86.1,
       "spin": 1753,
       "zone_pct": 32.1,
@@ -10,9 +10,9 @@
       "extension": 6.43
     },
     "CU": {
-      "count": 40501,
-      "velo": 80.3,
-      "spin": 2603,
+      "count": 40758,
+      "velo": 80.2,
+      "spin": 2604,
       "zone_pct": 35.6,
       "whiff_pct": 30.6,
       "extension": 6.35
@@ -34,31 +34,31 @@
       "extension": 4.65
     },
     "FC": {
-      "count": 50367,
+      "count": 50730,
       "velo": 89.8,
-      "spin": 2389,
+      "spin": 2388,
       "zone_pct": 46.5,
-      "whiff_pct": 23.0,
+      "whiff_pct": 22.9,
       "extension": 6.42
     },
     "FF": {
-      "count": 193811,
+      "count": 194804,
       "velo": 94.8,
       "spin": 2314,
-      "zone_pct": 47.6,
+      "zone_pct": 47.7,
       "whiff_pct": 21.7,
       "extension": 6.51
     },
     "FS": {
-      "count": 20427,
+      "count": 20471,
       "velo": 86.7,
-      "spin": 1373,
+      "spin": 1372,
       "zone_pct": 30.8,
       "whiff_pct": 34.3,
       "extension": 6.57
     },
     "KC": {
-      "count": 9993,
+      "count": 10027,
       "velo": 82.7,
       "spin": 2518,
       "zone_pct": 34.4,
@@ -66,7 +66,7 @@
       "extension": 6.45
     },
     "SI": {
-      "count": 105582,
+      "count": 106035,
       "velo": 94.1,
       "spin": 2199,
       "zone_pct": 51.3,
@@ -74,7 +74,7 @@
       "extension": 6.42
     },
     "SL": {
-      "count": 83668,
+      "count": 84078,
       "velo": 86.3,
       "spin": 2436,
       "zone_pct": 39.1,
@@ -82,11 +82,11 @@
       "extension": 6.38
     },
     "ST": {
-      "count": 52653,
+      "count": 52962,
       "velo": 82.8,
       "spin": 2597,
       "zone_pct": 38.8,
-      "whiff_pct": 31.1,
+      "whiff_pct": 31.2,
       "extension": 6.33
     },
     "SV": {
@@ -98,5 +98,5 @@
       "extension": 6.1
     }
   },
-  "generated_at": "2026-09-07 15:28:07 UTC"
+  "generated_at": "2026-09-08 15:34:18 UTC"
 }
