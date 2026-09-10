@@ -2,7 +2,7 @@
   "season": 2026,
   "pitch_types": {
     "CH": {
-      "count": 71797,
+      "count": 72335,
       "velo": 86.1,
       "spin": 1753,
       "zone_pct": 32.1,
@@ -10,31 +10,31 @@
       "extension": 6.43
     },
     "CU": {
-      "count": 41077,
+      "count": 41275,
       "velo": 80.2,
-      "spin": 2603,
-      "zone_pct": 35.7,
+      "spin": 2604,
+      "zone_pct": 35.6,
       "whiff_pct": 30.6,
       "extension": 6.35
     },
     "EP": {
-      "count": 1042,
+      "count": 1049,
       "velo": 45.5,
       "spin": 1148,
-      "zone_pct": 26.8,
-      "whiff_pct": 3.2,
-      "extension": 4.15
+      "zone_pct": 26.9,
+      "whiff_pct": 3.4,
+      "extension": 4.14
     },
     "FA": {
-      "count": 717,
-      "velo": 65.7,
-      "spin": 1611,
-      "zone_pct": 34.9,
+      "count": 718,
+      "velo": 65.6,
+      "spin": 1609,
+      "zone_pct": 34.8,
       "whiff_pct": 5.5,
       "extension": 4.65
     },
     "FC": {
-      "count": 51144,
+      "count": 51504,
       "velo": 89.8,
       "spin": 2389,
       "zone_pct": 46.5,
@@ -42,7 +42,7 @@
       "extension": 6.42
     },
     "FF": {
-      "count": 196156,
+      "count": 197491,
       "velo": 94.8,
       "spin": 2314,
       "zone_pct": 47.7,
@@ -50,31 +50,31 @@
       "extension": 6.51
     },
     "FS": {
-      "count": 20657,
+      "count": 20810,
       "velo": 86.7,
-      "spin": 1371,
+      "spin": 1372,
       "zone_pct": 30.7,
       "whiff_pct": 34.3,
       "extension": 6.56
     },
     "KC": {
-      "count": 10064,
+      "count": 10158,
       "velo": 82.7,
       "spin": 2518,
       "zone_pct": 34.4,
-      "whiff_pct": 34.0,
+      "whiff_pct": 34.1,
       "extension": 6.45
     },
     "SI": {
-      "count": 106805,
+      "count": 107502,
       "velo": 94.1,
       "spin": 2199,
       "zone_pct": 51.3,
-      "whiff_pct": 13.6,
+      "whiff_pct": 13.5,
       "extension": 6.42
     },
     "SL": {
-      "count": 84644,
+      "count": 85220,
       "velo": 86.3,
       "spin": 2436,
       "zone_pct": 39.1,
@@ -82,7 +82,7 @@
       "extension": 6.38
     },
     "ST": {
-      "count": 53244,
+      "count": 53630,
       "velo": 82.8,
       "spin": 2597,
       "zone_pct": 38.8,
@@ -90,13 +90,13 @@
       "extension": 6.33
     },
     "SV": {
-      "count": 2817,
+      "count": 2846,
       "velo": 82.2,
-      "spin": 2544,
+      "spin": 2548,
       "zone_pct": 36.0,
       "whiff_pct": 28.8,
       "extension": 6.1
     }
   },
-  "generated_at": "2026-09-09 15:33:46 UTC"
+  "generated_at": "2026-09-10 15:34:59 UTC"
 }
