@@ -7,73 +7,73 @@
       "label": "\u2264 -10",
       "avg_ev": 76.0,
       "hard_hit_pct": 14.8,
-      "count": 44599
+      "count": 44704
     },
     {
       "label": "-10 to -5",
       "avg_ev": 88.7,
       "hard_hit_pct": 40.0,
-      "count": 7648
+      "count": 7664
     },
     {
       "label": "-5 to 0",
       "avg_ev": 90.5,
-      "hard_hit_pct": 46.7,
-      "count": 8336
+      "hard_hit_pct": 46.6,
+      "count": 8353
     },
     {
       "label": "0 to 5",
       "avg_ev": 91.3,
       "hard_hit_pct": 49.8,
-      "count": 9466
+      "count": 9480
     },
     {
       "label": "5 to 10",
-      "avg_ev": 90.1,
-      "hard_hit_pct": 43.8,
-      "count": 11593
+      "avg_ev": 90.0,
+      "hard_hit_pct": 43.7,
+      "count": 11616
     },
     {
       "label": "10 to 15",
       "avg_ev": 89.1,
       "hard_hit_pct": 40.7,
-      "count": 12936
+      "count": 12961
     },
     {
       "label": "15 to 20",
       "avg_ev": 88.6,
       "hard_hit_pct": 39.4,
-      "count": 13175
+      "count": 13199
     },
     {
       "label": "20 to 25",
       "avg_ev": 87.5,
       "hard_hit_pct": 36.9,
-      "count": 12856
+      "count": 12883
     },
     {
       "label": "25 to 30",
       "avg_ev": 85.8,
       "hard_hit_pct": 32.6,
-      "count": 12893
+      "count": 12914
     },
     {
       "label": "30 to 35",
       "avg_ev": 83.6,
       "hard_hit_pct": 25.7,
-      "count": 12232
+      "count": 12261
     },
     {
       "label": "35 to 40",
       "avg_ev": 81.5,
       "hard_hit_pct": 18.2,
-      "count": 11217
+      "count": 11244
     },
     {
       "label": "> 40",
       "avg_ev": 78.0,
       "hard_hit_pct": 6.1,
-      "count": 57187
+      "count": 57301
     }
   ],
   "players": [
@@ -321,19 +321,19 @@
       "player_id": 691182,
       "name": "Adael Amador",
       "team": "COL",
-      "total_bbe": 54,
+      "total_bbe": 63,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 73.8,
-          "hard_hit_pct": 15.4,
-          "count": 13
+          "avg_ev": 72.9,
+          "hard_hit_pct": 11.8,
+          "count": 17
         },
         {
           "label": "-10 to -5",
-          "avg_ev": null,
-          "hard_hit_pct": null,
-          "count": 0
+          "avg_ev": 92.5,
+          "hard_hit_pct": 0.0,
+          "count": 1
         },
         {
           "label": "-5 to 0",
@@ -349,9 +349,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 92.2,
-          "hard_hit_pct": 40.0,
-          "count": 5
+          "avg_ev": 91.4,
+          "hard_hit_pct": 42.9,
+          "count": 7
         },
         {
           "label": "10 to 15",
@@ -367,9 +367,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 96.8,
-          "hard_hit_pct": 50.0,
-          "count": 2
+          "avg_ev": 86.6,
+          "hard_hit_pct": 33.3,
+          "count": 3
         },
         {
           "label": "25 to 30",
@@ -391,9 +391,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 70.0,
+          "avg_ev": 70.1,
           "hard_hit_pct": 0.0,
-          "count": 18
+          "count": 19
         }
       ]
     },
@@ -961,7 +961,7 @@
       "player_id": 664761,
       "name": "Alec Bohm",
       "team": "PHI",
-      "total_bbe": 760,
+      "total_bbe": 763,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -983,9 +983,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 90.9,
-          "hard_hit_pct": 42.3,
-          "count": 26
+          "avg_ev": 90.3,
+          "hard_hit_pct": 40.7,
+          "count": 27
         },
         {
           "label": "5 to 10",
@@ -1007,9 +1007,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 90.9,
-          "hard_hit_pct": 42.6,
-          "count": 54
+          "avg_ev": 91.1,
+          "hard_hit_pct": 43.6,
+          "count": 55
         },
         {
           "label": "25 to 30",
@@ -1020,8 +1020,8 @@
         {
           "label": "30 to 35",
           "avg_ev": 80.5,
-          "hard_hit_pct": 13.6,
-          "count": 44
+          "hard_hit_pct": 13.3,
+          "count": 45
         },
         {
           "label": "35 to 40",
@@ -1921,13 +1921,13 @@
       "player_id": 643217,
       "name": "Andrew Benintendi",
       "team": "CWS",
-      "total_bbe": 568,
+      "total_bbe": 573,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 74.2,
-          "hard_hit_pct": 14.1,
-          "count": 92
+          "hard_hit_pct": 14.0,
+          "count": 93
         },
         {
           "label": "-10 to -5",
@@ -1979,9 +1979,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 85.0,
-          "hard_hit_pct": 33.3,
-          "count": 33
+          "avg_ev": 84.7,
+          "hard_hit_pct": 32.4,
+          "count": 34
         },
         {
           "label": "35 to 40",
@@ -1991,9 +1991,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 79.9,
-          "hard_hit_pct": 10.4,
-          "count": 183
+          "avg_ev": 80.0,
+          "hard_hit_pct": 10.2,
+          "count": 186
         }
       ]
     },
@@ -2881,19 +2881,19 @@
       "player_id": 683011,
       "name": "Anthony Volpe",
       "team": "NYY",
-      "total_bbe": 242,
+      "total_bbe": 249,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 76.3,
-          "hard_hit_pct": 13.3,
-          "count": 45
+          "avg_ev": 76.2,
+          "hard_hit_pct": 13.0,
+          "count": 46
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 89.4,
-          "hard_hit_pct": 33.3,
-          "count": 9
+          "avg_ev": 88.0,
+          "hard_hit_pct": 30.0,
+          "count": 10
         },
         {
           "label": "-5 to 0",
@@ -2909,9 +2909,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 91.1,
-          "hard_hit_pct": 42.9,
-          "count": 14
+          "avg_ev": 90.3,
+          "hard_hit_pct": 41.2,
+          "count": 17
         },
         {
           "label": "10 to 15",
@@ -2927,9 +2927,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 91.0,
-          "hard_hit_pct": 33.3,
-          "count": 15
+          "avg_ev": 91.9,
+          "hard_hit_pct": 37.5,
+          "count": 16
         },
         {
           "label": "25 to 30",
@@ -2951,9 +2951,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 78.4,
-          "hard_hit_pct": 5.5,
-          "count": 73
+          "avg_ev": 78.6,
+          "hard_hit_pct": 5.4,
+          "count": 74
         }
       ]
     },
@@ -3201,13 +3201,13 @@
       "player_id": 663586,
       "name": "Austin Riley",
       "team": "ATL",
-      "total_bbe": 697,
+      "total_bbe": 701,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.9,
-          "hard_hit_pct": 13.3,
-          "count": 128
+          "avg_ev": 75.7,
+          "hard_hit_pct": 13.1,
+          "count": 130
         },
         {
           "label": "-10 to -5",
@@ -3217,9 +3217,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 92.4,
-          "hard_hit_pct": 56.0,
-          "count": 25
+          "avg_ev": 92.1,
+          "hard_hit_pct": 53.8,
+          "count": 26
         },
         {
           "label": "0 to 5",
@@ -3265,9 +3265,9 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 80.0,
-          "hard_hit_pct": 18.6,
-          "count": 43
+          "avg_ev": 79.9,
+          "hard_hit_pct": 18.2,
+          "count": 44
         },
         {
           "label": "> 40",
@@ -3361,13 +3361,13 @@
       "player_id": 669224,
       "name": "Austin Wells",
       "team": "NYY",
-      "total_bbe": 448,
+      "total_bbe": 449,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 73.4,
-          "hard_hit_pct": 13.0,
-          "count": 69
+          "avg_ev": 73.6,
+          "hard_hit_pct": 12.9,
+          "count": 70
         },
         {
           "label": "-10 to -5",
@@ -3601,13 +3601,13 @@
       "player_id": 700250,
       "name": "Ben Rice",
       "team": "NYY",
-      "total_bbe": 721,
+      "total_bbe": 727,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 75.4,
-          "hard_hit_pct": 14.0,
-          "count": 164
+          "hard_hit_pct": 13.9,
+          "count": 165
         },
         {
           "label": "-10 to -5",
@@ -3617,9 +3617,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 91.8,
-          "hard_hit_pct": 48.6,
-          "count": 35
+          "avg_ev": 91.9,
+          "hard_hit_pct": 47.2,
+          "count": 36
         },
         {
           "label": "0 to 5",
@@ -3659,21 +3659,21 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 86.7,
-          "hard_hit_pct": 38.1,
-          "count": 42
+          "avg_ev": 87.2,
+          "hard_hit_pct": 38.6,
+          "count": 44
         },
         {
           "label": "35 to 40",
-          "avg_ev": 86.4,
-          "hard_hit_pct": 30.4,
-          "count": 23
+          "avg_ev": 86.8,
+          "hard_hit_pct": 33.3,
+          "count": 24
         },
         {
           "label": "> 40",
           "avg_ev": 82.2,
           "hard_hit_pct": 13.1,
-          "count": 175
+          "count": 176
         }
       ]
     },
@@ -4481,13 +4481,13 @@
       "player_id": 695731,
       "name": "Braden Montgomery",
       "team": "CWS",
-      "total_bbe": 388,
+      "total_bbe": 391,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.3,
-          "hard_hit_pct": 16.5,
-          "count": 103
+          "avg_ev": 75.2,
+          "hard_hit_pct": 16.3,
+          "count": 104
         },
         {
           "label": "-10 to -5",
@@ -4521,9 +4521,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 84.0,
-          "hard_hit_pct": 24.0,
-          "count": 25
+          "avg_ev": 84.2,
+          "hard_hit_pct": 23.1,
+          "count": 26
         },
         {
           "label": "20 to 25",
@@ -4545,9 +4545,9 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 82.4,
-          "hard_hit_pct": 23.5,
-          "count": 17
+          "avg_ev": 83.3,
+          "hard_hit_pct": 27.8,
+          "count": 18
         },
         {
           "label": "> 40",
@@ -4801,19 +4801,19 @@
       "player_id": 664040,
       "name": "Brandon Lowe",
       "team": "PIT",
-      "total_bbe": 720,
+      "total_bbe": 724,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 77.7,
-          "hard_hit_pct": 16.0,
-          "count": 156
+          "hard_hit_pct": 15.9,
+          "count": 157
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 81.4,
-          "hard_hit_pct": 18.2,
-          "count": 22
+          "avg_ev": 81.9,
+          "hard_hit_pct": 17.4,
+          "count": 23
         },
         {
           "label": "-5 to 0",
@@ -4872,8 +4872,8 @@
         {
           "label": "> 40",
           "avg_ev": 80.5,
-          "hard_hit_pct": 10.9,
-          "count": 201
+          "hard_hit_pct": 10.8,
+          "count": 203
         }
       ]
     },
@@ -4881,13 +4881,13 @@
       "player_id": 669016,
       "name": "Brandon Marsh",
       "team": "PHI",
-      "total_bbe": 720,
+      "total_bbe": 723,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 74.2,
-          "hard_hit_pct": 11.8,
-          "count": 144
+          "avg_ev": 73.8,
+          "hard_hit_pct": 11.6,
+          "count": 146
         },
         {
           "label": "-10 to -5",
@@ -4953,7 +4953,7 @@
           "label": "> 40",
           "avg_ev": 77.3,
           "hard_hit_pct": 4.3,
-          "count": 161
+          "count": 162
         }
       ]
     },
@@ -4961,19 +4961,19 @@
       "player_id": 607043,
       "name": "Brandon Nimmo",
       "team": "TEX",
-      "total_bbe": 852,
+      "total_bbe": 858,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 79.1,
-          "hard_hit_pct": 16.8,
-          "count": 173
+          "avg_ev": 78.9,
+          "hard_hit_pct": 16.6,
+          "count": 175
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 89.6,
-          "hard_hit_pct": 33.3,
-          "count": 21
+          "avg_ev": 88.9,
+          "hard_hit_pct": 31.8,
+          "count": 22
         },
         {
           "label": "-5 to 0",
@@ -5025,15 +5025,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 81.2,
-          "hard_hit_pct": 17.0,
-          "count": 47
+          "avg_ev": 81.3,
+          "hard_hit_pct": 16.7,
+          "count": 48
         },
         {
           "label": "> 40",
           "avg_ev": 78.5,
           "hard_hit_pct": 3.9,
-          "count": 228
+          "count": 230
         }
       ]
     },
@@ -5838,6 +5838,86 @@
       ]
     },
     {
+      "player_id": 676551,
+      "name": "Brewer Hicklen",
+      "team": "ATL",
+      "total_bbe": 31,
+      "buckets": [
+        {
+          "label": "\u2264 -10",
+          "avg_ev": 81.8,
+          "hard_hit_pct": 12.5,
+          "count": 8
+        },
+        {
+          "label": "-10 to -5",
+          "avg_ev": 87.9,
+          "hard_hit_pct": 25.0,
+          "count": 4
+        },
+        {
+          "label": "-5 to 0",
+          "avg_ev": 93.8,
+          "hard_hit_pct": 0.0,
+          "count": 1
+        },
+        {
+          "label": "0 to 5",
+          "avg_ev": 97.6,
+          "hard_hit_pct": 100.0,
+          "count": 1
+        },
+        {
+          "label": "5 to 10",
+          "avg_ev": 100.8,
+          "hard_hit_pct": 100.0,
+          "count": 1
+        },
+        {
+          "label": "10 to 15",
+          "avg_ev": 106.8,
+          "hard_hit_pct": 100.0,
+          "count": 2
+        },
+        {
+          "label": "15 to 20",
+          "avg_ev": 102.0,
+          "hard_hit_pct": 100.0,
+          "count": 1
+        },
+        {
+          "label": "20 to 25",
+          "avg_ev": 78.5,
+          "hard_hit_pct": 0.0,
+          "count": 2
+        },
+        {
+          "label": "25 to 30",
+          "avg_ev": 104.8,
+          "hard_hit_pct": 100.0,
+          "count": 2
+        },
+        {
+          "label": "30 to 35",
+          "avg_ev": 75.0,
+          "hard_hit_pct": 0.0,
+          "count": 1
+        },
+        {
+          "label": "35 to 40",
+          "avg_ev": null,
+          "hard_hit_pct": null,
+          "count": 0
+        },
+        {
+          "label": "> 40",
+          "avg_ev": 79.9,
+          "hard_hit_pct": 12.5,
+          "count": 8
+        }
+      ]
+    },
+    {
       "player_id": 640459,
       "name": "Brian Navarreto",
       "team": "MIA",
@@ -6161,13 +6241,13 @@
       "player_id": 801126,
       "name": "Brock Rodden",
       "team": "SEA",
-      "total_bbe": 61,
+      "total_bbe": 62,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 74.4,
-          "hard_hit_pct": 20.0,
-          "count": 10
+          "avg_ev": 75.4,
+          "hard_hit_pct": 18.2,
+          "count": 11
         },
         {
           "label": "-10 to -5",
@@ -6401,13 +6481,13 @@
       "player_id": 668804,
       "name": "Bryan Reynolds",
       "team": "PIT",
-      "total_bbe": 752,
+      "total_bbe": 757,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.6,
-          "hard_hit_pct": 16.6,
-          "count": 199
+          "avg_ev": 77.7,
+          "hard_hit_pct": 16.9,
+          "count": 201
         },
         {
           "label": "-10 to -5",
@@ -6441,9 +6521,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 92.7,
-          "hard_hit_pct": 51.1,
-          "count": 45
+          "avg_ev": 93.0,
+          "hard_hit_pct": 52.2,
+          "count": 46
         },
         {
           "label": "20 to 25",
@@ -6453,9 +6533,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 88.7,
-          "hard_hit_pct": 34.0,
-          "count": 47
+          "avg_ev": 88.9,
+          "hard_hit_pct": 35.4,
+          "count": 48
         },
         {
           "label": "30 to 35",
@@ -6471,9 +6551,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 79.5,
+          "avg_ev": 79.4,
           "hard_hit_pct": 6.0,
-          "count": 150
+          "count": 151
         }
       ]
     },
@@ -6641,7 +6721,7 @@
       "player_id": 547180,
       "name": "Bryce Harper",
       "team": "PHI",
-      "total_bbe": 789,
+      "total_bbe": 792,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -6657,9 +6737,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 90.9,
-          "hard_hit_pct": 45.2,
-          "count": 31
+          "avg_ev": 91.0,
+          "hard_hit_pct": 45.5,
+          "count": 33
         },
         {
           "label": "0 to 5",
@@ -6687,9 +6767,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 89.9,
-          "hard_hit_pct": 32.2,
-          "count": 59
+          "avg_ev": 90.0,
+          "hard_hit_pct": 33.3,
+          "count": 60
         },
         {
           "label": "25 to 30",
@@ -6881,13 +6961,13 @@
       "player_id": 681082,
       "name": "Bryson Stott",
       "team": "PHI",
-      "total_bbe": 712,
+      "total_bbe": 718,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 76.5,
-          "hard_hit_pct": 11.6,
-          "count": 112
+          "avg_ev": 76.6,
+          "hard_hit_pct": 11.5,
+          "count": 113
         },
         {
           "label": "-10 to -5",
@@ -6898,8 +6978,8 @@
         {
           "label": "-5 to 0",
           "avg_ev": 92.2,
-          "hard_hit_pct": 50.0,
-          "count": 30
+          "hard_hit_pct": 48.4,
+          "count": 31
         },
         {
           "label": "0 to 5",
@@ -6915,9 +6995,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 91.1,
-          "hard_hit_pct": 42.0,
-          "count": 50
+          "avg_ev": 90.8,
+          "hard_hit_pct": 41.2,
+          "count": 51
         },
         {
           "label": "15 to 20",
@@ -6939,15 +7019,15 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 85.0,
-          "hard_hit_pct": 27.9,
-          "count": 43
+          "avg_ev": 84.9,
+          "hard_hit_pct": 27.3,
+          "count": 44
         },
         {
           "label": "35 to 40",
-          "avg_ev": 81.5,
-          "hard_hit_pct": 14.6,
-          "count": 48
+          "avg_ev": 80.1,
+          "hard_hit_pct": 14.0,
+          "count": 50
         },
         {
           "label": "> 40",
@@ -7281,7 +7361,7 @@
       "player_id": 663728,
       "name": "Cal Raleigh",
       "team": "SEA",
-      "total_bbe": 630,
+      "total_bbe": 635,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -7291,9 +7371,9 @@
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 88.2,
-          "hard_hit_pct": 28.6,
-          "count": 14
+          "avg_ev": 88.9,
+          "hard_hit_pct": 33.3,
+          "count": 15
         },
         {
           "label": "-5 to 0",
@@ -7315,15 +7395,15 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 88.0,
-          "hard_hit_pct": 28.2,
-          "count": 39
+          "avg_ev": 87.9,
+          "hard_hit_pct": 27.5,
+          "count": 40
         },
         {
           "label": "15 to 20",
-          "avg_ev": 91.4,
-          "hard_hit_pct": 42.4,
-          "count": 33
+          "avg_ev": 91.6,
+          "hard_hit_pct": 42.9,
+          "count": 35
         },
         {
           "label": "20 to 25",
@@ -7352,8 +7432,8 @@
         {
           "label": "> 40",
           "avg_ev": 83.5,
-          "hard_hit_pct": 15.9,
-          "count": 227
+          "hard_hit_pct": 15.8,
+          "count": 228
         }
       ]
     },
@@ -7521,7 +7601,7 @@
       "player_id": 701358,
       "name": "Cam Smith",
       "team": "HOU",
-      "total_bbe": 673,
+      "total_bbe": 677,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -7555,9 +7635,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 87.8,
-          "hard_hit_pct": 37.5,
-          "count": 32
+          "avg_ev": 88.0,
+          "hard_hit_pct": 39.4,
+          "count": 33
         },
         {
           "label": "15 to 20",
@@ -7579,9 +7659,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 82.9,
-          "hard_hit_pct": 25.0,
-          "count": 36
+          "avg_ev": 83.5,
+          "hard_hit_pct": 27.0,
+          "count": 37
         },
         {
           "label": "35 to 40",
@@ -7591,9 +7671,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 77.9,
-          "hard_hit_pct": 6.9,
-          "count": 188
+          "avg_ev": 77.8,
+          "hard_hit_pct": 6.8,
+          "count": 190
         }
       ]
     },
@@ -8401,7 +8481,7 @@
       "player_id": 656775,
       "name": "Cedric Mullins",
       "team": "TB",
-      "total_bbe": 633,
+      "total_bbe": 637,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -8417,9 +8497,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 85.1,
-          "hard_hit_pct": 28.0,
-          "count": 25
+          "avg_ev": 85.3,
+          "hard_hit_pct": 26.9,
+          "count": 26
         },
         {
           "label": "0 to 5",
@@ -8447,9 +8527,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 90.5,
-          "hard_hit_pct": 41.9,
-          "count": 31
+          "avg_ev": 90.8,
+          "hard_hit_pct": 42.4,
+          "count": 33
         },
         {
           "label": "25 to 30",
@@ -8472,8 +8552,8 @@
         {
           "label": "> 40",
           "avg_ev": 78.9,
-          "hard_hit_pct": 6.5,
-          "count": 232
+          "hard_hit_pct": 6.4,
+          "count": 233
         }
       ]
     },
@@ -8641,13 +8721,13 @@
       "player_id": 802415,
       "name": "Chandler Simpson",
       "team": "TB",
-      "total_bbe": 722,
+      "total_bbe": 727,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 73.2,
-          "hard_hit_pct": 8.4,
-          "count": 226
+          "hard_hit_pct": 8.3,
+          "count": 229
         },
         {
           "label": "-10 to -5",
@@ -8669,15 +8749,15 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 86.4,
-          "hard_hit_pct": 16.7,
-          "count": 36
+          "avg_ev": 86.2,
+          "hard_hit_pct": 16.2,
+          "count": 37
         },
         {
           "label": "10 to 15",
-          "avg_ev": 80.8,
-          "hard_hit_pct": 12.2,
-          "count": 49
+          "avg_ev": 80.7,
+          "hard_hit_pct": 12.0,
+          "count": 50
         },
         {
           "label": "15 to 20",
@@ -8881,7 +8961,7 @@
       "player_id": 805367,
       "name": "Chase Meidroth",
       "team": "CWS",
-      "total_bbe": 746,
+      "total_bbe": 747,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -8953,7 +9033,7 @@
           "label": "> 40",
           "avg_ev": 79.5,
           "hard_hit_pct": 8.0,
-          "count": 162
+          "count": 163
         }
       ]
     },
@@ -9281,13 +9361,13 @@
       "player_id": 543877,
       "name": "Christian V\u00e1zquez",
       "team": "HOU",
-      "total_bbe": 365,
+      "total_bbe": 367,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 74.6,
-          "hard_hit_pct": 10.7,
-          "count": 75
+          "hard_hit_pct": 10.4,
+          "count": 77
         },
         {
           "label": "-10 to -5",
@@ -9361,7 +9441,7 @@
       "player_id": 572233,
       "name": "Christian Walker",
       "team": "HOU",
-      "total_bbe": 742,
+      "total_bbe": 749,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -9377,9 +9457,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 90.3,
-          "hard_hit_pct": 50.0,
-          "count": 36
+          "avg_ev": 89.4,
+          "hard_hit_pct": 48.6,
+          "count": 37
         },
         {
           "label": "0 to 5",
@@ -9395,15 +9475,15 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 82.3,
-          "hard_hit_pct": 21.1,
-          "count": 38
+          "avg_ev": 82.6,
+          "hard_hit_pct": 20.5,
+          "count": 39
         },
         {
           "label": "15 to 20",
-          "avg_ev": 89.7,
-          "hard_hit_pct": 42.6,
-          "count": 47
+          "avg_ev": 88.8,
+          "hard_hit_pct": 40.8,
+          "count": 49
         },
         {
           "label": "20 to 25",
@@ -9419,9 +9499,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 84.9,
-          "hard_hit_pct": 28.9,
-          "count": 38
+          "avg_ev": 85.4,
+          "hard_hit_pct": 30.8,
+          "count": 39
         },
         {
           "label": "35 to 40",
@@ -9431,9 +9511,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 78.6,
-          "hard_hit_pct": 6.0,
-          "count": 218
+          "avg_ev": 78.7,
+          "hard_hit_pct": 5.9,
+          "count": 220
         }
       ]
     },
@@ -9761,7 +9841,7 @@
       "player_id": 641355,
       "name": "Cody Bellinger",
       "team": "NYY",
-      "total_bbe": 651,
+      "total_bbe": 655,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -9801,15 +9881,15 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 90.7,
-          "hard_hit_pct": 43.8,
-          "count": 32
+          "avg_ev": 91.1,
+          "hard_hit_pct": 45.5,
+          "count": 33
         },
         {
           "label": "20 to 25",
-          "avg_ev": 90.3,
-          "hard_hit_pct": 46.8,
-          "count": 47
+          "avg_ev": 90.6,
+          "hard_hit_pct": 47.9,
+          "count": 48
         },
         {
           "label": "25 to 30",
@@ -9825,15 +9905,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 83.0,
-          "hard_hit_pct": 21.4,
-          "count": 28
+          "avg_ev": 83.4,
+          "hard_hit_pct": 24.1,
+          "count": 29
         },
         {
           "label": "> 40",
-          "avg_ev": 78.4,
-          "hard_hit_pct": 4.2,
-          "count": 192
+          "avg_ev": 78.5,
+          "hard_hit_pct": 4.7,
+          "count": 193
         }
       ]
     },
@@ -10001,13 +10081,13 @@
       "player_id": 694249,
       "name": "Cole Carrigg",
       "team": "COL",
-      "total_bbe": 421,
+      "total_bbe": 427,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.6,
-          "hard_hit_pct": 10.7,
-          "count": 75
+          "avg_ev": 75.1,
+          "hard_hit_pct": 11.1,
+          "count": 81
         },
         {
           "label": "-10 to -5",
@@ -10081,13 +10161,13 @@
       "player_id": 702284,
       "name": "Cole Young",
       "team": "SEA",
-      "total_bbe": 787,
+      "total_bbe": 791,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.2,
-          "hard_hit_pct": 15.6,
-          "count": 128
+          "avg_ev": 77.1,
+          "hard_hit_pct": 15.5,
+          "count": 129
         },
         {
           "label": "-10 to -5",
@@ -10097,9 +10177,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 92.0,
-          "hard_hit_pct": 56.4,
-          "count": 39
+          "avg_ev": 92.3,
+          "hard_hit_pct": 57.5,
+          "count": 40
         },
         {
           "label": "0 to 5",
@@ -10109,9 +10189,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 90.8,
-          "hard_hit_pct": 41.7,
-          "count": 36
+          "avg_ev": 90.7,
+          "hard_hit_pct": 40.5,
+          "count": 37
         },
         {
           "label": "10 to 15",
@@ -10139,9 +10219,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 80.5,
-          "hard_hit_pct": 13.3,
-          "count": 45
+          "avg_ev": 80.9,
+          "hard_hit_pct": 15.2,
+          "count": 46
         },
         {
           "label": "35 to 40",
@@ -10161,13 +10241,13 @@
       "player_id": 695657,
       "name": "Colson Montgomery",
       "team": "CWS",
-      "total_bbe": 660,
+      "total_bbe": 664,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 79.8,
-          "hard_hit_pct": 21.0,
-          "count": 124
+          "avg_ev": 79.9,
+          "hard_hit_pct": 21.6,
+          "count": 125
         },
         {
           "label": "-10 to -5",
@@ -10201,9 +10281,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 90.8,
-          "hard_hit_pct": 43.2,
-          "count": 37
+          "avg_ev": 91.3,
+          "hard_hit_pct": 44.7,
+          "count": 38
         },
         {
           "label": "20 to 25",
@@ -10231,9 +10311,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 78.4,
-          "hard_hit_pct": 8.3,
-          "count": 217
+          "avg_ev": 78.3,
+          "hard_hit_pct": 8.2,
+          "count": 219
         }
       ]
     },
@@ -10561,7 +10641,7 @@
       "player_id": 681393,
       "name": "Connor Norby",
       "team": "COL",
-      "total_bbe": 413,
+      "total_bbe": 420,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -10589,9 +10669,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 89.4,
-          "hard_hit_pct": 50.0,
-          "count": 20
+          "avg_ev": 88.7,
+          "hard_hit_pct": 47.6,
+          "count": 21
         },
         {
           "label": "10 to 15",
@@ -10601,9 +10681,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 89.1,
-          "hard_hit_pct": 42.1,
-          "count": 19
+          "avg_ev": 89.7,
+          "hard_hit_pct": 45.0,
+          "count": 20
         },
         {
           "label": "20 to 25",
@@ -10613,15 +10693,15 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 85.4,
-          "hard_hit_pct": 35.7,
-          "count": 28
+          "avg_ev": 84.7,
+          "hard_hit_pct": 34.5,
+          "count": 29
         },
         {
           "label": "30 to 35",
-          "avg_ev": 80.2,
-          "hard_hit_pct": 9.1,
-          "count": 33
+          "avg_ev": 80.1,
+          "hard_hit_pct": 8.8,
+          "count": 34
         },
         {
           "label": "35 to 40",
@@ -10631,9 +10711,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 80.5,
-          "hard_hit_pct": 9.5,
-          "count": 116
+          "avg_ev": 80.4,
+          "hard_hit_pct": 9.2,
+          "count": 119
         }
       ]
     },
@@ -10881,13 +10961,13 @@
       "player_id": 608369,
       "name": "Corey Seager",
       "team": "TEX",
-      "total_bbe": 435,
+      "total_bbe": 438,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.7,
-          "hard_hit_pct": 16.3,
-          "count": 92
+          "avg_ev": 77.3,
+          "hard_hit_pct": 16.1,
+          "count": 93
         },
         {
           "label": "-10 to -5",
@@ -10897,9 +10977,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 94.5,
-          "hard_hit_pct": 50.0,
-          "count": 22
+          "avg_ev": 93.5,
+          "hard_hit_pct": 45.8,
+          "count": 24
         },
         {
           "label": "0 to 5",
@@ -11521,7 +11601,7 @@
       "player_id": 643376,
       "name": "Danny Jansen",
       "team": "TEX",
-      "total_bbe": 226,
+      "total_bbe": 229,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -11543,9 +11623,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 90.6,
-          "hard_hit_pct": 40.0,
-          "count": 10
+          "avg_ev": 86.6,
+          "hard_hit_pct": 41.7,
+          "count": 12
         },
         {
           "label": "5 to 10",
@@ -11591,9 +11671,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 78.9,
-          "hard_hit_pct": 10.3,
-          "count": 87
+          "avg_ev": 78.7,
+          "hard_hit_pct": 10.2,
+          "count": 88
         }
       ]
     },
@@ -11761,13 +11841,13 @@
       "player_id": 662139,
       "name": "Daulton Varsho",
       "team": "HOU",
-      "total_bbe": 716,
+      "total_bbe": 724,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 74.0,
           "hard_hit_pct": 11.8,
-          "count": 152
+          "count": 153
         },
         {
           "label": "-10 to -5",
@@ -11778,8 +11858,8 @@
         {
           "label": "-5 to 0",
           "avg_ev": 91.3,
-          "hard_hit_pct": 47.4,
-          "count": 19
+          "hard_hit_pct": 45.0,
+          "count": 20
         },
         {
           "label": "0 to 5",
@@ -11795,9 +11875,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 89.5,
-          "hard_hit_pct": 46.3,
-          "count": 41
+          "avg_ev": 89.3,
+          "hard_hit_pct": 45.2,
+          "count": 42
         },
         {
           "label": "15 to 20",
@@ -11819,9 +11899,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 79.8,
-          "hard_hit_pct": 16.2,
-          "count": 37
+          "avg_ev": 80.3,
+          "hard_hit_pct": 18.4,
+          "count": 38
         },
         {
           "label": "35 to 40",
@@ -11832,8 +11912,8 @@
         {
           "label": "> 40",
           "avg_ev": 75.6,
-          "hard_hit_pct": 5.7,
-          "count": 229
+          "hard_hit_pct": 5.6,
+          "count": 233
         }
       ]
     },
@@ -12561,13 +12641,13 @@
       "player_id": 686527,
       "name": "Dominic Canzone",
       "team": "SEA",
-      "total_bbe": 568,
+      "total_bbe": 573,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.2,
-          "hard_hit_pct": 11.3,
-          "count": 150
+          "avg_ev": 75.5,
+          "hard_hit_pct": 11.7,
+          "count": 154
         },
         {
           "label": "-10 to -5",
@@ -12631,9 +12711,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 78.0,
+          "avg_ev": 77.9,
           "hard_hit_pct": 5.8,
-          "count": 138
+          "count": 139
         }
       ]
     },
@@ -12641,7 +12721,7 @@
       "player_id": 642086,
       "name": "Dominic Smith",
       "team": "ATL",
-      "total_bbe": 400,
+      "total_bbe": 401,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -12669,9 +12749,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 92.0,
-          "hard_hit_pct": 50.0,
-          "count": 22
+          "avg_ev": 91.2,
+          "hard_hit_pct": 47.8,
+          "count": 23
         },
         {
           "label": "10 to 15",
@@ -12801,7 +12881,7 @@
       "player_id": 686948,
       "name": "Drake Baldwin",
       "team": "ATL",
-      "total_bbe": 739,
+      "total_bbe": 748,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -12835,9 +12915,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 91.2,
-          "hard_hit_pct": 45.0,
-          "count": 40
+          "avg_ev": 91.0,
+          "hard_hit_pct": 43.9,
+          "count": 41
         },
         {
           "label": "15 to 20",
@@ -12847,33 +12927,33 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 87.6,
-          "hard_hit_pct": 34.9,
-          "count": 43
+          "avg_ev": 87.4,
+          "hard_hit_pct": 34.1,
+          "count": 44
         },
         {
           "label": "25 to 30",
-          "avg_ev": 88.4,
-          "hard_hit_pct": 38.6,
-          "count": 57
+          "avg_ev": 88.2,
+          "hard_hit_pct": 37.9,
+          "count": 58
         },
         {
           "label": "30 to 35",
-          "avg_ev": 88.4,
-          "hard_hit_pct": 30.0,
-          "count": 40
+          "avg_ev": 88.6,
+          "hard_hit_pct": 29.3,
+          "count": 41
         },
         {
           "label": "35 to 40",
-          "avg_ev": 78.5,
-          "hard_hit_pct": 15.0,
-          "count": 40
+          "avg_ev": 78.3,
+          "hard_hit_pct": 14.6,
+          "count": 41
         },
         {
           "label": "> 40",
           "avg_ev": 79.9,
-          "hard_hit_pct": 11.9,
-          "count": 194
+          "hard_hit_pct": 11.6,
+          "count": 198
         }
       ]
     },
@@ -13441,7 +13521,7 @@
       "player_id": 700337,
       "name": "Edgar Quero",
       "team": "CWS",
-      "total_bbe": 295,
+      "total_bbe": 297,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -13475,9 +13555,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 89.4,
-          "hard_hit_pct": 40.0,
-          "count": 10
+          "avg_ev": 89.0,
+          "hard_hit_pct": 36.4,
+          "count": 11
         },
         {
           "label": "15 to 20",
@@ -13505,9 +13585,9 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 81.7,
-          "hard_hit_pct": 15.4,
-          "count": 13
+          "avg_ev": 81.5,
+          "hard_hit_pct": 14.3,
+          "count": 14
         },
         {
           "label": "> 40",
@@ -13521,7 +13601,7 @@
       "player_id": 624641,
       "name": "Edmundo Sosa",
       "team": "PHI",
-      "total_bbe": 341,
+      "total_bbe": 343,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -13567,9 +13647,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 86.4,
-          "hard_hit_pct": 33.3,
-          "count": 18
+          "avg_ev": 85.9,
+          "hard_hit_pct": 31.6,
+          "count": 19
         },
         {
           "label": "25 to 30",
@@ -13579,9 +13659,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 85.0,
-          "hard_hit_pct": 35.7,
-          "count": 14
+          "avg_ev": 83.7,
+          "hard_hit_pct": 33.3,
+          "count": 15
         },
         {
           "label": "35 to 40",
@@ -14881,13 +14961,13 @@
       "player_id": 694497,
       "name": "Evan Carter",
       "team": "TEX",
-      "total_bbe": 465,
+      "total_bbe": 467,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 69.1,
-          "hard_hit_pct": 14.9,
-          "count": 101
+          "avg_ev": 69.3,
+          "hard_hit_pct": 14.7,
+          "count": 102
         },
         {
           "label": "-10 to -5",
@@ -14921,9 +15001,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 84.1,
-          "hard_hit_pct": 32.1,
-          "count": 28
+          "avg_ev": 83.4,
+          "hard_hit_pct": 31.0,
+          "count": 29
         },
         {
           "label": "20 to 25",
@@ -15041,13 +15121,13 @@
       "player_id": 677649,
       "name": "Ezequiel Duran",
       "team": "TEX",
-      "total_bbe": 725,
+      "total_bbe": 733,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 76.9,
-          "hard_hit_pct": 19.3,
-          "count": 150
+          "hard_hit_pct": 19.1,
+          "count": 152
         },
         {
           "label": "-10 to -5",
@@ -15063,9 +15143,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 87.5,
-          "hard_hit_pct": 37.5,
-          "count": 32
+          "avg_ev": 88.1,
+          "hard_hit_pct": 39.4,
+          "count": 33
         },
         {
           "label": "5 to 10",
@@ -15088,8 +15168,8 @@
         {
           "label": "20 to 25",
           "avg_ev": 87.1,
-          "hard_hit_pct": 30.2,
-          "count": 43
+          "hard_hit_pct": 31.1,
+          "count": 45
         },
         {
           "label": "25 to 30",
@@ -15099,21 +15179,21 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 82.8,
-          "hard_hit_pct": 20.0,
-          "count": 50
+          "avg_ev": 82.6,
+          "hard_hit_pct": 19.6,
+          "count": 51
         },
         {
           "label": "35 to 40",
-          "avg_ev": 78.5,
-          "hard_hit_pct": 18.2,
-          "count": 33
+          "avg_ev": 78.8,
+          "hard_hit_pct": 17.6,
+          "count": 34
         },
         {
           "label": "> 40",
           "avg_ev": 76.2,
           "hard_hit_pct": 3.1,
-          "count": 195
+          "count": 196
         }
       ]
     },
@@ -15121,13 +15201,13 @@
       "player_id": 678662,
       "name": "Ezequiel Tovar",
       "team": "COL",
-      "total_bbe": 695,
+      "total_bbe": 699,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 73.2,
-          "hard_hit_pct": 14.2,
-          "count": 106
+          "avg_ev": 73.1,
+          "hard_hit_pct": 14.0,
+          "count": 107
         },
         {
           "label": "-10 to -5",
@@ -15162,8 +15242,8 @@
         {
           "label": "15 to 20",
           "avg_ev": 83.7,
-          "hard_hit_pct": 25.0,
-          "count": 36
+          "hard_hit_pct": 24.3,
+          "count": 37
         },
         {
           "label": "20 to 25",
@@ -15173,9 +15253,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 81.8,
-          "hard_hit_pct": 26.7,
-          "count": 45
+          "avg_ev": 82.0,
+          "hard_hit_pct": 26.1,
+          "count": 46
         },
         {
           "label": "30 to 35",
@@ -15186,8 +15266,8 @@
         {
           "label": "35 to 40",
           "avg_ev": 74.2,
-          "hard_hit_pct": 2.9,
-          "count": 35
+          "hard_hit_pct": 2.8,
+          "count": 36
         },
         {
           "label": "> 40",
@@ -16321,13 +16401,13 @@
       "player_id": 806146,
       "name": "George Lombard Jr.",
       "team": "NYY",
-      "total_bbe": 129,
+      "total_bbe": 132,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 72.6,
-          "hard_hit_pct": 13.5,
-          "count": 37
+          "avg_ev": 72.7,
+          "hard_hit_pct": 13.2,
+          "count": 38
         },
         {
           "label": "-10 to -5",
@@ -16349,9 +16429,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 93.6,
-          "hard_hit_pct": 60.0,
-          "count": 5
+          "avg_ev": 91.0,
+          "hard_hit_pct": 50.0,
+          "count": 6
         },
         {
           "label": "10 to 15",
@@ -16391,9 +16471,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 77.8,
-          "hard_hit_pct": 3.4,
-          "count": 29
+          "avg_ev": 78.5,
+          "hard_hit_pct": 6.7,
+          "count": 30
         }
       ]
     },
@@ -17121,13 +17201,13 @@
       "player_id": 673490,
       "name": "Ha-Seong Kim",
       "team": "ATL",
-      "total_bbe": 156,
+      "total_bbe": 161,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.1,
-          "hard_hit_pct": 11.8,
-          "count": 34
+          "avg_ev": 76.5,
+          "hard_hit_pct": 11.4,
+          "count": 35
         },
         {
           "label": "-10 to -5",
@@ -17143,15 +17223,15 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 93.4,
-          "hard_hit_pct": 50.0,
-          "count": 6
+          "avg_ev": 91.7,
+          "hard_hit_pct": 42.9,
+          "count": 7
         },
         {
           "label": "5 to 10",
-          "avg_ev": 104.2,
-          "hard_hit_pct": 75.0,
-          "count": 4
+          "avg_ev": 102.5,
+          "hard_hit_pct": 80.0,
+          "count": 5
         },
         {
           "label": "10 to 15",
@@ -17167,9 +17247,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 73.9,
+          "avg_ev": 75.1,
           "hard_hit_pct": 0.0,
-          "count": 4
+          "count": 5
         },
         {
           "label": "25 to 30",
@@ -17193,7 +17273,7 @@
           "label": "> 40",
           "avg_ev": 76.7,
           "hard_hit_pct": 1.7,
-          "count": 59
+          "count": 60
         }
       ]
     },
@@ -17441,13 +17521,13 @@
       "player_id": 671218,
       "name": "Heliot Ramos",
       "team": "NYY",
-      "total_bbe": 519,
+      "total_bbe": 520,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 77.0,
-          "hard_hit_pct": 15.9,
-          "count": 107
+          "hard_hit_pct": 15.7,
+          "count": 108
         },
         {
           "label": "-10 to -5",
@@ -17841,13 +17921,13 @@
       "player_id": 696100,
       "name": "Hunter Goodman",
       "team": "COL",
-      "total_bbe": 629,
+      "total_bbe": 638,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 73.8,
-          "hard_hit_pct": 16.2,
-          "count": 117
+          "hard_hit_pct": 16.1,
+          "count": 118
         },
         {
           "label": "-10 to -5",
@@ -17887,33 +17967,33 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 90.1,
-          "hard_hit_pct": 38.2,
-          "count": 34
+          "avg_ev": 90.6,
+          "hard_hit_pct": 40.0,
+          "count": 35
         },
         {
           "label": "25 to 30",
-          "avg_ev": 86.7,
-          "hard_hit_pct": 39.4,
-          "count": 33
+          "avg_ev": 86.4,
+          "hard_hit_pct": 40.0,
+          "count": 35
         },
         {
           "label": "30 to 35",
-          "avg_ev": 90.0,
-          "hard_hit_pct": 53.1,
-          "count": 32
+          "avg_ev": 89.6,
+          "hard_hit_pct": 51.5,
+          "count": 33
         },
         {
           "label": "35 to 40",
-          "avg_ev": 85.1,
-          "hard_hit_pct": 28.6,
-          "count": 42
+          "avg_ev": 84.7,
+          "hard_hit_pct": 27.3,
+          "count": 44
         },
         {
           "label": "> 40",
-          "avg_ev": 82.0,
-          "hard_hit_pct": 11.4,
-          "count": 210
+          "avg_ev": 82.1,
+          "hard_hit_pct": 11.8,
+          "count": 212
         }
       ]
     },
@@ -18321,13 +18401,13 @@
       "player_id": 670623,
       "name": "Isaac Paredes",
       "team": "HOU",
-      "total_bbe": 909,
+      "total_bbe": 914,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 74.4,
-          "hard_hit_pct": 8.1,
-          "count": 161
+          "hard_hit_pct": 8.0,
+          "count": 162
         },
         {
           "label": "-10 to -5",
@@ -18344,8 +18424,8 @@
         {
           "label": "0 to 5",
           "avg_ev": 90.0,
-          "hard_hit_pct": 41.0,
-          "count": 39
+          "hard_hit_pct": 41.5,
+          "count": 41
         },
         {
           "label": "5 to 10",
@@ -18355,15 +18435,15 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 89.0,
-          "hard_hit_pct": 38.1,
-          "count": 63
+          "avg_ev": 89.1,
+          "hard_hit_pct": 39.1,
+          "count": 64
         },
         {
           "label": "15 to 20",
-          "avg_ev": 89.3,
-          "hard_hit_pct": 42.1,
-          "count": 76
+          "avg_ev": 88.6,
+          "hard_hit_pct": 41.6,
+          "count": 77
         },
         {
           "label": "20 to 25",
@@ -18641,13 +18721,13 @@
       "player_id": 641487,
       "name": "J.P. Crawford",
       "team": "SEA",
-      "total_bbe": 529,
+      "total_bbe": 536,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.9,
-          "hard_hit_pct": 17.7,
-          "count": 113
+          "avg_ev": 77.5,
+          "hard_hit_pct": 17.5,
+          "count": 114
         },
         {
           "label": "-10 to -5",
@@ -18669,15 +18749,15 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 88.3,
-          "hard_hit_pct": 30.0,
-          "count": 30
+          "avg_ev": 88.9,
+          "hard_hit_pct": 32.3,
+          "count": 31
         },
         {
           "label": "10 to 15",
-          "avg_ev": 86.3,
-          "hard_hit_pct": 34.3,
-          "count": 35
+          "avg_ev": 86.1,
+          "hard_hit_pct": 33.3,
+          "count": 36
         },
         {
           "label": "15 to 20",
@@ -18693,15 +18773,15 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 83.6,
-          "hard_hit_pct": 30.8,
-          "count": 26
+          "avg_ev": 83.0,
+          "hard_hit_pct": 29.6,
+          "count": 27
         },
         {
           "label": "30 to 35",
-          "avg_ev": 81.5,
-          "hard_hit_pct": 16.1,
-          "count": 31
+          "avg_ev": 81.9,
+          "hard_hit_pct": 15.6,
+          "count": 32
         },
         {
           "label": "35 to 40",
@@ -18712,8 +18792,8 @@
         {
           "label": "> 40",
           "avg_ev": 74.1,
-          "hard_hit_pct": 2.5,
-          "count": 122
+          "hard_hit_pct": 2.4,
+          "count": 124
         }
       ]
     },
@@ -19681,13 +19761,13 @@
       "player_id": 669394,
       "name": "Jake Burger",
       "team": "TEX",
-      "total_bbe": 640,
+      "total_bbe": 645,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.4,
-          "hard_hit_pct": 18.1,
-          "count": 155
+          "avg_ev": 77.5,
+          "hard_hit_pct": 17.9,
+          "count": 156
         },
         {
           "label": "-10 to -5",
@@ -19703,9 +19783,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 90.4,
-          "hard_hit_pct": 54.2,
-          "count": 24
+          "avg_ev": 90.5,
+          "hard_hit_pct": 52.0,
+          "count": 25
         },
         {
           "label": "5 to 10",
@@ -19739,9 +19819,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 84.3,
-          "hard_hit_pct": 33.3,
-          "count": 39
+          "avg_ev": 84.0,
+          "hard_hit_pct": 31.7,
+          "count": 41
         },
         {
           "label": "35 to 40",
@@ -19752,8 +19832,8 @@
         {
           "label": "> 40",
           "avg_ev": 79.8,
-          "hard_hit_pct": 11.9,
-          "count": 160
+          "hard_hit_pct": 11.8,
+          "count": 161
         }
       ]
     },
@@ -19921,13 +20001,13 @@
       "player_id": 663968,
       "name": "Jake Mangum",
       "team": "PIT",
-      "total_bbe": 660,
+      "total_bbe": 665,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 72.5,
-          "hard_hit_pct": 11.5,
-          "count": 131
+          "avg_ev": 72.8,
+          "hard_hit_pct": 12.0,
+          "count": 133
         },
         {
           "label": "-10 to -5",
@@ -19955,15 +20035,15 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 87.1,
-          "hard_hit_pct": 26.8,
-          "count": 41
+          "avg_ev": 86.8,
+          "hard_hit_pct": 26.2,
+          "count": 42
         },
         {
           "label": "15 to 20",
           "avg_ev": 84.6,
-          "hard_hit_pct": 21.3,
-          "count": 47
+          "hard_hit_pct": 20.8,
+          "count": 48
         },
         {
           "label": "20 to 25",
@@ -19991,9 +20071,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 72.6,
+          "avg_ev": 72.7,
           "hard_hit_pct": 0.0,
-          "count": 140
+          "count": 141
         }
       ]
     },
@@ -20001,13 +20081,13 @@
       "player_id": 664983,
       "name": "Jake McCarthy",
       "team": "COL",
-      "total_bbe": 712,
+      "total_bbe": 722,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 71.9,
           "hard_hit_pct": 8.6,
-          "count": 162
+          "count": 163
         },
         {
           "label": "-10 to -5",
@@ -20017,9 +20097,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 88.4,
-          "hard_hit_pct": 37.5,
-          "count": 24
+          "avg_ev": 87.2,
+          "hard_hit_pct": 36.0,
+          "count": 25
         },
         {
           "label": "0 to 5",
@@ -20035,9 +20115,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 87.6,
-          "hard_hit_pct": 35.6,
-          "count": 59
+          "avg_ev": 87.7,
+          "hard_hit_pct": 36.7,
+          "count": 60
         },
         {
           "label": "15 to 20",
@@ -20053,27 +20133,27 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 83.3,
-          "hard_hit_pct": 26.9,
-          "count": 52
+          "avg_ev": 83.6,
+          "hard_hit_pct": 28.3,
+          "count": 53
         },
         {
           "label": "30 to 35",
-          "avg_ev": 75.0,
-          "hard_hit_pct": 17.1,
-          "count": 41
+          "avg_ev": 75.3,
+          "hard_hit_pct": 16.7,
+          "count": 42
         },
         {
           "label": "35 to 40",
           "avg_ev": 82.6,
-          "hard_hit_pct": 21.1,
-          "count": 19
+          "hard_hit_pct": 20.0,
+          "count": 20
         },
         {
           "label": "> 40",
-          "avg_ev": 72.9,
-          "hard_hit_pct": 1.8,
-          "count": 168
+          "avg_ev": 73.0,
+          "hard_hit_pct": 1.7,
+          "count": 172
         }
       ]
     },
@@ -20161,7 +20241,7 @@
       "player_id": 668670,
       "name": "Jake Rogers",
       "team": "CWS",
-      "total_bbe": 188,
+      "total_bbe": 189,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -20231,9 +20311,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 79.7,
-          "hard_hit_pct": 11.4,
-          "count": 70
+          "avg_ev": 79.6,
+          "hard_hit_pct": 11.3,
+          "count": 71
         }
       ]
     },
@@ -20561,7 +20641,7 @@
       "player_id": 669707,
       "name": "Jared Triolo",
       "team": "PIT",
-      "total_bbe": 406,
+      "total_bbe": 409,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -20613,9 +20693,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 83.2,
-          "hard_hit_pct": 10.7,
-          "count": 28
+          "avg_ev": 83.6,
+          "hard_hit_pct": 13.8,
+          "count": 29
         },
         {
           "label": "30 to 35",
@@ -20633,7 +20713,7 @@
           "label": "> 40",
           "avg_ev": 74.1,
           "hard_hit_pct": 1.4,
-          "count": 71
+          "count": 73
         }
       ]
     },
@@ -20961,7 +21041,7 @@
       "player_id": 691176,
       "name": "Jasson Dom\u00ednguez",
       "team": "NYY",
-      "total_bbe": 291,
+      "total_bbe": 298,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -20983,9 +21063,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 94.2,
-          "hard_hit_pct": 52.6,
-          "count": 19
+          "avg_ev": 92.8,
+          "hard_hit_pct": 50.0,
+          "count": 20
         },
         {
           "label": "5 to 10",
@@ -21001,9 +21081,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 86.6,
-          "hard_hit_pct": 46.2,
-          "count": 13
+          "avg_ev": 85.8,
+          "hard_hit_pct": 42.9,
+          "count": 14
         },
         {
           "label": "20 to 25",
@@ -21020,8 +21100,8 @@
         {
           "label": "30 to 35",
           "avg_ev": 84.3,
-          "hard_hit_pct": 30.8,
-          "count": 13
+          "hard_hit_pct": 28.6,
+          "count": 14
         },
         {
           "label": "35 to 40",
@@ -21031,9 +21111,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 73.8,
-          "hard_hit_pct": 2.4,
-          "count": 82
+          "avg_ev": 73.7,
+          "hard_hit_pct": 2.3,
+          "count": 86
         }
       ]
     },
@@ -21521,13 +21601,13 @@
       "player_id": 665161,
       "name": "Jeremy Pe\u00f1a",
       "team": "HOU",
-      "total_bbe": 529,
+      "total_bbe": 536,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 77.5,
-          "hard_hit_pct": 17.7,
-          "count": 158
+          "hard_hit_pct": 17.5,
+          "count": 160
         },
         {
           "label": "-10 to -5",
@@ -21537,9 +21617,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 92.5,
-          "hard_hit_pct": 50.0,
-          "count": 26
+          "avg_ev": 92.0,
+          "hard_hit_pct": 46.4,
+          "count": 28
         },
         {
           "label": "0 to 5",
@@ -21561,9 +21641,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 89.7,
-          "hard_hit_pct": 38.1,
-          "count": 42
+          "avg_ev": 89.8,
+          "hard_hit_pct": 37.2,
+          "count": 43
         },
         {
           "label": "20 to 25",
@@ -21585,15 +21665,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 84.8,
-          "hard_hit_pct": 19.2,
-          "count": 26
+          "avg_ev": 85.2,
+          "hard_hit_pct": 22.2,
+          "count": 27
         },
         {
           "label": "> 40",
-          "avg_ev": 77.9,
+          "avg_ev": 78.0,
           "hard_hit_pct": 2.6,
-          "count": 116
+          "count": 117
         }
       ]
     },
@@ -22161,13 +22241,13 @@
       "player_id": 592626,
       "name": "Joc Pederson",
       "team": "TEX",
-      "total_bbe": 515,
+      "total_bbe": 517,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 79.8,
-          "hard_hit_pct": 13.8,
-          "count": 87
+          "avg_ev": 80.0,
+          "hard_hit_pct": 14.8,
+          "count": 88
         },
         {
           "label": "-10 to -5",
@@ -22207,9 +22287,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 94.7,
-          "hard_hit_pct": 64.0,
-          "count": 25
+          "avg_ev": 95.0,
+          "hard_hit_pct": 65.4,
+          "count": 26
         },
         {
           "label": "25 to 30",
@@ -22961,7 +23041,7 @@
       "player_id": 666018,
       "name": "Jonathan Aranda",
       "team": "TB",
-      "total_bbe": 844,
+      "total_bbe": 846,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -22971,9 +23051,9 @@
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 86.8,
-          "hard_hit_pct": 33.3,
-          "count": 18
+          "avg_ev": 87.1,
+          "hard_hit_pct": 31.6,
+          "count": 19
         },
         {
           "label": "-5 to 0",
@@ -23013,9 +23093,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 85.8,
-          "hard_hit_pct": 32.7,
-          "count": 55
+          "avg_ev": 85.5,
+          "hard_hit_pct": 32.1,
+          "count": 56
         },
         {
           "label": "30 to 35",
@@ -23201,13 +23281,13 @@
       "player_id": 676356,
       "name": "Jonny DeLuca",
       "team": "TB",
-      "total_bbe": 430,
+      "total_bbe": 435,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.0,
-          "hard_hit_pct": 12.6,
-          "count": 103
+          "avg_ev": 76.8,
+          "hard_hit_pct": 12.5,
+          "count": 104
         },
         {
           "label": "-10 to -5",
@@ -23230,8 +23310,8 @@
         {
           "label": "5 to 10",
           "avg_ev": 88.3,
-          "hard_hit_pct": 35.0,
-          "count": 20
+          "hard_hit_pct": 33.3,
+          "count": 21
         },
         {
           "label": "10 to 15",
@@ -23253,15 +23333,15 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 82.0,
-          "hard_hit_pct": 20.0,
-          "count": 20
+          "avg_ev": 81.5,
+          "hard_hit_pct": 19.0,
+          "count": 21
         },
         {
           "label": "30 to 35",
-          "avg_ev": 76.3,
-          "hard_hit_pct": 9.5,
-          "count": 21
+          "avg_ev": 76.2,
+          "hard_hit_pct": 8.7,
+          "count": 23
         },
         {
           "label": "35 to 40",
@@ -23361,7 +23441,7 @@
       "player_id": 687597,
       "name": "Jordan Beck",
       "team": "COL",
-      "total_bbe": 189,
+      "total_bbe": 193,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -23395,15 +23475,15 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 90.6,
-          "hard_hit_pct": 50.0,
-          "count": 14
+          "avg_ev": 89.5,
+          "hard_hit_pct": 46.7,
+          "count": 15
         },
         {
           "label": "15 to 20",
-          "avg_ev": 86.1,
-          "hard_hit_pct": 14.3,
-          "count": 7
+          "avg_ev": 87.7,
+          "hard_hit_pct": 25.0,
+          "count": 8
         },
         {
           "label": "20 to 25",
@@ -23432,8 +23512,8 @@
         {
           "label": "> 40",
           "avg_ev": 78.3,
-          "hard_hit_pct": 6.7,
-          "count": 60
+          "hard_hit_pct": 6.5,
+          "count": 62
         }
       ]
     },
@@ -23681,13 +23761,13 @@
       "player_id": 622761,
       "name": "Jorge Mateo",
       "team": "TB",
-      "total_bbe": 251,
+      "total_bbe": 255,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 74.1,
-          "hard_hit_pct": 15.7,
-          "count": 51
+          "avg_ev": 73.3,
+          "hard_hit_pct": 15.1,
+          "count": 53
         },
         {
           "label": "-10 to -5",
@@ -23745,15 +23825,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 74.2,
+          "avg_ev": 74.7,
           "hard_hit_pct": 0.0,
-          "count": 16
+          "count": 17
         },
         {
           "label": "> 40",
           "avg_ev": 74.3,
-          "hard_hit_pct": 3.0,
-          "count": 67
+          "hard_hit_pct": 2.9,
+          "count": 68
         }
       ]
     },
@@ -23921,13 +24001,13 @@
       "player_id": 514888,
       "name": "Jose Altuve",
       "team": "HOU",
-      "total_bbe": 634,
+      "total_bbe": 638,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 73.5,
-          "hard_hit_pct": 11.0,
-          "count": 172
+          "avg_ev": 73.2,
+          "hard_hit_pct": 10.9,
+          "count": 174
         },
         {
           "label": "-10 to -5",
@@ -23955,9 +24035,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 87.4,
-          "hard_hit_pct": 41.9,
-          "count": 31
+          "avg_ev": 87.9,
+          "hard_hit_pct": 43.8,
+          "count": 32
         },
         {
           "label": "15 to 20",
@@ -23979,9 +24059,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 82.5,
-          "hard_hit_pct": 17.4,
-          "count": 23
+          "avg_ev": 82.3,
+          "hard_hit_pct": 16.7,
+          "count": 24
         },
         {
           "label": "35 to 40",
@@ -24481,13 +24561,13 @@
       "player_id": 647304,
       "name": "Josh Naylor",
       "team": "SEA",
-      "total_bbe": 783,
+      "total_bbe": 787,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.5,
-          "hard_hit_pct": 16.8,
-          "count": 196
+          "avg_ev": 77.6,
+          "hard_hit_pct": 17.3,
+          "count": 197
         },
         {
           "label": "-10 to -5",
@@ -24552,8 +24632,8 @@
         {
           "label": "> 40",
           "avg_ev": 74.3,
-          "hard_hit_pct": 3.8,
-          "count": 184
+          "hard_hit_pct": 3.7,
+          "count": 187
         }
       ]
     },
@@ -25361,13 +25441,13 @@
       "player_id": 677594,
       "name": "Julio Rodr\u00edguez",
       "team": "SEA",
-      "total_bbe": 769,
+      "total_bbe": 772,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 74.9,
-          "hard_hit_pct": 18.6,
-          "count": 167
+          "avg_ev": 74.8,
+          "hard_hit_pct": 18.9,
+          "count": 169
         },
         {
           "label": "-10 to -5",
@@ -25401,9 +25481,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 89.5,
-          "hard_hit_pct": 43.8,
-          "count": 48
+          "avg_ev": 90.0,
+          "hard_hit_pct": 44.9,
+          "count": 49
         },
         {
           "label": "20 to 25",
@@ -25521,7 +25601,7 @@
       "player_id": 691406,
       "name": "Junior Caminero",
       "team": "TB",
-      "total_bbe": 758,
+      "total_bbe": 762,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -25531,9 +25611,9 @@
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 94.7,
-          "hard_hit_pct": 70.0,
-          "count": 30
+          "avg_ev": 95.1,
+          "hard_hit_pct": 71.0,
+          "count": 31
         },
         {
           "label": "-5 to 0",
@@ -25579,21 +25659,21 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 85.4,
-          "hard_hit_pct": 30.0,
-          "count": 30
+          "avg_ev": 85.6,
+          "hard_hit_pct": 29.0,
+          "count": 31
         },
         {
           "label": "35 to 40",
-          "avg_ev": 79.6,
-          "hard_hit_pct": 23.1,
-          "count": 26
+          "avg_ev": 79.3,
+          "hard_hit_pct": 22.2,
+          "count": 27
         },
         {
           "label": "> 40",
-          "avg_ev": 80.6,
+          "avg_ev": 80.5,
           "hard_hit_pct": 11.2,
-          "count": 196
+          "count": 197
         }
       ]
     },
@@ -25681,13 +25761,13 @@
       "player_id": 702222,
       "name": "Justin Crawford",
       "team": "PHI",
-      "total_bbe": 621,
+      "total_bbe": 624,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 77.5,
-          "hard_hit_pct": 18.2,
-          "count": 148
+          "hard_hit_pct": 18.1,
+          "count": 149
         },
         {
           "label": "-10 to -5",
@@ -25697,9 +25777,9 @@
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 91.8,
-          "hard_hit_pct": 50.0,
-          "count": 26
+          "avg_ev": 91.9,
+          "hard_hit_pct": 48.1,
+          "count": 27
         },
         {
           "label": "0 to 5",
@@ -25727,9 +25807,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 86.5,
-          "hard_hit_pct": 33.3,
-          "count": 30
+          "avg_ev": 85.5,
+          "hard_hit_pct": 32.3,
+          "count": 31
         },
         {
           "label": "25 to 30",
@@ -26641,13 +26721,13 @@
       "player_id": 804606,
       "name": "Konnor Griffin",
       "team": "PIT",
-      "total_bbe": 340,
+      "total_bbe": 345,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.4,
-          "hard_hit_pct": 13.8,
-          "count": 94
+          "avg_ev": 75.6,
+          "hard_hit_pct": 14.6,
+          "count": 96
         },
         {
           "label": "-10 to -5",
@@ -26658,8 +26738,8 @@
         {
           "label": "-5 to 0",
           "avg_ev": 89.8,
-          "hard_hit_pct": 50.0,
-          "count": 8
+          "hard_hit_pct": 44.4,
+          "count": 9
         },
         {
           "label": "0 to 5",
@@ -26688,8 +26768,8 @@
         {
           "label": "20 to 25",
           "avg_ev": 91.8,
-          "hard_hit_pct": 40.9,
-          "count": 22
+          "hard_hit_pct": 39.1,
+          "count": 23
         },
         {
           "label": "25 to 30",
@@ -26699,9 +26779,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 78.5,
-          "hard_hit_pct": 29.4,
-          "count": 17
+          "avg_ev": 79.0,
+          "hard_hit_pct": 27.8,
+          "count": 18
         },
         {
           "label": "35 to 40",
@@ -26881,7 +26961,7 @@
       "player_id": 691720,
       "name": "Kyle Karros",
       "team": "COL",
-      "total_bbe": 532,
+      "total_bbe": 535,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -26915,9 +26995,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 88.5,
-          "hard_hit_pct": 36.7,
-          "count": 30
+          "avg_ev": 87.9,
+          "hard_hit_pct": 35.5,
+          "count": 31
         },
         {
           "label": "15 to 20",
@@ -26933,9 +27013,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 85.6,
-          "hard_hit_pct": 22.2,
-          "count": 36
+          "avg_ev": 86.2,
+          "hard_hit_pct": 24.3,
+          "count": 37
         },
         {
           "label": "30 to 35",
@@ -26953,7 +27033,7 @@
           "label": "> 40",
           "avg_ev": 76.8,
           "hard_hit_pct": 0.8,
-          "count": 131
+          "count": 132
         }
       ]
     },
@@ -27041,13 +27121,13 @@
       "player_id": 656941,
       "name": "Kyle Schwarber",
       "team": "PHI",
-      "total_bbe": 721,
+      "total_bbe": 725,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 78.3,
-          "hard_hit_pct": 17.9,
-          "count": 168
+          "hard_hit_pct": 17.6,
+          "count": 170
         },
         {
           "label": "-10 to -5",
@@ -27063,9 +27143,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 90.5,
-          "hard_hit_pct": 42.9,
-          "count": 28
+          "avg_ev": 89.8,
+          "hard_hit_pct": 41.4,
+          "count": 29
         },
         {
           "label": "5 to 10",
@@ -27111,9 +27191,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 83.1,
+          "avg_ev": 83.0,
           "hard_hit_pct": 14.8,
-          "count": 209
+          "count": 210
         }
       ]
     },
@@ -27201,7 +27281,7 @@
       "player_id": 691019,
       "name": "Kyle Teel",
       "team": "CWS",
-      "total_bbe": 100,
+      "total_bbe": 102,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -27229,9 +27309,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 94.3,
-          "hard_hit_pct": 66.7,
-          "count": 3
+          "avg_ev": 92.6,
+          "hard_hit_pct": 50.0,
+          "count": 4
         },
         {
           "label": "10 to 15",
@@ -27271,9 +27351,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 76.8,
-          "hard_hit_pct": 4.5,
-          "count": 22
+          "avg_ev": 75.9,
+          "hard_hit_pct": 4.3,
+          "count": 23
         }
       ]
     },
@@ -28081,7 +28161,7 @@
       "player_id": 689414,
       "name": "Liam Hicks",
       "team": "TB",
-      "total_bbe": 645,
+      "total_bbe": 647,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -28115,9 +28195,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 86.9,
-          "hard_hit_pct": 35.9,
-          "count": 39
+          "avg_ev": 86.6,
+          "hard_hit_pct": 35.0,
+          "count": 40
         },
         {
           "label": "15 to 20",
@@ -28152,8 +28232,8 @@
         {
           "label": "> 40",
           "avg_ev": 72.7,
-          "hard_hit_pct": 1.9,
-          "count": 162
+          "hard_hit_pct": 1.8,
+          "count": 163
         }
       ]
     },
@@ -28481,7 +28561,7 @@
       "player_id": 650333,
       "name": "Luis Arraez",
       "team": "PHI",
-      "total_bbe": 979,
+      "total_bbe": 984,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -28516,8 +28596,8 @@
         {
           "label": "10 to 15",
           "avg_ev": 86.9,
-          "hard_hit_pct": 19.7,
-          "count": 66
+          "hard_hit_pct": 19.4,
+          "count": 67
         },
         {
           "label": "15 to 20",
@@ -28533,9 +28613,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 85.1,
-          "hard_hit_pct": 15.6,
-          "count": 64
+          "avg_ev": 85.3,
+          "hard_hit_pct": 16.9,
+          "count": 65
         },
         {
           "label": "30 to 35",
@@ -28551,9 +28631,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 76.7,
+          "avg_ev": 76.6,
           "hard_hit_pct": 2.4,
-          "count": 248
+          "count": 251
         }
       ]
     },
@@ -28641,19 +28721,19 @@
       "player_id": 671277,
       "name": "Luis Garc\u00eda Jr.",
       "team": "NYY",
-      "total_bbe": 709,
+      "total_bbe": 717,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 77.2,
-          "hard_hit_pct": 13.4,
-          "count": 187
+          "hard_hit_pct": 13.2,
+          "count": 190
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 93.8,
-          "hard_hit_pct": 57.1,
-          "count": 35
+          "avg_ev": 94.0,
+          "hard_hit_pct": 58.3,
+          "count": 36
         },
         {
           "label": "-5 to 0",
@@ -28669,9 +28749,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 95.9,
-          "hard_hit_pct": 69.2,
-          "count": 39
+          "avg_ev": 96.1,
+          "hard_hit_pct": 70.0,
+          "count": 40
         },
         {
           "label": "10 to 15",
@@ -28687,9 +28767,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 94.0,
-          "hard_hit_pct": 57.6,
-          "count": 33
+          "avg_ev": 94.4,
+          "hard_hit_pct": 60.0,
+          "count": 35
         },
         {
           "label": "25 to 30",
@@ -28713,7 +28793,7 @@
           "label": "> 40",
           "avg_ev": 78.3,
           "hard_hit_pct": 4.6,
-          "count": 173
+          "count": 174
         }
       ]
     },
@@ -30321,13 +30401,13 @@
       "player_id": 621566,
       "name": "Matt Olson",
       "team": "ATL",
-      "total_bbe": 875,
+      "total_bbe": 879,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 78.2,
-          "hard_hit_pct": 17.0,
-          "count": 147
+          "hard_hit_pct": 16.9,
+          "count": 148
         },
         {
           "label": "-10 to -5",
@@ -30355,9 +30435,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 92.1,
-          "hard_hit_pct": 50.0,
-          "count": 58
+          "avg_ev": 92.3,
+          "hard_hit_pct": 50.8,
+          "count": 59
         },
         {
           "label": "15 to 20",
@@ -30373,9 +30453,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 88.7,
-          "hard_hit_pct": 43.8,
-          "count": 48
+          "avg_ev": 88.8,
+          "hard_hit_pct": 44.9,
+          "count": 49
         },
         {
           "label": "30 to 35",
@@ -30391,9 +30471,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 81.4,
-          "hard_hit_pct": 10.9,
-          "count": 258
+          "avg_ev": 81.5,
+          "hard_hit_pct": 11.2,
+          "count": 259
         }
       ]
     },
@@ -30641,19 +30721,19 @@
       "player_id": 643289,
       "name": "Mauricio Dub\u00f3n",
       "team": "ATL",
-      "total_bbe": 880,
+      "total_bbe": 885,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.1,
-          "hard_hit_pct": 14.4,
-          "count": 118
+          "avg_ev": 75.3,
+          "hard_hit_pct": 14.2,
+          "count": 120
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 89.3,
-          "hard_hit_pct": 41.2,
-          "count": 34
+          "avg_ev": 88.9,
+          "hard_hit_pct": 40.0,
+          "count": 35
         },
         {
           "label": "-5 to 0",
@@ -30669,9 +30749,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 89.2,
-          "hard_hit_pct": 44.7,
-          "count": 47
+          "avg_ev": 88.9,
+          "hard_hit_pct": 43.8,
+          "count": 48
         },
         {
           "label": "10 to 15",
@@ -30699,9 +30779,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 80.2,
-          "hard_hit_pct": 16.9,
-          "count": 59
+          "avg_ev": 80.0,
+          "hard_hit_pct": 16.7,
+          "count": 60
         },
         {
           "label": "35 to 40",
@@ -31281,7 +31361,7 @@
       "player_id": 671739,
       "name": "Michael Harris II",
       "team": "ATL",
-      "total_bbe": 771,
+      "total_bbe": 775,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -31315,21 +31395,21 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 92.1,
-          "hard_hit_pct": 47.8,
-          "count": 46
+          "avg_ev": 92.0,
+          "hard_hit_pct": 46.8,
+          "count": 47
         },
         {
           "label": "15 to 20",
-          "avg_ev": 88.4,
-          "hard_hit_pct": 42.6,
-          "count": 54
+          "avg_ev": 88.5,
+          "hard_hit_pct": 41.8,
+          "count": 55
         },
         {
           "label": "20 to 25",
-          "avg_ev": 90.9,
-          "hard_hit_pct": 44.2,
-          "count": 43
+          "avg_ev": 90.6,
+          "hard_hit_pct": 43.2,
+          "count": 44
         },
         {
           "label": "25 to 30",
@@ -31351,9 +31431,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 77.9,
+          "avg_ev": 78.0,
           "hard_hit_pct": 7.9,
-          "count": 164
+          "count": 165
         }
       ]
     },
@@ -32001,7 +32081,7 @@
       "player_id": 678246,
       "name": "Miguel Vargas",
       "team": "CWS",
-      "total_bbe": 820,
+      "total_bbe": 824,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -32011,9 +32091,9 @@
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 85.7,
-          "hard_hit_pct": 28.6,
-          "count": 28
+          "avg_ev": 85.5,
+          "hard_hit_pct": 27.6,
+          "count": 29
         },
         {
           "label": "-5 to 0",
@@ -32023,9 +32103,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 87.4,
-          "hard_hit_pct": 46.2,
-          "count": 26
+          "avg_ev": 87.2,
+          "hard_hit_pct": 44.4,
+          "count": 27
         },
         {
           "label": "5 to 10",
@@ -32072,8 +32152,8 @@
         {
           "label": "> 40",
           "avg_ev": 80.7,
-          "hard_hit_pct": 8.6,
-          "count": 267
+          "hard_hit_pct": 8.9,
+          "count": 269
         }
       ]
     },
@@ -32161,7 +32241,7 @@
       "player_id": 573262,
       "name": "Mike Yastrzemski",
       "team": "ATL",
-      "total_bbe": 460,
+      "total_bbe": 463,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -32201,15 +32281,15 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 92.0,
-          "hard_hit_pct": 50.0,
-          "count": 32
+          "avg_ev": 91.9,
+          "hard_hit_pct": 48.5,
+          "count": 33
         },
         {
           "label": "20 to 25",
-          "avg_ev": 88.3,
-          "hard_hit_pct": 46.2,
-          "count": 26
+          "avg_ev": 88.4,
+          "hard_hit_pct": 44.4,
+          "count": 27
         },
         {
           "label": "25 to 30",
@@ -32219,9 +32299,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 86.0,
-          "hard_hit_pct": 32.3,
-          "count": 31
+          "avg_ev": 86.2,
+          "hard_hit_pct": 31.2,
+          "count": 32
         },
         {
           "label": "35 to 40",
@@ -32561,13 +32641,13 @@
       "player_id": 808959,
       "name": "Munetaka Murakami",
       "team": "CWS",
-      "total_bbe": 443,
+      "total_bbe": 449,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.2,
-          "hard_hit_pct": 11.7,
-          "count": 94
+          "avg_ev": 75.3,
+          "hard_hit_pct": 11.5,
+          "count": 96
         },
         {
           "label": "-10 to -5",
@@ -32589,9 +32669,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 89.3,
-          "hard_hit_pct": 38.1,
-          "count": 21
+          "avg_ev": 89.5,
+          "hard_hit_pct": 36.4,
+          "count": 22
         },
         {
           "label": "10 to 15",
@@ -32607,9 +32687,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 80.7,
-          "hard_hit_pct": 43.8,
-          "count": 16
+          "avg_ev": 80.9,
+          "hard_hit_pct": 41.2,
+          "count": 17
         },
         {
           "label": "25 to 30",
@@ -32625,15 +32705,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 88.5,
-          "hard_hit_pct": 43.5,
-          "count": 23
+          "avg_ev": 88.8,
+          "hard_hit_pct": 45.8,
+          "count": 24
         },
         {
           "label": "> 40",
           "avg_ev": 87.6,
-          "hard_hit_pct": 30.3,
-          "count": 142
+          "hard_hit_pct": 30.1,
+          "count": 143
         }
       ]
     },
@@ -33441,13 +33521,13 @@
       "player_id": 663743,
       "name": "Nick Fortes",
       "team": "TB",
-      "total_bbe": 403,
+      "total_bbe": 407,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 74.1,
-          "hard_hit_pct": 22.8,
-          "count": 114
+          "avg_ev": 74.3,
+          "hard_hit_pct": 23.5,
+          "count": 115
         },
         {
           "label": "-10 to -5",
@@ -33481,15 +33561,15 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 85.5,
-          "hard_hit_pct": 37.0,
-          "count": 27
+          "avg_ev": 86.4,
+          "hard_hit_pct": 39.3,
+          "count": 28
         },
         {
           "label": "20 to 25",
-          "avg_ev": 87.9,
-          "hard_hit_pct": 30.8,
-          "count": 13
+          "avg_ev": 87.7,
+          "hard_hit_pct": 28.6,
+          "count": 14
         },
         {
           "label": "25 to 30",
@@ -33505,9 +33585,9 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 79.4,
-          "hard_hit_pct": 8.3,
-          "count": 12
+          "avg_ev": 80.3,
+          "hard_hit_pct": 7.7,
+          "count": 13
         },
         {
           "label": "> 40",
@@ -33521,13 +33601,13 @@
       "player_id": 693304,
       "name": "Nick Gonzales",
       "team": "PIT",
-      "total_bbe": 778,
+      "total_bbe": 784,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 73.8,
-          "hard_hit_pct": 8.4,
-          "count": 166
+          "hard_hit_pct": 8.3,
+          "count": 168
         },
         {
           "label": "-10 to -5",
@@ -33567,21 +33647,21 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 82.6,
-          "hard_hit_pct": 24.5,
-          "count": 49
+          "avg_ev": 82.5,
+          "hard_hit_pct": 24.0,
+          "count": 50
         },
         {
           "label": "25 to 30",
-          "avg_ev": 84.1,
-          "hard_hit_pct": 17.8,
-          "count": 45
+          "avg_ev": 84.8,
+          "hard_hit_pct": 21.3,
+          "count": 47
         },
         {
           "label": "30 to 35",
-          "avg_ev": 83.6,
-          "hard_hit_pct": 20.4,
-          "count": 49
+          "avg_ev": 83.9,
+          "hard_hit_pct": 22.0,
+          "count": 50
         },
         {
           "label": "35 to 40",
@@ -33760,20 +33840,20 @@
     {
       "player_id": 663611,
       "name": "Nick Madrigal",
-      "team": "LAA",
-      "total_bbe": 89,
+      "team": "TB",
+      "total_bbe": 92,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 81.9,
-          "hard_hit_pct": 15.4,
-          "count": 26
+          "avg_ev": 81.0,
+          "hard_hit_pct": 14.3,
+          "count": 28
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 88.9,
-          "hard_hit_pct": 50.0,
-          "count": 2
+          "avg_ev": 78.2,
+          "hard_hit_pct": 33.3,
+          "count": 3
         },
         {
           "label": "-5 to 0",
@@ -34001,13 +34081,13 @@
       "player_id": 670032,
       "name": "Nicky Lopez",
       "team": "TEX",
-      "total_bbe": 344,
+      "total_bbe": 347,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 70.6,
-          "hard_hit_pct": 5.7,
-          "count": 87
+          "avg_ev": 70.9,
+          "hard_hit_pct": 6.7,
+          "count": 89
         },
         {
           "label": "-10 to -5",
@@ -34071,9 +34151,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 76.7,
-          "hard_hit_pct": 1.4,
-          "count": 74
+          "avg_ev": 75.9,
+          "hard_hit_pct": 1.3,
+          "count": 75
         }
       ]
     },
@@ -34481,13 +34561,13 @@
       "player_id": 665833,
       "name": "Oneil Cruz",
       "team": "PIT",
-      "total_bbe": 370,
+      "total_bbe": 376,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 80.8,
-          "hard_hit_pct": 26.0,
-          "count": 104
+          "avg_ev": 80.9,
+          "hard_hit_pct": 26.4,
+          "count": 106
         },
         {
           "label": "-10 to -5",
@@ -34509,9 +34589,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 94.6,
-          "hard_hit_pct": 61.1,
-          "count": 18
+          "avg_ev": 93.9,
+          "hard_hit_pct": 57.9,
+          "count": 19
         },
         {
           "label": "10 to 15",
@@ -34527,9 +34607,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 93.2,
-          "hard_hit_pct": 52.2,
-          "count": 23
+          "avg_ev": 94.0,
+          "hard_hit_pct": 52.0,
+          "count": 25
         },
         {
           "label": "25 to 30",
@@ -34551,9 +34631,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 76.9,
-          "hard_hit_pct": 8.2,
-          "count": 85
+          "avg_ev": 76.7,
+          "hard_hit_pct": 8.1,
+          "count": 86
         }
       ]
     },
@@ -35041,13 +35121,13 @@
       "player_id": 645277,
       "name": "Ozzie Albies",
       "team": "ATL",
-      "total_bbe": 953,
+      "total_bbe": 955,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 78.8,
-          "hard_hit_pct": 10.8,
-          "count": 195
+          "avg_ev": 78.7,
+          "hard_hit_pct": 10.7,
+          "count": 196
         },
         {
           "label": "-10 to -5",
@@ -35087,9 +35167,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 87.5,
-          "hard_hit_pct": 22.2,
-          "count": 54
+          "avg_ev": 87.7,
+          "hard_hit_pct": 23.6,
+          "count": 55
         },
         {
           "label": "25 to 30",
@@ -36081,13 +36161,13 @@
       "player_id": 804668,
       "name": "Rafael Flores Jr.",
       "team": "PIT",
-      "total_bbe": 127,
+      "total_bbe": 131,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 73.5,
-          "hard_hit_pct": 4.5,
-          "count": 22
+          "avg_ev": 72.7,
+          "hard_hit_pct": 4.2,
+          "count": 24
         },
         {
           "label": "-10 to -5",
@@ -36103,9 +36183,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 90.5,
-          "hard_hit_pct": 40.0,
-          "count": 10
+          "avg_ev": 91.7,
+          "hard_hit_pct": 45.5,
+          "count": 11
         },
         {
           "label": "5 to 10",
@@ -36151,9 +36231,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 79.5,
-          "hard_hit_pct": 8.1,
-          "count": 37
+          "avg_ev": 80.1,
+          "hard_hit_pct": 10.5,
+          "count": 38
         }
       ]
     },
@@ -36161,13 +36241,13 @@
       "player_id": 665561,
       "name": "Rafael March\u00e1n",
       "team": "PHI",
-      "total_bbe": 136,
+      "total_bbe": 138,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.6,
-          "hard_hit_pct": 13.0,
-          "count": 23
+          "avg_ev": 76.7,
+          "hard_hit_pct": 12.5,
+          "count": 24
         },
         {
           "label": "-10 to -5",
@@ -36196,8 +36276,8 @@
         {
           "label": "10 to 15",
           "avg_ev": 84.0,
-          "hard_hit_pct": 12.5,
-          "count": 8
+          "hard_hit_pct": 11.1,
+          "count": 9
         },
         {
           "label": "15 to 20",
@@ -36401,7 +36481,7 @@
       "player_id": 545341,
       "name": "Randal Grichuk",
       "team": "CWS",
-      "total_bbe": 314,
+      "total_bbe": 315,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -36429,9 +36509,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 91.5,
-          "hard_hit_pct": 40.9,
-          "count": 22
+          "avg_ev": 92.0,
+          "hard_hit_pct": 43.5,
+          "count": 23
         },
         {
           "label": "10 to 15",
@@ -36481,13 +36561,13 @@
       "player_id": 668227,
       "name": "Randy Arozarena",
       "team": "SEA",
-      "total_bbe": 749,
+      "total_bbe": 753,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.0,
-          "hard_hit_pct": 12.3,
-          "count": 171
+          "avg_ev": 76.9,
+          "hard_hit_pct": 12.2,
+          "count": 172
         },
         {
           "label": "-10 to -5",
@@ -36533,9 +36613,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 87.7,
-          "hard_hit_pct": 40.0,
-          "count": 60
+          "avg_ev": 87.0,
+          "hard_hit_pct": 39.3,
+          "count": 61
         },
         {
           "label": "30 to 35",
@@ -36545,15 +36625,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 78.8,
-          "hard_hit_pct": 10.3,
-          "count": 29
+          "avg_ev": 79.2,
+          "hard_hit_pct": 10.0,
+          "count": 30
         },
         {
           "label": "> 40",
           "avg_ev": 79.3,
           "hard_hit_pct": 4.7,
-          "count": 171
+          "count": 172
         }
       ]
     },
@@ -37441,19 +37521,19 @@
       "player_id": 660670,
       "name": "Ronald Acu\u00f1a Jr.",
       "team": "ATL",
-      "total_bbe": 523,
+      "total_bbe": 530,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.8,
-          "hard_hit_pct": 13.0,
-          "count": 108
+          "avg_ev": 77.7,
+          "hard_hit_pct": 12.7,
+          "count": 110
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 87.7,
-          "hard_hit_pct": 42.1,
-          "count": 19
+          "avg_ev": 86.7,
+          "hard_hit_pct": 40.0,
+          "count": 20
         },
         {
           "label": "-5 to 0",
@@ -37463,9 +37543,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 93.8,
-          "hard_hit_pct": 54.5,
-          "count": 22
+          "avg_ev": 92.4,
+          "hard_hit_pct": 52.2,
+          "count": 23
         },
         {
           "label": "5 to 10",
@@ -37499,9 +37579,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 84.5,
-          "hard_hit_pct": 37.1,
-          "count": 35
+          "avg_ev": 84.3,
+          "hard_hit_pct": 36.1,
+          "count": 36
         },
         {
           "label": "35 to 40",
@@ -37511,9 +37591,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 80.0,
-          "hard_hit_pct": 10.4,
-          "count": 144
+          "avg_ev": 79.8,
+          "hard_hit_pct": 10.3,
+          "count": 146
         }
       ]
     },
@@ -37921,7 +38001,7 @@
       "player_id": 641857,
       "name": "Ryan McMahon",
       "team": "NYY",
-      "total_bbe": 392,
+      "total_bbe": 398,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -37931,9 +38011,9 @@
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 88.7,
-          "hard_hit_pct": 33.3,
-          "count": 15
+          "avg_ev": 89.3,
+          "hard_hit_pct": 37.5,
+          "count": 16
         },
         {
           "label": "-5 to 0",
@@ -37961,9 +38041,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 87.7,
-          "hard_hit_pct": 33.3,
-          "count": 24
+          "avg_ev": 88.5,
+          "hard_hit_pct": 36.0,
+          "count": 25
         },
         {
           "label": "20 to 25",
@@ -37985,15 +38065,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 84.3,
-          "hard_hit_pct": 30.4,
-          "count": 23
+          "avg_ev": 85.0,
+          "hard_hit_pct": 33.3,
+          "count": 24
         },
         {
           "label": "> 40",
-          "avg_ev": 78.6,
-          "hard_hit_pct": 5.8,
-          "count": 104
+          "avg_ev": 78.5,
+          "hard_hit_pct": 5.6,
+          "count": 107
         }
       ]
     },
@@ -38161,13 +38241,13 @@
       "player_id": 668723,
       "name": "Ryan Vilade",
       "team": "TB",
-      "total_bbe": 343,
+      "total_bbe": 346,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.4,
-          "hard_hit_pct": 24.0,
-          "count": 50
+          "avg_ev": 77.0,
+          "hard_hit_pct": 23.5,
+          "count": 51
         },
         {
           "label": "-10 to -5",
@@ -38189,9 +38269,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 85.9,
-          "hard_hit_pct": 23.5,
-          "count": 17
+          "avg_ev": 85.3,
+          "hard_hit_pct": 22.2,
+          "count": 18
         },
         {
           "label": "10 to 15",
@@ -38225,9 +38305,9 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 79.7,
-          "hard_hit_pct": 18.8,
-          "count": 16
+          "avg_ev": 79.2,
+          "hard_hit_pct": 17.6,
+          "count": 17
         },
         {
           "label": "> 40",
@@ -38641,7 +38721,7 @@
       "player_id": 803011,
       "name": "Sam Antonacci",
       "team": "CWS",
-      "total_bbe": 678,
+      "total_bbe": 683,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -38694,8 +38774,8 @@
         {
           "label": "25 to 30",
           "avg_ev": 80.9,
-          "hard_hit_pct": 25.0,
-          "count": 60
+          "hard_hit_pct": 24.6,
+          "count": 61
         },
         {
           "label": "30 to 35",
@@ -38712,8 +38792,8 @@
         {
           "label": "> 40",
           "avg_ev": 76.5,
-          "hard_hit_pct": 4.4,
-          "count": 136
+          "hard_hit_pct": 4.3,
+          "count": 140
         }
       ]
     },
@@ -39761,7 +39841,7 @@
       "player_id": 687462,
       "name": "Spencer Horwitz",
       "team": "PIT",
-      "total_bbe": 542,
+      "total_bbe": 547,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -39772,14 +39852,14 @@
         {
           "label": "-10 to -5",
           "avg_ev": 91.1,
-          "hard_hit_pct": 40.9,
-          "count": 22
+          "hard_hit_pct": 39.1,
+          "count": 23
         },
         {
           "label": "-5 to 0",
-          "avg_ev": 86.7,
-          "hard_hit_pct": 31.8,
-          "count": 22
+          "avg_ev": 86.4,
+          "hard_hit_pct": 30.4,
+          "count": 23
         },
         {
           "label": "0 to 5",
@@ -39789,9 +39869,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 91.5,
-          "hard_hit_pct": 53.3,
-          "count": 30
+          "avg_ev": 90.5,
+          "hard_hit_pct": 53.1,
+          "count": 32
         },
         {
           "label": "10 to 15",
@@ -39833,7 +39913,7 @@
           "label": "> 40",
           "avg_ev": 76.3,
           "hard_hit_pct": 2.5,
-          "count": 158
+          "count": 159
         }
       ]
     },
@@ -39841,7 +39921,7 @@
       "player_id": 682987,
       "name": "Spencer Jones",
       "team": "NYY",
-      "total_bbe": 303,
+      "total_bbe": 308,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -39863,9 +39943,9 @@
         },
         {
           "label": "0 to 5",
-          "avg_ev": 98.6,
-          "hard_hit_pct": 66.7,
-          "count": 6
+          "avg_ev": 99.4,
+          "hard_hit_pct": 71.4,
+          "count": 7
         },
         {
           "label": "5 to 10",
@@ -39875,15 +39955,15 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 90.9,
-          "hard_hit_pct": 46.2,
-          "count": 26
+          "avg_ev": 91.5,
+          "hard_hit_pct": 48.1,
+          "count": 27
         },
         {
           "label": "15 to 20",
-          "avg_ev": 94.5,
-          "hard_hit_pct": 50.0,
-          "count": 14
+          "avg_ev": 95.6,
+          "hard_hit_pct": 53.3,
+          "count": 15
         },
         {
           "label": "20 to 25",
@@ -39893,9 +39973,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 84.1,
-          "hard_hit_pct": 27.3,
-          "count": 22
+          "avg_ev": 83.9,
+          "hard_hit_pct": 26.1,
+          "count": 23
         },
         {
           "label": "30 to 35",
@@ -39911,9 +39991,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 84.7,
-          "hard_hit_pct": 16.1,
-          "count": 93
+          "avg_ev": 84.9,
+          "hard_hit_pct": 17.0,
+          "count": 94
         }
       ]
     },
@@ -40481,13 +40561,13 @@
       "player_id": 681198,
       "name": "TJ Rumfield",
       "team": "COL",
-      "total_bbe": 799,
+      "total_bbe": 804,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.4,
-          "hard_hit_pct": 10.6,
-          "count": 142
+          "avg_ev": 75.1,
+          "hard_hit_pct": 10.3,
+          "count": 145
         },
         {
           "label": "-10 to -5",
@@ -40551,9 +40631,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 75.9,
-          "hard_hit_pct": 4.4,
-          "count": 205
+          "avg_ev": 76.2,
+          "hard_hit_pct": 5.3,
+          "count": 207
         }
       ]
     },
@@ -40641,13 +40721,13 @@
       "player_id": 666211,
       "name": "Taylor Trammell",
       "team": "HOU",
-      "total_bbe": 270,
+      "total_bbe": 276,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 75.1,
-          "hard_hit_pct": 19.7,
-          "count": 61
+          "hard_hit_pct": 19.0,
+          "count": 63
         },
         {
           "label": "-10 to -5",
@@ -40681,9 +40761,9 @@
         },
         {
           "label": "15 to 20",
-          "avg_ev": 91.2,
-          "hard_hit_pct": 47.1,
-          "count": 17
+          "avg_ev": 92.1,
+          "hard_hit_pct": 50.0,
+          "count": 18
         },
         {
           "label": "20 to 25",
@@ -40705,15 +40785,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 83.9,
-          "hard_hit_pct": 27.8,
-          "count": 18
+          "avg_ev": 82.6,
+          "hard_hit_pct": 26.3,
+          "count": 19
         },
         {
           "label": "> 40",
-          "avg_ev": 79.1,
-          "hard_hit_pct": 9.1,
-          "count": 77
+          "avg_ev": 79.2,
+          "hard_hit_pct": 8.9,
+          "count": 79
         }
       ]
     },
@@ -40801,7 +40881,7 @@
       "player_id": 621493,
       "name": "Taylor Ward",
       "team": "SEA",
-      "total_bbe": 637,
+      "total_bbe": 638,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -40873,7 +40953,7 @@
           "label": "> 40",
           "avg_ev": 78.0,
           "hard_hit_pct": 5.5,
-          "count": 164
+          "count": 165
         }
       ]
     },
@@ -41521,13 +41601,13 @@
       "player_id": 607208,
       "name": "Trea Turner",
       "team": "PHI",
-      "total_bbe": 806,
+      "total_bbe": 813,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 78.1,
-          "hard_hit_pct": 23.0,
-          "count": 178
+          "hard_hit_pct": 22.9,
+          "count": 179
         },
         {
           "label": "-10 to -5",
@@ -41555,15 +41635,15 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 87.3,
-          "hard_hit_pct": 40.0,
-          "count": 45
+          "avg_ev": 87.7,
+          "hard_hit_pct": 41.3,
+          "count": 46
         },
         {
           "label": "15 to 20",
           "avg_ev": 89.8,
-          "hard_hit_pct": 45.5,
-          "count": 55
+          "hard_hit_pct": 44.6,
+          "count": 56
         },
         {
           "label": "20 to 25",
@@ -41585,15 +41665,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 82.5,
-          "hard_hit_pct": 25.0,
-          "count": 44
+          "avg_ev": 82.4,
+          "hard_hit_pct": 24.4,
+          "count": 45
         },
         {
           "label": "> 40",
           "avg_ev": 77.2,
           "hard_hit_pct": 2.4,
-          "count": 206
+          "count": 209
         }
       ]
     },
@@ -41921,7 +42001,7 @@
       "player_id": 671976,
       "name": "Tristan Peters",
       "team": "CWS",
-      "total_bbe": 595,
+      "total_bbe": 600,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -41979,9 +42059,9 @@
         },
         {
           "label": "30 to 35",
-          "avg_ev": 81.4,
-          "hard_hit_pct": 20.0,
-          "count": 35
+          "avg_ev": 81.0,
+          "hard_hit_pct": 19.4,
+          "count": 36
         },
         {
           "label": "35 to 40",
@@ -41992,8 +42072,8 @@
         {
           "label": "> 40",
           "avg_ev": 76.1,
-          "hard_hit_pct": 10.4,
-          "count": 163
+          "hard_hit_pct": 10.2,
+          "count": 167
         }
       ]
     },
@@ -43361,7 +43441,7 @@
       "player_id": 683748,
       "name": "Victor Mesa Jr.",
       "team": "TB",
-      "total_bbe": 281,
+      "total_bbe": 283,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -43407,9 +43487,9 @@
         },
         {
           "label": "20 to 25",
-          "avg_ev": 91.0,
-          "hard_hit_pct": 47.4,
-          "count": 19
+          "avg_ev": 91.5,
+          "hard_hit_pct": 50.0,
+          "count": 20
         },
         {
           "label": "25 to 30",
@@ -43432,8 +43512,8 @@
         {
           "label": "> 40",
           "avg_ev": 79.6,
-          "hard_hit_pct": 10.5,
-          "count": 105
+          "hard_hit_pct": 10.4,
+          "count": 106
         }
       ]
     },
@@ -44801,13 +44881,13 @@
       "player_id": 694671,
       "name": "Wyatt Langford",
       "team": "TEX",
-      "total_bbe": 547,
+      "total_bbe": 550,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 79.3,
-          "hard_hit_pct": 23.7,
-          "count": 97
+          "hard_hit_pct": 23.5,
+          "count": 98
         },
         {
           "label": "-10 to -5",
@@ -44853,9 +44933,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 86.4,
-          "hard_hit_pct": 30.0,
-          "count": 30
+          "avg_ev": 85.9,
+          "hard_hit_pct": 29.0,
+          "count": 31
         },
         {
           "label": "30 to 35",
@@ -44872,8 +44952,8 @@
         {
           "label": "> 40",
           "avg_ev": 80.6,
-          "hard_hit_pct": 7.2,
-          "count": 181
+          "hard_hit_pct": 7.1,
+          "count": 182
         }
       ]
     },
@@ -45041,13 +45121,13 @@
       "player_id": 673237,
       "name": "Yainer Diaz",
       "team": "HOU",
-      "total_bbe": 409,
+      "total_bbe": 411,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 77.7,
-          "hard_hit_pct": 10.3,
-          "count": 107
+          "avg_ev": 77.5,
+          "hard_hit_pct": 10.2,
+          "count": 108
         },
         {
           "label": "-10 to -5",
@@ -45111,9 +45191,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 76.5,
+          "avg_ev": 76.7,
           "hard_hit_pct": 3.7,
-          "count": 108
+          "count": 109
         }
       ]
     },
@@ -45121,19 +45201,19 @@
       "player_id": 650490,
       "name": "Yandy D\u00edaz",
       "team": "TB",
-      "total_bbe": 904,
+      "total_bbe": 912,
       "buckets": [
         {
           "label": "\u2264 -10",
           "avg_ev": 80.1,
-          "hard_hit_pct": 27.6,
-          "count": 203
+          "hard_hit_pct": 27.5,
+          "count": 204
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 94.3,
-          "hard_hit_pct": 54.3,
-          "count": 35
+          "avg_ev": 94.7,
+          "hard_hit_pct": 55.6,
+          "count": 36
         },
         {
           "label": "-5 to 0",
@@ -45150,8 +45230,8 @@
         {
           "label": "5 to 10",
           "avg_ev": 95.0,
-          "hard_hit_pct": 55.8,
-          "count": 43
+          "hard_hit_pct": 54.5,
+          "count": 44
         },
         {
           "label": "10 to 15",
@@ -45173,9 +45253,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 87.5,
-          "hard_hit_pct": 46.5,
-          "count": 43
+          "avg_ev": 87.6,
+          "hard_hit_pct": 45.5,
+          "count": 44
         },
         {
           "label": "30 to 35",
@@ -45185,15 +45265,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 84.2,
-          "hard_hit_pct": 18.8,
-          "count": 48
+          "avg_ev": 83.9,
+          "hard_hit_pct": 18.0,
+          "count": 50
         },
         {
           "label": "> 40",
           "avg_ev": 77.4,
           "hard_hit_pct": 1.6,
-          "count": 251
+          "count": 253
         }
       ]
     },
@@ -45361,7 +45441,7 @@
       "player_id": 670541,
       "name": "Yordan Alvarez",
       "team": "HOU",
-      "total_bbe": 793,
+      "total_bbe": 796,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -45425,15 +45505,15 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 85.2,
-          "hard_hit_pct": 30.2,
-          "count": 43
+          "avg_ev": 85.0,
+          "hard_hit_pct": 29.5,
+          "count": 44
         },
         {
           "label": "> 40",
           "avg_ev": 79.7,
           "hard_hit_pct": 8.5,
-          "count": 246
+          "count": 248
         }
       ]
     },
@@ -45521,13 +45601,13 @@
       "player_id": 691728,
       "name": "Zac Veen",
       "team": "COL",
-      "total_bbe": 51,
+      "total_bbe": 54,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 72.8,
-          "hard_hit_pct": 14.3,
-          "count": 14
+          "avg_ev": 72.5,
+          "hard_hit_pct": 13.3,
+          "count": 15
         },
         {
           "label": "-10 to -5",
@@ -45555,9 +45635,9 @@
         },
         {
           "label": "10 to 15",
-          "avg_ev": 71.6,
+          "avg_ev": 75.3,
           "hard_hit_pct": 0.0,
-          "count": 1
+          "count": 2
         },
         {
           "label": "15 to 20",
@@ -45591,9 +45671,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 83.3,
-          "hard_hit_pct": 9.1,
-          "count": 11
+          "avg_ev": 82.6,
+          "hard_hit_pct": 8.3,
+          "count": 12
         }
       ]
     },
@@ -46080,7 +46160,7 @@
   ],
   "meta": {
     "min_bbe": 30,
-    "total_bbe": 214138,
+    "total_bbe": 214580,
     "bucket_labels": [
       "\u2264 -10",
       "-10 to -5",
@@ -46095,6 +46175,6 @@
       "35 to 40",
       "> 40"
     ],
-    "generated_at": "2026-09-10 15:15:41 UTC"
+    "generated_at": "2026-09-11 15:16:20 UTC"
   }
 }
