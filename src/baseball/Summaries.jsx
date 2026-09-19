@@ -1448,6 +1448,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
 function HitterView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
+  const [hitsOnly, setHitsOnly] = useState(false);   // spray chart: hits only vs all batted balls
   const subtitle = (() => {
     if (isGame && game) {
       const home = game.home?.abbreviation || game.home?.teamName || "?";
@@ -1473,6 +1474,9 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
     { label: "Whiff%", value: data.whiffPct, format: ".1f", good: "low", thresholds: isAAA ? [22, 28, 34] : [19, 25, 31] },
   ];
   const battedBalls = data.pitches.filter(p => p.isInPlay && p.hitData);
+  // "Hits only" keeps 1B/2B/3B/HR (result substring match, same as SprayChart's coloring).
+  const isHitResult = (r) => ["Single", "Double", "Triple", "Home Run"].some(h => (r || "").includes(h));
+  const shownBattedBalls = hitsOnly ? battedBalls.filter(bb => isHitResult(bb.result)) : battedBalls;
   const hardContact = data.pitches.filter(p => p.isInPlay && p.hitData?.launchSpeed >= 95);
   const whiffs = data.pitches.filter(p => p.isWhiff);
   const pitchTypes = [...new Set(data.pitches.map(p => p.pitchType))];
@@ -1481,12 +1485,34 @@ function HitterView({ data, player, game, season, seasonType, isGame, isAAA, lea
   };
   return (
     <div>
+      {/* Spray-chart filter lives OUTSIDE cardRef so it isn't in the saved PNG */}
+      {battedBalls.length > 0 && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+          <div style={{ display: "inline-flex", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 8, padding: 2 }}>
+            {[["all", "All Batted Balls"], ["hits", "Hits Only"]].map(([id, label]) => {
+              const active = (id === "hits") === hitsOnly;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setHitsOnly(id === "hits")}
+                  style={{
+                    padding: "5px 14px", fontSize: 11, fontWeight: 700, borderRadius: 6, cursor: "pointer",
+                    border: "none", fontFamily: "inherit",
+                    background: active ? t.accent : "transparent",
+                    color: active ? "#fff" : t.textMuted, transition: "all 0.15s",
+                  }}
+                >{label}</button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <FitToWidth designWidth={700}>
       <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 700, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
         <SummaryHeader player={player} subtitle={subtitle} seasonType={seasonType} isAAA={isAAA} />
         <StatBar stats={stats} />
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <SprayChart battedBalls={battedBalls} width={660} height={380} />
+          <SprayChart battedBalls={shownBattedBalls} width={660} height={380} />
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 12, padding: "8px 16px" }}>
           <ZonePlot pitches={hardContact} title="95+ EV Contact" width={310} height={242} />
