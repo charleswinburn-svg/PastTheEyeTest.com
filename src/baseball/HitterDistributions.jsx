@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import KdeCurve from "./KdeCurve.jsx";
 import { renderHeatmapCanvas } from "./SummaryComponents.jsx";
-import { MLB_TEAM_PRIMARY } from "./SharedComponents.jsx";
+import { MLB_TEAM_PRIMARY, useISwingNew } from "./SharedComponents.jsx";
 import { gaussianKde, mmddFromDate, filterByWindow, loadSeasonJson } from "./kde.js";
 
 // Precomputed hitter files (iswing_update.py):
@@ -88,6 +88,7 @@ function makeHeat(entry, stand) {
 export default function HitterDistributions({ playerId, team, season, isAAA = false, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const [dist, setDist] = useState(undefined);   // season KDE {curve, mean, n}
+  const iswingNew = useISwingNew(season);
   const [distMeta, setDistMeta] = useState(null);
   const [icpt, setIcpt] = useState(undefined);
   const [swings, setSwings] = useState(undefined);   // per-swing {v,d} for windowing
@@ -178,6 +179,7 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
           <KdeCurve
             title={`iSwing+ Distribution  ·  avg ${Math.round(curveInfo.mean)}${curveInfo.windowed ? "  ·  date range" : ""}`}
             curves={[{ densities: curveInfo.densities, color: teamColor, label: "iSwing+" }]}
+            badge={iswingNew}
             xLo={xLo} xHi={xHi}
             width={640} height={200}
             fill

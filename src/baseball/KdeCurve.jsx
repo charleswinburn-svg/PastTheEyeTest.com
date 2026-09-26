@@ -1,4 +1,5 @@
 import { useTheme } from "./ThemeContext.jsx";
+import { NewBadge } from "./SharedComponents.jsx";
 
 // Reusable KDE bell-curve figure (SVG). Renders one or more precomputed density
 // curves on a shared x-axis, with optional vertical reference lines (e.g. player
@@ -12,9 +13,10 @@ import { useTheme } from "./ThemeContext.jsx";
 //   fill     : bool  — fill under the curve (nice for a single curve)
 //   xTicks   : number[] — x values to label (default 60..140 by 20)
 //   title    : string — small heading above the plot
+//   badge    : bool   — "new" label under the title
 export default function KdeCurve({
   curves = [], xLo = 40, xHi = 160, width = 300, height = 120,
-  refLines = [], fill = false, xTicks, title,
+  refLines = [], fill = false, xTicks, title, badge = false,
 }) {
   const { theme: t } = useTheme();
   const padL = 8, padR = 8, padT = 6, padB = 16;
@@ -42,6 +44,7 @@ export default function KdeCurve({
       {title && (
         <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: t.textMuted, marginBottom: 2 }}>
           {title}
+          {badge && <NewBadge />}
         </div>
       )}
       <svg viewBox={`0 0 ${width} ${height}`} width="100%" style={{ display: "block" }}>

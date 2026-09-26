@@ -7,7 +7,8 @@ import Summaries from "./Summaries.jsx";
 import RaceToTwoStrikes from "./RaceToTwoStrikes.jsx";
 import EVLAChart from "./EVLAChart.jsx";
 import TeamScatter from "./TeamScatter.jsx";
-import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv } from "./SharedComponents.jsx";
+import ISwingWaterfall from "./ISwingWaterfall.jsx";
+import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv, NewBadge, useISwingNew } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
 // ── Mobile breakpoint ──
@@ -78,6 +79,7 @@ const TABS = [
       { id: "hitter_game", label: "Hitter Game" },
       { id: "hitter_season", label: "Hitter Season" },
       { id: "hitter_plinko", label: "Hitter Plinko" },
+      { id: "hitter_iswing", label: "Hitter iSwing+", isNew: true },
     ]
   },
   {
@@ -143,6 +145,7 @@ function BaseballApp() {
   const [selectedHitter, setSelectedHitter] = useState(null);
   const [selectedPitcher, setSelectedPitcher] = useState(null);
   const [iswingData, setIswingData] = useState(null);
+  const iswingNew = useISwingNew(season);
   const [xrvData, setXrvData] = useState(null);
   const [xrvGamesData, setXrvGamesData] = useState(null);
   const [xrvGamesLoading, setXrvGamesLoading] = useState(false);
@@ -315,7 +318,7 @@ function BaseballApp() {
   const aaaReady = !!aaaData;
 
   // Helper to check if tab is active (handles dropdown sub-items)
-  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_plinko", "hitter_game", "hitter_season", "hitter_plinko"].includes(id);
+  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_plinko", "hitter_game", "hitter_season", "hitter_plinko", "hitter_iswing"].includes(id);
   const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
   const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
   const isLeaderboardTab = (id) => ["hitter_lb", "hitter_xrv_lb", "pitcher_lb", "pitch_modeling_lb"].includes(id);
@@ -433,6 +436,7 @@ function BaseballApp() {
                           }}
                         >
                           {sub.label}
+                          {sub.isNew && <NewBadge style={{ pointerEvents: "none" }} />}
                         </button>
                       ))}
                     </div>
@@ -519,6 +523,7 @@ function BaseballApp() {
                         onMouseLeave={(e) => { if (tab !== sub.id) e.target.style.background = "transparent"; }}
                       >
                         {sub.label}
+                        {sub.isNew && <NewBadge style={{ pointerEvents: "none" }} />}
                       </button>
                     ))}
                   </div>
@@ -749,14 +754,17 @@ function BaseballApp() {
             </div>
           )
         )}
-        {isSummaryTab(tab) && (
+        {isSummaryTab(tab) && tab !== "hitter_iswing" && (
           <Summaries season={season} initialSubTab={summarySubTab} />
+        )}
+        {tab === "hitter_iswing" && (
+          <ISwingWaterfall season={season} hitters={hittersFull} />
         )}
         {tab === "hitter_lb" && (
           pipelineReady ? (
             <Leaderboard
               players={hittersFull}
-              metrics={iswingData ? [{ label: "iSwing+" }, ...(data?.hitter_metrics || [])] : data?.hitter_metrics}
+              metrics={iswingData ? [{ label: "iSwing+", isNew: iswingNew }, ...(data?.hitter_metrics || [])] : data?.hitter_metrics}
               type="hitter"
               positionByPid={positionByPid}
               csvFilename={`hitters_${season}.csv`}
@@ -924,7 +932,7 @@ function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSor
       { key: "name", label: type === "pitcher" ? "Pitcher" : "Player" },
       { key: "team", label: "Tm" },
       ...(type === "pitcher" ? [{ key: "ip", label: "IP" }] : [{ key: "pa", label: "PA" }]),
-      ...metrics.map(m => ({ key: m.label, label: m.label, isMetric: true })),
+      ...metrics.map(m => ({ key: m.label, label: m.label, isMetric: true, isNew: !!m.isNew })),
     ];
   }, [metrics, type]);
 
@@ -1052,6 +1060,7 @@ function Leaderboard({ players, metrics, type, defaultSortCol = null, defaultSor
               {columns.map(c => (
                 <th key={c.key} onClick={() => toggle(c.key)} style={thS}>
                   {c.label} {sortCol === c.key ? (sortDir === "desc" ? "▾" : "▴") : ""}
+                  {c.isNew && <NewBadge />}
                 </th>
               ))}
             </tr>

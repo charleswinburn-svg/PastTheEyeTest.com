@@ -46,7 +46,26 @@ Comprehensive reference for the project across both repos. Use this when startin
 | `evla_2026.json`, `evla_st_2026.json` | Pipeline | Daily |
 | `league_avgs_2026.json` | Pipeline | Daily |
 | `race2k_2026.json` | Pipeline | Daily |
-| `iswing.json` | Manual | Rare |
+| `iswing.json` | `iswing_update.py` (iSwing+ v9) | Daily |
+| `iswing_waterfall_{year}.json` | `iswing_update.py` — per-hitter iSwing+ breakdown (Summaries → Hitter iSwing+) | Daily |
+| `iswing_meta.json` | `iswing_update.py` — seasons scored by the current model (drives the *new* labels) | Daily |
+
+### iSwing+ (v9)
+
+One XGBRegressor predicting xwOBAcon per competitive swing from 13 swing-mechanics,
+adjustability and hitter-trait features (`notebooks/iSwing_Plus_v9.ipynb`). Model files at the
+repo root: `iswing_model.pkl`, `iswing_scaler.pkl`, `iswing_config.json`.
+
+- Daily: `python3 iswing_update.py` fetches new swings, re-scores every season in
+  `competitive_swings_2023_2026.csv` (features built per season), and writes `iswing.json`,
+  `iswing_waterfall_{year}.json`, `iswing_meta.json` plus the current-season hitter-card files.
+- Past seasons (one-time after a model change): `python3 iswing_update.py --backfill 2023 2024 2025`
+  fetches each season from Savant (cached to `competitive_swings_{year}.csv`, gitignored), or
+  `--csv PATH` reads them from an existing swings CSV.
+- Waterfall bars are the model's own feature contributions vs the average qualified hitter,
+  converted to iSwing+ points; they always sum to the hitter's iSwing+ − 100.
+- The *new* label shows on iSwing+ only for seasons listed in `iswing_meta.json`;
+  set `SHOW_ISWING_NEW = false` in `SharedComponents.jsx` to retire it.
 
 ### Pitch+ integration in React
 

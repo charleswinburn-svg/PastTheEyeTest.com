@@ -1,18 +1,34 @@
 #!/usr/bin/env python3
 """
-iSwing+ daily update script.
+iSwing+ daily update script (model v9).
 
-Uses pre-trained models from the notebook to incrementally fetch yesterday's
-2026 Statcast data, re-score all 2026 swings, and update public/iswing.json.
+Uses the pre-trained v9 model from notebooks/iSwing_Plus_v9.ipynb (one
+XGBRegressor predicting xwOBAcon from swing mechanics, adjustability and hitter
+traits) to incrementally fetch yesterday's Statcast data, re-score every season
+in the swings CSV, and update:
+    public/iswing.json                  per-year iSwing+ / percentile, keyed by name
+    public/iswing_waterfall_{year}.json per-hitter feature decomposition (Summaries)
+    public/iswing_meta.json             which seasons are scored by the current model
+    public/iswing_dist_{year}.json, iswing_swings_{year}.json, intercept_{year}.json
+                                        hitter-card files (current season only)
+
+Features are built one season at a time, so the per-hitter traits
+(hard_swing_contact, aa/dir_adaptability, effort ceiling) describe that season.
+The notebook pooled 2023-26 for those, so numbers can differ slightly from it.
 
 Run from the project root:
     python3 iswing_update.py
+
+Re-score past seasons (one-time, after a model change). Fetches each season from
+Savant (cached to competitive_swings_{year}.csv) unless --csv points at a swings
+CSV that already holds them (e.g. the notebook's competitive_swings_2023_2026.csv):
+    python3 iswing_update.py --backfill 2023 2024 2025 [--csv PATH]
 
 Cron (daily at 8 AM):
     0 8 * * * cd /path/to/PastTheEyeTest.com && python3 iswing_update.py >> logs/iswing_update.log 2>&1
 """
 
-import os, sys, json, time, warnings, re, unicodedata
+import os, sys, json, time, warnings, re, unicodedata, argparse
 warnings.filterwarnings('ignore')
 
 import pandas as pd
@@ -39,13 +55,20 @@ def _name_key(s):
 # ── Paths ──
 ROOT        = os.path.dirname(os.path.abspath(__file__))
 SWINGS_CSV  = os.path.join(ROOT, 'competitive_swings_2023_2026.csv')
-ENRICHED    = os.path.join(ROOT, 'competitive_swings_enriched.csv')
 PUBLIC_JSON = os.path.join(ROOT, 'public', 'iswing.json')
-MODEL_A     = os.path.join(ROOT, 'iswing_model_a.pkl')
-MODEL_B     = os.path.join(ROOT, 'iswing_model_b.pkl')
-SCALER_A    = os.path.join(ROOT, 'iswing_scaler_a.pkl')
-SCALER_B    = os.path.join(ROOT, 'iswing_scaler_b.pkl')
+META_JSON   = os.path.join(ROOT, 'public', 'iswing_meta.json')
+MODEL_FILE  = os.path.join(ROOT, 'iswing_model.pkl')
+SCALER_FILE = os.path.join(ROOT, 'iswing_scaler.pkl')
 CONFIG_FILE = os.path.join(ROOT, 'iswing_config.json')
+MODEL_VERSION = 'v9'
+
+# Backfill fetch windows — same ranges the v9 notebook trained on (bat tracking
+# starts mid-2023). Other seasons fall back to a full regular-season window.
+BACKFILL_WINDOWS = {
+    2023: ('2023-07-01', '2023-10-01'),
+    2024: ('2024-03-28', '2024-10-01'),
+    2025: ('2025-03-27', '2025-10-01'),
+}
 
 SWING_DESCRIPTIONS = [
     'hit_into_play', 'swinging_strike', 'swinging_strike_blocked',
@@ -72,11 +95,20 @@ def log(msg):
 
 
 def check_models():
-    missing = [p for p in [MODEL_A, MODEL_B, SCALER_A, SCALER_B, CONFIG_FILE] if not os.path.exists(p)]
+    missing = [p for p in [MODEL_FILE, SCALER_FILE, CONFIG_FILE] if not os.path.exists(p)]
     if missing:
         log(f'ERROR: Missing model files: {missing}')
-        log('Run the iSwing_Plus_v7.ipynb notebook (cells 1-6) first to train and save models.')
+        log('Run notebooks/iSwing_Plus_v9.ipynb (sections 1-5) first to train and save the model.')
         sys.exit(1)
+
+
+def load_models():
+    import joblib
+    model  = joblib.load(MODEL_FILE)
+    scaler = joblib.load(SCALER_FILE)
+    with open(CONFIG_FILE) as f:
+        config = json.load(f)
+    return model, scaler, config
 
 
 def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
@@ -131,14 +163,27 @@ def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
     return swings[available + extra].copy()
 
 
+def _per_batter_corr(df, x, y, min_n=50):
+    """Per-batter Pearson r of columns x and y (NaN below min_n swings) — the
+    notebook's calc_aa_adapt / calc_dir_adapt."""
+    def _r(g):
+        if len(g) < min_n:
+            return np.nan
+        return g[x].corr(g[y])
+    return df.groupby('batter')[[x, y]].apply(_r)
+
+
 def enrich(df: pd.DataFrame) -> pd.DataFrame:
-    """Add derived features needed by the model."""
+    """Build the v9 model features (ports notebook section 3). Call it on ONE
+    season's swings: the per-hitter traits and the speed-by-location bins are
+    computed over whatever rows are passed in. Context columns (location, height,
+    handedness) only build features — they never enter the model directly."""
     # A full-season re-fetch (or a raw CSV load) can leave numeric Savant columns as
     # object dtype, which breaks np.sqrt / arithmetic below ("'float' object has no
     # attribute 'sqrt'"). Coerce every column the derived features touch up front.
     NUMERIC_COLS = [
-        'plate_x', 'plate_z', 'sz_top', 'sz_bot', 'pfx_x', 'pfx_z',
-        'balls', 'strikes', 'attack_direction', 'attack_angle',
+        'batter', 'plate_x', 'plate_z', 'sz_top', 'sz_bot',
+        'attack_direction', 'attack_angle', 'swing_path_tilt', 'swing_length',
         'bat_speed', 'release_speed', 'launch_speed', 'launch_angle',
         'estimated_woba_using_speedangle',
     ]
@@ -146,46 +191,21 @@ def enrich(df: pd.DataFrame) -> pd.DataFrame:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors='coerce')
 
-    if 'attack_angle' in df.columns:
-        df['ideal_attack_angle'] = df['attack_angle'].between(5, 20).fillna(False).astype(int)
-
     CONTACT = ['hit_into_play', 'foul', 'hit_into_play_no_out', 'hit_into_play_score', 'foul_bunt']
     df['made_contact'] = df['description'].isin(CONTACT).astype(int)
 
-    if all(c in df.columns for c in ['plate_x', 'plate_z', 'sz_top', 'sz_bot']):
-        df['in_zone'] = ((df['plate_x'].abs() <= 0.83) &
-                         (df['plate_z'] >= df['sz_bot']) &
-                         (df['plate_z'] <= df['sz_top'])).fillna(False).astype(int)
-    elif all(c in df.columns for c in ['plate_x', 'plate_z']):
-        df['in_zone'] = ((df['plate_x'].abs() <= 0.83) &
-                         (df['plate_z'].between(1.5, 3.5))).fillna(False).astype(int)
-
+    # ── Context (feature inputs only) ──
     if all(c in df.columns for c in ['plate_x', 'plate_z']):
         df['location_difficulty'] = np.sqrt(df['plate_x']**2 + (df['plate_z'] - 2.5)**2)
 
-    pitch_families = {
-        'FF':'fastball','SI':'fastball','FC':'fastball','FA':'fastball',
-        'SL':'breaking','CU':'breaking','KC':'breaking','SV':'breaking','CS':'breaking','ST':'breaking',
-        'CH':'offspeed','FS':'offspeed','FO':'offspeed','SC':'offspeed','KN':'offspeed','EP':'offspeed',
-    }
-    if 'pitch_type' in df.columns:
-        pf = df['pitch_type'].map(pitch_families).fillna('other')
-        df['is_fastball'] = (pf == 'fastball').astype(int)
-        df['is_breaking'] = (pf == 'breaking').astype(int)
-        df['is_offspeed'] = (pf == 'offspeed').astype(int)
+    if all(c in df.columns for c in ['sz_top', 'sz_bot']):
+        df['sz_height'] = df['sz_top'] - df['sz_bot']
+        df['pitch_height_norm'] = (df['plate_z'] - df['sz_bot']) / df['sz_height'].replace(0, np.nan)
+    else:
+        df['sz_height'] = 1.85
+        df['pitch_height_norm'] = (df['plate_z'] - 1.5) / 1.85
 
-    if all(c in df.columns for c in ['pfx_x', 'pfx_z']):
-        df['total_movement'] = np.sqrt(df['pfx_x']**2 + df['pfx_z']**2)
-
-    if all(c in df.columns for c in ['balls', 'strikes']):
-        df['count_leverage'] = df['balls'] - df['strikes']
-
-    if all(c in df.columns for c in ['attack_direction', 'plate_x']):
-        df['directional_match'] = -df['attack_direction'] * df['plate_x']
-
-    if all(c in df.columns for c in ['bat_speed', 'release_speed']):
-        df['speed_differential'] = df['bat_speed'] - (df['release_speed'] * 0.7)
-
+    # ── Speed context ──
     if all(c in df.columns for c in ['bat_speed', 'plate_x']):
         df['plate_x_bin'] = pd.cut(df['plate_x'], bins=20, labels=False)
         exp_speed = df.groupby('plate_x_bin')['bat_speed'].transform('mean')
@@ -195,10 +215,61 @@ def enrich(df: pd.DataFrame) -> pd.DataFrame:
     if all(c in df.columns for c in ['bat_speed', 'location_difficulty']):
         df['speed_vs_location'] = df['bat_speed'] * (1 + 0.3 * df['location_difficulty'])
 
-    if all(c in df.columns for c in ['launch_speed', 'bat_speed', 'release_speed']):
-        df['theoretical_max_ev'] = 1.23 * df['bat_speed'] + 0.23 * df['release_speed']
-        df['squared_up_rate'] = df['launch_speed'] / df['theoretical_max_ev'].replace(0, np.nan)
+    # ── Swing adjustability: distance from empirical optimals ──
+    # Attack angle optimal rises with pitch height (low≈10°, mid≈16°, high≈27°).
+    if all(c in df.columns for c in ['attack_angle', 'plate_z']):
+        pz = df['plate_z'].clip(1.0, 4.0)
+        optimal_aa = (3 * (pz - 1.0)**2 + 7).clip(5, 30)
+        df['aa_vs_optimal'] = -np.abs(df['attack_angle'] - optimal_aa)
 
+    # Same optimum on the hitter's own zone height.
+    if all(c in df.columns for c in ['attack_angle', 'pitch_height_norm']):
+        phn = df['pitch_height_norm'].clip(0, 1.5)
+        opt_aa_n = (3 * (phn * 1.85)**2 + 7).clip(5, 30)
+        df['aa_adjustment'] = -np.abs(df['attack_angle'] - opt_aa_n)
+
+    # Tilt optimal falls with pitch height (low≈47°, mid≈35°, high≈29°).
+    if all(c in df.columns for c in ['swing_path_tilt', 'plate_z']):
+        pz = df['plate_z'].clip(1.0, 4.0)
+        opt_tilt = (58 - 10 * pz).clip(20, 48)
+        df['tilt_for_height'] = -np.abs(df['swing_path_tilt'] - opt_tilt)
+
+    # Handedness-aware: pull inside, oppo outside (optimal ≈ 20 × batter-side plate_x).
+    has_dir = all(c in df.columns for c in ['attack_direction', 'plate_x', 'stand'])
+    if has_dir:
+        is_r = df['stand'] == 'R'
+        df['_bpx'] = np.where(is_r, -df['plate_x'], df['plate_x'])
+        df['_bad'] = np.where(is_r, -df['attack_direction'], df['attack_direction'])
+        optimal_dir = (20 * df['_bpx']).clip(-18, 18)
+        df['direction_from_optimal'] = -np.abs(df['_bad'] - optimal_dir)
+
+    # Shorter swings outside, longer inside.
+    if all(c in df.columns for c in ['swing_length', 'plate_x']):
+        expected_len = 7.3 + 0.3 * df['plate_x']
+        df['length_for_location'] = -(df['swing_length'] - expected_len)
+
+    # ── Effort: bat speed vs the hitter's own 90th percentile ──
+    if 'bat_speed' in df.columns:
+        df['p90_speed'] = df.groupby('batter')['bat_speed'].transform('quantile', 0.90)
+        df['effort_level'] = df['bat_speed'] / df['p90_speed'].replace(0, np.nan)
+
+    # ── Hitter traits ──
+    # Contact rate on 90th-percentile-or-harder swings.
+    if all(c in df.columns for c in ['bat_speed', 'made_contact', 'p90_speed']):
+        is_hard = df['bat_speed'] >= df['p90_speed']
+        hard_contact = df[is_hard].groupby('batter')['made_contact'].mean()
+        df['hard_swing_contact'] = df['batter'].map(hard_contact)
+
+    # Does attack angle track pitch height? (positive = adjusts correctly)
+    if all(c in df.columns for c in ['attack_angle', 'plate_z']):
+        df['aa_adaptability'] = df['batter'].map(_per_batter_corr(df, 'attack_angle', 'plate_z'))
+
+    # Does attack direction track horizontal location? (positive = adjusts correctly)
+    if has_dir:
+        df['dir_adaptability'] = df['batter'].map(_per_batter_corr(df, '_bad', '_bpx'))
+        df.drop(columns=['_bpx', '_bad'], inplace=True)
+
+    # ── Target (validation only) ──
     if 'estimated_woba_using_speedangle' in df.columns:
         contact_mask = df['launch_speed'].notna() & df['launch_angle'].notna()
         df['xwOBAcon'] = np.where(contact_mask, df['estimated_woba_using_speedangle'], np.nan)
@@ -206,54 +277,89 @@ def enrich(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def score_swings(df: pd.DataFrame, model_a, model_b, scaler_a, scaler_b, config) -> pd.DataFrame:
-    """Apply trained models to produce raw_value per swing."""
-    feat_a = config['features_a']
-    feat_b = config['features_b']
-    meds_a = config['feature_medians_a']
-    meds_b = config['feature_medians_b']
+def _model_matrix(df: pd.DataFrame, scaler, config) -> pd.DataFrame:
+    """Scaled model inputs: config features, gaps filled with training medians."""
+    feats = config['features']
+    meds  = config['feature_medians']
+    X = pd.DataFrame(index=df.index)
+    for f in feats:
+        if f not in df.columns:
+            log(f'  WARNING: feature {f} missing — filling with training median')
+            X[f] = meds[f]
+        else:
+            X[f] = pd.to_numeric(df[f], errors='coerce').replace([np.inf, -np.inf], np.nan).fillna(meds[f])
+    return pd.DataFrame(scaler.transform(X[feats]), columns=feats, index=df.index)
 
-    avail_a = [f for f in feat_a if f in df.columns]
-    avail_b = [f for f in feat_b if f in df.columns]
 
-    Xa = df[avail_a].copy()
-    Xb = df[avail_b].copy()
-    for c in Xa.columns: Xa[c] = Xa[c].fillna(meds_a.get(c, Xa[c].median()))
-    for c in Xb.columns: Xb[c] = Xb[c].fillna(meds_b.get(c, Xb[c].median()))
-
-    Xa_sc = pd.DataFrame(scaler_a.transform(Xa), columns=avail_a, index=df.index)
-    Xb_sc = pd.DataFrame(scaler_b.transform(Xb), columns=avail_b, index=df.index)
-
-    q_exp = config.get('quality_exponent', 1.5)
-    c_exp = config.get('contact_exponent', 0.3)
-
-    df['pred_quality']  = np.maximum(model_a.predict(Xa_sc), 0.001)
-    df['contact_prob']  = np.maximum(model_b.predict_proba(Xb_sc)[:, 1], 0.001)
-    df['raw_value']     = df['pred_quality']**q_exp * df['contact_prob']**c_exp
+def score_swings(df: pd.DataFrame, model, scaler, config) -> pd.DataFrame:
+    """Apply the v9 model: raw_value = predicted xwOBAcon per swing (floored)."""
+    X_sc = _model_matrix(df, scaler, config)
+    df['pred_wOBAcon'] = model.predict(X_sc)
+    df['raw_value']    = df['pred_wOBAcon'].clip(lower=0.001)
     return df
 
 
+def _fallback_names(years):
+    """player_id -> name from public/baseball_data_{year}.json (site's own hitter
+    list), used when the pybaseball lookup can't resolve an id."""
+    out = {}
+    for yr in years:
+        path = os.path.join(ROOT, 'public', f'baseball_data_{int(yr)}.json')
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path) as f:
+                data = json.load(f)
+            for h in data.get('hitters', []):
+                if h.get('player_id') is not None and h.get('name'):
+                    out.setdefault(int(h['player_id']), h['name'])
+        except Exception as e:
+            log(f'  Could not read {path}: {e}')
+    return out
+
+
 def resolve_batter_names(df: pd.DataFrame) -> pd.DataFrame:
-    """Add batter_name column via pybaseball reverse lookup."""
-    if 'batter_name' in df.columns:
-        return df
-
-    if 'player_name' in df.columns:
-        df = df.rename(columns={'player_name': 'pitcher_name'})
-
-    batter_ids = df['batter'].dropna().unique().astype(int)
-    log(f'  Resolving {len(batter_ids)} batter IDs...')
-    try:
-        from pybaseball import playerid_reverse_lookup
-        lookup = playerid_reverse_lookup(batter_ids, key_type='mlbam')
-        if len(lookup) > 0:
-            lookup['batter_name'] = lookup['name_last'] + ', ' + lookup['name_first']
-            name_map = dict(zip(lookup['key_mlbam'].astype(int), lookup['batter_name']))
-            df['batter_name'] = df['batter'].astype(int).map(name_map)
-            log(f'  Resolved {df["batter_name"].notna().sum():,} / {len(df):,} names')
-    except Exception as e:
-        log(f'  Name lookup failed: {e}')
+    """Fill batter_name via pybaseball reverse lookup, then the site's own hitter
+    list for any id pybaseball couldn't resolve."""
+    if 'player_name' in df.columns and 'batter_name' not in df.columns:
+        df = df.rename(columns={'player_name': 'pitcher_name'})   # Savant player_name = pitcher
+    if 'batter_name' not in df.columns:
         df['batter_name'] = None
+    df['batter'] = pd.to_numeric(df['batter'], errors='coerce')
+    df = df[df['batter'].notna()].copy()
+    df['batter'] = df['batter'].astype(int)
+
+    missing = df.loc[df['batter_name'].isna(), 'batter'].unique()
+    if len(missing):
+        log(f'  Resolving {len(missing)} batter IDs...')
+        try:
+            from pybaseball import playerid_reverse_lookup
+            lookup = playerid_reverse_lookup(missing, key_type='mlbam')
+            if len(lookup) > 0:
+                names = lookup['name_last'] + ', ' + lookup['name_first']
+                name_map = dict(zip(lookup['key_mlbam'].astype(int), names))
+                df['batter_name'] = df['batter_name'].fillna(df['batter'].map(name_map))
+        except Exception as e:
+            log(f'  Name lookup failed: {e}')
+
+    if df['batter_name'].isna().any():
+        years = pd.to_datetime(df['game_date'], errors='coerce').dt.year.dropna().unique()
+        fb = _fallback_names(years)
+        if fb:
+            df['batter_name'] = df['batter_name'].fillna(df['batter'].map(fb))
+    log(f'  Resolved {df["batter_name"].notna().sum():,} / {len(df):,} names')
+    return df
+
+
+def score_season(swings: pd.DataFrame, model, scaler, config) -> pd.DataFrame:
+    """Enrich + name + score one season's competitive swings."""
+    df = swings.copy()
+    df['bat_speed'] = pd.to_numeric(df['bat_speed'], errors='coerce')
+    df = df.dropna(subset=['bat_speed']).reset_index(drop=True)
+    df = enrich(df)
+    df = resolve_batter_names(df)
+    df = score_swings(df, model, scaler, config)
+    df['year'] = pd.to_datetime(df['game_date'], errors='coerce').dt.year
     return df
 
 
@@ -310,61 +416,150 @@ def _drop_redundant_lf_keys(out, canon_map):
             del out[k]
 
 
-def build_json(scored_df: pd.DataFrame, existing_json: dict) -> dict:
-    """
-    Compute per-year iSwing+ (within-year normalized) for all years present in
-    scored_df, then merge into existing_json — OVERWRITING each player's entry in
-    place under a canonical First-Last key (resolved via _name_key, matching the
-    frontend's nameKey/fuzzyLookup). This replaces stale values instead of letting
-    fresh lowercase pybaseball names ("pete alonso") pile up beside legacy
-    capitalized ones ("Pete Alonso") and freeze the card headline.
-    """
-    name_col = 'batter_name'
-    scored_df = scored_df[scored_df[name_col].notna()].copy()
-    scored_df['year'] = pd.to_datetime(scored_df['game_date'], errors='coerce').dt.year
+def season_scores(scored_df: pd.DataFrame, yr: int) -> pd.DataFrame:
+    """Per-hitter iSwing+ for one season, normalized within that season: log of the
+    hitter's mean raw_value, z-scored across qualified hitters, on a 100 ± 15 scale.
+    Grouped by batter id; returns batter, batter_name, mean, count, score, pct."""
+    # Lower min swings for current season (early season has fewer games)
+    mn = 25 if yr == date.today().year else 75
+    d = scored_df[(scored_df['year'] == yr) & scored_df['batter_name'].notna()]
+    g = d.groupby('batter')
+    agg = pd.DataFrame({
+        'batter_name': g['batter_name'].first(),
+        'mean':  g['raw_value'].mean(),
+        'count': g['raw_value'].count(),
+    }).reset_index()
+    agg = agg[agg['count'] >= mn].copy()
+    if len(agg) == 0:
+        log(f'  {yr}: no players met min {mn} swings')
+        return agg
+    agg['log_raw'] = np.log(agg['mean'].clip(lower=1e-10))
+    agg['score'] = (100 + 15 * (agg['log_raw'] - agg['log_raw'].mean()) / agg['log_raw'].std()).round(0).astype(int)
+    agg['pct']   = agg['score'].rank(pct=True).mul(100).round(0).astype(int)
+    log(f'  {yr}: {len(agg)} players (min {mn} swings)  mean={agg["score"].mean():.1f}  sd={agg["score"].std():.1f}')
+    return agg
 
-    current_year = date.today().year
+
+def build_json(scores_by_year: dict, existing_json: dict) -> dict:
+    """
+    Merge per-year iSwing+ ({year: season_scores() frame}) into existing_json,
+    writing each player under a canonical First-Last key (resolved via _name_key,
+    matching the frontend's nameKey/fuzzyLookup) so fresh lowercase pybaseball
+    names ("pete alonso") overwrite legacy capitalized ones ("Pete Alonso")
+    instead of piling up beside them and freezing the card headline.
+
+    Every rebuilt year is cleared from ALL entries first, so a hitter who drops out
+    of that year's pool can't keep a value from an older model.
+    """
     # Start from existing, collapsing case/format-variant duplicates into one key/player.
     out, canon_map = _dedupe_by_namekey(existing_json)
+    for v in out.values():   # v7 'overall' (never displayed) — not reproduced by v9
+        v.pop('overall', None)
+        v.pop('overall_pct', None)
 
-    years = sorted(scored_df['year'].dropna().unique())
-    for yr in years:
-        yr = int(yr)
-        # Lower min swings for current season (early season has fewer games)
-        mn = 25 if yr == current_year else 75
-        yr_data = scored_df[scored_df['year'] == yr]
-        yr_agg = yr_data.groupby(name_col)['raw_value'].agg(['mean', 'count']).reset_index()
-        yr_agg = yr_agg[yr_agg['count'] >= mn].copy()
-        if len(yr_agg) == 0:
-            log(f'  {yr}: no players met min {mn} swings')
-            continue
-
-        yr_agg['log_raw'] = np.log(yr_agg['mean'].clip(lower=1e-10))
-        yr_log_mean = yr_agg['log_raw'].mean()
-        yr_log_std  = yr_agg['log_raw'].std()
-        yr_agg['score'] = (100 + 15 * (yr_agg['log_raw'] - yr_log_mean) / yr_log_std).round(0).astype(int)
-        yr_agg['pct']   = yr_agg['score'].rank(pct=True).mul(100).round(0).astype(int)
-        log(f'  {yr}: {len(yr_agg)} players (min {mn} swings)  mean={yr_agg["score"].mean():.1f}')
-
-        yr_key  = str(yr)
-        pct_key = f'{yr}_pct'
-        for _, row in yr_agg.iterrows():
-            name  = row[name_col]                 # pybaseball, e.g. "alonso, pete" (lowercase)
-            score = int(row['score'])
-            pct   = int(row['pct'])
-
+    for yr, agg in sorted(scores_by_year.items()):
+        if agg is None or len(agg) == 0:
+            continue   # nothing new for this year — keep what's there
+        yr_key, pct_key = str(yr), f'{yr}_pct'
+        for v in out.values():
+            v.pop(yr_key, None)
+            v.pop(pct_key, None)
+        # Most swings last, so when two hitters share a name key (e.g. the two Max
+        # Muncys) the everyday player's value is the one the name lookup finds.
+        for _, row in agg.sort_values('count').iterrows():
             # Canonical First-Last display key (what the frontend h.name lookup hits).
-            ff_name = _title_name(name)           # "Pete Alonso"
+            ff_name = _title_name(row['batter_name'])   # "alonso, pete" -> "Pete Alonso"
             nk = _name_key(ff_name)
             canon = canon_map.get(nk)
-            if canon is None:                     # brand-new player — register canonical
+            if canon is None:                           # brand-new player — register canonical
                 canon = ff_name
                 canon_map[nk] = canon
-            out.setdefault(canon, {})[yr_key]  = score
-            out[canon][pct_key] = pct
+            out.setdefault(canon, {})[yr_key] = int(row['score'])
+            out[canon][pct_key] = int(row['pct'])
 
+    out = {k: v for k, v in out.items() if v}
     _drop_redundant_lf_keys(out, canon_map)
     return out
+
+
+def _best_iteration_range(model):
+    """Tree range model.predict() uses (the early-stopping best iteration)."""
+    try:
+        best = model.best_iteration
+    except Exception:
+        best = None
+    return (0, int(best) + 1) if best is not None else (0, 0)
+
+
+def write_waterfall(scored_df, season, agg, model, scaler, config):
+    """public/iswing_waterfall_{season}.json — per hitter, how much each feature
+    moved their iSwing+ away from the average qualified hitter (100), in points.
+
+    Uses the model's own per-swing feature contributions (XGBoost's fast
+    path-based attribution, which sums to each swing's prediction), so a bar's
+    sign reflects what the model actually did with that feature. Per hitter:
+    mean contribution per feature minus the average qualified hitter's, converted
+    to points with the slope of the iSwing+ transform at the hitter's own mean
+    (15 / (sd_log · mean)). The small leftover from the log transform and integer
+    rounding is spread in proportion to bar size (never flips a bar's sign), then
+    bars are rounded to 0.1 with the remainder folded into the largest, so the
+    running total lands exactly on the published iSwing+. Keyed by batter id."""
+    if agg is None or len(agg) == 0:
+        log(f'  waterfall: no {season} scores — skipping')
+        return
+    import xgboost as xgb
+    feats = config['features']
+    d = scored_df[(scored_df['year'] == season) & scored_df['batter'].isin(agg['batter'])]
+    X_sc = _model_matrix(d, scaler, config)
+    contrib = model.get_booster().predict(
+        xgb.DMatrix(X_sc), pred_contribs=True, approx_contribs=True,
+        iteration_range=_best_iteration_range(model))[:, :len(feats)]   # last col = bias
+
+    per_hitter = pd.DataFrame(contrib, columns=feats, index=d.index).groupby(d['batter']).mean()
+    per_hitter = per_hitter.loc[agg['batter']]
+    delta = per_hitter - per_hitter.mean()          # vs the average qualified hitter
+    sd_log = float(agg['log_raw'].std())
+
+    out = {'meta': {'season': int(season), 'model': MODEL_VERSION, 'features': feats,
+                    'method': 'model contributions vs average qualified hitter'}}
+    for _, row in agg.iterrows():
+        bid = int(row['batter'])
+        target = int(row['score'])
+        shift = target - 100
+        pts = delta.loc[bid] * (15.0 / (sd_log * float(row['mean'])))
+        spread = pts.abs().sum()
+        if spread > 1e-9:
+            pts = pts + (shift - pts.sum()) * pts.abs() / spread
+        else:
+            pts = pd.Series(shift / len(feats), index=feats)
+        c = {f: round(float(pts[f]), 1) for f in feats}
+        resid = round(shift - sum(c.values()), 1)
+        if resid:
+            big = max(c, key=lambda f: abs(c[f]))
+            c[big] = round(c[big] + resid, 1)
+        out[str(bid)] = {'name': _title_name(row['batter_name']), 'iswing': target,
+                         'pct': int(row['pct']), 'n': int(row['count']), 'c': c}
+    path = os.path.join(ROOT, 'public', f'iswing_waterfall_{season}.json')
+    with open(path, 'w') as f:
+        json.dump(out, f, separators=(',', ':'))
+    log(f'  Wrote {path}: {len(out) - 1} hitters')
+
+
+def write_meta(seasons):
+    """public/iswing_meta.json — which seasons are scored by the current model.
+    The site shows its NEW label on iSwing+ only for these seasons."""
+    seasons = {int(s) for s in seasons}
+    if os.path.exists(META_JSON):
+        try:
+            with open(META_JSON) as f:
+                prev = json.load(f)
+            if prev.get('model') == MODEL_VERSION:
+                seasons |= {int(s) for s in prev.get('seasons', [])}
+        except Exception:
+            pass
+    with open(META_JSON, 'w') as f:
+        json.dump({'model': MODEL_VERSION, 'seasons': sorted(seasons)}, f)
+    log(f'  Wrote {META_JSON}: model {MODEL_VERSION}, seasons {sorted(seasons)}')
 
 
 # ── Distribution / heatmap outputs for the hitter card ──────────────────────
@@ -584,41 +779,103 @@ def write_intercept(scored_df, season, min_pts=20):
     log(f'  Wrote {path}: {n_hitters} hitters ({n_switch} switch, {n_exact} exact-plate) (x={xcol}, y={ycol})')
 
 
-def main():
-    log('=== iSwing+ daily update ===')
-    check_models()
+def _load_iswing_json():
+    if not os.path.exists(PUBLIC_JSON):
+        return {}
+    with open(PUBLIC_JSON) as f:
+        existing = json.load(f)
+    log(f'Loaded existing iswing.json ({len(existing)} entries)')
+    return existing
 
-    # ── Load models ──
-    import joblib
-    log('Loading models...')
-    model_a  = joblib.load(MODEL_A)
-    model_b  = joblib.load(MODEL_B)
-    scaler_a = joblib.load(SCALER_A)
-    scaler_b = joblib.load(SCALER_B)
-    with open(CONFIG_FILE) as f:
-        config = json.load(f)
+
+def _write_iswing_json(updated_json):
+    os.makedirs(os.path.dirname(PUBLIC_JSON), exist_ok=True)
+    with open(PUBLIC_JSON, 'w') as f:
+        json.dump(updated_json, f)
+    log(f'Wrote {len(updated_json)} entries -> {PUBLIC_JSON}')
+
+
+def _backfill_swings(yr, src):
+    """One season's competitive swings for --backfill: from the --csv frame when
+    given, else the per-season cache, else a fresh Savant fetch (then cached)."""
+    if src is not None:
+        return src[src['_year'] == yr].drop(columns=['_year'])
+    cache = os.path.join(ROOT, f'competitive_swings_{yr}.csv')
+    if os.path.exists(cache):
+        log(f'  Using cached {cache}')
+        return pd.read_csv(cache, low_memory=False)
+    start, end = BACKFILL_WINDOWS.get(yr, (f'{yr}-03-15', f'{yr}-10-05'))
+    swings = fetch_new_swings(start, end)
+    if len(swings) > 0:
+        swings.to_csv(cache, index=False)
+        log(f'  Cached {len(swings):,} swings -> {cache}')
+    return swings
+
+
+def run_backfill(years, csv_path, model, scaler, config):
+    """Re-score past seasons with the current model: rewrites those years in
+    iswing.json and writes their waterfall files. Leaves the daily CSV and the
+    current-season hitter-card files alone."""
+    log(f'=== iSwing+ backfill ({MODEL_VERSION}): {sorted(set(years))} ===')
+    src = None
+    if csv_path:
+        src = pd.read_csv(csv_path, low_memory=False)
+        src['_year'] = pd.to_datetime(src['game_date'], errors='coerce').dt.year
+        log(f'Loaded {len(src):,} swings from {csv_path}: {src["_year"].value_counts().sort_index().to_dict()}')
+
+    scores = {}
+    for yr in sorted(set(years)):
+        log(f'── {yr} ──')
+        swings = _backfill_swings(yr, src)
+        if len(swings) == 0:
+            log(f'  No {yr} swings — skipping')
+            continue
+        scored = score_season(swings, model, scaler, config)
+        agg = season_scores(scored, yr)
+        if len(agg) == 0:
+            continue
+        scores[yr] = agg
+        write_waterfall(scored, yr, agg, model, scaler, config)
+
+    if not scores:
+        log('Nothing backfilled.')
+        return
+    _write_iswing_json(build_json(scores, _load_iswing_json()))
+    write_meta(scores.keys())
+    log('Done.')
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description='iSwing+ daily update / backfill')
+    ap.add_argument('--backfill', nargs='+', type=int, metavar='YEAR',
+                    help='re-score these past seasons instead of the daily update')
+    ap.add_argument('--csv', help='with --backfill: swings CSV to read those seasons from '
+                                  '(default: competitive_swings_{year}.csv cache, else fetch from Savant)')
+    args = ap.parse_args(argv)
+
+    check_models()
+    log('Loading model...')
+    model, scaler, config = load_models()
+
+    if args.backfill:
+        run_backfill(args.backfill, args.csv, model, scaler, config)
+        return
+
+    log(f'=== iSwing+ daily update ({MODEL_VERSION}) ===')
+    season = date.today().year
 
     # ── Determine fetch range (yesterday, or since last date in CSV) ──
-    yesterday = date.today() - timedelta(days=1)
-    season_start = date(date.today().year, 3, 1)
-
-    last_date = season_start - timedelta(days=1)
-    if os.path.exists(SWINGS_CSV):
-        existing = pd.read_csv(SWINGS_CSV, usecols=['game_date'])
-        existing_2026 = existing[pd.to_datetime(existing['game_date']).dt.year == date.today().year]
-        if len(existing_2026) > 0:
-            last_date = pd.to_datetime(existing_2026['game_date']).max().date()
-            log(f'Existing data through {last_date} ({len(existing_2026):,} swings this season)')
+    full = pd.read_csv(SWINGS_CSV, low_memory=False) if os.path.exists(SWINGS_CSV) else pd.DataFrame()
+    last_date = date(season, 3, 1) - timedelta(days=1)
+    if len(full) > 0:
+        dates = pd.to_datetime(full['game_date'], errors='coerce')
+        this_season = dates[dates.dt.year == season]
+        if len(this_season) > 0:
+            last_date = this_season.max().date()
+            log(f'Existing data through {last_date} ({len(this_season):,} swings this season)')
 
     fetch_start = last_date + timedelta(days=1)
-    fetch_end   = yesterday
-
-    # ── Load all existing enriched 2026 swings ──
-    all_2026 = pd.DataFrame()
-    if os.path.exists(SWINGS_CSV):
-        full = pd.read_csv(SWINGS_CSV)
-        all_2026 = full[pd.to_datetime(full['game_date']).dt.year == date.today().year].copy()
-        log(f'Loaded {len(all_2026):,} existing {date.today().year} swings from CSV')
+    fetch_end   = date.today() - timedelta(days=1)
 
     # ── Fetch new data ──
     if fetch_start <= fetch_end:
@@ -626,69 +883,45 @@ def main():
         new_swings = fetch_new_swings(str(fetch_start), str(fetch_end))
         if len(new_swings) > 0:
             log(f'  Got {len(new_swings):,} new competitive swings')
-            # Append to main CSV
-            if os.path.exists(SWINGS_CSV):
-                combined = pd.concat([pd.read_csv(SWINGS_CSV), new_swings], ignore_index=True).drop_duplicates()
-            else:
-                combined = new_swings
-            combined.to_csv(SWINGS_CSV, index=False)
-            log(f'  Updated {SWINGS_CSV} ({len(combined):,} total rows)')
-            # Reload 2026 slice
-            all_2026 = combined[pd.to_datetime(combined['game_date']).dt.year == date.today().year].copy()
+            full = pd.concat([full, new_swings], ignore_index=True).drop_duplicates() if len(full) else new_swings
+            full.to_csv(SWINGS_CSV, index=False)
+            log(f'  Updated {SWINGS_CSV} ({len(full):,} total rows)')
         else:
             log('  No new swings found (off-day or no data yet)')
     else:
         log(f'Already up to date through {last_date}')
 
-    if len(all_2026) == 0:
-        log('No 2026 swings to score — nothing to update')
+    if len(full) == 0:
+        log(f'No {season} swings to score — nothing to update')
+        return
+    years = pd.to_datetime(full['game_date'], errors='coerce').dt.year
+    if not (years == season).any():
+        log(f'No {season} swings to score — nothing to update')
         return
 
-    # ── Enrich + score 2026 swings ──
-    log(f'Enriching {len(all_2026):,} swings...')
-    all_2026 = enrich(all_2026)
-    all_2026 = all_2026.dropna(subset=['bat_speed'])
-    all_2026 = resolve_batter_names(all_2026)
-    log(f'Scoring...')
-    all_2026 = score_swings(all_2026, model_a, model_b, scaler_a, scaler_b, config)
+    # ── Enrich + score each season in the CSV on its own (traits are per season) ──
+    scores, current = {}, None
+    for yr in sorted(years.dropna().astype(int).unique()):
+        season_rows = full[years == yr]
+        log(f'Scoring {yr} ({len(season_rows):,} swings)...')
+        scored = score_season(season_rows, model, scaler, config)
+        scores[yr] = season_scores(scored, yr)
+        write_waterfall(scored, yr, scores[yr], model, scaler, config)
+        if yr == season:
+            current = scored
 
-    # ── Load existing JSON ──
-    existing_json = {}
-    if os.path.exists(PUBLIC_JSON):
-        with open(PUBLIC_JSON) as f:
-            existing_json = json.load(f)
-        log(f'Loaded existing iswing.json ({len(existing_json)} entries)')
-
-    # ── Build updated JSON ──
-    # Score all years present in the full CSV so normalization uses the full pool
-    full_scored = pd.DataFrame()
-    if os.path.exists(SWINGS_CSV):
-        log('Loading full CSV for multi-year scoring...')
-        full_raw = pd.read_csv(SWINGS_CSV)
-        full_raw = enrich(full_raw)
-        full_raw = full_raw.dropna(subset=['bat_speed'])
-        full_raw = resolve_batter_names(full_raw)
-        full_scored = score_swings(full_raw, model_a, model_b, scaler_a, scaler_b, config)
-
-    source = full_scored if len(full_scored) > 0 else all_2026
-    updated_json = build_json(source, existing_json)
-
-    # ── Write JSON ──
-    os.makedirs(os.path.dirname(PUBLIC_JSON), exist_ok=True)
-    with open(PUBLIC_JSON, 'w') as f:
-        json.dump(updated_json, f)
-    log(f'Wrote {len(updated_json)} entries -> {PUBLIC_JSON}')
+    updated_json = build_json(scores, _load_iswing_json())
+    _write_iswing_json(updated_json)
 
     # ── Hitter-card distribution + intercept-heatmap files (current season) ──
-    season = date.today().year
     log('Building hitter-card distribution files...')
-    write_iswing_dist(all_2026, season, updated_json=updated_json)
-    write_intercept(all_2026, season)
+    write_iswing_dist(current, season, updated_json=updated_json)
+    write_intercept(current, season)
+    write_meta([yr for yr, agg in scores.items() if len(agg) > 0])
 
     # ── Summary ──
-    current_year = str(date.today().year)
-    with_2026 = sum(1 for v in updated_json.values() if current_year in v)
-    log(f'Players with {current_year} iSwing+: {with_2026}')
+    with_season = sum(1 for v in updated_json.values() if str(season) in v)
+    log(f'Players with {season} iSwing+: {with_season}')
     log('Done.')
 
 

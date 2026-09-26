@@ -87,12 +87,105 @@ export const MLB_TEAM_PRIMARY = {
   ABQ: "#33006F",                              // Albuquerque Isotopes → COL
 };
 
+// ── MLB team secondary colors — used where a team's primary is black/white ──
+export const MLB_TEAM_SECONDARY = {
+  ARI: "#E3D4AD", AZ:  "#E3D4AD",
+  ATL: "#13274F",
+  BAL: "#27251F",
+  BOS: "#0C2340",
+  CHC: "#CC3433",
+  CWS: "#C4CED4", CHW: "#C4CED4",
+  CIN: "#27251F",
+  CLE: "#E50022",
+  COL: "#C4CED4",
+  DET: "#FA4616",
+  HOU: "#EB6E1F",
+  KC:  "#BD9B60", KCR: "#BD9B60",
+  LAA: "#003263",
+  LAD: "#EF3E42",
+  MIA: "#EF3340",
+  MIL: "#12284B",
+  MIN: "#D31145",
+  NYM: "#FF5910",
+  NYY: "#C4CED3",
+  OAK: "#EFB21E", ATH: "#EFB21E",
+  PHI: "#002D72",
+  PIT: "#27251F",
+  SD:  "#FFC425", SDP: "#FFC425",
+  SEA: "#005C5C",
+  SF:  "#27251F", SFG: "#27251F",
+  STL: "#0C2340",
+  TB:  "#8FBCE6", TBR: "#8FBCE6",
+  TEX: "#C0111F",
+  TOR: "#1D2D5C",
+  WSH: "#14225A", WSN: "#14225A",
+};
+
+// Near-black (dark AND nearly colorless — so navy stays navy) or near-white.
+function isBlackOrWhite(hex) {
+  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const hi = Math.max(r, g, b), lo = Math.min(r, g, b);
+  return (hi < 0x40 && hi - lo < 24) || lo > 0xE0;
+}
+
+// Team color for chart marks: the primary, unless it's black or white
+// (White Sox, Padres brown-black), then the secondary.
+export function teamMarkColor(team) {
+  const primary = MLB_TEAM_PRIMARY[team];
+  if (!primary) return null;
+  return isBlackOrWhite(primary) ? (MLB_TEAM_SECONDARY[team] || primary) : primary;
+}
+
 export function hexLuminance(hex) {
   return [hex.slice(1,3), hex.slice(3,5), hex.slice(5,7)].reduce((sum, h, i) => {
     const c = parseInt(h, 16) / 255;
     const lin = c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     return sum + lin * [0.2126, 0.7152, 0.0722][i];
   }, 0);
+}
+
+// Blend hex toward another hex by w (0..1).
+export function mixHex(hex, toward, w) {
+  const a = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const b = [1, 3, 5].map(i => parseInt(toward.slice(i, i + 2), 16));
+  return "#" + a.map((v, i) => Math.round(v + (b[i] - v) * w).toString(16).padStart(2, "0")).join("");
+}
+
+// ── "new" label for everything driven by the current iSwing+ model ──
+// Flip to false to retire every iSwing+ "new" label at once.
+export const SHOW_ISWING_NEW = true;
+
+export function NewBadge({ style }) {
+  const { theme: t } = useTheme();
+  return (
+    <div style={{
+      fontSize: 9, fontWeight: 800, fontStyle: "italic", letterSpacing: "0.04em",
+      color: t.accent, lineHeight: 1, marginTop: 2, textTransform: "none", ...style,
+    }}>new</div>
+  );
+}
+
+// public/iswing_meta.json (written by iswing_update.py) lists the seasons scored
+// by the current model; the "new" label only shows on those seasons.
+let _iswingMetaPromise = null;
+function loadISwingMeta() {
+  if (!_iswingMetaPromise) {
+    _iswingMetaPromise = fetch("/iswing_meta.json")
+      .then(r => (r.ok ? r.json() : null))
+      .catch(() => null);
+  }
+  return _iswingMetaPromise;
+}
+
+export function useISwingNew(season) {
+  const [seasons, setSeasons] = useState(null);
+  useEffect(() => {
+    if (!SHOW_ISWING_NEW) return;
+    let alive = true;
+    loadISwingMeta().then(m => { if (alive) setSeasons(Array.isArray(m?.seasons) ? m.seasons.map(Number) : []); });
+    return () => { alive = false; };
+  }, []);
+  return SHOW_ISWING_NEW && !!seasons && seasons.includes(Number(season));
 }
 
 // ── Player bio hook — fetches age/height/weight/hand/birthplace from MLB API ──
@@ -186,7 +279,7 @@ export function getLogoUrl(teamAbbr, teamId) {
 // BUBBLE PERCENTILE BAR
 // ═══════════════════════════════════════════════════════════
 
-export function BubblePercentileBar({ label, pctile, display, labelWidth = 110 }) {
+export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, badge = false }) {
   const { theme: t } = useTheme();
   const hasValue = pctile != null && isFinite(pctile);
   const barWidth = hasValue ? Math.max(3, pctile) : 0;
@@ -205,6 +298,7 @@ export function BubblePercentileBar({ label, pctile, display, labelWidth = 110 }
         color: t.text, flexShrink: 0, lineHeight: 1.2,
       }}>
         {label}
+        {badge && <NewBadge />}
       </div>
 
       {/* Bar track + bubble */}
@@ -296,7 +390,7 @@ const _fallbackTeamIdCache = new Map();
 // fallback when the pipeline data carries no team (IL stints / AAA options
 // strip the abbreviation), so the card still shows a logo. Prefers the MLB
 // parent org when the player is on a minor-league roster.
-function useFallbackTeamId(playerId, needed) {
+export function useFallbackTeamId(playerId, needed) {
   const [tid, setTid] = useState(() => _fallbackTeamIdCache.get(playerId) ?? null);
   useEffect(() => {
     if (!needed || !playerId) return;

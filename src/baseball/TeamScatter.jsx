@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
+import { NewBadge, useISwingNew } from "./SharedComponents.jsx";
 
 const METRICS = [
   { id: "stuff",    label: "Stuff+"    },
@@ -38,6 +39,7 @@ export default function TeamScatter({ season, hitters, iswingData }) {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
   const [metric, setMetric] = useState("stuff");
+  const iswingNew = useISwingNew(season);
   const isBar = METRICS.find(m => m.id === metric)?.kind === "bar";
 
   useEffect(() => {
@@ -100,13 +102,13 @@ export default function TeamScatter({ season, hitters, iswingData }) {
   if (isBar) {
     return (
       <div>
-        <MetricButtons metric={metric} setMetric={setMetric} theme={t} />
+        <MetricButtons metric={metric} setMetric={setMetric} theme={t} iswingNew={iswingNew} />
         {bars.length === 0 ? (
           <div style={{ color: t.textMuted, padding: 40, textAlign: "center", fontSize: 13 }}>
             No iSwing+ data for {season}.
           </div>
         ) : (
-          <ISwingBars bars={bars} theme={t} season={season} />
+          <ISwingBars bars={bars} theme={t} season={season} isNew={iswingNew} />
         )}
       </div>
     );
@@ -146,7 +148,7 @@ export default function TeamScatter({ season, hitters, iswingData }) {
 
   return (
     <div>
-      <MetricButtons metric={metric} setMetric={setMetric} theme={t} />
+      <MetricButtons metric={metric} setMetric={setMetric} theme={t} iswingNew={iswingNew} />
 
       <div style={{
         background: t.cardBg,
@@ -214,7 +216,7 @@ export default function TeamScatter({ season, hitters, iswingData }) {
 
 
 // ── Metric selector buttons (shared by scatter + bar views) ────────────────
-function MetricButtons({ metric, setMetric, theme: t }) {
+function MetricButtons({ metric, setMetric, theme: t, iswingNew = false }) {
   return (
     <div style={{ display: "flex", gap: 6, marginBottom: 14, justifyContent: "center", flexWrap: "wrap" }}>
       {METRICS.map(m => (
@@ -236,6 +238,9 @@ function MetricButtons({ metric, setMetric, theme: t }) {
           }}
         >
           {m.label}
+          {m.id === "iswing" && iswingNew && (
+            <NewBadge style={metric === m.id ? { color: "#fff" } : undefined} />
+          )}
         </button>
       ))}
     </div>
@@ -244,7 +249,7 @@ function MetricButtons({ metric, setMetric, theme: t }) {
 
 
 // ── iSwing+ team bar chart ────────────────────────────────────────────────
-function ISwingBars({ bars, theme: t, season }) {
+function ISwingBars({ bars, theme: t, season, isNew = false }) {
   const W = 900;
   const M = { l: 48, r: 16, t: 28, b: 64 };  // bottom leaves room for logos + abbr
   const barGap = 6;
@@ -324,6 +329,7 @@ function ISwingBars({ bars, theme: t, season }) {
       </svg>
       <div style={{ fontSize: 10, color: t.textFaint, marginTop: 8, textAlign: "center" }}>
         {bars.length} teams · season {season} · PA-weighted average · 100 = league average
+        {isNew && <NewBadge style={{ marginTop: 3 }} />}
       </div>
     </div>
   );

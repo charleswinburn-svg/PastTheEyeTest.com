@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
@@ -48,6 +48,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
   // Date-range iSwing+ bubble: recompute the player's windowed average from the
   // per-swing file and rank it against the season iSwing+ distribution.
   const [iswingSwings, setIswingSwings] = useState(null);
+  const iswingNew = useISwingNew(season);
   useEffect(() => {
     if (!isDateRange || !player?.player_id || isAAA) { setIswingSwings(null); return; }
     let cancelled = false;
@@ -160,6 +161,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                   label={label}
                   pctile={cat.pctile}
                   display={cat.display}
+                  badge={label === "iSwing+" && iswingNew}
                 />
               ))
             )}
