@@ -2450,9 +2450,9 @@
           "display": "2.5"
         },
         "LD%": {
-          "pctile": 55,
-          "value": 18.4,
-          "display": "18.4"
+          "pctile": 52,
+          "value": 17.9,
+          "display": "17.9"
         },
         "Chase %": {
           "pctile": 49,
@@ -12165,9 +12165,9 @@
           "display": "7.5"
         },
         "LD%": {
-          "pctile": 27,
-          "value": 15.4,
-          "display": "15.4"
+          "pctile": 29,
+          "value": 16.3,
+          "display": "16.3"
         },
         "Chase %": {
           "pctile": 48,
@@ -13773,9 +13773,9 @@
           "display": "4.0"
         },
         "LD%": {
-          "pctile": 15,
-          "value": 13.0,
-          "display": "13.0"
+          "pctile": 9,
+          "value": 11.1,
+          "display": "11.1"
         },
         "Chase %": {
           "pctile": 83,
@@ -14176,8 +14176,8 @@
         },
         "LD%": {
           "pctile": 95,
-          "value": 29.1,
-          "display": "29.1"
+          "value": 29.9,
+          "display": "29.9"
         },
         "Chase %": {
           "pctile": 44,
@@ -14510,7 +14510,7 @@
           "display": "9.3"
         },
         "LD%": {
-          "pctile": 88,
+          "pctile": 87,
           "value": 25.0,
           "display": "25.0"
         },
@@ -15448,7 +15448,7 @@
           "display": "13.2"
         },
         "LD%": {
-          "pctile": 53,
+          "pctile": 55,
           "value": 18.2,
           "display": "18.2"
         },
@@ -16118,9 +16118,9 @@
           "display": "8.4"
         },
         "LD%": {
-          "pctile": 21,
-          "value": 14.3,
-          "display": "14.3"
+          "pctile": 17,
+          "value": 13.3,
+          "display": "13.3"
         },
         "Chase %": {
           "pctile": 92,
@@ -16185,7 +16185,7 @@
           "display": "6.2"
         },
         "LD%": {
-          "pctile": 73,
+          "pctile": 71,
           "value": 20.0,
           "display": "20.0"
         },
@@ -16654,7 +16654,7 @@
           "display": "9.4"
         },
         "LD%": {
-          "pctile": 17,
+          "pctile": 19,
           "value": 13.4,
           "display": "13.4"
         },
@@ -20406,9 +20406,9 @@
           "display": "13.5"
         },
         "LD%": {
-          "pctile": 33,
-          "value": 16.6,
-          "display": "16.6"
+          "pctile": 32,
+          "value": 16.4,
+          "display": "16.4"
         },
         "Chase %": {
           "pctile": 46,
@@ -21143,7 +21143,7 @@
           "display": "4.6"
         },
         "LD%": {
-          "pctile": 13,
+          "pctile": 15,
           "value": 12.9,
           "display": "12.9"
         },
@@ -23220,7 +23220,7 @@
           "display": "3.1"
         },
         "LD%": {
-          "pctile": 19,
+          "pctile": 21,
           "value": 13.6,
           "display": "13.6"
         },
@@ -29317,9 +29317,9 @@
           "display": "7.2"
         },
         "LD%": {
-          "pctile": 71,
-          "value": 19.7,
-          "display": "19.7"
+          "pctile": 78,
+          "value": 20.4,
+          "display": "20.4"
         },
         "Chase %": {
           "pctile": 90,
@@ -29451,9 +29451,9 @@
           "display": "16.7"
         },
         "LD%": {
-          "pctile": 88,
-          "value": 25.0,
-          "display": "25.0"
+          "pctile": 91,
+          "value": 26.2,
+          "display": "26.2"
         },
         "Chase %": {
           "pctile": 72,
@@ -32466,7 +32466,7 @@
           "display": "13.2"
         },
         "LD%": {
-          "pctile": 9,
+          "pctile": 11,
           "value": 12.7,
           "display": "12.7"
         },
@@ -33270,7 +33270,7 @@
           "display": "4.0"
         },
         "LD%": {
-          "pctile": 51,
+          "pctile": 52,
           "value": 17.9,
           "display": "17.9"
         },
@@ -33874,8 +33874,8 @@
         },
         "LD%": {
           "pctile": 25,
-          "value": 14.7,
-          "display": "14.7"
+          "value": 14.9,
+          "display": "14.9"
         },
         "Chase %": {
           "pctile": 28,
@@ -34946,8 +34946,8 @@
         },
         "LD%": {
           "pctile": 69,
-          "value": 19.6,
-          "display": "19.6"
+          "value": 19.5,
+          "display": "19.5"
         },
         "Chase %": {
           "pctile": 75,
@@ -35950,7 +35950,7 @@
           "display": "7.4"
         },
         "LD%": {
-          "pctile": 91,
+          "pctile": 89,
           "value": 25.9,
           "display": "25.9"
         },
@@ -43723,8 +43723,8 @@
         },
         "LD%": {
           "pctile": 83,
-          "value": 21.8,
-          "display": "21.8"
+          "value": 21.7,
+          "display": "21.7"
         },
         "Chase %": {
           "pctile": 88,
@@ -45799,9 +45799,9 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 41,
-          "value": 17.1,
-          "display": "17.1"
+          "pctile": 39,
+          "value": 16.8,
+          "display": "16.8"
         },
         "Chase %": {
           "pctile": 41,
@@ -49752,7 +49752,7 @@
           "display": "8.3"
         },
         "LD%": {
-          "pctile": 11,
+          "pctile": 13,
           "value": 12.8,
           "display": "12.8"
         },
@@ -50288,7 +50288,7 @@
           "display": "11.8"
         },
         "LD%": {
-          "pctile": 31,
+          "pctile": 32,
           "value": 16.4,
           "display": "16.4"
         },
@@ -50825,8 +50825,8 @@
         },
         "LD%": {
           "pctile": 5,
-          "value": 9.6,
-          "display": "9.6"
+          "value": 9.5,
+          "display": "9.5"
         },
         "Chase %": {
           "pctile": 25,
@@ -51427,7 +51427,7 @@
           "display": "25.0"
         },
         "LD%": {
-          "pctile": 77,
+          "pctile": 75,
           "value": 20.3,
           "display": "20.3"
         },
@@ -51695,7 +51695,7 @@
           "display": "21.4"
         },
         "LD%": {
-          "pctile": 29,
+          "pctile": 27,
           "value": 15.9,
           "display": "15.9"
         },
@@ -53973,7 +53973,7 @@
           "display": "12.5"
         },
         "LD%": {
-          "pctile": 39,
+          "pctile": 41,
           "value": 17.0,
           "display": "17.0"
         },
@@ -56720,7 +56720,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 79,
+          "pctile": 78,
           "value": 20.4,
           "display": "20.4"
         },
@@ -57792,7 +57792,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 75,
+          "pctile": 73,
           "value": 20.1,
           "display": "20.1"
         },
@@ -138439,6 +138439,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-09-26 14:02:33 UTC"
+    "generated_at": "2026-09-27 14:02:32 UTC"
   }
 }
