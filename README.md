@@ -56,12 +56,14 @@ One XGBRegressor predicting xwOBAcon per competitive swing from 13 swing-mechani
 adjustability and hitter-trait features (`notebooks/iSwing_Plus_v9.ipynb`). Model files at the
 repo root: `iswing_model.pkl`, `iswing_scaler.pkl`, `iswing_config.json`.
 
-- Daily: `python3 iswing_update.py` fetches new swings, re-scores every season in
-  `competitive_swings_2023_2026.csv` (features built per season), and writes `iswing.json`,
-  `iswing_waterfall_{year}.json`, `iswing_meta.json` plus the current-season hitter-card files.
-- Past seasons (one-time after a model change): `python3 iswing_update.py --backfill 2023 2024 2025`
-  fetches each season from Savant (cached to `competitive_swings_{year}.csv`, gitignored), or
-  `--csv PATH` reads them from an existing swings CSV.
+- Daily: `python3 iswing_update.py` fetches new swings into `competitive_swings_2023_2026.csv`, then
+  re-scores every season on hand (that CSV plus the `competitive_swings_{year}.csv` backfill files) and
+  writes `iswing.json`, `iswing_waterfall_{year}.json`, `iswing_meta.json` plus the current-season
+  hitter-card files. Per-hitter traits and speed bins are pooled across all seasons, exactly as in the
+  notebook — the model is very sensitive to them, so this is what makes the site match the notebook.
+- Past seasons (one-time): `python3 iswing_update.py --backfill 2023 2024 2025` fetches each season from
+  Savant into `competitive_swings_{year}.csv` (gitignored; keep them — the daily run pools them), or
+  `--csv PATH` takes them from an existing swings CSV.
 - Waterfall bars are the model's own feature contributions vs the average qualified hitter,
   converted to iSwing+ points; they always sum to the hitter's iSwing+ − 100.
 - The *new* label shows on iSwing+ only for seasons listed in `iswing_meta.json`;
