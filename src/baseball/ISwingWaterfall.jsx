@@ -23,7 +23,7 @@ const FEATURE_LABELS = {
   tilt_for_height: "Tilt for Height",
   direction_from_optimal: "Direction vs Optimal",
   length_for_location: "Length for Location",
-  effort_level: "Effort Level",
+  effort_level: "90th Percentile Bat Speed",
   hard_swing_contact: "Hard-Swing Contact",
   aa_adaptability: "Attack Angle Adaptability",
   dir_adaptability: "Direction Adaptability",
@@ -55,6 +55,9 @@ function readableOn(hex, isDark) {
   if (!isDark && lum > 0.45) return mixHex(hex, "#000000", 0.35);
   return hex;
 }
+
+// The whole card (header, numbers, chart) is set in Pliant.
+const FONT = "'Pliant', sans-serif";
 
 const fmtPts = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}`;
 
@@ -127,7 +130,7 @@ export default function ISwingWaterfall({ season, hitters }) {
       {rec && (
         <>
           <FitToWidth designWidth={700}>
-            <div ref={cardRef} style={{ background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 700, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
+            <div ref={cardRef} style={{ fontFamily: FONT, background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 700, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
               <PlayerHeader
                 name={name}
                 team={team}
@@ -162,7 +165,7 @@ function SummaryStrip({ rec, isNew }) {
   const stat = (label, value, extra) => (
     <div style={{ textAlign: "center", minWidth: 110 }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 800, color: t.text, fontFamily: "'DM Mono', monospace", lineHeight: 1.2 }}>{value}</div>
+      <div style={{ fontSize: 26, fontWeight: 800, color: t.text, lineHeight: 1.2 }}>{value}</div>
       {extra}
     </div>
   );
@@ -215,7 +218,7 @@ function Waterfall({ rec, color }) {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "4px 12px 0" }}>
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ maxWidth: "100%", height: "auto" }} role="img"
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ maxWidth: "100%", height: "auto", fontFamily: FONT }} role="img"
         aria-label={`iSwing+ waterfall: ${rows.map(r => `${featureLabel(r.f)} ${fmtPts(r.v)}`).join(", ")}; final ${final}`}>
         <defs>
           <pattern id={patternId} patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
@@ -228,7 +231,7 @@ function Waterfall({ rec, color }) {
         {ticks.map(v => (
           <g key={v}>
             <line x1={x(v)} x2={x(v)} y1={top - 6} y2={yBottom} stroke={t.divider} strokeWidth="1" />
-            <text x={x(v)} y={yBottom + 14} textAnchor="middle" fontSize="10" fill={t.textFaint} fontFamily="'DM Mono', monospace">{v}</text>
+            <text x={x(v)} y={yBottom + 14} textAnchor="middle" fontSize="10" fill={t.textFaint}>{v}</text>
           </g>
         ))}
         <text x={(plotL + plotR) / 2} y={H - 4} textAnchor="middle" fontSize="10" fontWeight="700" fill={t.textMuted} letterSpacing="0.06em">iSWING+ POINTS</text>
@@ -255,7 +258,7 @@ function Waterfall({ rec, color }) {
                 <line x1={x(r.end)} x2={x(r.end)} y1={y + rowH - 4} y2={y + rowH + 4} stroke={t.textFaint} strokeWidth="1" />
               )}
               <text x={pos ? x1 + 4 : x0 - 4} y={y + rowH / 2 + 3.5} textAnchor={pos ? "start" : "end"}
-                fontSize="10" fontWeight="700" fill={t.textSecondary} fontFamily="'DM Mono', monospace" {...halo}>{fmtPts(r.v)}</text>
+                fontSize="10" fontWeight="700" fill={t.textSecondary} {...halo}>{fmtPts(r.v)}</text>
             </g>
           );
         })}
