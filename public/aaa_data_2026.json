@@ -1914,9 +1914,9 @@
           "display": "5.8"
         },
         "LD%": {
-          "pctile": 3,
-          "value": 9.1,
-          "display": "9.1"
+          "pctile": 85,
+          "value": 23.1,
+          "display": "23.1"
         },
         "Chase %": {
           "pctile": 26,
@@ -2450,9 +2450,9 @@
           "display": "2.5"
         },
         "LD%": {
-          "pctile": 52,
-          "value": 17.9,
-          "display": "17.9"
+          "pctile": 41,
+          "value": 17.3,
+          "display": "17.3"
         },
         "Chase %": {
           "pctile": 49,
@@ -2919,7 +2919,7 @@
           "display": "10.9"
         },
         "LD%": {
-          "pctile": 81,
+          "pctile": 79,
           "value": 20.8,
           "display": "20.8"
         },
@@ -11562,7 +11562,7 @@
           "display": "8.0"
         },
         "LD%": {
-          "pctile": 36,
+          "pctile": 34,
           "value": 16.7,
           "display": "16.7"
         },
@@ -12098,7 +12098,7 @@
           "display": "1.0"
         },
         "LD%": {
-          "pctile": 43,
+          "pctile": 41,
           "value": 17.3,
           "display": "17.3"
         },
@@ -12165,9 +12165,9 @@
           "display": "7.5"
         },
         "LD%": {
-          "pctile": 29,
-          "value": 16.3,
-          "display": "16.3"
+          "pctile": 37,
+          "value": 17.1,
+          "display": "17.1"
         },
         "Chase %": {
           "pctile": 48,
@@ -13773,9 +13773,9 @@
           "display": "4.0"
         },
         "LD%": {
-          "pctile": 9,
-          "value": 11.1,
-          "display": "11.1"
+          "pctile": 19,
+          "value": 14.3,
+          "display": "14.3"
         },
         "Chase %": {
           "pctile": 83,
@@ -14176,8 +14176,8 @@
         },
         "LD%": {
           "pctile": 95,
-          "value": 29.9,
-          "display": "29.9"
+          "value": 29.5,
+          "display": "29.5"
         },
         "Chase %": {
           "pctile": 44,
@@ -15448,7 +15448,7 @@
           "display": "13.2"
         },
         "LD%": {
-          "pctile": 55,
+          "pctile": 53,
           "value": 18.2,
           "display": "18.2"
         },
@@ -16118,9 +16118,9 @@
           "display": "8.4"
         },
         "LD%": {
-          "pctile": 17,
-          "value": 13.3,
-          "display": "13.3"
+          "pctile": 5,
+          "value": 10.5,
+          "display": "10.5"
         },
         "Chase %": {
           "pctile": 92,
@@ -16185,7 +16185,7 @@
           "display": "6.2"
         },
         "LD%": {
-          "pctile": 71,
+          "pctile": 69,
           "value": 20.0,
           "display": "20.0"
         },
@@ -16654,7 +16654,7 @@
           "display": "9.4"
         },
         "LD%": {
-          "pctile": 19,
+          "pctile": 15,
           "value": 13.4,
           "display": "13.4"
         },
@@ -20406,9 +20406,9 @@
           "display": "13.5"
         },
         "LD%": {
-          "pctile": 32,
-          "value": 16.4,
-          "display": "16.4"
+          "pctile": 29,
+          "value": 16.3,
+          "display": "16.3"
         },
         "Chase %": {
           "pctile": 46,
@@ -21143,7 +21143,7 @@
           "display": "4.6"
         },
         "LD%": {
-          "pctile": 15,
+          "pctile": 13,
           "value": 12.9,
           "display": "12.9"
         },
@@ -23220,7 +23220,7 @@
           "display": "3.1"
         },
         "LD%": {
-          "pctile": 21,
+          "pctile": 17,
           "value": 13.6,
           "display": "13.6"
         },
@@ -25096,7 +25096,7 @@
           "display": "6.1"
         },
         "LD%": {
-          "pctile": 49,
+          "pctile": 51,
           "value": 17.8,
           "display": "17.8"
         },
@@ -29317,9 +29317,9 @@
           "display": "7.2"
         },
         "LD%": {
-          "pctile": 78,
-          "value": 20.4,
-          "display": "20.4"
+          "pctile": 76,
+          "value": 20.3,
+          "display": "20.3"
         },
         "Chase %": {
           "pctile": 90,
@@ -30523,7 +30523,7 @@
           "display": "4.1"
         },
         "LD%": {
-          "pctile": 61,
+          "pctile": 60,
           "value": 18.9,
           "display": "18.9"
         },
@@ -32466,7 +32466,7 @@
           "display": "13.2"
         },
         "LD%": {
-          "pctile": 11,
+          "pctile": 9,
           "value": 12.7,
           "display": "12.7"
         },
@@ -33270,9 +33270,9 @@
           "display": "4.0"
         },
         "LD%": {
-          "pctile": 52,
-          "value": 17.9,
-          "display": "17.9"
+          "pctile": 48,
+          "value": 17.6,
+          "display": "17.6"
         },
         "Chase %": {
           "pctile": 60,
@@ -33873,9 +33873,9 @@
           "display": "1.2"
         },
         "LD%": {
-          "pctile": 25,
-          "value": 14.9,
-          "display": "14.9"
+          "pctile": 23,
+          "value": 14.8,
+          "display": "14.8"
         },
         "Chase %": {
           "pctile": 28,
@@ -34945,9 +34945,9 @@
           "display": "11.5"
         },
         "LD%": {
-          "pctile": 69,
-          "value": 19.5,
-          "display": "19.5"
+          "pctile": 72,
+          "value": 20.1,
+          "display": "20.1"
         },
         "Chase %": {
           "pctile": 75,
@@ -37290,7 +37290,7 @@
           "display": "10.7"
         },
         "LD%": {
-          "pctile": 36,
+          "pctile": 34,
           "value": 16.7,
           "display": "16.7"
         },
@@ -38898,7 +38898,7 @@
           "display": "1.9"
         },
         "LD%": {
-          "pctile": 59,
+          "pctile": 57,
           "value": 18.6,
           "display": "18.6"
         },
@@ -40975,7 +40975,7 @@
           "display": "2.2"
         },
         "LD%": {
-          "pctile": 23,
+          "pctile": 21,
           "value": 14.6,
           "display": "14.6"
         },
@@ -42248,9 +42248,9 @@
           "display": "8.3"
         },
         "LD%": {
-          "pctile": 85,
-          "value": 23.9,
-          "display": "23.9"
+          "pctile": 83,
+          "value": 23.0,
+          "display": "23.0"
         },
         "Chase %": {
           "pctile": 9,
@@ -42449,7 +42449,7 @@
           "display": "15.2"
         },
         "LD%": {
-          "pctile": 66,
+          "pctile": 65,
           "value": 19.4,
           "display": "19.4"
         },
@@ -42851,9 +42851,9 @@
           "display": "8.8"
         },
         "LD%": {
-          "pctile": 66,
-          "value": 19.4,
-          "display": "19.4"
+          "pctile": 60,
+          "value": 18.9,
+          "display": "18.9"
         },
         "Chase %": {
           "pctile": 50,
@@ -43722,9 +43722,9 @@
           "display": "4.1"
         },
         "LD%": {
-          "pctile": 83,
-          "value": 21.7,
-          "display": "21.7"
+          "pctile": 81,
+          "value": 22.0,
+          "display": "22.0"
         },
         "Chase %": {
           "pctile": 88,
@@ -45799,9 +45799,9 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 39,
-          "value": 16.8,
-          "display": "16.8"
+          "pctile": 31,
+          "value": 16.4,
+          "display": "16.4"
         },
         "Chase %": {
           "pctile": 41,
@@ -47809,9 +47809,9 @@
           "display": "12.5"
         },
         "LD%": {
-          "pctile": 57,
-          "value": 18.5,
-          "display": "18.5"
+          "pctile": 55,
+          "value": 18.4,
+          "display": "18.4"
         },
         "Chase %": {
           "pctile": 9,
@@ -49283,7 +49283,7 @@
           "display": "5.3"
         },
         "LD%": {
-          "pctile": 47,
+          "pctile": 48,
           "value": 17.6,
           "display": "17.6"
         },
@@ -49752,7 +49752,7 @@
           "display": "8.3"
         },
         "LD%": {
-          "pctile": 13,
+          "pctile": 11,
           "value": 12.8,
           "display": "12.8"
         },
@@ -50288,9 +50288,9 @@
           "display": "11.8"
         },
         "LD%": {
-          "pctile": 32,
-          "value": 16.4,
-          "display": "16.4"
+          "pctile": 27,
+          "value": 16.2,
+          "display": "16.2"
         },
         "Chase %": {
           "pctile": 95,
@@ -50824,9 +50824,9 @@
           "display": "12.5"
         },
         "LD%": {
-          "pctile": 5,
-          "value": 9.5,
-          "display": "9.5"
+          "pctile": 3,
+          "value": 9.4,
+          "display": "9.4"
         },
         "Chase %": {
           "pctile": 25,
@@ -51427,9 +51427,9 @@
           "display": "25.0"
         },
         "LD%": {
-          "pctile": 75,
-          "value": 20.3,
-          "display": "20.3"
+          "pctile": 67,
+          "value": 19.8,
+          "display": "19.8"
         },
         "Chase %": {
           "pctile": 98,
@@ -51695,7 +51695,7 @@
           "display": "21.4"
         },
         "LD%": {
-          "pctile": 27,
+          "pctile": 25,
           "value": 15.9,
           "display": "15.9"
         },
@@ -53974,8 +53974,8 @@
         },
         "LD%": {
           "pctile": 41,
-          "value": 17.0,
-          "display": "17.0"
+          "value": 17.3,
+          "display": "17.3"
         },
         "Chase %": {
           "pctile": 72,
@@ -56720,9 +56720,9 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 78,
-          "value": 20.4,
-          "display": "20.4"
+          "pctile": 76,
+          "value": 20.3,
+          "display": "20.3"
         },
         "Chase %": {
           "pctile": 73,
@@ -57792,7 +57792,7 @@
           "display": "0.0"
         },
         "LD%": {
-          "pctile": 73,
+          "pctile": 72,
           "value": 20.1,
           "display": "20.1"
         },
@@ -138439,6 +138439,6 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-09-27 14:02:32 UTC"
+    "generated_at": "2026-09-28 14:02:48 UTC"
   }
 }
