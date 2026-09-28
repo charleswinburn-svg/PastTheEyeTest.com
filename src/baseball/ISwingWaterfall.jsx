@@ -231,7 +231,7 @@ function Waterfall({ rec, color }) {
         {ticks.map(v => (
           <g key={v}>
             <line x1={x(v)} x2={x(v)} y1={top - 6} y2={yBottom} stroke={t.divider} strokeWidth="1" />
-            <text x={x(v)} y={yBottom + 14} textAnchor="middle" fontSize="10" fill={t.textFaint}>{v}</text>
+            <text x={x(v)} y={yBottom + 14} textAnchor="middle" fontSize="10" fontWeight="700" fill={t.textFaint}>{v}</text>
           </g>
         ))}
         <text x={(plotL + plotR) / 2} y={H - 4} textAnchor="middle" fontSize="10" fontWeight="700" fill={t.textMuted} letterSpacing="0.06em">iSWING+ POINTS</text>

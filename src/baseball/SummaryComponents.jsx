@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { PITCH_COLORS, PITCH_NAMES, HIT_COLORS } from "./mlbApi.js";
 import { useTheme } from "./ThemeContext.jsx";
+import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // MOVEMENT PLOT (Horizontal Break vs Induced Vertical Break)
@@ -144,9 +145,9 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
             stroke={tk === 0 ? gridMajor : gridMinor} strokeWidth={tk === 0 ? 1 : 0.5}
             strokeDasharray={tk === 0 ? "4,4" : "none"} />
           <text x={scaleX(tk)} y={pT + side + 18} textAnchor="middle"
-            fill={labelFill} fontSize={10}>{tk}"</text>
+            fill={labelFill} fontSize={10} fontFamily={NUM_FONT} fontWeight={NUM_WEIGHT}>{tk}"</text>
           <text x={pL - 8} y={scaleY(tk) + 3} textAnchor="end"
-            fill={labelFill} fontSize={10}>{tk}"</text>
+            fill={labelFill} fontSize={10} fontFamily={NUM_FONT} fontWeight={NUM_WEIGHT}>{tk}"</text>
         </g>
       ))}
 
@@ -204,7 +205,7 @@ export function MovementPlot({ pitches, width = 500, height = 500, maxPitches = 
             <text x={b.x + 16} y={b.y + 13} fontSize={9.5} fontWeight={700} fill={t.textSecondary}>
               {PITCH_NAMES[b.pt] || b.pt}
             </text>
-            <text x={b.x + 6} y={b.y + 25} fontSize={8} fontFamily="ui-monospace,monospace" fill={t.textMuted}>
+            <text x={b.x + 6} y={b.y + 25} fontSize={8} fontFamily={NUM_FONT} fontWeight={NUM_WEIGHT} fill={t.textMuted}>
               {fmtIn(b.dH)} H  {fmtIn(b.dV)} V
             </text>
           </g>
@@ -706,7 +707,7 @@ export function ZonePlot({ pitches, title, width = 260, height = 300, pitchPlus 
 
         {/* Count */}
         <text x={width - 8} y={height - 6} textAnchor="end"
-          fill={t.textMuted} fontSize={10}>n={count}</text>
+          fill={t.textMuted} fontSize={10} fontFamily={NUM_FONT} fontWeight={NUM_WEIGHT}>n={count}</text>
       </svg>
       {hovered && <PitchTooltip pitch={hovered} pos={tooltipPos} ptScores={pitchPlus?.[hovered.pitchType]} />}
     </div>
@@ -1605,7 +1606,7 @@ function MiniZone({ pitches, pitchType, color, size, isGame, ptScores }) {
           <image href={heatDataUrl} x={pad} y={labelH} width={plotW} height={plotH}
             style={{ imageRendering: "auto" }} />
         )}
-        <text x={w - 3} y={h - 2} textAnchor="end" fill={countFill} fontSize={7}>{filtered.length}</text>
+        <text x={w - 3} y={h - 2} textAnchor="end" fill={countFill} fontSize={7} fontFamily={NUM_FONT} fontWeight={NUM_WEIGHT}>{filtered.length}</text>
       </svg>
       {hovered && <PitchTooltip pitch={hovered} pos={tooltipPos} ptScores={ptScores} />}
     </div>

@@ -1,5 +1,5 @@
 import { useTheme } from "./ThemeContext.jsx";
-import { NewBadge } from "./SharedComponents.jsx";
+import { NewBadge, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 
 // Reusable KDE bell-curve figure (SVG). Renders one or more precomputed density
 // curves on a shared x-axis, with optional vertical reference lines (e.g. player
@@ -54,7 +54,7 @@ export default function KdeCurve({
         {ticks.map(v => (
           <g key={v}>
             <line x1={sx(v)} y1={baseY} x2={sx(v)} y2={baseY + 3} stroke={t.divider} strokeWidth={1} />
-            <text x={sx(v)} y={baseY + 13} fontSize={8} fill={t.textFaint} textAnchor="middle" fontFamily="'DM Mono', monospace">{v}</text>
+            <text x={sx(v)} y={baseY + 13} fontSize={8} fill={t.textFaint} textAnchor="middle" fontFamily={NUM_FONT} fontWeight={NUM_WEIGHT}>{v}</text>
           </g>
         ))}
         {/* reference lines */}

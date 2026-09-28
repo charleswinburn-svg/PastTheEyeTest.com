@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ReferenceLine } from "recharts";
-import { SearchableSelect, exportCanvasAsPng } from "../baseball/SharedComponents.jsx";
+import { SearchableSelect, exportCanvasAsPng, NUM_FONT, NUM_WEIGHT } from "../baseball/SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 
 function useWindowWidth() {
@@ -112,7 +112,7 @@ function PercentileBar({label,pctile,isOverall,weight}){
       <div style={{flex:1,position:"relative",height:isOverall?28:22,background:"#0f172a",borderRadius:4,border:isOverall?"2px solid #f59e0b":"1px solid #1e3a5f",overflow:"hidden"}}>
         <div style={{width:`${w}%`,height:"100%",background:binColor(pctile),borderRadius:3,transition:"width 0.6s cubic-bezier(0.25,0.46,0.45,0.94)"}}/>
       </div>
-      <div style={{width:32,textAlign:"right",fontSize:isOverall?14:12,fontWeight:isOverall?800:600,color:pctile!=null?"#f8fafc":"#64748b",fontFamily:"'DM Mono',monospace",flexShrink:0}}>{pctile!=null?Math.round(pctile):"—"}</div>
+      <div style={{width:32,textAlign:"right",fontSize:isOverall?14:12,fontWeight:isOverall?800:NUM_WEIGHT,color:pctile!=null?"#f8fafc":"#64748b",fontFamily:NUM_FONT,flexShrink:0,whiteSpace:"nowrap"}}>{pctile!=null?Math.round(pctile):"—"}</div>
     </div>
   );
 }
@@ -150,8 +150,8 @@ function TrendChart({data,lines,colors,labels}){
       <ResponsiveContainer width="100%" height={170}>
         <LineChart data={sorted} margin={{top:8,right:16,bottom:4,left:0}}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f"/>
-          <XAxis dataKey="season" tick={{fill:"#94a3b8",fontSize:11}} tickLine={false} axisLine={{stroke:"#334155"}}/>
-          <YAxis domain={[0,100]} ticks={[0,25,50,75,100]} tick={{fill:"#64748b",fontSize:10}} tickLine={false} axisLine={false} width={28}/>
+          <XAxis dataKey="season" tick={{fill:"#94a3b8",fontSize:11,fontFamily:NUM_FONT,fontWeight:NUM_WEIGHT}} tickLine={false} axisLine={{stroke:"#334155"}}/>
+          <YAxis domain={[0,100]} ticks={[0,25,50,75,100]} tick={{fill:"#64748b",fontSize:10,fontFamily:NUM_FONT,fontWeight:NUM_WEIGHT}} tickLine={false} axisLine={false} width={28}/>
           {lines.map((key,i)=>(
             <Line key={key} type="monotone" dataKey={key} stroke={colors[i]} strokeWidth={2.5} dot={{r:4,fill:colors[i],stroke:"#0f172a",strokeWidth:2}}/>
           ))}

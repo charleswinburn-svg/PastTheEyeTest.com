@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
 import { fetchGameLog, fetchSavantPlayerSeason } from "./mlbApi.js";
-import { saveCardAsPng } from "./SharedComponents.jsx";
+import { saveCardAsPng, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 
 // ── Statcast counter aggregation ───────────────────────────────────────────
 // Aggregate per-pitch Savant rows into per-game counters that can be summed
@@ -518,14 +518,14 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
                 <CartesianGrid strokeDasharray="3 3" stroke={t.cardBorder} />
                 <XAxis
                   dataKey="date"
-                  tick={{ fill: t.textMuted, fontSize: 10 }}
+                  tick={{ fill: t.textMuted, fontSize: 10, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}
                   tickLine={false}
                   axisLine={{ stroke: t.divider }}
                   tickFormatter={(d) => (d || "").slice(5)}
                   minTickGap={28}
                 />
                 <YAxis
-                  tick={{ fill: t.textFaint, fontSize: 10 }} tickLine={false}
+                  tick={{ fill: t.textFaint, fontSize: 10, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }} tickLine={false}
                   axisLine={false} width={40}
                   domain={["auto", "auto"]}
                   tickFormatter={v => v.toFixed(tickDigits)}

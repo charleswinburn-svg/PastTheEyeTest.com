@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import { LocationZonePanel } from "./SummaryComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { PITCH_COLORS, PITCH_NAMES, fetchSavantPlayerSeason, fetchSavantPlayerDateRange, scorePitchCode } from "./mlbApi.js";
@@ -293,7 +293,7 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6 }}>
                       <span style={{ width: 10, height: 10, borderRadius: "50%", background: ty.overall ? t.accent : ty.color, flexShrink: 0 }} />
                       <span style={{ fontSize: 12, fontWeight: 800, color: t.text, letterSpacing: "0.02em" }}>{ty.name}</span>
-                      <span style={{ fontSize: 10, color: t.textFaint, fontFamily: "'DM Mono', monospace" }}>{ty.n} pitches</span>
+                      <span style={{ fontSize: 10, color: t.textFaint, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{ty.n} pitches</span>
                     </div>
                     {ty.rows.map(r => (
                       <BubblePercentileBar key={r.key} label={r.label} pctile={r.pctile} display={r.display} labelWidth={140} />

@@ -14,6 +14,11 @@ export const pctToBin = (p) => {
   if (p >= 25) return "25-45";  if (p >= 10) return "10-25";
   return "0-10";
 };
+// Numbers on every card (percentiles, stat values, chart ticks) — the Pliant
+// face the Summaries stat bar and pitch table use, always bold.
+export const NUM_FONT = "'Pliant', sans-serif";
+export const NUM_WEIGHT = 700;
+
 export const binColor = (p) => BIN_COLORS[pctToBin(p)] || "#333";
 export const textOnBin = (p) => {
   if (p == null) return "#aaa";
@@ -345,7 +350,7 @@ export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, 
             <span style={{
               fontSize: 10, fontWeight: 800,
               color: txtColor,
-              fontFamily: "'DM Mono', monospace",
+              fontFamily: NUM_FONT,
               lineHeight: 1,
             }}>
               {Math.round(pctile)}
@@ -366,9 +371,9 @@ export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, 
 
       {/* Raw value */}
       <div style={{
-        width: 48, textAlign: "right", fontSize: 11, fontWeight: 600,
+        width: 48, textAlign: "right", fontSize: 11, fontWeight: NUM_WEIGHT,
         color: hasValue ? t.textSecondary : t.textFaintest,
-        fontFamily: "'DM Mono', monospace",
+        fontFamily: NUM_FONT, whiteSpace: "nowrap",
         flexShrink: 0,
       }}>
         {display || "—"}
@@ -493,11 +498,11 @@ export function TrendChart({ data, metricLabel, metricKey }) {
         <LineChart data={sorted} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={t.cardBorder} />
           <XAxis
-            dataKey="season" tick={{ fill: t.textMuted, fontSize: 11 }}
+            dataKey="season" tick={{ fill: t.textMuted, fontSize: 11, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}
             tickLine={false} axisLine={{ stroke: t.divider }}
           />
           <YAxis
-            tick={{ fill: t.textFaint, fontSize: 10 }} tickLine={false}
+            tick={{ fill: t.textFaint, fontSize: 10, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }} tickLine={false}
             axisLine={false} width={36}
           />
           <Line

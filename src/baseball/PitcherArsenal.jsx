@@ -1,6 +1,7 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect } from "react";
 import { MovementPlot, PitchTypeLegend } from "./SummaryComponents.jsx";
+import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import {
   PITCH_COLORS, PITCH_NAMES,
   fetchSavantPlayerSeason, fetchSavantPlayerDateRange,
@@ -362,9 +363,9 @@ function ArsenalTable({ rows, theme, isAAA }) {
     { key: "kPct",    label: "K",     fmt: v => v == null ? "—" : `${Math.round(v)}%` },
   ];
   const th = { fontSize: 8, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.03em", padding: "1px 3px", textAlign: "right" };
-  // Mirror the percentile-bar fonts: pitch name in the sans label font, numbers in DM Mono.
+  // Mirror the percentile-bar fonts: pitch name in the sans label font, numbers in bold Pliant.
   const nameTd = { fontSize: 11, fontWeight: 500, color: t.text, padding: "1px 3px", textAlign: "left", whiteSpace: "nowrap", width: "1%" };
-  const td = { fontSize: 11, fontWeight: 600, color: t.textSecondary, padding: "1px 3px", textAlign: "right", fontFamily: "'DM Mono', monospace" };
+  const td = { fontSize: 11, fontWeight: NUM_WEIGHT, color: t.textSecondary, padding: "1px 3px", textAlign: "right", fontFamily: NUM_FONT, whiteSpace: "nowrap" };
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 300 }}>

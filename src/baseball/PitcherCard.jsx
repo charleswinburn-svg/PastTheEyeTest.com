@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
@@ -356,7 +356,7 @@ function ProBubblesRow({ data, theme }) {
                 <div style={{
                   fontSize: 18, fontWeight: 800,
                   color: txt,
-                  fontFamily: "'DM Mono', monospace",
+                  fontFamily: NUM_FONT,
                   lineHeight: 1,
                 }}>
                   {value != null ? Math.round(value) : "—"}
@@ -364,9 +364,9 @@ function ProBubblesRow({ data, theme }) {
               )}
             </div>
             <div style={{
-              fontSize: 9, fontWeight: 700,
+              fontSize: 9, fontWeight: NUM_WEIGHT,
               color: pctile != null ? t.textSecondary : t.textFaintest,
-              fontFamily: "'DM Mono', monospace",
+              fontFamily: NUM_FONT,
               letterSpacing: "0.02em",
               whiteSpace: "nowrap",
             }}>
