@@ -4110,7 +4110,7 @@
       "player_id": 703725,
       "name": "Luis Gastelum",
       "team": "STL",
-      "ip": 36.4,
+      "ip": 36.9,
       "gs": 0,
       "g": 34,
       "is_sp": false,
@@ -7527,6 +7527,6 @@
     "min_ip": 20,
     "role_method": "starter_pct_gt_50",
     "total_pitches_analyzed": 716792,
-    "generated_at": "2026-09-28 14:58:01 UTC"
+    "generated_at": "2026-09-29 14:57:27 UTC"
   }
 }
