@@ -299,14 +299,12 @@ export async function fetchSchedule(season, gameType = "S", sportId = null) {
   }
 
   // ── REGULAR SEASON / POSTSEASON ──
-  let startDate, endDate;
-  if (gameType === "R") {
-    startDate = `${season}-03-20`;
-    endDate = `${season}-11-05`;
-  } else {
-    startDate = `${season}-10-01`;
-    endDate = `${season}-11-15`;
-  }
+  // Postseason is scoped by season rather than a date window: the Wild Card
+  // round can start in late September (e.g. 2026-09-29), and the F/D/L/W
+  // gameType filter already excludes everything else.
+  const range = gameType === "R"
+    ? `startDate=${season}-03-20&endDate=${season}-11-05`
+    : `season=${season}`;
 
   const sid = sportId || 1;
   const gameTypes = gameType === "P" ? ["F", "D", "L", "W"] : [gameType];
@@ -314,7 +312,7 @@ export async function fetchSchedule(season, gameType = "S", sportId = null) {
 
   for (const gt of gameTypes) {
     const d = await fetchJson(
-      `${API}/schedule?sportId=${sid}&gameType=${gt}&startDate=${startDate}&endDate=${endDate}&hydrate=team,probablePitcher`
+      `${API}/schedule?sportId=${sid}&gameType=${gt}&${range}&hydrate=team,probablePitcher`
     );
     for (const date of (d.dates || [])) {
       for (const g of date.games) {
