@@ -252,17 +252,29 @@ export async function fetchSchedule(season, gameType = "S", sportId = null) {
     return allGames;
   }
 
-  // ── EXHIBITION: Spring Breakout + Futures (sportId=21) and the All-Star Game (sportId=1) ──
+  // ── EXHIBITION: Spring Breakout + Futures (sportId=21), the All-Star Game (sportId=1)
+  // and the Arizona Fall League (sportId=17) ──
   // The prospect showcases live at sportId=21; the MLB All-Star Game lives at
   // sportId=1 with gameType=A, so it's fetched separately and merged in. Prospect
   // squads ("… Prospects") get remapped to their parent MLB org for logos/colors;
   // All-Star team names ("AL/NL All-Stars") don't match, so they pass through.
+  // The AFL shares sportId=17 (Winter Leagues) with the Caribbean/Mexican/
+  // Australian leagues, so only games involving an AFL club are kept.
   if (gameType === "E") {
-    const [teamsRes, sportId21, allStar] = await Promise.all([
+    const [teamsRes, sportId21, allStar, winter] = await Promise.all([
       fetchJson(`${API}/teams?sportId=1`).catch(() => ({ teams: [] })),
       fetchJson(`${API}/schedule?sportId=21&season=${season}&hydrate=team,probablePitcher`).catch(() => ({ dates: [] })),
       fetchJson(`${API}/schedule?sportId=1&gameType=A&season=${season}&hydrate=team,probablePitcher`).catch(() => ({ dates: [] })),
+      fetchJson(`${API}/schedule?sportId=17&season=${season}&hydrate=team,probablePitcher`).catch(() => ({ dates: [] })),
     ]);
+    const AFL_TEAMS = /desert dogs|rafters|scorpions|saguaros|solar sox|javelinas/i;
+    const isAflTeam = (t) => /arizona fall/i.test(t?.league?.name || "") || AFL_TEAMS.test(t?.name || t?.teamName || "");
+    const afl = {
+      dates: (winter.dates || []).map(d => ({
+        ...d,
+        games: (d.games || []).filter(g => isAflTeam(g.teams?.away?.team) || isAflTeam(g.teams?.home?.team)),
+      })),
+    };
     const mlbNameMap = {};
     for (const t of (teamsRes.teams || [])) {
       if (t.name) mlbNameMap[t.name.toLowerCase()] = t;
@@ -276,7 +288,7 @@ export async function fetchSchedule(season, gameType = "S", sportId = null) {
     };
     const allGames = [];
     const seenPks = new Set();
-    for (const src of [sportId21, allStar]) {
+    for (const src of [sportId21, allStar, afl]) {
       for (const date of (src.dates || [])) {
         for (const g of date.games) {
           if (seenPks.has(g.gamePk)) continue;
@@ -293,7 +305,7 @@ export async function fetchSchedule(season, gameType = "S", sportId = null) {
       }
     }
     // Ascending here; the caller reverses the schedule, so the dropdown ends up
-    // newest-first (All-Star Game / Futures on top, Spring Breakout below).
+    // newest-first (AFL on top, then All-Star Game / Futures, Spring Breakout below).
     allGames.sort((a, b) => a.date.localeCompare(b.date));
     return allGames;
   }
