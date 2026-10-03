@@ -10,7 +10,7 @@
       "extension": 6.44
     },
     "CU": {
-      "count": 46040,
+      "count": 46074,
       "velo": 80.3,
       "spin": 2603,
       "zone_pct": 35.7,
@@ -34,15 +34,15 @@
       "extension": 4.67
     },
     "FC": {
-      "count": 57002,
+      "count": 57278,
       "velo": 89.8,
-      "spin": 2388,
+      "spin": 2390,
       "zone_pct": 46.7,
       "whiff_pct": 22.8,
       "extension": 6.42
     },
     "FF": {
-      "count": 219136,
+      "count": 219137,
       "velo": 94.8,
       "spin": 2314,
       "zone_pct": 47.7,
@@ -66,7 +66,7 @@
       "extension": 6.45
     },
     "SI": {
-      "count": 118798,
+      "count": 118794,
       "velo": 94.1,
       "spin": 2200,
       "zone_pct": 51.3,
@@ -74,18 +74,18 @@
       "extension": 6.42
     },
     "SL": {
-      "count": 93871,
+      "count": 93560,
       "velo": 86.3,
-      "spin": 2435,
-      "zone_pct": 39.1,
-      "whiff_pct": 33.3,
+      "spin": 2434,
+      "zone_pct": 39.0,
+      "whiff_pct": 33.4,
       "extension": 6.39
     },
     "ST": {
-      "count": 59322,
+      "count": 59325,
       "velo": 82.8,
       "spin": 2595,
-      "zone_pct": 39.0,
+      "zone_pct": 38.9,
       "whiff_pct": 31.2,
       "extension": 6.34
     },
@@ -98,5 +98,5 @@
       "extension": 6.11
     }
   },
-  "generated_at": "2026-10-02 15:41:46 UTC"
+  "generated_at": "2026-10-03 15:36:59 UTC"
 }

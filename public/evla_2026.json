@@ -66,8 +66,8 @@
     {
       "label": "35 to 40",
       "avg_ev": 81.6,
-      "hard_hit_pct": 18.3,
-      "count": 12482
+      "hard_hit_pct": 18.4,
+      "count": 12483
     },
     {
       "label": "> 40",
@@ -18241,7 +18241,7 @@
       "player_id": 681715,
       "name": "Heriberto Hern\u00e1ndez",
       "team": "MIA",
-      "total_bbe": 561,
+      "total_bbe": 562,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -18305,9 +18305,9 @@
         },
         {
           "label": "35 to 40",
-          "avg_ev": 86.1,
-          "hard_hit_pct": 37.5,
-          "count": 24
+          "avg_ev": 86.6,
+          "hard_hit_pct": 40.0,
+          "count": 25
         },
         {
           "label": "> 40",
@@ -47360,7 +47360,7 @@
   ],
   "meta": {
     "min_bbe": 30,
-    "total_bbe": 236998,
+    "total_bbe": 236999,
     "bucket_labels": [
       "\u2264 -10",
       "-10 to -5",
@@ -47375,6 +47375,6 @@
       "35 to 40",
       "> 40"
     ],
-    "generated_at": "2026-10-02 15:21:39 UTC"
+    "generated_at": "2026-10-03 15:17:40 UTC"
   }
 }
