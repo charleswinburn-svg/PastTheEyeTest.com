@@ -346,8 +346,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
   const playerGames = useMemo(() => {
     if (!selectedPlayer || !games.length || isGame) return [];
-    // Exhibition (sportId=21): few games, and the sportId=1 game log / MLB team
-    // ids don't line up with All-Star/Futures games — include them all and let
+    // Exhibition (sportId=21/17): few games, and the sportId=1 game log / MLB team
+    // ids don't line up with All-Star/Futures/AFL games — include them all and let
     // the extract functions filter by player ID (same as WBC below).
     if (seasonType === "E") {
       return games.filter(g => g.isExhibition);
