@@ -753,8 +753,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
 
   // Live Pitch+ scoring: send loaded pitches to /score_aggregate, which normalizes
   // at the pitcher×pitch-type level (same scale as /leaderboard pre-computed values).
-  // Three parallel requests: all pitches (pitch table), vs-LHB only, vs-RHB only
-  // (the latter two feed PlatoonUsageBars per-handedness Pitch+).
+  // One request scores all pitches; its by_pitch_type_stand splits feed PlatoonUsageBars
+  // per-handedness grades (older API builds: separate vs-LHB / vs-RHB requests).
   // Game view uses Savant (Statcast) CSV data — same source as the leaderboard batch
   // pipeline — so grades are coherent with season/leaderboard values. Season view and
   // AAA fall back to MLB Stats API data (season view is overridden by leaderboard anyway).
@@ -843,13 +843,25 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           const apiCode = p.details.type.code;
           if (!aliasedToOrig[apiCode]) aliasedToOrig[apiCode] = p._pitchType;
         }
-        const [allData, lData, rData] = await Promise.all([
-          post(allPitches), post(lPitches), post(rPitches),
-        ]);
+        // Platoon splits come from the same scoring as the table (by_pitch_type_stand),
+        // so they always average back to the overall grade. Older API builds don't
+        // return them; only then score the L-only / R-only subsets separately.
+        const allData = await post(allPitches);
         if (cancelled) return;
+        const stand = allData?.by_pitch_type_stand;
+        let byTypeL = {}, byTypeR = {};
+        if (stand) {
+          for (const [pt, sides] of Object.entries(stand)) {
+            if (sides.L) byTypeL[pt] = sides.L;
+            if (sides.R) byTypeR[pt] = sides.R;
+          }
+        } else {
+          const [lData, rData] = await Promise.all([post(lPitches), post(rPitches)]);
+          if (cancelled) return;
+          byTypeL = lData?.by_pitch_type || {};
+          byTypeR = rData?.by_pitch_type || {};
+        }
         const byType  = allData?.by_pitch_type || {};
-        const byTypeL = lData?.by_pitch_type   || {};
-        const byTypeR = rData?.by_pitch_type   || {};
         const round = (v) => v != null ? Math.round(v * 10) / 10 : null;
         const out = {};
         for (const [apiPt, v] of Object.entries(byType)) {
