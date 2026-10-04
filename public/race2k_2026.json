@@ -5537,7 +5537,7 @@
     {
       "player_id": 666808,
       "name": "Camilo Doval",
-      "team": "SF",
+      "team": "PIT",
       "ip": 61.0,
       "gs": 0,
       "g": 66,
@@ -7527,6 +7527,6 @@
     "min_ip": 20,
     "role_method": "starter_pct_gt_50",
     "total_pitches_analyzed": 716792,
-    "generated_at": "2026-10-03 14:56:03 UTC"
+    "generated_at": "2026-10-04 14:52:44 UTC"
   }
 }
