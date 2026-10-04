@@ -14,11 +14,13 @@ by pitcher MLBAM id. Each entry has:
 The aggregation mirrors src/baseball/PitcherArsenal.jsx exactly (pitcher's-
 perspective movement = -pfx_x*12 / pfx_z*12; Zone% via the gameday zone 1-9;
 Avg EV over balls in play only; xwOBA/xBA over all PA outcomes). AAA is not in
-this parquet, so AAA cards keep live-fetching via play-by-play.
+this parquet; --level aaa builds the separate AAA file from pitch_aaa_{season}.parquet.
 
 Usage:
   python3 build_pitcher_arsenal.py --season 2026 \
       --parquet pitch_xrv_2026.parquet --output-dir ./public
+  python3 build_pitcher_arsenal.py --season 2026 --level aaa     # pitch_aaa_2026.parquet
+      # -> public/pitcher_arsenal_aaa_2026.json (AAA only; MLB file untouched)
 """
 import argparse
 import json
@@ -142,11 +144,14 @@ def build(df: pd.DataFrame) -> dict:
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--season", type=int, required=True)
-    p.add_argument("--parquet", default=None, help="default: pitch_xrv_{season}.parquet")
+    p.add_argument("--level", choices=["mlb", "aaa"], default="mlb",
+                   help="aaa: AAA pitches (pitch_aaa_{season}.parquet) -> pitcher_arsenal_aaa_{season}.json")
+    p.add_argument("--parquet", default=None, help="default: pitch_xrv_{season}.parquet (aaa: pitch_aaa_{season}.parquet)")
     p.add_argument("--output-dir", default="./public")
     args = p.parse_args()
 
-    parquet = Path(args.parquet or f"pitch_xrv_{args.season}.parquet")
+    aaa = args.level == "aaa"
+    parquet = Path(args.parquet or (f"pitch_aaa_{args.season}.parquet" if aaa else f"pitch_xrv_{args.season}.parquet"))
     if not parquet.exists():
         raise SystemExit(f"ERROR: parquet not found: {parquet} (run fetch_statcast.py first)")
     print(f"Reading {parquet} …")
@@ -155,7 +160,10 @@ def main():
 
     data = build(df)
     os.makedirs(args.output_dir, exist_ok=True)
-    out = Path(args.output_dir) / f"pitcher_arsenal_{args.season}.json"
+    out = Path(args.output_dir) / (f"pitcher_arsenal_aaa_{args.season}.json" if aaa
+                                   else f"pitcher_arsenal_{args.season}.json")
+    if aaa and "_aaa_" not in out.name:
+        raise SystemExit(f"refusing to write AAA arsenal to a non-AAA file: {out}")
     with open(out, "w") as f:
         json.dump(data, f, separators=(",", ":"))
     print(f"Wrote {out}: {len(data):,} pitchers")

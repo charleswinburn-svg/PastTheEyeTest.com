@@ -9,13 +9,16 @@ const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 
 // Precomputed per-pitcher grade distributions (build_pitcher_grade_dist.py):
 // pitcher id -> { stuff/loc/tun/pitch : { L|R : { pitchType: [density…] } } }
-const distCache = new Map(); // season -> Promise<map|null>
-function loadDist(season) {
-  if (!distCache.has(season)) {
-    distCache.set(season, fetch(`/pitcher_grade_dist_${season}.json`)
+// AAA has its own file (pitcher_grade_dist_aaa_{season}.json: AAA pitches on the
+// MLB scale), never mixed with the MLB one.
+const distCache = new Map(); // "mlb-2026" / "aaa-2026" -> Promise<map|null>
+function loadDist(season, isAAA) {
+  const key = `${isAAA ? "aaa" : "mlb"}-${season}`;
+  if (!distCache.has(key)) {
+    distCache.set(key, fetch(`/pitcher_grade_dist${isAAA ? "_aaa" : ""}_${season}.json`)
       .then(r => (r.ok ? r.json() : null)).catch(() => null));
   }
-  return distCache.get(season);
+  return distCache.get(key);
 }
 
 const METRICS = [["stuff", "Stuff+"], ["loc", "Loc+"], ["tun", "Tun+"], ["pitch", "Pitch+"]];
@@ -97,13 +100,15 @@ export default function PitcherDistributions({ playerId, season, isAAA = false, 
   const { theme: t } = useTheme();
   const [state, setState] = useState({ loading: true, entry: null, meta: null });
   const [win, setWin] = useState({ loading: false, entry: null });
-  const active = !!(dateFrom || dateTo);
+  const ranged = !!(dateFrom || dateTo);
+  // Date windows are re-scored live for MLB only; an AAA window keeps the season curves.
+  const active = ranged && !isAAA;
 
   useEffect(() => {
-    if (isAAA || !playerId) { setState({ loading: false, entry: null, meta: null }); return; }
+    if (!playerId) { setState({ loading: false, entry: null, meta: null }); return; }
     let cancelled = false;
     setState(s => ({ ...s, loading: true }));
-    loadDist(season).then(map => {
+    loadDist(season, isAAA).then(map => {
       if (cancelled) return;
       setState({ loading: false, entry: (map && map[String(playerId)]) || null, meta: map?.meta || null });
     });
@@ -126,7 +131,6 @@ export default function PitcherDistributions({ playerId, season, isAAA = false, 
   const entry = active ? win.entry : state.entry;
   const windowed = active && !!win.entry;
 
-  if (isAAA) return null;
   if (active && win.loading && !win.entry) {
     return (
       <div style={{ maxWidth: 1040, margin: "12px auto 0", textAlign: "center", fontSize: 11, color: t.textFaint }}>
@@ -166,7 +170,7 @@ export default function PitcherDistributions({ playerId, season, isAAA = false, 
   return (
     <div style={{ maxWidth: 1040, margin: "16px auto 0", padding: "0 12px" }}>
       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: t.textMuted, textAlign: "center", marginBottom: 6 }}>
-        Grade Distributions by Pitch Type{windowed ? "  ·  date range" : ""}
+        Grade Distributions by Pitch Type{windowed ? "  ·  date range" : ranged && isAAA ? "  ·  season" : ""}
       </div>
       <PitchTypeLegend types={types} />
       {/* 4 metrics across × 2 rows: vs LHH on top, vs RHH below */}

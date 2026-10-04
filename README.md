@@ -244,6 +244,12 @@ python3 build_component_norms.py --parquet pitch_xrv_2025.parquet
 | `build_component_norms.py` | Calibrate Stuff+/Loc+/Tun+/Pitch+ norms (chunked, hybrid mode) |
 | `build_aaa_norms.py` | AAA-specific norms |
 | `fetch_statcast_chunked.py` | Pull Statcast → parquet (auto-detects opening day, preserves game_type/game_pk) |
+| `fetch_statcast_aaa.py` | Pull AAA Statcast (Savant minors search) → `pitch_aaa_{yr}.parquet`; `--probe YEAR` validates the source first |
+| `build_pitcher_arsenal.py --level aaa` | AAA arsenal panel → `public/pitcher_arsenal_aaa_{yr}.json` |
+| `build_pitcher_grade_dist.py --level aaa` | AAA grade distributions (MLB scale) → `public/pitcher_grade_dist_aaa_{yr}.json` |
+
+AAA pitcher cards are graded on the MLB scale but never touch MLB files: the whole AAA build runs via
+`pitch-plus-api/update_aaa_pitchers.sh`, which writes only `*_aaa_*` outputs and checksums every MLB file before and after.
 
 ### Diagnostic scripts
 

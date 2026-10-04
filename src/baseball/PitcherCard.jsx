@@ -21,11 +21,29 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   useEffect(() => {
     setPitchPlusData(null);
     if (!player?.player_id) return;
-    // AAA has no pitch-modeling grades (Stuff+/Loc+/Tun+/Pitch+ models are
-    // MLB-only) — show "n/a" instead of a perpetual "scoring…" spinner.
-    if (isAAA) { setPitchPlusData({ qualified: false }); return; }
     const isDateRange = !!(dateFrom || dateTo);
     let cancelled = false;
+
+    // AAA: season grades of the pitcher's AAA pitches on the MLB scale, ranked
+    // against AAA pitchers (separate from MLB grades — level=aaa). There's no
+    // live AAA rescoring, so a date range keeps the season values (labelled).
+    if (isAAA) {
+      fetch(`${PITCH_PLUS_API}/pitcher_percentiles/${player.player_id}?season=${season}&level=aaa`)
+        .then(r => r.ok ? r.json() : null)
+        .then(j => {
+          if (cancelled) return;
+          if (!j || j.error) { setPitchPlusData({ qualified: false }); return; }
+          setPitchPlusData({
+            stuff_plus: { value: j.stuff_plus?.value, percentile: j.stuff_plus?.percentile },
+            loc_plus:   { value: j.loc_plus?.value,   percentile: j.loc_plus?.percentile },
+            tun_plus:   { value: j.tun_plus?.value,   percentile: j.tun_plus?.percentile },
+            pitch_plus: { value: j.pitch_plus?.value, percentile: j.pitch_plus?.percentile },
+            seasonOnly: isDateRange,
+          });
+        })
+        .catch(() => { if (!cancelled) setPitchPlusData({ qualified: false }); });
+      return () => { cancelled = true; };
+    }
 
     if (!isDateRange) {
       // Full-season: use pre-computed endpoint (fast, authoritative)
@@ -371,7 +389,7 @@ function ProBubblesRow({ data, theme }) {
               whiteSpace: "nowrap",
             }}>
               {pctile != null
-                ? `${ordinal(Math.round(pctile))} percentile`
+                ? `${ordinal(Math.round(pctile))} percentile${data?.seasonOnly ? " · season" : ""}`
                 : (isUnqualified ? "n/a" : isLoading ? "scoring…" : "—")}
             </div>
           </div>

@@ -11,11 +11,17 @@ metric has one — only Stuff+), then for each (pitcher, metric, stand, pitch_ty
 fits a Gaussian KDE on a fixed x-grid so the frontend just plots the curve.
 
 Output: public/pitcher_grade_dist_{season}.json
+        (--level aaa: reads pitch_aaa_{season}.parquet, writes
+         public/pitcher_grade_dist_aaa_{season}.json — AAA pitches on the MLB
+         scale; the norm file and models are only read, never written)
   { "meta": {"season", "xLo", "xHi", "nPts"},
     "<pitcherId>": { "stuff": {"L": {"FF":[d0..d63], ...}, "R": {...}},
                      "loc": {...}, "tun": {...}, "pitch": {...} } }
 
 Env: same as score_pitches.py — pandas, pyarrow, numpy, lightgbm.
+Set PITCH_PLUS_API_DIR=/var/www/pitch-plus-api to score with the API's
+score_pitches.py and models (current fastball baselines) instead of this repo's
+copies — the season grades come from there, so the curves should too.
 """
 import argparse
 import json
@@ -26,6 +32,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import os
+_API_DIR = os.environ.get("PITCH_PLUS_API_DIR")
+if _API_DIR:                 # score with the API's code + models (same as the season grades)
+    sys.path.insert(0, _API_DIR)
 import score_pitches as sp   # production feature-engineering + models
 
 ROOT = Path(__file__).resolve().parent
@@ -102,14 +112,20 @@ def kde_on_grid(samples):
 def main():
     ap = argparse.ArgumentParser(description="Precompute pitcher grade distributions (KDE)")
     ap.add_argument("--season", type=int, default=DEFAULT_SEASON)
-    ap.add_argument("--parquet", default=None, help="default: pitch_xrv_{season}.parquet")
-    ap.add_argument("--models", default=None, help="default: ./models")
+    ap.add_argument("--level", choices=["mlb", "aaa"], default="mlb",
+                    help="aaa: AAA pitches (pitch_aaa_{season}.parquet) -> pitcher_grade_dist_aaa_{season}.json")
+    ap.add_argument("--parquet", default=None, help="default: pitch_xrv_{season}.parquet (aaa: pitch_aaa_{season}.parquet)")
+    ap.add_argument("--models", default=None, help="default: $PITCH_PLUS_API_DIR/models, else ./models")
     ap.add_argument("--output-dir", default="./public")
     ap.add_argument("--chunk", type=int, default=150000)
     args = ap.parse_args()
 
-    parquet = Path(args.parquet) if args.parquet else ROOT / f"pitch_xrv_{args.season}.parquet"
-    models_dir = Path(args.models) if args.models else ROOT / "models"
+    aaa = args.level == "aaa"
+    default_pq = f"pitch_aaa_{args.season}.parquet" if aaa else f"pitch_xrv_{args.season}.parquet"
+    parquet = Path(args.parquet) if args.parquet else ROOT / default_pq
+    models_dir = (Path(args.models) if args.models
+                  else Path(_API_DIR) / "models" if _API_DIR else ROOT / "models")
+    print(f"  score_pitches: {Path(sp.__file__).resolve()}  models: {models_dir}", file=sys.stderr)
     if not parquet.exists():
         raise SystemExit(f"ERROR: parquet not found: {parquet} (run fetch_statcast.py first)")
 
@@ -152,7 +168,7 @@ def main():
     for (pid, _, _), sd in samples.items():
         by_pitcher_total[pid] += len(sd["stuff"])
 
-    out = {"meta": {"season": args.season, "xLo": X_LO, "xHi": X_HI, "nPts": N_PTS}}
+    out = {"meta": {"season": args.season, "level": args.level, "xLo": X_LO, "xHi": X_HI, "nPts": N_PTS}}
     for (pid, hand, ptype), sd in samples.items():
         if by_pitcher_total[pid] < MIN_PITCHER_TOTAL:
             continue
@@ -165,7 +181,10 @@ def main():
 
     n_pitchers = len(out) - 1
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
-    outfile = Path(args.output_dir) / f"pitcher_grade_dist_{args.season}.json"
+    outfile = Path(args.output_dir) / (f"pitcher_grade_dist_aaa_{args.season}.json" if aaa
+                                       else f"pitcher_grade_dist_{args.season}.json")
+    if aaa and "_aaa_" not in outfile.name:
+        raise SystemExit(f"refusing to write AAA distributions to a non-AAA file: {outfile}")
     with open(outfile, "w") as f:
         json.dump(out, f, separators=(",", ":"))
     print(f"Wrote {outfile}: {n_pitchers:,} pitchers", file=sys.stderr)

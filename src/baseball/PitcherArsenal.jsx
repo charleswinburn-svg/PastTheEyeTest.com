@@ -182,18 +182,21 @@ async function loadPitches({ playerId, season, isAAA, dateFrom, dateTo, onProgre
   return normalizePbp(all);
 }
 
-// ── Precomputed season arsenal (public/pitcher_arsenal_{season}.json) ─────────
-// Built daily by build_pitcher_arsenal.py from the season Statcast parquet, so
-// MLB full-season cards render instantly instead of live-fetching Savant. The
-// aggregation there mirrors aggregate() below, so the shapes are interchangeable.
-const arsenalCache = new Map();   // season -> Promise<{[pid]: entry} | null>
-function loadPrecomputed(season) {
-  if (!arsenalCache.has(season)) {
-    arsenalCache.set(season, fetch(`/pitcher_arsenal_${season}.json`)
+// ── Precomputed season arsenal (public/pitcher_arsenal_{season}.json, AAA:
+// public/pitcher_arsenal_aaa_{season}.json) ──────────────────────────────────
+// Built daily by build_pitcher_arsenal.py from the season Statcast parquet (AAA:
+// its own AAA parquet), so full-season cards render instantly instead of
+// live-fetching. The aggregation there mirrors aggregate() below, so the shapes
+// are interchangeable.
+const arsenalCache = new Map();   // "mlb-2026" / "aaa-2026" -> Promise<{[pid]: entry} | null>
+function loadPrecomputed(season, isAAA) {
+  const key = `${isAAA ? "aaa" : "mlb"}-${season}`;
+  if (!arsenalCache.has(key)) {
+    arsenalCache.set(key, fetch(`/pitcher_arsenal${isAAA ? "_aaa" : ""}_${season}.json`)
       .then(r => (r.ok ? r.json() : null))
       .catch(() => null));
   }
-  return arsenalCache.get(season);
+  return arsenalCache.get(key);
 }
 
 // Expand a precomputed entry into the same {rows, usage, movement} state the live
@@ -227,10 +230,11 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
     setState(s => ({ ...s, loading: true, progress: "" }));
     (async () => {
       try {
-        // MLB full season → try the daily precompute first (instant); fall back to
-        // live Savant fetch on a miss. AAA and date-range always live-fetch.
-        if (!isAAA && !dateFrom && !dateTo) {
-          const map = await loadPrecomputed(season);
+        // Full season → try the daily precompute first (instant); fall back to the
+        // live fetch (Savant for MLB, play-by-play for AAA) on a miss. Date ranges
+        // always live-fetch.
+        if (!dateFrom && !dateTo) {
+          const map = await loadPrecomputed(season, isAAA);
           if (cancelled) return;
           const entry = map && map[String(playerId)];
           if (entry) {
@@ -299,13 +303,11 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
         </div>
       </div>
 
-      {/* ── Bottom: arsenal metrics table (MLB only — AAA has no expected stats) ── */}
-      {!isAAA && (
-        <div style={box}>
-          <div style={heading}>Arsenal by Pitch Type</div>
-          <ArsenalTable rows={rows} theme={t} isAAA={isAAA} />
-        </div>
-      )}
+      {/* ── Bottom: arsenal metrics table ── */}
+      <div style={box}>
+        <div style={heading}>Arsenal by Pitch Type</div>
+        <ArsenalTable rows={rows} theme={t} isAAA={isAAA} />
+      </div>
     </div>
   );
 }
@@ -392,7 +394,7 @@ function ArsenalTable({ rows, theme, isAAA }) {
           })}
         </tbody>
       </table>
-      {isAAA && (
+      {isAAA && rows.every(r => r.xwoba == null && r.xba == null) && (
         <div style={{ fontSize: 8.5, color: t.textFaint, marginTop: 4, fontStyle: "italic", textAlign: "center" }}>
           xwOBA / xBA unavailable at AAA (no Statcast expected stats)
         </div>
