@@ -29,7 +29,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-from savant_fetch import SAVANT_BASE, SAVANT_ROW_CAP, csv_to_df, fetch_url, iter_chunks
+from savant_fetch import HTTP_HEADERS, SAVANT_BASE, SAVANT_ROW_CAP, csv_to_df, fetch_url, iter_chunks
 
 STATSAPI = "https://statsapi.mlb.com/api/v1"
 CHUNK_DAYS = 4
@@ -40,6 +40,11 @@ MLB_TEAMS = {"AZ", "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CHW", "CIN", "CLE"
              "HOU", "KC", "KCR", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", "NYY", "ATH", "OAK",
              "PHI", "PIT", "SD", "SDP", "SEA", "SF", "SFG", "STL", "TB", "TBR", "TEX", "TOR",
              "WSH", "WSN"}
+# The 30 AAA clubs (International League + Pacific Coast League), Stats API codes.
+# Columbus is "COL" like the Rockies, so it counts here rather than in the non-MLB share.
+AAA_TEAMS = {"BUF", "CLT", "COL", "DUR", "GWN", "IND", "IOW", "JAX", "LHV", "LOU", "MEM", "NAS",
+             "NOR", "OMA", "ROC", "SWB", "STP", "SYR", "TOL", "WOR",
+             "ABQ", "ELP", "LV", "OKC", "RNO", "RR", "SAC", "SL", "SUG", "TAC"}
 
 # Columns score_pitches.py requires, plus the ones the arsenal/distribution builders use.
 NEEDED = ['release_speed', 'pfx_x', 'pfx_z', 'vy0', 'vz0', 'vx0', 'ax', 'ay', 'az',
@@ -62,39 +67,50 @@ def _variants(season, start, end):
 
 
 def aaa_game_pks(start, end):
-    """game_pks on the MLB Stats API AAA schedule (sportId=11) for [start, end]."""
-    try:
-        r = requests.get(f"{STATSAPI}/schedule", params={"sportId": 11, "startDate": start, "endDate": end},
-                         timeout=60)
-        r.raise_for_status()
-        return {g["gamePk"] for d in r.json().get("dates", []) for g in d.get("games", [])}
-    except Exception as e:
-        print(f"    ⚠ AAA schedule lookup failed: {e}")
-        return set()
+    """game_pks on the MLB Stats API AAA schedule (sportId=11) for [start, end],
+    or None if the schedule couldn't be fetched. Browser headers like the other
+    pipelines: the Stats API answers a bare python-requests client with 406."""
+    for attempt in range(1, 4):
+        try:
+            r = requests.get(f"{STATSAPI}/schedule", params={"sportId": 11, "startDate": start, "endDate": end},
+                             headers=HTTP_HEADERS, timeout=60)
+            r.raise_for_status()
+            return {g["gamePk"] for d in r.json().get("dates", []) for g in d.get("games", [])}
+        except Exception as e:
+            print(f"    ⚠ AAA schedule lookup failed (attempt {attempt}/3): {e}")
+    return None
 
 
 def validate(df, start, end, verbose=True):
-    """True when df looks like genuine AAA pitches with the scoring columns."""
+    """True when df looks like genuine AAA pitches with the scoring columns.
+
+    Home teams must be AAA clubs (MLB data would show MLB clubs). When the Stats API
+    schedule is reachable, the game_pks must also be on the AAA schedule; when it
+    isn't, the home-team check decides on its own."""
     if df is None or len(df) == 0:
         if verbose:
             print("    rows: 0")
         return False
     teams = df['home_team'].astype(str).str.upper() if 'home_team' in df.columns else pd.Series(dtype=str)
+    aaa_share = float(teams.isin(AAA_TEAMS).mean()) if len(teams) else 0.0
     non_mlb = float((~teams.isin(MLB_TEAMS)).mean()) if len(teams) else 0.0
     sched = aaa_game_pks(start, end)
     pks = set(pd.to_numeric(df.get('game_pk'), errors='coerce').dropna().astype(int)) if 'game_pk' in df.columns else set()
-    on_sched = len(pks & sched) / len(pks) if pks else 0.0
+    on_sched = None if sched is None else (len(pks & sched) / len(pks) if pks else 0.0)
     missing = [c for c in SCORING_COLS if c not in df.columns]
     if verbose:
-        print(f"    rows: {len(df):,}   games: {len(pks)}   home teams: {sorted(teams.unique())[:12]}")
-        print(f"    non-MLB home teams: {non_mlb:.0%}   game_pks on AAA schedule: {on_sched:.0%}"
-              f"   ({len(sched)} AAA games scheduled)")
+        print(f"    rows: {len(df):,}   games: {len(pks)}   home teams: {sorted(teams.unique())}")
+        print(f"    AAA-club home teams: {aaa_share:.0%}   non-MLB home teams: {non_mlb:.0%}")
+        if sched is None:
+            print("    game_pks on AAA schedule: n/a (schedule unavailable — deciding on home teams)")
+        else:
+            print(f"    game_pks on AAA schedule: {on_sched:.0%}   ({len(sched)} AAA games scheduled)")
         print(f"    missing scoring columns: {missing or 'none'}")
         opt = [c for c in OPTIONAL_COLS if c in df.columns]
         print(f"    optional columns present: {opt}")
         if 'estimated_woba_using_speedangle' in df.columns:
             print(f"    xwOBA populated on {df['estimated_woba_using_speedangle'].notna().mean():.0%} of rows")
-    return non_mlb >= 0.9 and on_sched >= 0.5 and not missing
+    return aaa_share >= 0.8 and (on_sched is None or on_sched >= 0.5) and not missing
 
 
 def pick_variant(season):
