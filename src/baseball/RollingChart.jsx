@@ -3,6 +3,8 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Refe
 import { useTheme } from "./ThemeContext.jsx";
 import { fetchGameLog, fetchSavantPlayerSeason } from "./mlbApi.js";
 import { saveCardAsPng, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { mmddFromDate } from "./kde.js";
+import { loadISwingGames, iswingScore, ISWING_MIN_SWINGS } from "./iswingGames.js";
 
 // ── Statcast counter aggregation ───────────────────────────────────────────
 // Aggregate per-pitch Savant rows into per-game counters that can be summed
@@ -150,6 +152,31 @@ function mergeSavant(gameLogRows, savantByDate) {
   });
 }
 
+const isRegularSeason = (r) => !r.gt || r.gt === "R";
+
+// Attach the player's per-date iSwing+ counters (swings + summed raw value, from
+// /iswing_games_{season}.json) to date-sorted gameLog rows: each date's counters go
+// on its FIRST regular-season row only, so a doubleheader isn't counted twice. Every
+// row also carries the season's mu/sd (not summed) for the iSwing+ formula.
+function mergeISwing(rows, games, playerId) {
+  const entry = games?.[String(playerId)];
+  const meta = games?.meta;
+  if (!entry?.d || !meta) return rows;
+  const byDate = new Map(entry.d.map((m, i) => [m, i]));
+  const used = new Set();
+  return rows.map(r => {
+    const out = { ...r, isw_mu: meta.mu, isw_sd: meta.sd };
+    const m = mmddFromDate(r.date);
+    if (isRegularSeason(r) && byDate.has(m) && !used.has(m)) {
+      used.add(m);
+      const i = byDate.get(m);
+      out.isw_n = entry.n[i];
+      out.isw_sum = entry.s[i];
+    }
+    return out;
+  });
+}
+
 // ── Computable metrics ──
 // Each entry maps an id (matched against card category labels + a few of our
 // own additions) to a compute(window) → number, where window is a summed
@@ -202,6 +229,14 @@ const HITTER_COMPUTE = {
   "BB%":  { compute: w => safe(w.BB, w.PA) * 100, suffix: "%" },
   "K%":   { compute: w => safe(w.K,  w.PA) * 100, suffix: "%" },
   "wRC+": { compute: computeWrcPlus, digits: 0, refLine: 100 },
+  // Exact iSwing+ over the window's swings, on the scale of the season of the
+  // window's latest game. Regular season only (iSwing+ is scored on regular-season
+  // swings, so spring PAs would only thin the 50).
+  "iSwing+": {
+    compute: (w, row) => (w.isw_n >= ISWING_MIN_SWINGS
+      ? iswingScore(w.isw_n, w.isw_sum, { mu: row.isw_mu, sd: row.isw_sd }) : null),
+    digits: 0, refLine: 100, regularSeason: true,
+  },
   ...STATCAST_COMPUTE,
 };
 
@@ -255,6 +290,7 @@ function gameRowHitter(g) {
   const s = g.stat || {};
   return {
     date: g.date || g.gameDate,
+    gt:  g.gameType,
     PA:  Number(s.plateAppearances) || 0,
     AB:  Number(s.atBats)            || 0,
     H:   Number(s.hits)              || 0,
@@ -322,12 +358,13 @@ function percentile(arr, p) {
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
 }
 
-const HITTER_KEYS  = ["PA", "AB", "H", "BB", "HBP", "SF", "TB", "K", "d2", "d3", "HR", ...STATCAST_KEYS];
+const HITTER_KEYS  = ["PA", "AB", "H", "BB", "HBP", "SF", "TB", "K", "d2", "d3", "HR", "isw_n", "isw_sum", ...STATCAST_KEYS];
 const PITCHER_KEYS = ["IP", "BF", "H", "BB", "HBP", "K", "HR", "ER", "GO", "AO", ...STATCAST_KEYS];
 
 // Walk games chronologically and emit one point per game once the trailing
 // window (looking BACK from this game inclusive) accumulates at least
 // `windowSize` of `windowKey`. Drops older games as the window slides forward.
+// compute(window, latestRow) may return null (window lacks data) → no point.
 function buildRolling(rows, windowSize, windowKey, keys, compute) {
   if (!rows.length) return [];
   const win = {};
@@ -342,11 +379,10 @@ function buildRolling(rows, windowSize, windowKey, keys, compute) {
       lo++;
     }
     if (win[windowKey] >= windowSize) {
-      out.push({
-        date: rows[i].date,
-        idx: out.length + 1,
-        value: compute(win),
-      });
+      const value = compute(win, rows[i]);
+      if (value != null && Number.isFinite(value)) {
+        out.push({ date: rows[i].date, idx: out.length + 1, value });
+      }
     }
   }
   return out;
@@ -409,15 +445,17 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
       try {
         const yr = Number(season);
         const collected = [];
-        let total = 0;
-        // Walk back up to 5 seasons until we reach the target. For each
-        // season we fetch the gameLog and the Savant per-pitch CSV in
-        // parallel, then merge the per-game Statcast counters into the
-        // gameLog rows by date.
-        for (let s = yr; s > yr - 5 && total < target; s--) {
-          const [log, savantRows] = await Promise.all([
+        let total = 0, regTotal = 0;
+        // Walk back up to 5 seasons until we reach the target in regular-season
+        // games (what iSwing+ needs; the other stats just get more history). For
+        // each season we fetch the gameLog, the Savant per-pitch CSV and (hitters)
+        // the per-game iSwing+ file in parallel, then merge the per-game counters
+        // into the gameLog rows by date.
+        for (let s = yr; s > yr - 5 && regTotal < target; s--) {
+          const [log, savantRows, iswGames] = await Promise.all([
             fetchGameLog(playerId, s, group, 1, "R"),
             fetchSavantPlayerSeason(playerId, s, savantType).catch(() => []),
+            type === "pitcher" ? null : loadISwingGames(s),
           ]);
           if (cancelled) return;
           const savByDate = aggregateSavantToGames(savantRows || []);
@@ -425,9 +463,11 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
           seasonRows = mergeSavant(seasonRows, savByDate);
           // Sort within season by date (gameLog usually already chronological)
           seasonRows.sort((a, b) => a.date.localeCompare(b.date));
+          seasonRows = mergeISwing(seasonRows, iswGames, playerId);
           // Prepend older season's rows so the full array is chronological
           collected.unshift(...seasonRows);
           total = collected.reduce((a, r) => a + (r[targetKey] || 0), 0);
+          regTotal = collected.reduce((a, r) => a + (isRegularSeason(r) ? (r[targetKey] || 0) : 0), 0);
         }
         if (cancelled) return;
         if (total < target) { setRows([]); return; }
@@ -446,7 +486,8 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
     const target = type === "pitcher" ? 10 : 50;
     const targetKey = type === "pitcher" ? "IP" : "PA";
     const keys = type === "pitcher" ? PITCHER_KEYS : HITTER_KEYS;
-    return buildRolling(rows, target, targetKey, keys, computeDef.compute);
+    const src = computeDef.regularSeason ? rows.filter(isRegularSeason) : rows;
+    return buildRolling(src, target, targetKey, keys, computeDef.compute);
   }, [rows, metric, type, computeDef]);
 
   const currentLabel = options.find(o => o.id === metric)?.label || metric;
@@ -490,7 +531,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
         ))}
       </select>
       <span style={{ fontSize: 10, color: t.textFaintest, marginLeft: "auto" }}>
-        Trailing {target} {unitLbl}
+        Trailing {target} {unitLbl}{computeDef?.regularSeason ? " · regular season" : ""}
       </span>
     </div>
 
@@ -509,7 +550,9 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
       {computeDef ? (
         series.length < 2 ? (
           <div style={{ padding: "24px 12px 28px", textAlign: "center", color: t.textFaint, fontSize: 12 }}>
-            Not enough recent games to fill a trailing {target}-{unitLbl} window.
+            {computeDef.regularSeason
+              ? `Not enough tracked swings to fill a trailing ${target}-${unitLbl} ${currentLabel} window.`
+              : `Not enough recent games to fill a trailing ${target}-${unitLbl} window.`}
           </div>
         ) : (
           <div style={{ padding: "0 12px" }}>

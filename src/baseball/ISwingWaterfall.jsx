@@ -6,6 +6,7 @@ import {
   TEAM_IDS, MLB_TEAM_PRIMARY,
 } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
+import { loadISwingGames, iswingByMonth, ISWING_MIN_SWINGS } from "./iswingGames.js";
 
 // One-season iSwing+ waterfall (SUMMARIES → Hitter iSwing+).
 // Reads /iswing_waterfall_{season}.json (iswing_update.py): batterId ->
@@ -61,11 +62,18 @@ const FONT = "'Pliant', sans-serif";
 
 const fmtPts = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}`;
 
+// "Monthly trend" toggle, remembered per viewer.
+const MONTHLY_KEY = "ptet-iswing-monthly";
+const readMonthlyPref = () => { try { return localStorage.getItem(MONTHLY_KEY) === "1"; } catch { return false; } };
+const writeMonthlyPref = (on) => { try { localStorage.setItem(MONTHLY_KEY, on ? "1" : "0"); } catch { /* storage blocked */ } };
+
 export default function ISwingWaterfall({ season, hitters }) {
   const { theme: t, isDark } = useTheme();
   const cardRef = useRef(null);
   const [data, setData] = useState(undefined);   // undefined = loading, null = no file
   const [pid, setPid] = useState(null);
+  const [showMonthly, setShowMonthly] = useState(readMonthlyPref);
+  const [games, setGames] = useState(undefined);  // per-game iSwing+ file (only loaded when the toggle is on)
   const isNew = useISwingNew(season);
 
   useEffect(() => {
@@ -74,6 +82,16 @@ export default function ISwingWaterfall({ season, hitters }) {
     loadWaterfall(season).then(d => { if (alive) setData(d && typeof d === "object" ? d : null); });
     return () => { alive = false; };
   }, [season]);
+
+  useEffect(() => {
+    if (!showMonthly) return;
+    let alive = true;
+    setGames(undefined);
+    loadISwingGames(season).then(g => { if (alive) setGames(g && typeof g === "object" ? g : null); });
+    return () => { alive = false; };
+  }, [season, showMonthly]);
+
+  const toggleMonthly = () => setShowMonthly(on => { writeMonthlyPref(!on); return !on; });
 
   // Drop the selection when the new season doesn't have that hitter.
   useEffect(() => {
@@ -104,6 +122,9 @@ export default function ISwingWaterfall({ season, hitters }) {
   const team = hitter?.team || ABBR_BY_TEAM_ID[fallbackTeamId] || null;
   const name = hitter?.name || rec?.name || "";
   const barColor = readableOn(teamMarkColor(team) || t.accentSecondary, isDark);
+  const months = useMemo(
+    () => (games && pid ? iswingByMonth(games[pid], games.meta) : []),
+    [games, pid]);
 
   const saveCard = async () => {
     await saveCardAsPng(cardRef, `${name.replace(/\s+/g, "_")}_iSwing_breakdown_${season}.png`);
@@ -121,6 +142,20 @@ export default function ISwingWaterfall({ season, hitters }) {
           placeholder="Search hitter…"
           style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, minWidth: 320 }}
         />
+        <button
+          type="button"
+          onClick={toggleMonthly}
+          aria-pressed={showMonthly}
+          style={{
+            padding: "5px 12px", fontSize: 11, fontWeight: 600, borderRadius: 14, cursor: "pointer",
+            fontFamily: "inherit",
+            background: showMonthly ? `${t.accent}26` : t.inputBg,
+            color: showMonthly ? t.text : t.textMuted,
+            border: `1px solid ${showMonthly ? t.accent : t.inputBorder}`,
+          }}
+        >
+          {showMonthly ? "✓ " : ""}Monthly trend
+        </button>
         {data === undefined && <span style={{ fontSize: 11, color: t.textMuted }}>Loading {season} iSwing+…</span>}
       </div>
 
@@ -145,6 +180,9 @@ export default function ISwingWaterfall({ season, hitters }) {
                 Each bar is how much that part of the swing moved this hitter's predicted contact quality versus the
                 average qualified hitter (100), in iSwing+ points. Solid = helped, striped = hurt.
               </div>
+              {showMonthly && (
+                <MonthlySection months={months} games={games} season={season} final={rec.iswing} color={barColor} />
+              )}
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
                 <span>Created by: @PastTheEyeTest on X</span>
                 <span style={{ fontStyle: "italic" }}>Data: Baseball Savant · iSwing+ {data?.meta?.model || ""}</span>
@@ -259,6 +297,134 @@ function Waterfall({ rec, color }) {
               )}
               <text x={pos ? x1 + 4 : x0 - 4} y={y + rowH / 2 + 3.5} textAnchor={pos ? "start" : "end"}
                 fontSize="10" fontWeight="700" fill={t.textSecondary} {...halo}>{fmtPts(r.v)}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+// ── Monthly trend (under the waterfall, inside the card so Save as PNG keeps it) ──
+const MONTH_NAMES = { 4: "Mar/Apr", 5: "May", 6: "Jun", 7: "Jul", 8: "Aug", 9: "Sep/Oct" };
+
+function MonthlySection({ months, games, season, final, color }) {
+  const { theme: t } = useTheme();
+  const note = (text) => (
+    <div style={{ padding: "10px 20px 12px", fontSize: 11, color: t.textFaint, textAlign: "center" }}>{text}</div>
+  );
+  let body;
+  if (games === undefined) body = note("Loading monthly iSwing+…");
+  else if (games === null) body = note(`Monthly iSwing+ isn't available for ${season} yet.`);
+  else if (months.length < 2) body = note(`Not enough swings for a monthly trend (needs 2+ months with ${ISWING_MIN_SWINGS}+ swings).`);
+  else body = <MonthlyTrend months={months} final={final} color={color} />;
+  return (
+    <div style={{ borderTop: `1px solid ${t.divider}`, margin: "8px 16px 0", paddingTop: 10 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
+        iSwing+ by Month
+      </div>
+      {body}
+      {months.length >= 2 && (
+        <div style={{ padding: "0 4px 4px", fontSize: 10, color: t.textFaint, lineHeight: 1.4, textAlign: "center" }}>
+          Each point is iSwing+ over that month's swings, on the same scale as the season number.
+          Months with fewer than {ISWING_MIN_SWINGS} swings are omitted.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MonthlyTrend({ months, final, color }) {
+  const { theme: t } = useTheme();
+  const W = 660, padL = 40, padR = 92, top = 24, plotH = 124, bottom = 38;
+  const H = top + plotH + bottom;
+  const plotL = padL, plotR = W - padR;
+
+  // One slot per calendar month from the first to the last plotted month, so a
+  // missing month leaves a visible gap instead of silently joining its neighbors.
+  const first = months[0].key, last = months[months.length - 1].key;
+  const slots = [];
+  for (let k = first; k <= last; k++) slots.push(k);
+  const byKey = new Map(months.map(m => [m.key, m]));
+  const slotW = (plotR - plotL) / slots.length;
+  const xOf = (k) => plotL + (k - first + 0.5) * slotW;
+
+  // League average (100) joins the scale only when it's near this hitter's values;
+  // for a hitter far from average it would flatten the month-to-month movement
+  // (the waterfall above already shows where 100 is).
+  const own = [...months.map(m => m.value), final];
+  const showAvg = 100 >= Math.min(...own) - 15 && 100 <= Math.max(...own) + 15;
+  const vals = showAvg ? [...own, 100] : own;
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = Math.max(3, (hi - lo) * 0.18);
+  let step = (hi - lo + 2 * pad) <= 16 ? 2 : (hi - lo + 2 * pad) <= 40 ? 5 : 10;
+  const yMin = Math.floor((lo - pad) / step) * step;
+  const yMax = Math.ceil((hi + pad) / step) * step;
+  if ((yMax - yMin) / step > 7) step *= 2;
+  const y = (v) => top + ((yMax - v) / (yMax - yMin)) * plotH;
+  const ticks = [];
+  for (let v = Math.ceil(yMin / step) * step; v <= yMax + 1e-9; v += step) ticks.push(v);
+
+  // Reference-line labels in the right margin; nudge apart if they'd overlap.
+  let yAvg = y(100), ySeason = y(final);
+  if (showAvg && Math.abs(yAvg - ySeason) < 12) {
+    const mid = (yAvg + ySeason) / 2, up = final >= 100;
+    ySeason = mid + (up ? -6 : 6);
+    yAvg = mid + (up ? 6 : -6);
+  }
+  const halo = { stroke: t.cardBg, strokeWidth: 3, strokeLinejoin: "round", paintOrder: "stroke" };
+
+  return (
+    <div style={{ display: "flex", justifyContent: "center", padding: "2px 0 4px" }}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ maxWidth: "100%", height: "auto", fontFamily: FONT }} role="img"
+        aria-label={`iSwing+ by month: ${months.map(m => `${m.label} ${Math.round(m.value)}`).join(", ")}; season ${final}`}>
+        {/* Hairline gridlines + tick labels */}
+        {ticks.map(v => (
+          <g key={v}>
+            <line x1={plotL} x2={plotR} y1={y(v)} y2={y(v)} stroke={t.divider} strokeWidth="1" />
+            <text x={plotL - 8} y={y(v) + 3.5} textAnchor="end" fontSize="10" fontWeight="700" fill={t.textFaint}>{v}</text>
+          </g>
+        ))}
+
+        {/* League average (100) and the hitter's season iSwing+ */}
+        {showAvg && <>
+          <line x1={plotL} x2={plotR} y1={y(100)} y2={y(100)} stroke={t.textMuted} strokeWidth="1.2" strokeDasharray="4 3" />
+          <text x={plotR + 8} y={yAvg + 3.5} fontSize="10" fill={t.textMuted}>Avg 100</text>
+        </>}
+        <line x1={plotL} x2={plotR} y1={y(final)} y2={y(final)} stroke={t.text} strokeWidth="1.2" opacity="0.35" />
+        <text x={plotR + 8} y={ySeason + 3.5} fontSize="10" fontWeight="800" fill={t.textSecondary}>Season {final}</text>
+
+        {/* The line: segments only between consecutive calendar months */}
+        {months.slice(1).map((m, i) => {
+          const p = months[i];
+          if (m.key !== p.key + 1) return null;
+          return <line key={m.key} x1={xOf(p.key)} y1={y(p.value)} x2={xOf(m.key)} y2={y(m.value)}
+            stroke={color} strokeWidth="2" strokeLinecap="round" />;
+        })}
+
+        {/* Points (surface ring, bigger invisible hover target, native tooltip) + value labels */}
+        {months.map(m => (
+          <g key={m.key}>
+            <title>{`${m.label}: iSwing+ ${Math.round(m.value)} (${m.n} swings)`}</title>
+            <circle cx={xOf(m.key)} cy={y(m.value)} r="12" fill="transparent" />
+            <circle cx={xOf(m.key)} cy={y(m.value)} r="4.5" fill={color} stroke={t.cardBg} strokeWidth="2" />
+            <text x={xOf(m.key)} y={y(m.value) - 10} textAnchor="middle" fontSize="11" fontWeight="800" fill={t.text} {...halo}>
+              {Math.round(m.value)}
+            </text>
+          </g>
+        ))}
+
+        {/* Month labels with swing counts */}
+        {slots.map(k => {
+          const m = byKey.get(k);
+          return (
+            <g key={k}>
+              <text x={xOf(k)} y={top + plotH + 16} textAnchor="middle" fontSize="10" fontWeight="700" fill={m ? t.textMuted : t.textFaint}>
+                {MONTH_NAMES[k]}
+              </text>
+              <text x={xOf(k)} y={top + plotH + 29} textAnchor="middle" fontSize="9" fill={t.textFaint}>
+                {m ? `${m.n} swings` : `<${ISWING_MIN_SWINGS} swings`}
+              </text>
             </g>
           );
         })}

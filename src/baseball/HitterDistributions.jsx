@@ -4,11 +4,14 @@ import KdeCurve from "./KdeCurve.jsx";
 import { renderHeatmapCanvas } from "./SummaryComponents.jsx";
 import { MLB_TEAM_PRIMARY, useISwingNew } from "./SharedComponents.jsx";
 import { gaussianKde, mmddFromDate, filterByWindow, loadSeasonJson } from "./kde.js";
+import { loadISwingGames, iswingForWindow } from "./iswingGames.js";
 
 // Precomputed hitter files (iswing_update.py):
 //   /iswing_dist_{season}.json    : batterId -> { curve:[density…], mean, n }
 //   /iswing_swings_{season}.json  : batterId -> { v:[iSwing+ per swing], d:[mmdd] }
-//       Per-swing values + dates, so a date window can recompute the curve + avg.
+//       Per-swing values + dates, so a date window can recompute the curve.
+//   /iswing_games_{season}.json   : exact windowed iSwing+ (see iswingGames.js) — the
+//       date-window curve is centered on it, matching the card's iSwing+ bubble.
 //   /intercept_{season}.json      : batterId -> { L:{pts:[[x,y,mmdd]…], plateX}, R:{…} }
 //     Balls-in-play contact points relative to the batter's center of mass (inches),
 //     split by hand; plateX = derived home-plate center; 3rd point element = mmdd date.
@@ -92,6 +95,7 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
   const [distMeta, setDistMeta] = useState(null);
   const [icpt, setIcpt] = useState(undefined);
   const [swings, setSwings] = useState(undefined);   // per-swing {v,d} for windowing
+  const [games, setGames] = useState(undefined);     // per-game file → exact windowed iSwing+
 
   const active = !!(dateFrom || dateTo);
   const fromMMDD = mmddFromDate(dateFrom) ?? 0;
@@ -114,24 +118,35 @@ export default function HitterDistributions({ playerId, team, season, isAAA = fa
     return () => { cancelled = true; };
   }, [playerId, season, isAAA, active]);
 
+  useEffect(() => {
+    if (isAAA || !playerId || !active) { setGames(undefined); return; }
+    let cancelled = false;
+    loadISwingGames(season).then(g => { if (!cancelled) setGames(g || null); });
+    return () => { cancelled = true; };
+  }, [playerId, season, isAAA, active]);
+
   const teamColor = MLB_TEAM_PRIMARY[team] || t.accent;
   const xLo = distMeta?.xLo ?? 40, xHi = distMeta?.xHi ?? 180;
 
-  // iSwing+ curve: a date window recomputes it from the filtered per-swing values;
-  // otherwise the precomputed season curve.
+  // iSwing+ curve: a date window recomputes it from the filtered per-swing values,
+  // re-centered on the window's exact iSwing+ (same number as the card's bubble, the
+  // way the season curve is centered on the published value); otherwise the
+  // precomputed season curve. Without the per-game file (not built yet) the window
+  // falls back to the plain per-swing average.
   const curveInfo = useMemo(() => {
     if (active && swings && Array.isArray(swings.v)) {
-      const fv = filterByWindow(swings.v, swings.d, fromMMDD, toMMDD);
+      let fv = filterByWindow(swings.v, swings.d, fromMMDD, toMMDD);
+      const exact = games ? iswingForWindow(games[String(playerId)], games.meta, fromMMDD, toMMDD) : null;
+      if (games && !exact) return { densities: null, mean: null, n: fv.length, windowed: true };   // under the 25-swing minimum
+      let mean = fv.length ? fv.reduce((a, b) => a + b, 0) / fv.length : null;
+      if (exact && fv.length) { fv = fv.map(v => v - mean + exact.value); mean = exact.value; }
       const densities = fv.length >= 2 ? gaussianKde(fv, xLo, xHi, distMeta?.nPts ?? 64) : null;
-      if (densities) {
-        const mean = fv.reduce((a, b) => a + b, 0) / fv.length;
-        return { densities, mean, n: fv.length, windowed: true };
-      }
+      if (densities) return { densities, mean, n: fv.length, windowed: true };
       return { densities: null, mean: null, n: fv.length, windowed: true };   // window set, too few swings
     }
     if (dist && Array.isArray(dist.curve)) return { densities: dist.curve, mean: dist.mean, n: dist.n, windowed: false };
     return null;
-  }, [active, swings, dist, fromMMDD, toMMDD, xLo, xHi, distMeta]);
+  }, [active, swings, games, playerId, dist, fromMMDD, toMMDD, xLo, xHi, distMeta]);
 
   // Intercept heatmap(s): a date window filters the contact cloud by each point's
   // mmdd (3rd element) and drops the season avgIy so makeHeat recomputes the dashed

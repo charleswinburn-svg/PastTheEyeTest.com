@@ -5,7 +5,8 @@ import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { useDateRangeStats, computeXrvDateRange, buildXrvPctileLookup, buildPctileLookup, interpolatePctile } from "./statsCompute.js";
-import { filterByWindow, mmddFromDate, loadSeasonJson } from "./kde.js";
+import { mmddFromDate } from "./kde.js";
+import { loadISwingGames, iswingForWindow } from "./iswingGames.js";
 
 // Fixed display order for the xRV / 600 PA column (matches build_hitter_xrv.py).
 const XRV_LABELS = [
@@ -45,27 +46,26 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
     return { pa: r.pa, metrics };
   }, [isDateRange, xrvGames, xrvAll, dateFrom, dateTo]);
 
-  // Date-range iSwing+ bubble: recompute the player's windowed average from the
-  // per-swing file and rank it against the season iSwing+ distribution.
-  const [iswingSwings, setIswingSwings] = useState(null);
+  // Date-range iSwing+ bubble: the season formula over the window's swings (per-game
+  // file), ranked against the season iSwing+ distribution. Below the season's
+  // 25-swing minimum the bubble keeps the season value.
+  const [iswingGames, setIswingGames] = useState(null);
   const iswingNew = useISwingNew(season);
   useEffect(() => {
-    if (!isDateRange || !player?.player_id || isAAA) { setIswingSwings(null); return; }
+    if (!isDateRange || !player?.player_id || isAAA) { setIswingGames(null); return; }
     let cancelled = false;
-    loadSeasonJson(`/iswing_swings_${season}.json`).then(m => {
-      if (!cancelled) setIswingSwings((m && m[String(player.player_id)]) || null);
-    });
+    loadISwingGames(season).then(g => { if (!cancelled) setIswingGames(g || null); });
     return () => { cancelled = true; };
   }, [isDateRange, player?.player_id, season, isAAA]);
 
   const windowedIswing = useMemo(() => {
-    if (!isDateRange || !iswingSwings?.v) return null;
-    const fv = filterByWindow(iswingSwings.v, iswingSwings.d, mmddFromDate(dateFrom) ?? 0, mmddFromDate(dateTo) ?? 9999);
-    if (fv.length < 5) return null;
-    const mean = fv.reduce((a, b) => a + b, 0) / fv.length;
-    const pctile = interpolatePctile(buildPctileLookup(allHitters, "iSwing+"), mean);
-    return { value: Math.round(mean), pctile, n: fv.length };
-  }, [isDateRange, iswingSwings, dateFrom, dateTo, allHitters]);
+    if (!isDateRange || !iswingGames || !player?.player_id) return null;
+    const w = iswingForWindow(iswingGames[String(player.player_id)], iswingGames.meta,
+                              mmddFromDate(dateFrom) ?? 0, mmddFromDate(dateTo) ?? 9999);
+    if (!w) return null;
+    const pctile = interpolatePctile(buildPctileLookup(allHitters, "iSwing+"), w.value);
+    return { value: Math.round(w.value), pctile, n: w.n };
+  }, [isDateRange, iswingGames, player?.player_id, dateFrom, dateTo, allHitters]);
 
   const saveCard = useCallback(async () => {
     if (!player) return;

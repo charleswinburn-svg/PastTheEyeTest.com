@@ -8,6 +8,9 @@ traits) to incrementally fetch yesterday's Statcast data, re-score every season
 in the swings CSV, and update:
     public/iswing.json                  per-year iSwing+ / percentile, keyed by name
     public/iswing_waterfall_{year}.json per-hitter feature decomposition (Summaries)
+    public/iswing_games_{year}.json     per-hitter, per-date swing counts + raw sums, so the
+                                        site computes exact iSwing+ over any window (rolling
+                                        50 PA, by month, date range)
     public/iswing_meta.json             which seasons are scored by the current model
     public/iswing_dist_{year}.json, iswing_swings_{year}.json, intercept_{year}.json
                                         hitter-card files (current season only)
@@ -591,6 +594,37 @@ def write_waterfall(scored_df, season, agg, model, scaler, config):
     log(f'  Wrote {path}: {len(out) - 1} hitters')
 
 
+def write_iswing_games(scored_df, season, agg):
+    """public/iswing_games_{season}.json — per qualified hitter, per game date: the
+    number of competitive swings and the sum of their raw_value, plus the season's
+    mu/sd of log(mean raw_value) across qualified hitters. With these the site
+    computes iSwing+ over any window with the season formula itself,
+        100 + 15 * (ln(sum s / sum n) - mu) / sd,
+    so a window covering the whole season lands exactly on the published number.
+    Keyed by batter id; d = month*100+day."""
+    if agg is None or len(agg) == 0:
+        log(f'  games: no {season} scores — skipping')
+        return
+    mu, sd = float(agg['log_raw'].mean()), float(agg['log_raw'].std())
+    d = scored_df[(scored_df['year'] == season) & scored_df['batter'].isin(agg['batter'])
+                  & scored_df['batter_name'].notna()]
+    dt = pd.to_datetime(d['game_date'], errors='coerce')
+    g = (d.assign(_mmdd=dt.dt.month * 100 + dt.dt.day).dropna(subset=['_mmdd'])
+          .groupby(['batter', '_mmdd'])['raw_value'].agg(['count', 'sum']))
+    out = {'meta': {'season': int(season), 'model': MODEL_VERSION, 'mu': round(mu, 6),
+                    'sd': round(sd, 6), 'minSwings': 25}}
+    for bid, gg in g.groupby(level=0):
+        out[str(int(bid))] = {
+            'd': [int(m) for m in gg.index.get_level_values(1)],
+            'n': [int(n) for n in gg['count']],
+            's': [round(float(s), 5) for s in gg['sum']],
+        }
+    path = os.path.join(ROOT, 'public', f'iswing_games_{season}.json')
+    with open(path, 'w') as f:
+        json.dump(out, f, separators=(',', ':'))
+    log(f'  Wrote {path}: {len(out) - 1} hitters')
+
+
 def write_meta(seasons):
     """public/iswing_meta.json — which seasons are scored by the current model.
     The site shows its NEW label on iSwing+ only for these seasons."""
@@ -858,8 +892,8 @@ def _cached_seasons(exclude):
 def rescore_all(main_df, model, scaler, config, season):
     """Score every season on hand — the daily CSV plus any per-season backfill
     files — with hitter traits pooled across all of them (as the v9 notebook
-    does), then write iswing.json, the waterfalls, meta, and the current
-    season's hitter-card files."""
+    does), then write iswing.json, the waterfalls, the per-game files, meta,
+    and the current season's hitter-card files."""
     sources = {}
     if len(main_df) > 0:
         yrs = pd.to_datetime(main_df['game_date'], errors='coerce').dt.year
@@ -881,6 +915,7 @@ def rescore_all(main_df, model, scaler, config, season):
         scored = score_season(swings, model, scaler, config, ctx)
         scores[yr] = season_scores(scored, yr)
         write_waterfall(scored, yr, scores[yr], model, scaler, config)
+        write_iswing_games(scored, yr, scores[yr])
         if yr == season:
             current = scored
 
