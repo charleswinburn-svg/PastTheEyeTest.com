@@ -664,7 +664,15 @@ export async function saveCardAsPng(cardRef, filename) {
   let canvas = null;
   try {
     const html2canvas = (await import("html2canvas")).default;
-    canvas = await html2canvas(cardRef.current, { backgroundColor: "#0d0d0d", scale: 2, logging: false });
+    canvas = await html2canvas(cardRef.current, {
+      backgroundColor: "#0d0d0d", scale: 2, logging: false,
+      // The site-wide body letter-spacing (-0.01em) makes html2canvas split every
+      // text node into single characters and place each from the browser's
+      // per-character rects, which iOS Safari reports unreliably (letters spread
+      // apart, spaces dropped). Zero it in the capture clone so ordinary text is
+      // drawn word by word; labels with their own tracking keep it.
+      onclone: (doc) => { doc.body.style.letterSpacing = "0px"; },
+    });
   } catch (e) {
     console.error("Capture failed:", e);
   } finally {
