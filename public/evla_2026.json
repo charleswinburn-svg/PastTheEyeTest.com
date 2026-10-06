@@ -7,13 +7,13 @@
       "label": "\u2264 -10",
       "avg_ev": 76.0,
       "hard_hit_pct": 14.7,
-      "count": 49395
+      "count": 49396
     },
     {
       "label": "-10 to -5",
       "avg_ev": 88.7,
       "hard_hit_pct": 40.1,
-      "count": 8428
+      "count": 8429
     },
     {
       "label": "-5 to 0",
@@ -67,13 +67,13 @@
       "label": "35 to 40",
       "avg_ev": 81.6,
       "hard_hit_pct": 18.4,
-      "count": 12483
+      "count": 12484
     },
     {
       "label": "> 40",
       "avg_ev": 78.0,
       "hard_hit_pct": 6.1,
-      "count": 63260
+      "count": 63262
     }
   ],
   "players": [
@@ -25761,7 +25761,7 @@
       "player_id": 608070,
       "name": "Jos\u00e9 Ram\u00edrez",
       "team": "CLE",
-      "total_bbe": 802,
+      "total_bbe": 803,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -25833,7 +25833,7 @@
           "label": "> 40",
           "avg_ev": 77.8,
           "hard_hit_pct": 6.5,
-          "count": 216
+          "count": 217
         }
       ]
     },
@@ -30001,13 +30001,13 @@
       "player_id": 807712,
       "name": "Luke Keaschall",
       "team": "MIN",
-      "total_bbe": 781,
+      "total_bbe": 782,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 73.6,
+          "avg_ev": 73.4,
           "hard_hit_pct": 11.0,
-          "count": 163
+          "count": 164
         },
         {
           "label": "-10 to -5",
@@ -41361,7 +41361,7 @@
       "player_id": 680757,
       "name": "Steven Kwan",
       "team": "CLE",
-      "total_bbe": 821,
+      "total_bbe": 824,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -41371,9 +41371,9 @@
         },
         {
           "label": "-10 to -5",
-          "avg_ev": 85.0,
-          "hard_hit_pct": 6.5,
-          "count": 31
+          "avg_ev": 85.2,
+          "hard_hit_pct": 6.2,
+          "count": 32
         },
         {
           "label": "-5 to 0",
@@ -41426,14 +41426,14 @@
         {
           "label": "35 to 40",
           "avg_ev": 74.8,
-          "hard_hit_pct": 1.7,
-          "count": 60
+          "hard_hit_pct": 1.6,
+          "count": 61
         },
         {
           "label": "> 40",
           "avg_ev": 73.4,
           "hard_hit_pct": 0.6,
-          "count": 167
+          "count": 168
         }
       ]
     },
@@ -47360,7 +47360,7 @@
   ],
   "meta": {
     "min_bbe": 30,
-    "total_bbe": 236999,
+    "total_bbe": 237004,
     "bucket_labels": [
       "\u2264 -10",
       "-10 to -5",
@@ -47375,6 +47375,6 @@
       "35 to 40",
       "> 40"
     ],
-    "generated_at": "2026-10-05 15:20:14 UTC"
+    "generated_at": "2026-10-06 15:18:33 UTC"
   }
 }

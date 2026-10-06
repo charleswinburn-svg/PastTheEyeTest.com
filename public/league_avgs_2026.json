@@ -2,7 +2,7 @@
   "season": 2026,
   "pitch_types": {
     "CH": {
-      "count": 79845,
+      "count": 79844,
       "velo": 86.0,
       "spin": 1754,
       "zone_pct": 32.0,
@@ -10,7 +10,7 @@
       "extension": 6.44
     },
     "CU": {
-      "count": 46074,
+      "count": 46075,
       "velo": 80.3,
       "spin": 2603,
       "zone_pct": 35.7,
@@ -34,7 +34,7 @@
       "extension": 4.67
     },
     "FC": {
-      "count": 57278,
+      "count": 57272,
       "velo": 89.8,
       "spin": 2390,
       "zone_pct": 46.7,
@@ -42,7 +42,7 @@
       "extension": 6.42
     },
     "FF": {
-      "count": 219137,
+      "count": 219144,
       "velo": 94.8,
       "spin": 2314,
       "zone_pct": 47.7,
@@ -74,7 +74,7 @@
       "extension": 6.42
     },
     "SL": {
-      "count": 93560,
+      "count": 93555,
       "velo": 86.3,
       "spin": 2434,
       "zone_pct": 39.0,
@@ -82,7 +82,7 @@
       "extension": 6.39
     },
     "ST": {
-      "count": 59325,
+      "count": 59329,
       "velo": 82.8,
       "spin": 2595,
       "zone_pct": 38.9,
@@ -98,5 +98,5 @@
       "extension": 6.11
     }
   },
-  "generated_at": "2026-10-05 15:41:08 UTC"
+  "generated_at": "2026-10-06 15:39:05 UTC"
 }
