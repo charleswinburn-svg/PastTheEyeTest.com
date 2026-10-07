@@ -7,7 +7,7 @@
       "label": "\u2264 -10",
       "avg_ev": 76.0,
       "hard_hit_pct": 14.7,
-      "count": 49396
+      "count": 49397
     },
     {
       "label": "-10 to -5",
@@ -31,7 +31,7 @@
       "label": "5 to 10",
       "avg_ev": 90.0,
       "hard_hit_pct": 43.6,
-      "count": 12844
+      "count": 12845
     },
     {
       "label": "10 to 15",
@@ -8961,13 +8961,13 @@
       "player_id": 802415,
       "name": "Chandler Simpson",
       "team": "TB",
-      "total_bbe": 797,
+      "total_bbe": 798,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 73.3,
-          "hard_hit_pct": 8.7,
-          "count": 252
+          "avg_ev": 73.4,
+          "hard_hit_pct": 9.1,
+          "count": 253
         },
         {
           "label": "-10 to -5",
@@ -13281,7 +13281,7 @@
       "player_id": 701852,
       "name": "Drew Cavanaugh",
       "team": "SF",
-      "total_bbe": 197,
+      "total_bbe": 198,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -13309,9 +13309,9 @@
         },
         {
           "label": "5 to 10",
-          "avg_ev": 86.1,
-          "hard_hit_pct": 23.1,
-          "count": 13
+          "avg_ev": 86.7,
+          "hard_hit_pct": 28.6,
+          "count": 14
         },
         {
           "label": "10 to 15",
@@ -47360,7 +47360,7 @@
   ],
   "meta": {
     "min_bbe": 30,
-    "total_bbe": 237004,
+    "total_bbe": 237006,
     "bucket_labels": [
       "\u2264 -10",
       "-10 to -5",
@@ -47375,6 +47375,6 @@
       "35 to 40",
       "> 40"
     ],
-    "generated_at": "2026-10-06 15:18:33 UTC"
+    "generated_at": "2026-10-07 15:21:44 UTC"
   }
 }
