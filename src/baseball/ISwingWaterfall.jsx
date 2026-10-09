@@ -25,9 +25,6 @@ const FEATURE_LABELS = {
   direction_from_optimal: "Direction vs Optimal",
   length_for_location: "Length for Location",
   effort_level: "90th Percentile Bat Speed",
-  hard_swing_contact: "Hard-Swing Contact",
-  aa_adaptability: "Attack Angle Adaptability",
-  dir_adaptability: "Direction Adaptability",
 };
 const featureLabel = (f) =>
   FEATURE_LABELS[f] || f.split("_").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");

@@ -397,11 +397,13 @@ export function useDateRangeStats(player, season, type, dateFrom, dateTo, allPla
 
         const { stats: computedStats, pa, ip } = computeStatsFromRows(gameLog, savantRows, type);
 
-        // Merge server stats (server wins on overlap for server-only metrics)
+        // Merge server stats (server wins on overlap for server-only metrics).
+        // iSwing+ is never taken from the server: the hitter card computes it from
+        // iswing_games_{season}.json with the current model and the season's scale.
         const mergedStats = { ...computedStats };
         if (serverData?.stats) {
           for (const [k, v] of Object.entries(serverData.stats)) {
-            if (v != null) mergedStats[k] = v;
+            if (v != null && k !== "iSwing+") mergedStats[k] = v;
           }
         }
 
