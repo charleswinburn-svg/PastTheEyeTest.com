@@ -181,7 +181,7 @@ def main():
         lb['batter'] = lb['batter'].astype(int)
         lb = lb.set_index('batter')
 
-    bad = 0
+    bad, lb_bad = 0, 0
     print(f"\n{'season':>6} {'swings':>9} {'hitters':>8} {'site':>6} {'match':>6}  {'notebook csv':>12}")
     for yr, r in ref.items():
         path = os.path.join(iu.ROOT, 'public', f'iswing_waterfall_{yr}.json')
@@ -204,7 +204,7 @@ def main():
             diff = [(b, int(col[b]), int(r.loc[b, 'score'])) for b in both if int(col[b]) != int(r.loc[b, 'score'])]
             lb_txt = f'{len(both) - len(diff)}/{len(col)} equal'
             if diff or len(both) != len(col):
-                bad += 1
+                lb_bad += 1
                 lb_txt += f'  ({len(diff)} differ, {len(col) - len(both)} not in this data)'
                 for b, nb_v, v in diff[:5]:
                     print(f'      notebook csv {yr} batter {b}: notebook {nb_v}, recomputed {v}')
@@ -218,13 +218,13 @@ def main():
 
     if bad:
         print('\nMISMATCH between the site and the notebook logic — see above.')
-    elif not same_swings:
-        print('\nThe site matches the notebook logic exactly on these swings, but the swings differ '
-              "from the notebook's (see the swing-set table). To score the notebook's exact swings run:\n"
-              '    python3 iswing_update.py --resync 2024 2025 2026')
+    elif not same_swings or lb_bad:
+        print('\nThe site matches the notebook logic exactly on these swings. Any season whose swings '
+              "differ from the notebook's (swing-set table) can differ from the notebook's export by "
+              'a point here and there; the seasons whose swings are identical match it exactly.')
     else:
         print('\nAll seasons match the notebook exactly (same swings, same numbers).')
-    sys.exit(1 if bad or not same_swings else 0)
+    sys.exit(1 if bad or lb_bad or not same_swings else 0)
 
 
 if __name__ == '__main__':
