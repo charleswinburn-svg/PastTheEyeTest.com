@@ -24,6 +24,10 @@ backfill files), and every season is re-scored each run.
 Run from the project root:
     python3 iswing_update.py
 
+Rebuild seasons so they hold exactly the swings the notebook scrapes (its windows,
+game types and per-window swing filter), then re-score:
+    python3 iswing_update.py --resync 2024 2025 2026
+
 Add past seasons (one-time). Fetches each season from Savant into
 competitive_swings_{year}.csv unless --csv points at a swings CSV that already
 holds them (e.g. the notebook's competitive_swings_2023_2026.csv), then re-scores:
@@ -67,13 +71,26 @@ SCALER_FILE = os.path.join(ROOT, 'iswing_scaler.pkl')
 CONFIG_FILE = os.path.join(ROOT, 'iswing_config.json')
 MODEL_VERSION = 'v9.1'
 
-# Backfill fetch windows — same ranges the v9 notebook trained on (bat tracking
-# starts mid-2023). Other seasons fall back to a full regular-season window.
-BACKFILL_WINDOWS = {
-    2023: ('2023-07-01', '2023-10-01'),
-    2024: ('2024-03-28', '2024-10-01'),
-    2025: ('2025-03-27', '2025-10-01'),
+# The notebook's scrape (section 2 DATE_RANGES): each season is pulled in these
+# windows and the competitive-swing filter (each hitter's bottom 10% of bat speeds)
+# is applied WITHIN each window — so a season built any other way (whole-season
+# filter, per-day filter) is a slightly different set of swings. Bat tracking
+# starts mid-2023. pybaseball.statcast(), which the notebook uses, asks Savant for
+# regular season + postseason + spring games, so the windows ending Oct 1 also
+# carry the first wild-card games.
+NOTEBOOK_WINDOWS = {
+    2023: [('2023-07-01', '2023-10-01')],
+    2024: [('2024-03-28', '2024-06-30'), ('2024-07-01', '2024-10-01')],
+    2025: [('2025-03-27', '2025-06-30'), ('2025-07-01', '2025-10-01')],
+    2026: [('2026-03-26', '2026-06-30'), ('2026-07-01', '2026-10-01')],
 }
+NOTEBOOK_GAME_TYPES = 'R|PO|S'
+
+
+def season_windows(yr):
+    """The notebook's scrape windows for a season (the same two-window split for
+    seasons it doesn't list)."""
+    return NOTEBOOK_WINDOWS.get(int(yr), [(f'{yr}-03-20', f'{yr}-06-30'), (f'{yr}-07-01', f'{yr}-10-01')])
 
 SWING_DESCRIPTIONS = [
     'hit_into_play', 'swinging_strike', 'swinging_strike_blocked',
@@ -116,9 +133,12 @@ def load_models():
     return model, scaler, config
 
 
-def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
+def fetch_new_swings(start_date: str, end_date: str, game_type: str = 'R',
+                     strict: bool = False) -> pd.DataFrame:
     """Fetch Statcast data for a date range (direct from Baseball Savant) and
-    filter to competitive swings.
+    filter to competitive swings (the bottom-10% bat-speed filter is applied per
+    hitter over this whole range). strict=True raises instead of returning an
+    empty frame when the fetch fails.
 
     Uses savant_fetch instead of pybaseball.statcast(): pybaseball hits the same
     endpoint without browser headers and was returning empty on the droplet,
@@ -133,8 +153,10 @@ def fetch_new_swings(start_date: str, end_date: str) -> pd.DataFrame:
     season = int(str(start_date)[:4])
     log(f'  Fetching Statcast {start_date} -> {end_date} (Savant)...')
     try:
-        raw = fetch_savant_range(season, start_date, end_date, player_type='batter')
+        raw = fetch_savant_range(season, start_date, end_date, player_type='batter', game_type=game_type)
     except Exception as e:
+        if strict:
+            raise
         log(f'  Statcast fetch error: {e}')
         return pd.DataFrame()
 
@@ -869,6 +891,58 @@ def rescore_all(main_df, model, scaler, config, season):
     return updated_json
 
 
+def fetch_season_like_notebook(yr) -> pd.DataFrame:
+    """One season's competitive swings built exactly like the notebook's scrape:
+    its windows, its game types, the swing filter within each window, then
+    drop_duplicates() and sort. Raises if any part of the fetch fails."""
+    frames = []
+    for start, end in season_windows(yr):
+        log(f'  {yr}: window {start} -> {end}')
+        w = fetch_new_swings(start, end, game_type=NOTEBOOK_GAME_TYPES, strict=True)
+        log(f'    competitive swings: {len(w):,}')
+        if len(w):
+            frames.append(w)
+    if not frames:
+        return pd.DataFrame()
+    df = pd.concat(frames, ignore_index=True).drop_duplicates()
+    return df.sort_values(['game_date', 'batter']).reset_index(drop=True)
+
+
+def run_resync(years, model, scaler, config):
+    """Rebuild these seasons' swings the notebook's way (fetch_season_like_notebook)
+    so the site scores exactly the swings the notebook did, then re-score. A season
+    held in the daily CSV is replaced inside it (backed up first to
+    competitive_swings_2023_2026.csv.bak); other seasons go to
+    competitive_swings_{year}.csv."""
+    log(f'=== iSwing+ resync ({MODEL_VERSION}): {sorted(set(years))} ===')
+    rebuilt = {}
+    for yr in sorted(set(years)):
+        rows = fetch_season_like_notebook(yr)
+        if len(rows) == 0:
+            sys.exit(f'{yr}: Savant returned no swings — nothing changed.')
+        rebuilt[yr] = rows
+        log(f'  {yr}: {len(rows):,} competitive swings')
+
+    main_df = pd.read_csv(SWINGS_CSV, low_memory=False) if os.path.exists(SWINGS_CSV) else pd.DataFrame()
+    main_years = (set(pd.to_datetime(main_df['game_date'], errors='coerce').dt.year.dropna().astype(int))
+                  if len(main_df) else set())
+    in_main = [yr for yr in rebuilt if yr in main_years]
+    if in_main:
+        import shutil
+        shutil.copyfile(SWINGS_CSV, SWINGS_CSV + '.bak')
+        keep = ~pd.to_datetime(main_df['game_date'], errors='coerce').dt.year.isin(in_main)
+        main_df = pd.concat([main_df[keep]] + [rebuilt[yr] for yr in in_main], ignore_index=True)
+        main_df.to_csv(SWINGS_CSV, index=False)
+        log(f'  Replaced {in_main} in {SWINGS_CSV} (backup: {SWINGS_CSV}.bak)')
+    for yr, rows in rebuilt.items():
+        if yr not in in_main:
+            rows.to_csv(_season_cache(yr), index=False)
+            log(f'  {yr}: wrote {_season_cache(yr)}')
+
+    rescore_all(main_df, model, scaler, config, date.today().year)
+    log('Done.')
+
+
 def run_backfill(years, csv_path, model, scaler, config):
     """Make sure each requested past season has a swings file
     (competitive_swings_{year}.csv: from --csv, the existing file, or a Savant
@@ -892,8 +966,7 @@ def run_backfill(years, csv_path, model, scaler, config):
         elif os.path.exists(cache):
             log(f'  {yr}: using {cache}')
         else:
-            start, end = BACKFILL_WINDOWS.get(yr, (f'{yr}-03-15', f'{yr}-10-05'))
-            swings = fetch_new_swings(start, end)
+            swings = fetch_season_like_notebook(yr)
             if len(swings) == 0:
                 log(f'  {yr}: no swings fetched — skipping')
                 continue
@@ -911,12 +984,18 @@ def main(argv=None):
                     help='add these past seasons (competitive_swings_{year}.csv), then re-score all seasons')
     ap.add_argument('--csv', help='with --backfill: swings CSV to take those seasons from '
                                   '(default: existing competitive_swings_{year}.csv, else fetch from Savant)')
+    ap.add_argument('--resync', nargs='+', type=int, metavar='YEAR',
+                    help="re-fetch these seasons exactly the way the notebook scrapes them "
+                         "(its windows, game types and swing filter), replace them, then re-score")
     args = ap.parse_args(argv)
 
     check_models()
     log('Loading model...')
     model, scaler, config = load_models()
 
+    if args.resync:
+        run_resync(args.resync, model, scaler, config)
+        return
     if args.backfill:
         run_backfill(args.backfill, args.csv, model, scaler, config)
         return

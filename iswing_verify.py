@@ -26,6 +26,49 @@ import pandas as pd
 
 import iswing_update as iu   # paths + the season sources only
 
+# What notebooks/iSwing_Plus_v9_1.ipynb printed for its swing set (section 3):
+# rows per season, contact swings with xwOBAcon, and each feature's non-null count
+# and mean (4 dp). Identical numbers mean the site is scoring the same swings.
+NOTEBOOK_FINGERPRINT = {
+    'rows': {2023: 130706, 2024: 286844, 2025: 299168, 2026: 292513},
+    'xwOBAcon_n': 382065,
+    'features': {
+        'bat_speed': (1009231, 71.7061), 'swing_length': (1009231, 7.3113),
+        'speed_over_expected': (1009231, 0.0000), 'speed_vs_location': (1009156, 88.7327),
+        'aa_vs_optimal': (1009156, -11.1523), 'aa_adjustment': (1009156, -9.7402),
+        'tilt_for_height': (1009155, -5.3090), 'direction_from_optimal': (1009156, -16.6494),
+        'length_for_location': (1009156, -0.0050), 'effort_level': (1009231, 0.9386),
+    },
+    'hitters': {2023: 515, 2024: 597, 2025: 612, 2026: 618},
+}
+
+
+def fingerprint(df, ref):
+    """Compare this swing set with the notebook's printed one. True if identical."""
+    fp, ok = NOTEBOOK_FINGERPRINT, True
+    print('\nSwing set vs the notebook (section 3 printout):')
+    rows = df['year'].value_counts().sort_index()
+    for yr, want in fp['rows'].items():
+        got = int(rows.get(yr, 0))
+        same = got == want
+        ok &= same
+        print(f"  {yr} swings        {got:>11,}  notebook {want:>11,}  {'ok' if same else 'DIFFERENT'}")
+    contact = df['launch_speed'].notna() & df['launch_angle'].notna() & df['estimated_woba_using_speedangle'].notna()
+    same = int(contact.sum()) == fp['xwOBAcon_n']
+    ok &= same
+    print(f"  xwOBAcon swings     {int(contact.sum()):>11,}  notebook {fp['xwOBAcon_n']:>11,}  {'ok' if same else 'DIFFERENT'}")
+    for f, (n, mean) in fp['features'].items():
+        got_n, got_m = int(df[f].notna().sum()), round(float(df[f].mean()), 4)
+        same = got_n == n and abs(got_m - mean) < 5e-5
+        ok &= same
+        print(f"  {f:22s} n={got_n:>9,} mean={got_m:+.4f}  notebook n={n:>9,} mean={mean:+.4f}  {'ok' if same else 'DIFFERENT'}")
+    for yr, want in fp['hitters'].items():
+        got = len(ref.get(yr, []))
+        same = got == want
+        ok &= same
+        print(f"  {yr} hitters (25+)  {got:>11}  notebook {want:>11}  {'ok' if same else 'DIFFERENT'}")
+    return ok
+
 
 def notebook_features(df):
     """Notebook v9.1 section 3 (feature part), verbatim apart from the prints."""
@@ -124,11 +167,16 @@ def main():
     print(f"Model {config.get('version', '?')}: {len(config['features'])} features")
 
     df = notebook_features(load_swings())
+    for c in ['launch_speed', 'launch_angle', 'estimated_woba_using_speedangle']:
+        df[c] = pd.to_numeric(df[c], errors='coerce')
     ref = notebook_year_scores(df, model, scaler, config)
     swings = df['year'].value_counts().sort_index()
+    same_swings = fingerprint(df, ref)
 
     lb = None
-    if args.leaderboard:
+    if args.leaderboard and not os.path.exists(args.leaderboard):
+        print(f'{args.leaderboard} not found — skipping the comparison with the notebook export.')
+    elif args.leaderboard:
         lb = pd.read_csv(args.leaderboard)
         lb['batter'] = lb['batter'].astype(int)
         lb = lb.set_index('batter')
@@ -168,8 +216,15 @@ def main():
             if extra:
                 print(f'      site has {len(extra)} hitters the notebook logic does not: {extra[:10]}')
 
-    print('\nAll seasons match the notebook exactly.' if not bad else '\nMISMATCH — see above.')
-    sys.exit(1 if bad else 0)
+    if bad:
+        print('\nMISMATCH between the site and the notebook logic — see above.')
+    elif not same_swings:
+        print('\nThe site matches the notebook logic exactly on these swings, but the swings differ '
+              "from the notebook's (see the swing-set table). To score the notebook's exact swings run:\n"
+              '    python3 iswing_update.py --resync 2024 2025 2026')
+    else:
+        print('\nAll seasons match the notebook exactly (same swings, same numbers).')
+    sys.exit(1 if bad or not same_swings else 0)
 
 
 if __name__ == '__main__':

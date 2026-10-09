@@ -64,8 +64,13 @@ and effort features (`notebooks/iSwing_Plus_v9_1.ipynb`). Model files at the rep
   plate_x bins) are per season and effort_level uses the hitter's own 90th-percentile bat speed that
   season, exactly as in the notebook. iSwing+ is normalized within each season (min 25 swings).
 - `python3 iswing_verify.py [--leaderboard iSwing_leaderboard.csv]` re-derives every season with the
-  notebook's own code and checks the site's numbers against it (and against the notebook's exported
-  leaderboard when given).
+  notebook's own code and checks the site's numbers against it, checks that the swings are the
+  notebook's (row counts + feature fingerprint it printed), and compares with the notebook's exported
+  leaderboard when given.
+- `python3 iswing_update.py --resync 2024 2025 2026` rebuilds seasons exactly the way the notebook
+  scrapes them (its date windows, pybaseball's game types `R|PO|S`, and the bottom-10% bat-speed
+  filter applied within each window), replaces them and re-scores. The daily job filters each day's
+  fetch instead, so run this after a season ends to line the site up with a notebook re-scrape.
 - Past seasons (one-time): `python3 iswing_update.py --backfill 2023 2024 2025` fetches each season from
   Savant into `competitive_swings_{year}.csv` (gitignored; keep them — the daily run re-scores them), or
   `--csv PATH` takes them from an existing swings CSV.

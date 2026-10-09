@@ -97,7 +97,10 @@ def iter_chunks(start, end, days=CHUNK_DAYS):
 
 
 def _fetch_one(season, start, end, player_type, game_type):
-    gt = "R%7C" if game_type == "R" else "E%7C"
+    if "|" in game_type:                  # several types, e.g. "R|PO|S" (pybaseball's default)
+        gt = "".join(f"{g}%7C" for g in game_type.split("|"))
+    else:
+        gt = "R%7C" if game_type == "R" else "E%7C"
     url = (
         f"{SAVANT_BASE}/statcast_search/csv?all=true&type=detail"
         f"&player_type={player_type}&hfGT={gt}&hfSea={season}%7C"
@@ -144,7 +147,8 @@ def fetch_savant_range(season, start, end, player_type="batter", game_type="R"):
 
     Returns one concatenated, de-duplicated DataFrame (empty if nothing came back).
     `player_type` is "batter" or "pitcher" (same row set either way; it only
-    changes the keyed player). `game_type` "R" = regular season, "E" = spring.
+    changes the keyed player). `game_type` "R" = regular season, "E" = spring;
+    "R|PO|S" (several Savant codes joined by "|") is what pybaseball.statcast() asks for.
     """
     end_d = min(_to_date(end), date.today())
     frames = []
