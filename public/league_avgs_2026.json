@@ -42,7 +42,7 @@
       "extension": 6.42
     },
     "FF": {
-      "count": 219171,
+      "count": 219170,
       "velo": 94.8,
       "spin": 2314,
       "zone_pct": 47.7,
@@ -74,7 +74,7 @@
       "extension": 6.42
     },
     "SL": {
-      "count": 93539,
+      "count": 93540,
       "velo": 86.3,
       "spin": 2434,
       "zone_pct": 39.0,
@@ -98,5 +98,5 @@
       "extension": 6.11
     }
   },
-  "generated_at": "2026-10-08 15:42:31 UTC"
+  "generated_at": "2026-10-09 15:39:24 UTC"
 }
