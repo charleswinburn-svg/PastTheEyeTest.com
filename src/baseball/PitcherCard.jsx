@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, deltaSpread, projDelta } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
@@ -17,10 +17,19 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   const [view, setView] = useState("results");   // "results" | "modeling"
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
+  // Projected seasons ("2027P") come entirely from the projection file: no API
+  // grades, arsenal, distributions or rolling chart exist for them.
+  const isProjection = typeof season === "string" && season.endsWith("P");
+  const seasonLabel = isProjection ? `${season.slice(0, -1)} Projected` : season;
 
   useEffect(() => {
     setPitchPlusData(null);
     if (!player?.player_id) return;
+    if (isProjection) {
+      const g = player.grades;
+      setPitchPlusData(g && Object.keys(g).length ? { ...g } : { qualified: false });
+      return;
+    }
     const isDateRange = !!(dateFrom || dateTo);
     let cancelled = false;
 
@@ -147,6 +156,22 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   const displayCategories = rangeCategories ?? player?.categories;
   const isDateRange = !!(dateFrom || dateTo);
 
+  // Projection files carry last season's value per stat ("last"); the spread of
+  // changes across every projected pitcher sets how deep each delta is shaded.
+  const deltaSpreads = useMemo(() => {
+    if (!isProjection) return {};
+    const out = {};
+    for (const pp of allPitchers || []) {
+      for (const [label, cat] of Object.entries(pp.categories || {})) {
+        if (cat?.last) (out[label] ||= []).push(cat);
+      }
+      for (const [key, g] of Object.entries(pp.grades || {})) {
+        if (g?.last != null) (out[`grade:${key}`] ||= []).push(gradeCat(g));
+      }
+    }
+    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, deltaSpread(v)]));
+  }, [allPitchers, isProjection]);
+
   if (!player) {
     return (
       <div style={{ color: "#666", padding: 40, textAlign: "center" }}>
@@ -161,14 +186,16 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
     ? `${dateFrom || "start"} → ${dateTo || "now"}`
     : null;
 
-  const subtitle = isAAA
+  const subtitle = isProjection
+    ? `${seasonLabel}${player.proj?.age ? ` | Age ${player.proj.age}` : ""}${player.ip ? ` | ${String(season).slice(0, 4) - 1}: ${player.ip} IP` : ""}`
+    : isAAA
     ? `Parent Org: ${player?.parent_org_name || player?.parent_org_abbr || "—"} | ${season}${player?.ip ? ` | ${player.ip} IP` : ""}`
     : (dateSubtitle || buildBioSubtitle(bio, "throws") || `${season}${player.ip ? ` | ${player.ip} IP` : ""}`);
 
   return (
     <div>
       {/* === Results | Pitch Modeling toggle (outside the saved PNG) === */}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+      {!isProjection && <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
         <div style={{ display: "inline-flex", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 8, padding: 2 }}>
           {[["results", "Results"], ["modeling", "Pitch Modeling"]].map(([id, label]) => (
             <button
@@ -184,9 +211,9 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
             >{label}</button>
           ))}
         </div>
-      </div>
+      </div>}
 
-      {view === "modeling" ? (
+      {view === "modeling" && !isProjection ? (
         <PitchModelingCard player={player} season={season} isAAA={isAAA} dateFrom={dateFrom} dateTo={dateTo} />
       ) : (
       <>
@@ -212,7 +239,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           playerId={player.player_id}
           subtitle={subtitle}
         />
-        <ProBubblesRow data={pitchPlusData} theme={t} />
+        <ProBubblesRow data={pitchPlusData} theme={t} deltaSpreads={isProjection ? deltaSpreads : null} />
         {/* Two fluid columns (no divider): percentile bars + pitch arsenal */}
         <div style={{ display: "flex", gap: 36, flexWrap: "wrap", padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
           {/* Left column — percentile bars */}
@@ -235,12 +262,13 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
                   label={label}
                   pctile={cat.pctile}
                   display={cat.display}
+                  delta={isProjection && !isDateRange ? projDelta(cat, deltaSpreads[label]) : null}
                 />
               ))
             )}
           </div>
-          {/* Right column — pitch arsenal figures */}
-          <div style={{ flex: "1 1 360px", minWidth: 300 }}>
+          {/* Right column — pitch arsenal figures (none for projections) */}
+          {!isProjection && <div style={{ flex: "1 1 360px", minWidth: 300 }}>
             <PitcherArsenal
               playerId={player.player_id}
               season={season}
@@ -248,22 +276,22 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
               dateFrom={dateFrom}
               dateTo={dateTo}
             />
-          </div>
+          </div>}
         </div>
         {/* === GRADE DISTRIBUTIONS (8 KDE figures) — inside cardRef so Save-as-PNG captures them === */}
-        <PitcherDistributions
+        {!isProjection && <PitcherDistributions
           playerId={player.player_id}
           season={season}
           isAAA={isAAA}
           dateFrom={dateFrom}
           dateTo={dateTo}
-        />
+        />}
         <div style={{
           padding: "8px 16px 10px",
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{isDateRange ? "Date range" : `${season} Season`}</span>
+          <span>{isDateRange ? "Date range" : isProjection ? seasonLabel : `${season} Season`}</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
@@ -287,13 +315,13 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
       </div>
 
       {/* === ROLLING 10-IP CHART === */}
-      <RollingChart
+      {!isProjection && <RollingChart
         playerId={player.player_id}
         playerName={player.name}
         season={season}
         type="pitcher"
         cardMetrics={Object.keys(player.categories || {})}
-      />
+      />}
       </>
       )}
     </div>
@@ -313,7 +341,10 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
 // Loading state: live computation takes 30-60s (game log + per-game PBP +
 // /score round trip). Until pitchPlusData arrives, each bubble renders a
 // rotating spinner so users see the work is in progress.
-function ProBubblesRow({ data, theme }) {
+// A projected grade as a card-style category so projDelta can shade it.
+const gradeCat = (g) => ({ display: Number(g.value).toFixed(1), last: { display: Number(g.last).toFixed(1) } });
+
+function ProBubblesRow({ data, theme, deltaSpreads = null }) {
   const t = theme;
   const metrics = [
     { key: "stuff_plus", label: "Stuff+" },
@@ -392,6 +423,13 @@ function ProBubblesRow({ data, theme }) {
                 ? `${ordinal(Math.round(pctile))} percentile${data?.seasonOnly ? " · season" : ""}`
                 : (isUnqualified ? "n/a" : isLoading ? "scoring…" : "—")}
             </div>
+            {deltaSpreads && m?.last != null && value != null && (() => {
+              const d = projDelta(gradeCat(m), deltaSpreads[`grade:${key}`]);
+              return d && (
+                <div style={{ fontSize: 9, fontStyle: "italic", fontWeight: 600, lineHeight: 1,
+                  color: d.color || t.textFaint, fontFamily: NUM_FONT }}>{d.text}</div>
+              );
+            })()}
           </div>
         );
       })}

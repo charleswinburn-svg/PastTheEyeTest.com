@@ -25,6 +25,39 @@ export const textOnBin = (p) => {
   return (p < 25 || p >= 75) ? "#fff" : "#111";
 };
 
+// ── Projection deltas (projected − last season) ──
+// Read from the card's display strings so the change carries the stat's own units
+// and decimals. Shaded with the percentile bins by how big the change is relative to
+// the spread of changes across all projected hitters: red = up, blue = down.
+const _deltaNum = (s) => {
+  const v = parseFloat(String(s ?? "").replace("\u2212", "-").replace(/[^0-9.+-]/g, ""));
+  return isFinite(v) ? v : null;
+};
+const _rawDelta = (cat) => {
+  if (!cat?.last) return null;
+  const a = _deltaNum(cat.display), b = _deltaNum(cat.last.display);
+  return a == null || b == null ? null : a - b;
+};
+export function deltaSpread(cats) {
+  const ds = cats.map(_rawDelta).filter(d => d != null);
+  if (ds.length < 10) return null;
+  const rms = Math.sqrt(ds.reduce((acc, d) => acc + d * d, 0) / ds.length);
+  return rms > 0 ? rms : null;
+}
+export function projDelta(cat, spread) {
+  const raw = _rawDelta(cat);
+  if (raw == null || spread == null) return null;
+  const dec = (String(cat.display).split(".")[1] || "").length;
+  const d = +raw.toFixed(dec);
+  let txt = Math.abs(d).toFixed(dec);
+  if (dec === 3 && txt.startsWith("0.")) txt = txt.slice(1);
+  const p = Math.max(0, Math.min(100, 50 + 20 * d / spread));
+  return {
+    text: `${d > 0 ? "+" : d < 0 ? "\u2212" : "\u00b1"}${txt}`,
+    color: pctToBin(p) === "45-55" ? null : binColor(p),
+  };
+}
+
 // ── MLB team primary colors (all known abbreviation variants) ──
 export const MLB_TEAM_PRIMARY = {
   // Standard + Fangraphs/Savant variants
@@ -284,7 +317,7 @@ export function getLogoUrl(teamAbbr, teamId) {
 // BUBBLE PERCENTILE BAR
 // ═══════════════════════════════════════════════════════════
 
-export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, badge = false }) {
+export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, badge = false, delta = null }) {
   const { theme: t } = useTheme();
   const hasValue = pctile != null && isFinite(pctile);
   const barWidth = hasValue ? Math.max(3, pctile) : 0;
@@ -377,6 +410,17 @@ export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, 
         flexShrink: 0,
       }}>
         {display || "—"}
+        {delta && (
+          <div style={{
+            fontSize: 8.5, fontStyle: "italic", fontWeight: 600, lineHeight: 1, marginTop: 1,
+            // the deepest blue bin is unreadable as text on a dark card — lift it there
+            color: !delta.color ? t.textFaint
+              : delta.color === BIN_COLORS["0-10"] && hexLuminance(t.cardBg || t.bg) < 0.4 ? "#4F8FD6"
+              : delta.color,
+          }}>
+            {delta.text}
+          </div>
+        )}
       </div>
     </div>
   );

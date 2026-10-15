@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, deltaSpread, projDelta } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
@@ -66,6 +66,23 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
     const pctile = interpolatePctile(buildPctileLookup(allHitters, "iSwing+"), w.value);
     return { value: Math.round(w.value), pctile, n: w.n };
   }, [isDateRange, iswingGames, player?.player_id, dateFrom, dateTo, allHitters]);
+
+  // Projection files carry last season's value per stat ("last"); the spread of
+  // changes across every projected hitter sets how deep each delta is shaded.
+  const deltaSpreads = useMemo(() => {
+    const out = {};
+    for (const hh of allHitters || []) {
+      for (const [label, cat] of Object.entries(hh.categories || {})) {
+        if (cat?.last) (out[label] ||= []).push(cat);
+      }
+    }
+    for (const id in xrvAll || {}) {
+      for (const [label, m] of Object.entries(xrvAll[id]?.metrics || {})) {
+        if (m?.last) (out[`xrv:${label}`] ||= []).push(m);
+      }
+    }
+    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, deltaSpread(v)]));
+  }, [allHitters, xrvAll]);
 
   const saveCard = useCallback(async () => {
     if (!player) return;
@@ -162,6 +179,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                   pctile={cat.pctile}
                   display={cat.display}
                   badge={label === "iSwing+" && iswingNew}
+                  delta={isDateRange ? null : projDelta(cat, deltaSpreads[label])}
                 />
               ))
             )}
@@ -195,6 +213,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                     label={label}
                     pctile={xrvMetrics?.[label]?.pctile ?? null}
                     display={xrvMetrics?.[label]?.display ?? "—"}
+                    delta={seasonFallback ? projDelta(xrvMetrics?.[label], deltaSpreads[`xrv:${label}`]) : null}
                   />
                 ))
               )}
