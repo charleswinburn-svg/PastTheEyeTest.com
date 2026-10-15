@@ -9,6 +9,7 @@ import EVLAChart from "./EVLAChart.jsx";
 import TeamScatter from "./TeamScatter.jsx";
 import ISwingWaterfall from "./ISwingWaterfall.jsx";
 import StuffWaterfall from "./StuffWaterfall.jsx";
+import ProjectionMovers from "./ProjectionMovers.jsx";
 import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv, NewBadge, useISwingNew } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
@@ -52,6 +53,10 @@ function deduplicatePlayers(players) {
   return [...byKey.values()];
 }
 
+const SEASONS = ["2026", "2025", "2024", "2023"];
+// Projection season ("2027P") if one is listed — enables the Movers leaderboard.
+const PROJ_SEASON = SEASONS.find(x => String(x).endsWith("P")) || null;
+
 const TABS = [
   {
     id: "hitter",
@@ -92,6 +97,7 @@ const TABS = [
       { id: "hitter_xrv_lb", label: "Hitter xRV" },
       { id: "pitcher_lb", label: "Pitcher" },
       { id: "pitch_modeling_lb", label: "Pitch Modeling" },
+      ...(PROJ_SEASON ? [{ id: "proj_movers", label: `${PROJ_SEASON.slice(0, 4)} Movers`, isNew: true }] : []),
     ]
   },
   { id: "team_plots", label: "TEAM PLOTS" },
@@ -99,7 +105,6 @@ const TABS = [
   { id: "evla",       label: "EV/LA FAN" },
 ];
 
-const SEASONS = ["2026", "2025", "2024", "2023"];
 
 // Ordered xRV/600 PA metric labels for the hitter xRV leaderboard (mirrors the
 // HitterCard right column / build_hitter_xrv.py). xRV/600 leads so the board
@@ -323,7 +328,7 @@ function BaseballApp() {
   const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_plinko", "hitter_game", "hitter_season", "hitter_plinko", "hitter_iswing", "pitcher_stuff_wf"].includes(id);
   const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
   const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
-  const isLeaderboardTab = (id) => ["hitter_lb", "hitter_xrv_lb", "pitcher_lb", "pitch_modeling_lb"].includes(id);
+  const isLeaderboardTab = (id) => ["hitter_lb", "hitter_xrv_lb", "pitcher_lb", "pitch_modeling_lb", "proj_movers"].includes(id);
   const isTabActive = (tabId) => {
     if (tabId === "summaries") return isSummaryTab(tab);
     if (tabId === "leaderboard") return isLeaderboardTab(tab);
@@ -815,6 +820,9 @@ function BaseballApp() {
               {loading ? `Loading ${season} data...` : `No pipeline data for ${season}.`}
             </div>
           )
+        )}
+        {tab === "proj_movers" && PROJ_SEASON && (
+          <ProjectionMovers projSeason={PROJ_SEASON} />
         )}
         {tab === "pitch_modeling_lb" && (
           <PitchModelingLeaderboard season={season} pitchers={pitchersFull} />
