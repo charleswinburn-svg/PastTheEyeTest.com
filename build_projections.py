@@ -692,6 +692,7 @@ def main():
         if m is not None:
             p, has, _ = sp.predict(m, None, keys)
             proj["iSwing+"] = np.where(has, p, np.nan)
+            proj["__hist__iSwing+"], proj["__age__iSwing+"] = decompose(sp, m, keys)
             report.append({"stat": "iSwing+", "denom": "n_swings", "lags": sp.J, **m.describe(),
                            "n_fit": m.n_fit, "layer": "base"})
     if "swing_residual" in signals:
@@ -756,7 +757,8 @@ def main():
         if "iSwing+" in proj.columns and np.isfinite(r.get("iSwing+", np.nan)):
             v = float(r["iSwing+"])
             cats["iSwing+"] = {"value": round(v, 1), "display": str(int(round(v))),
-                               "pctile": ecdf_pct(isw_pool, v, False)}
+                               "pctile": ecdf_pct(isw_pool, v, False),
+                               "parts": parts_of(v, r.get("__hist__iSwing+", np.nan), r.get("__age__iSwing+", np.nan), 3)}
             if isw is not None:
                 lv = isw[(isw.player_id == pid) & (isw.season == LAST)]["iswing"]
                 if len(lv):
@@ -813,7 +815,9 @@ def main():
         "meta": {"projection": True, "target_season": TARGET, "percentiles_vs": f"{LAST} actual (min 100 PA)",
                  "min_recent_pa": args.min_recent_pa,
                  "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
-                 "pools": pool_lists(pool, [lab for lab, *_ in CARD_STATS]),
+                 "pools": {**pool_lists(pool, [lab for lab, *_ in CARD_STATS]),
+                           **({"iSwing+": [round(float(x), 5) for x in np.sort(isw_pool[np.isfinite(isw_pool)])]}
+                              if len(isw_pool) else {})},
                  "xrv_pools": pool_lists(xpool, XRV_STATS),
                  "lower_better": [lab for lab, _f, lb, *_ in CARD_STATS if lb]},
     }
