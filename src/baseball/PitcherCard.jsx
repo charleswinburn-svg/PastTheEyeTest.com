@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, deltaSpread, projDelta } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, projAdj, useProjView, ProjViewSelect } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
@@ -156,8 +156,9 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   const displayCategories = rangeCategories ?? player?.categories;
   const isDateRange = !!(dateFrom || dateTo);
 
-  // Projection files carry last season's value per stat ("last"); the spread of
-  // changes across every projected pitcher sets how deep each delta is shaded.
+  // Projected seasons: the line under each value shows the adjustment picked in
+  // "Show"; its spread across every projected pitcher sets how deep it's shaded.
+  const [projView, setProjView] = useProjView();
   const deltaSpreads = useMemo(() => {
     if (!isProjection) return {};
     const out = {};
@@ -169,8 +170,8 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
         if (g?.last != null) (out[`grade:${key}`] ||= []).push(gradeCat(g));
       }
     }
-    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, deltaSpread(v)]));
-  }, [allPitchers, isProjection]);
+    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, adjSpread(v, projView)]));
+  }, [allPitchers, isProjection, projView]);
 
   if (!player) {
     return (
@@ -194,6 +195,11 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
 
   return (
     <div>
+      {isProjection && !isDateRange && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <ProjViewSelect value={projView} onChange={setProjView} />
+        </div>
+      )}
       {/* === Results | Pitch Modeling toggle (outside the saved PNG) === */}
       {!isProjection && <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
         <div style={{ display: "inline-flex", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 8, padding: 2 }}>
@@ -239,7 +245,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           playerId={player.player_id}
           subtitle={subtitle}
         />
-        <ProBubblesRow data={pitchPlusData} theme={t} deltaSpreads={isProjection ? deltaSpreads : null} />
+        <ProBubblesRow data={pitchPlusData} theme={t} deltaSpreads={isProjection ? deltaSpreads : null} projView={projView} />
         {/* Two fluid columns (no divider): percentile bars + pitch arsenal */}
         <div style={{ display: "flex", gap: 36, flexWrap: "wrap", padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
           {/* Left column — percentile bars */}
@@ -262,7 +268,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
                   label={label}
                   pctile={cat.pctile}
                   display={cat.display}
-                  delta={isProjection && !isDateRange ? projDelta(cat, deltaSpreads[label]) : null}
+                  delta={isProjection && !isDateRange ? projAdj(cat, projView, deltaSpreads[label]) : null}
                 />
               ))
             )}
@@ -341,10 +347,11 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
 // Loading state: live computation takes 30-60s (game log + per-game PBP +
 // /score round trip). Until pitchPlusData arrives, each bubble renders a
 // rotating spinner so users see the work is in progress.
-// A projected grade as a card-style category so projDelta can shade it.
-const gradeCat = (g) => ({ display: Number(g.value).toFixed(1), last: { display: Number(g.last).toFixed(1) } });
+// A projected grade as a card-style category so projAdj can read and shade it.
+const gradeCat = (g) => ({ display: Number(g.value).toFixed(1), value: g.value,
+                           last: { display: Number(g.last).toFixed(1) }, parts: g.parts });
 
-function ProBubblesRow({ data, theme, deltaSpreads = null }) {
+function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "change" }) {
   const t = theme;
   const metrics = [
     { key: "stuff_plus", label: "Stuff+" },
@@ -424,12 +431,13 @@ function ProBubblesRow({ data, theme, deltaSpreads = null }) {
                 : (isUnqualified ? "n/a" : isLoading ? "scoring…" : "—")}
             </div>
             {deltaSpreads && m?.last != null && value != null && (() => {
-              const d = projDelta(gradeCat(m), deltaSpreads[`grade:${key}`]);
+              const d = projAdj(gradeCat(m), projView, deltaSpreads[`grade:${key}`]);
               return d && (
                 <div style={{ fontSize: 9, fontStyle: "italic", fontWeight: 600, lineHeight: 1,
                   color: d.color || t.textFaint, fontFamily: NUM_FONT }}>{d.text}</div>
               );
             })()}
+
           </div>
         );
       })}

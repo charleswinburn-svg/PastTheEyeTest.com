@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, deltaSpread, projDelta } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projAdj, useProjView, ProjViewSelect } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
@@ -67,8 +67,10 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
     return { value: Math.round(w.value), pctile, n: w.n };
   }, [isDateRange, iswingGames, player?.player_id, dateFrom, dateTo, allHitters]);
 
-  // Projection files carry last season's value per stat ("last"); the spread of
-  // changes across every projected hitter sets how deep each delta is shaded.
+  // Projected seasons: the line under each value shows the adjustment picked in
+  // "Show" (change vs last season, age + model, model, age); its spread across every
+  // projected hitter sets how deep it's shaded.
+  const [projView, setProjView] = useProjView();
   const deltaSpreads = useMemo(() => {
     const out = {};
     for (const hh of allHitters || []) {
@@ -81,8 +83,8 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
         if (m?.last) (out[`xrv:${label}`] ||= []).push(m);
       }
     }
-    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, deltaSpread(v)]));
-  }, [allHitters, xrvAll]);
+    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, adjSpread(v, projView)]));
+  }, [allHitters, xrvAll, projView]);
 
   const saveCard = useCallback(async () => {
     if (!player) return;
@@ -129,12 +131,22 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
     ? `${dateFrom || "start"} → ${dateTo || "now"} | ${rangeCategories?._pa ?? "—"} PA`
     : null;
 
-  const subtitle = isAAA
+  // Projected seasons ("2027P"): label them "2027 Projected" and show the age they'll play at.
+  const isProjection = typeof season === "string" && season.endsWith("P");
+  const seasonLabel = isProjection ? `${season.slice(0, -1)} Projected` : season;
+  const subtitle = isProjection && !isDateRange
+    ? `${seasonLabel}${player.proj?.age ? ` | Age ${player.proj.age}` : ""}${player.pa ? ` | ${String(season).slice(0, 4) - 1}: ${player.pa} PA` : ""}`
+    : isAAA
     ? `Parent Org: ${player.parent_org_name || player.parent_org_abbr || "—"} | ${season} | ${player.pa || "—"} PA`
     : (dateSubtitle || buildBioSubtitle(bio, "bats") || `${season} | ${player.pa || "—"} PA`);
 
   return (
     <div>
+      {isProjection && !isDateRange && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <ProjViewSelect value={projView} onChange={setProjView} />
+        </div>
+      )}
       {/* === SAVEABLE CARD (scaled to fit width so it's never clipped on mobile) === */}
       <FitToWidth designWidth={1040}>
       <div
@@ -179,7 +191,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                   pctile={cat.pctile}
                   display={cat.display}
                   badge={label === "iSwing+" && iswingNew}
-                  delta={isDateRange ? null : projDelta(cat, deltaSpreads[label])}
+                  delta={isDateRange ? null : projAdj(cat, projView, deltaSpreads[label])}
                 />
               ))
             )}
@@ -213,7 +225,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                     label={label}
                     pctile={xrvMetrics?.[label]?.pctile ?? null}
                     display={xrvMetrics?.[label]?.display ?? "—"}
-                    delta={seasonFallback ? projDelta(xrvMetrics?.[label], deltaSpreads[`xrv:${label}`]) : null}
+                    delta={seasonFallback ? projAdj(xrvMetrics?.[label], projView, deltaSpreads[`xrv:${label}`]) : null}
                   />
                 ))
               )}
@@ -234,7 +246,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{isDateRange ? "Date range" : `${season} Season`}</span>
+          <span>{isDateRange ? "Date range" : isProjection ? seasonLabel : `${season} Season`}</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>

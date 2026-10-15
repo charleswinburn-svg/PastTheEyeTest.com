@@ -58,6 +58,85 @@ export function projDelta(cat, spread) {
   };
 }
 
+// ── Projected-card "Show" setting (shared by the cards and the Movers board) ──
+// What the small line under each projected value shows. Every projected value is
+// stored as history + age + model (parts); "change" is projection − last season.
+export const PROJ_VIEWS = [
+  { id: "change", label: "Change vs last season", short: "Change" },
+  { id: "signal", label: "Age + model (beyond his stats)", short: "Age + model" },
+  { id: "model",  label: "Model only (iSwing+ / Stuff+)", short: "Model" },
+  { id: "age",    label: "Aging only", short: "Age" },
+];
+const PROJ_VIEW_KEY = "ptet-proj-view";
+const PROJ_VIEW_EVENT = "ptet-proj-view";
+const readProjView = (fallback) => {
+  try { const v = localStorage.getItem(PROJ_VIEW_KEY); return PROJ_VIEWS.some(x => x.id === v) ? v : fallback; }
+  catch { return fallback; }
+};
+
+// One remembered setting; changing it on a card also changes the board, and back.
+// Until someone picks, cards start on "change" and the Movers board on "signal".
+export function useProjView(fallback = "change") {
+  const [view, setView] = useState(() => readProjView(fallback));
+  useEffect(() => {
+    const on = (e) => setView(e.detail);
+    window.addEventListener(PROJ_VIEW_EVENT, on);
+    return () => window.removeEventListener(PROJ_VIEW_EVENT, on);
+  }, []);
+  const set = (v) => {
+    try { localStorage.setItem(PROJ_VIEW_KEY, v); } catch { /* storage blocked */ }
+    window.dispatchEvent(new CustomEvent(PROJ_VIEW_EVENT, { detail: v }));
+  };
+  return [view, set];
+}
+
+export function ProjViewSelect({ value, onChange, style }) {
+  const { theme: t } = useTheme();
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)} title="What the line under each projected value shows"
+      style={{ padding: "6px 10px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
+               borderRadius: 6, fontSize: 12, fontFamily: "inherit", ...style }}>
+      {PROJ_VIEWS.map(v => <option key={v.id} value={v.id}>Show: {v.label}</option>)}
+    </select>
+  );
+}
+
+// The chosen adjustment for one projected value, in the card's display units, or null.
+export function projAdjValue(cat, view) {
+  if (!cat) return null;
+  if (view === "change") return _rawDelta(cat);
+  const pp = cat.parts;
+  if (!pp) return null;
+  const shown = _deltaNum(cat.display), raw = Number(cat.value);
+  const scale = raw && shown != null && Math.abs(shown / raw) > 50 ? 100 : 1;   // K% etc. stored as fractions
+  const x = view === "model" ? pp.model : view === "age" ? pp.age : pp.age + pp.model;
+  return Number(x) * scale;
+}
+
+export function adjSpread(cats, view) {
+  const ds = cats.map(c => projAdjValue(c, view)).filter(d => d != null && isFinite(d));
+  if (ds.length < 10) return null;
+  const rms = Math.sqrt(ds.reduce((acc, d) => acc + d * d, 0) / ds.length);
+  return rms > 0 ? rms : null;
+}
+
+// {text, color} for the line under a projected value — same shading as the delta.
+// Stats with no model layer show nothing in "Model only".
+export function projAdj(cat, view, spread) {
+  const v = projAdjValue(cat, view);
+  if (v == null || !isFinite(v) || spread == null) return null;
+  const dec = (String(cat.display).split(".")[1] || "").length;
+  const d = +v.toFixed(dec);
+  if (view === "model" && d === 0) return null;
+  let txt = Math.abs(d).toFixed(dec);
+  if (dec === 3 && txt.startsWith("0.")) txt = txt.slice(1);
+  const p = Math.max(0, Math.min(100, 50 + 20 * d / spread));
+  return {
+    text: `${d > 0 ? "+" : d < 0 ? "\u2212" : "\u00b1"}${txt}`,
+    color: pctToBin(p) === "45-55" ? null : binColor(p),
+  };
+}
+
 // ── MLB team primary colors (all known abbreviation variants) ──
 export const MLB_TEAM_PRIMARY = {
   // Standard + Fangraphs/Savant variants

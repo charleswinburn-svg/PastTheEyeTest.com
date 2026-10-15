@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
-import { deltaSpread, projDelta, binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance } from "./SharedComponents.jsx";
+import { binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance, PROJ_VIEWS, useProjView, ProjViewSelect, projAdjValue, adjSpread, projAdj } from "./SharedComponents.jsx";
 
 // LEADERBOARD → "{year} Movers": who the projection moves, and why.
 // Every projected value is split by the build scripts into three parts ("parts"):
@@ -15,12 +15,6 @@ import { deltaSpread, projDelta, binColor, textOnBin, NUM_FONT, BIN_COLORS, hexL
 
 const GRADE_LABELS = { stuff_plus: "Stuff+", loc_plus: "Location+", tun_plus: "Tunnel+", pitch_plus: "Pitch+" };
 const XRV_LABELS = ["xRV/600", "Contact Quality", "Whiff", "Decision", "Chase"];
-const RANKS = [
-  { id: "signal", label: "Age + model (beyond his stats)" },
-  { id: "model",  label: "Model only (iSwing+ / Stuff+)" },
-  { id: "age",    label: "Aging only" },
-  { id: "change", label: "Raw change vs last season" },
-];
 const MIN_REG = { hitters: { field: "pa", n: 300, unit: "PA" }, pitchers: { field: "ip", n: 50, unit: "IP" } };
 
 const num = (s) => {
@@ -31,12 +25,6 @@ const fmtDelta = (d, dec) => {
   let txt = Math.abs(d).toFixed(dec);
   if (dec === 3 && txt.startsWith("0.")) txt = txt.slice(1);
   return `${d > 0 ? "+" : d < 0 ? "−" : "±"}${txt}`;
-};
-
-// Same style as the card's own display (".349" for pitchers, "0.423" for hitters).
-const fmtVal = (v, dec, like) => {
-  const s = v.toFixed(dec);
-  return String(like).startsWith(".") ? s.replace(/^(-?)0\./, "$1.") : s;
 };
 
 // One player's projected entry for a stat key ("cat:K%", "grade:stuff_plus", "xrv:Whiff").
@@ -65,7 +53,7 @@ export default function ProjectionMovers({ projSeason }) {
   const [side, setSide] = useState("hitters");
   const [stat, setStat] = useState(null);
   const [regulars, setRegulars] = useState(true);
-  const [rank, setRank] = useState("signal");
+  const [rank, setRank] = useProjView("signal");   // shared with the projected cards' "Show"
   const year = String(projSeason).slice(0, 4);
   const lastYear = Number(year) - 1;
 
@@ -107,30 +95,14 @@ export default function ProjectionMovers({ projSeason }) {
       if (!cat?.last || num(cat.display) == null || num(cat.last.display) == null) continue;
       const dec = (String(cat.display).split(".")[1] || "").length;
       const d = +(num(cat.display) - num(cat.last.display)).toFixed(dec);
-      // parts are stored in the stat's raw units; the display may be ×100 (K% etc.)
-      const raw = Number(cat.value);
-      const scale = raw && Math.abs(num(cat.display) / raw) > 50 ? 100 : 1;
-      const pt = cat.parts ? {
-        history: cat.parts.history * scale, age: cat.parts.age * scale, model: cat.parts.model * scale,
-      } : null;
-      const score = rank === "change" ? d
-        : !pt ? null
-        : rank === "model" ? pt.model : rank === "age" ? pt.age : pt.age + pt.model;
-      if (score == null) continue;
+      const raw = projAdjValue(cat, rank);
+      if (raw == null || !isFinite(raw)) continue;
+      const score = +raw.toFixed(dec);
       const sign = active.lowerBetter ? -1 : 1;
-      all.push({ p, cat, d, dec, pt, score, better: sign * score, dBetter: sign * d, sample: p[reg.field] });
+      all.push({ p, cat, d, dec, score, better: sign * score, dBetter: sign * d, sample: p[reg.field] });
     }
-    const spread = deltaSpread(all.map(r => r.cat));
-    for (const r of all) r.color = projDelta(r.cat, spread)?.color || null;
-    // spreads for coloring the age / model columns the same way
-    const rms = (xs) => { const v = xs.filter(x => x != null); return v.length ? Math.sqrt(v.reduce((a, x) => a + x * x, 0) / v.length) : null; };
-    const sAge = rms(all.map(r => r.pt?.age)), sModel = rms(all.map(r => r.pt?.model));
-    const shade = (x, sp) => {
-      if (x == null || !sp) return null;
-      const pc = Math.max(0, Math.min(100, 50 + 20 * x / sp));
-      return pc >= 45 && pc < 55 ? null : binColor(pc);
-    };
-    for (const r of all) { r.ageColor = shade(r.pt?.age, sAge); r.modelColor = shade(r.pt?.model, sModel); }
+    const spread = adjSpread(all.map(r => r.cat), rank);
+    for (const r of all) r.color = projAdj(r.cat, rank, spread)?.color || null;
     return all;
   }, [data, xrv, active, side, rank]);
 
@@ -159,18 +131,21 @@ export default function ProjectionMovers({ projSeason }) {
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 14 }}>
         {pill(side === "hitters", "Hitters", () => { setSide("hitters"); setStat(null); })}
         {pill(side === "pitchers", "Pitchers", () => { setSide("pitchers"); setStat(null); })}
-        <select value={active?.key || ""} onChange={e => setStat(e.target.value)} style={{
-          padding: "6px 10px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
+        {/* Stats with an iSwing+ / Stuff+ layer are shown in orange italics */}
+        <select value={active?.key || ""} onChange={e => setStat(e.target.value)}
+          title="Orange italic = stat has an iSwing+ / Stuff+ model layer" style={{
+          padding: "6px 10px", background: t.inputBg, border: `1px solid ${t.inputBorder}`,
           borderRadius: 6, fontSize: 12, fontFamily: "inherit",
+          color: active?.hasModel ? t.accent : t.textSecondary, fontStyle: active?.hasModel ? "italic" : "normal",
         }}>
-          {stats.map(s => <option key={s.key} value={s.key}>{s.label}{s.hasModel ? "  ◆ model" : ""}</option>)}
+          {stats.map(s => (
+            <option key={s.key} value={s.key} style={{
+              background: t.inputBg, color: s.hasModel ? t.accent : t.textSecondary,
+              fontStyle: s.hasModel ? "italic" : "normal",
+            }}>{s.label}</option>
+          ))}
         </select>
-        <select value={rank} onChange={e => setRank(e.target.value)} title="What to rank by" style={{
-          padding: "6px 10px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
-          borderRadius: 6, fontSize: 12, fontFamily: "inherit",
-        }}>
-          {RANKS.map(r => <option key={r.id} value={r.id}>Rank by: {r.label}</option>)}
-        </select>
+        <ProjViewSelect value={rank} onChange={setRank} />
         {pill(regulars, `${reg.n}+ ${reg.unit} in ${lastYear}`, () => setRegulars(v => !v))}
         <span style={{ fontSize: 11, color: t.textFaint }}>
           {shown.length} {side} · {year} projection vs {lastYear}
@@ -189,21 +164,23 @@ export default function ProjectionMovers({ projSeason }) {
         ? "No players with both a projection and a last-season value for this stat."
         : "This stat has no projection breakdown — rebuild the projections with the latest scripts, or rank by raw change.") : (
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-          <MoverTable title={`Biggest risers — ${active.label}`} rows={risers} lastYear={lastYear} year={year} reg={reg} />
-          <MoverTable title={`Biggest fallers — ${active.label}`} rows={fallers} lastYear={lastYear} year={year} reg={reg} />
+          <MoverTable title={`Biggest risers — ${active.label}`} rows={risers} lastYear={lastYear} year={year} reg={reg} view={rank} />
+          <MoverTable title={`Biggest fallers — ${active.label}`} rows={fallers} lastYear={lastYear} year={year} reg={reg} view={rank} />
         </div>
       )}
       <div style={{ marginTop: 10, fontSize: 10, color: t.textFaint, textAlign: "center", lineHeight: 1.5 }}>
-        {year}P = History + Age + Model. History = league average plus the regressed blend of his own seasons (this is
-        where most of the change vs {lastYear} comes from — regression to the mean). Age = the aging curve. Model = what
-        iSwing+ / Stuff+ add. Red = pushes the number up, blue = down, shaded by size vs everyone else's.
+        {year}P = History + Age + Model. History = league average plus the regressed blend of his own seasons — most
+        of the change vs {lastYear} (regression to the mean). Age = the aging curve. Model = what iSwing+ / Stuff+ add.
+        Pick what to show with "Show" (it also sets the projected cards). Red = up, blue = down, shaded by size.
         Percentile = the {year} projection's rank against {lastYear} players.
+        Stats in <span style={{ color: t.accent, fontStyle: "italic" }}>orange italics</span> have a model layer.
       </div>
     </div>
   );
 }
 
-function MoverTable({ title, rows, lastYear, year, reg }) {
+function MoverTable({ title, rows, lastYear, year, reg, view }) {
+  const viewLabel = PROJ_VIEWS.find(v => v.id === view)?.short || "Change";
   const { theme: t } = useTheme();
   // the deepest blue bin is unreadable as text on a dark card — lift it there (same as the cards)
   const deltaColor = (c) => (!c ? t.textFaint
@@ -222,11 +199,8 @@ function MoverTable({ title, rows, lastYear, year, reg }) {
               <th style={{ ...th, textAlign: "left" }}>Player</th>
               <th style={th}>Age</th>
               <th style={th}>{lastYear}</th>
-              <th style={th} title="League average + the regressed blend of his own seasons">History</th>
-              <th style={th} title="Aging adjustment">Age</th>
-              <th style={th} title="What iSwing+ / Stuff+ add">Model</th>
               <th style={th}>{year}P</th>
-              <th style={th} title={`${year}P − ${lastYear}`}>Change</th>
+              <th style={{ ...th, color: view === "model" ? t.accent : th.color, fontStyle: view === "model" ? "italic" : "normal" }}>{viewLabel}</th>
               <th style={th}>Pctile</th>
             </tr>
           </thead>
@@ -240,14 +214,12 @@ function MoverTable({ title, rows, lastYear, year, reg }) {
                 </td>
                 <td style={td}>{r.p.proj?.age ?? "—"}</td>
                 <td style={td}>{r.cat.last.display}</td>
-                <td style={{ ...td, color: t.textMuted }}>{r.pt ? fmtVal(r.pt.history, r.dec, r.cat.display) : "—"}</td>
-                <td style={{ ...td, fontStyle: "italic", color: deltaColor(r.ageColor) }}>{r.pt ? fmtDelta(r.pt.age, r.dec) : "—"}</td>
-                <td style={{ ...td, fontStyle: "italic", color: deltaColor(r.modelColor) }}>{r.pt ? fmtDelta(r.pt.model, r.dec) : "—"}</td>
                 <td style={{ ...td, color: t.text, fontWeight: 700 }}>{r.cat.display}</td>
-                <td style={{ ...td, fontStyle: "italic", fontWeight: 700, color: deltaColor(r.color) }}>{fmtDelta(r.d, r.dec)}</td>
+                <td style={{ ...td, fontStyle: "italic", fontWeight: 700, color: deltaColor(r.color) }}>{fmtDelta(r.score, r.dec)}</td>
                 <td style={td}>
                   {r.cat.pctile != null ? (
-                    <span style={{ display: "inline-block", minWidth: 28, padding: "0 6px", borderRadius: 10, fontSize: 11,
+                    <span style={{ display: "inline-block", minWidth: 28, padding: "1px 6px", borderRadius: 10, fontSize: 11,
+                      fontFamily: NUM_FONT, fontWeight: 800, lineHeight: 1.2,
                       background: binColor(r.cat.pctile), color: textOnBin(r.cat.pctile), textAlign: "center" }}>
                       {Math.round(r.cat.pctile)}
                     </span>
