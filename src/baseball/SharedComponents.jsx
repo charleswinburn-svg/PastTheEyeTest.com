@@ -60,22 +60,24 @@ export function projDelta(cat, spread) {
 
 // ── Projected-card "Show" setting (shared by the cards and the Movers board) ──
 // Every projected value is stored as history + age + model ("parts"): history is
-// league average plus the regressed blend of the player's own seasons (his stats),
-// age is the aging curve, model is what iSwing+ / Stuff+ add.
-//   Full projection     the projection itself; percentile vs last season's players;
-//                       line = change vs last season
-//   History             his stats alone (no age, no model); same percentile and line
-//   Age + model / Age / Model
-//                       just that adjustment, e.g. "−.012"; percentile = where it
-//                       ranks among all projected players (direction-aware, so a
-//                       drop in SIERA ranks high); no line — the value is the change
-// Only "Full projection" is the actual projection.
+// league average plus the regressed blend of the player's own seasons, age is the
+// aging curve, model is what iSwing+ / Stuff+ add. The move from last season to the
+// projection splits into three pieces:
+//   regression = history − last season,   age,   model
+// Each view is last season plus some of those pieces, so every view is a real stat
+// value: the bar and percentile rank it against last season's players, and the line
+// is always its change vs last season (= the pieces included).
+//   Full projection  regression + age + model   (the actual projection — the only one)
+//   History          regression                 (his stats alone, no age or model)
+//   Age + model      age + model
+//   Age              age
+//   Model            model
 export const PROJ_VIEWS = [
-  { id: "full",    label: "Full projection",        short: "Change", parts: ["history", "age", "model"] },
-  { id: "history", label: "History (stats only)",   short: "Change", parts: ["history"] },
-  { id: "signal",  label: "Age + model",            short: "Age + model", parts: ["age", "model"], pure: true },
-  { id: "age",     label: "Age",                    short: "Age",   parts: ["age"], pure: true },
-  { id: "model",   label: "Model",                  short: "Model", parts: ["model"], pure: true },
+  { id: "full",    label: "Full projection", short: "2027P",       pieces: ["regression", "age", "model"] },
+  { id: "history", label: "History",         short: "History",     pieces: ["regression"] },
+  { id: "signal",  label: "Age + model",     short: "Age + model", pieces: ["age", "model"] },
+  { id: "age",     label: "Age",             short: "Age",         pieces: ["age"] },
+  { id: "model",   label: "Model",           short: "Model",       pieces: ["model"] },
 ];
 const PROJ_VIEW_KEY = "ptet-proj-view";
 const PROJ_VIEW_EVENT = "ptet-proj-view";
@@ -151,23 +153,8 @@ function _formatLike(cat, raw) {
 
 export const projViewDef = (view) => PROJ_VIEWS.find(x => x.id === view) || PROJ_VIEWS[0];
 
-// An adjustment-only view's value (age / model / both), in the card's display units.
-export function projPureValue(cat, view) {
-  const v = projViewDef(view);
-  if (!v.pure || !cat?.parts) return null;
-  return v.parts.reduce((a, k) => a + Number(cat.parts[k] || 0), 0) * _scaleOf(cat);
-}
-
-// Sorted adjustment values across every projected player — the percentile pool for
-// the adjustment-only views.
-export function adjPoolFor(cats, view) {
-  if (!projViewDef(view).pure) return null;
-  return cats.map(c => projPureValue(c, view)).filter(x => x != null && isFinite(x)).sort((a, b) => a - b);
-}
-
 function _ecdf(pool, x, lowerBetter) {
   if (!Array.isArray(pool) || !pool.length || x == null || !isFinite(x)) return null;
-  if (pool[0] === pool[pool.length - 1]) return null;            // everyone the same (e.g. no model layer)
   let lo = 0, hi = pool.length;                                  // count of pool values < x
   while (lo < hi) { const m = (lo + hi) >> 1; if (pool[m] < x) lo = m + 1; else hi = m; }
   const p = (lo / pool.length) * 100;
@@ -182,40 +169,46 @@ const _fmtSigned = (cat, x) => {
   return `${d > 0 ? "+" : d < 0 ? "−" : "±"}${txt}`;
 };
 
+// Last season's value in the stat's raw units (what the parts are stored in).
+const _lastRaw = (cat) => {
+  if (!cat?.last) return null;
+  if (cat.last.value != null && isFinite(Number(cat.last.value))) return Number(cat.last.value);
+  const shown = _deltaNum(cat.last.display);
+  return shown == null ? null : shown / _scaleOf(cat);
+};
+
 // What the card shows for one projected stat under a view:
-//   { display, pctile, line, value }   line / value in display units
-// pool = last season's values (Full / History); adjPool = every projected player's
-// adjustment (Age + model / Age / Model).
-export function projShow(cat, view, pool, lowerBetter = false, adjPool = null) {
+//   { display, pctile, line, value }   value/line in display units; line = change vs last season
+// pool = last season's values (raw units) for the percentile.
+export function projShow(cat, view, pool, lowerBetter = false) {
   if (!cat) return null;
   const v = projViewDef(view);
   const lastShown = cat.last ? _deltaNum(cat.last.display) : null;
-  if (v.pure) {
-    const x = projPureValue(cat, view);
-    if (x == null || !isFinite(x)) return { display: "—", pctile: null, line: null, value: null };
-    return { display: _fmtSigned(cat, x), pctile: _ecdf(adjPool, x, lowerBetter), line: null, value: x };
-  }
   if (v.id === "full") {
     const shown = _deltaNum(cat.display);
     return { display: cat.display, pctile: cat.pctile, value: shown,
              line: lastShown == null || shown == null ? null : shown - lastShown };
   }
-  // History: his stats alone, ranked against last season's players
-  if (!cat.parts) return { display: "—", pctile: null, line: null, value: null };
-  const disp = _formatLike(cat, Number(cat.parts.history));
-  const shown = _deltaNum(disp);
-  return { display: disp, pctile: _ecdf(pool, Number(cat.parts.history), lowerBetter) ?? null, value: shown,
+  const pp = cat.parts, last = _lastRaw(cat);
+  if (!pp) return { display: "—", pctile: null, line: null, value: null };
+  let raw;
+  if (last == null) {
+    // no last season: only History is defined (his stats alone)
+    if (v.id !== "history") return { display: "—", pctile: null, line: null, value: null };
+    raw = Number(pp.history);
+  } else {
+    const piece = { regression: Number(pp.history) - last, age: Number(pp.age), model: Number(pp.model) };
+    raw = last + v.pieces.reduce((a, k) => a + piece[k], 0);
+  }
+  const display = _formatLike(cat, raw);
+  const shown = _deltaNum(display);
+  return { display, pctile: _ecdf(pool, raw, lowerBetter), value: shown,
            line: lastShown == null || shown == null ? null : shown - lastShown };
 }
 
-// Spread used to shade a view's numbers: the change line (Full / History) or the
-// adjustment itself (Age + model / Age / Model).
+// Spread of a view's change lines across players — sets how deep each line is shaded.
 export function adjSpread(cats, view) {
-  const pure = projViewDef(view).pure;
-  const ds = cats.map(c => {
-    const sh = projShow(c, view);
-    return pure ? sh?.value : sh?.line;
-  }).filter(d => d != null && isFinite(d));
+  const ds = cats.map(c => projShow(c, view)?.line).filter(d => d != null && isFinite(d));
   if (ds.length < 10) return null;
   const rms = Math.sqrt(ds.reduce((acc, d) => acc + d * d, 0) / ds.length);
   return rms > 0 ? rms : null;
@@ -228,12 +221,14 @@ export function projShade(x, spread) {
   return pctToBin(p) === "45-55" ? null : binColor(p);
 }
 
-// {text, color} for the small line under a value (Full / History only).
+// {text, color} for the small line under a value: its change vs last season.
+// Nothing for "Model" on a stat with no model layer.
 export function projLine(cat, shown, view, spread) {
-  if (projViewDef(view).pure) return null;
   const v = shown?.line;
   if (v == null || !isFinite(v) || spread == null) return null;
-  return { text: _fmtSigned(cat, v), color: projShade(+v.toFixed(_decOf(cat)), spread) };
+  const d = +v.toFixed(_decOf(cat));
+  if (view === "model" && d === 0 && !(Number(cat?.parts?.model) || 0)) return null;
+  return { text: _fmtSigned(cat, v), color: projShade(d, spread) };
 }
 
 // ── MLB team primary colors (all known abbreviation variants) ──

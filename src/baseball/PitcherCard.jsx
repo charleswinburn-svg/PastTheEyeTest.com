@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, adjPoolFor, projShow, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, projShow, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
@@ -158,7 +158,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
 
   // Projected seasons ("Show" picks the view — see PROJ_VIEWS): every projected
   // pitcher's value per stat, for shading the change lines and for ranking the
-  // adjustment-only views (Age + model / Age / Model) against each other.
+  // views' change lines (see PROJ_VIEWS).
   const [projView, setProjView] = useProjView();
   const projPools = useProjPools(season);
   const projGroups = useMemo(() => {
@@ -176,9 +176,6 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   }, [allPitchers, isProjection]);
   const deltaSpreads = useMemo(
     () => Object.fromEntries(Object.entries(projGroups).map(([k, v]) => [k, adjSpread(v, projView)])),
-    [projGroups, projView]);
-  const adjPools = useMemo(
-    () => Object.fromEntries(Object.entries(projGroups).map(([k, v]) => [k, adjPoolFor(v, projView)])),
     [projGroups, projView]);
 
   if (!player) {
@@ -254,7 +251,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           subtitle={subtitle}
         />
         <ProBubblesRow data={pitchPlusData} theme={t} deltaSpreads={isProjection ? deltaSpreads : null} projView={projView}
-          gradePools={projPools?.grades} adjPools={adjPools} />
+          gradePools={projPools?.grades} />
         {/* Two fluid columns (no divider): percentile bars + pitch arsenal */}
         <div style={{ display: "flex", gap: 36, flexWrap: "wrap", padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
           {/* Left column — percentile bars */}
@@ -274,7 +271,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
               cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => {
                 // Projected seasons: show the projection built from the parts picked in "Show"
                 const sh = isProjection && !isDateRange
-                  ? projShow(cat, projView, projPools?.pitchers?.[label], projPools?.pitcherLower?.has(label), adjPools[label]) : null;
+                  ? projShow(cat, projView, projPools?.pitchers?.[label], projPools?.pitcherLower?.has(label)) : null;
                 return (
                   <BubblePercentileBar
                     key={label}
@@ -363,9 +360,10 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
 // rotating spinner so users see the work is in progress.
 // A projected grade as a card-style category so projShow can rebuild and shade it.
 const gradeCat = (g) => ({ display: Number(g.value).toFixed(1), value: g.value,
-                           last: { display: Number(g.last).toFixed(1) }, parts: g.parts });
+                           last: g.last != null ? { display: Number(g.last).toFixed(1), value: g.last } : null,
+                           parts: g.parts });
 
-function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gradePools = null, adjPools = {} }) {
+function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gradePools = null }) {
   const t = theme;
   const metrics = [
     { key: "stuff_plus", label: "Stuff+" },
@@ -393,11 +391,9 @@ function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gr
         const m = !placeholder ? data[key] : null;
         // Projected seasons: the grade built from the parts picked in "Show"
         const sh = deltaSpreads && m?.value != null
-          ? projShow({ ...gradeCat(m), pctile: m.percentile }, projView, gradePools?.[key], false, adjPools?.[`grade:${key}`]) : null;
-        // adjustment views show a signed change ("+1.2"); the bubble keeps one decimal for those
+          ? projShow({ ...gradeCat(m), pctile: m.percentile }, projView, gradePools?.[key], false) : null;
         const value = sh ? (sh.value ?? null) : m?.value;
-        const valueText = sh && sh.value != null && sh.display.match(/^[+\u2212\u00b1]/) ? sh.display
-          : value != null ? String(Math.round(value)) : "—";
+        const valueText = value != null ? String(Math.round(value)) : "—";
         const pctile = sh ? sh.pctile : m?.percentile;
         const fill = pctile != null ? binColor(pctile) : t.inputBg;
         const txt = pctile != null ? textOnBin(pctile) : t.textFaintest;

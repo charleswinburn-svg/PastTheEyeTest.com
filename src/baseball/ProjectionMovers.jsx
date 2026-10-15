@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
-import { binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance, PROJ_VIEWS, projViewDef, useProjView, ProjViewSelect, projShow, projShade, adjSpread, adjPoolFor } from "./SharedComponents.jsx";
+import { binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance, projViewDef, useProjView, ProjViewSelect, projShow, projShade, adjSpread } from "./SharedComponents.jsx";
 
 // LEADERBOARD → "{year} Movers": who the projection moves, and why.
 // Every projected value is split by the build scripts into three parts ("parts"):
@@ -94,20 +94,16 @@ export default function ProjectionMovers({ projSeason }) {
     const pool = kind === "xrv" ? data.meta?.xrv_pools?.[name]
       : kind === "grade" ? data.pitcher_meta?.grade_pools?.[name]
       : side === "hitters" ? data.meta?.pools?.[name] : data.pitcher_meta?.pools?.[name];
-    // Adjustment views (Age + model / Age / Model) rank each player's adjustment
-    // against every projected player's — the same pool the cards use.
-    const pure = projViewDef(rank).pure;
     const allCats = players.map(p => catFor(p, active.key, xrv)).filter(Boolean);
-    const adjPool = adjPoolFor(allCats, rank);
     const all = [];
     for (const p of players) {
       const cat = catFor(p, active.key, xrv);
       if (!cat?.last || num(cat.display) == null || num(cat.last.display) == null) continue;
       const dec = (String(cat.display).split(".")[1] || "").length;
       const d = +(num(cat.display) - num(cat.last.display)).toFixed(dec);
-      const sh = projShow(cat, rank, pool, active.lowerBetter, adjPool);
-      // Full / History rank by change vs last season; adjustment views by the adjustment
-      const raw = pure ? sh?.value : sh?.line;
+      // every view = last season + some pieces; rank by its change vs last season
+      const sh = projShow(cat, rank, pool, active.lowerBetter);
+      const raw = sh?.line;
       if (raw == null || !isFinite(raw)) continue;
       const score = +raw.toFixed(dec);
       const sign = active.lowerBetter ? -1 : 1;
@@ -181,10 +177,10 @@ export default function ProjectionMovers({ projSeason }) {
         </div>
       )}
       <div style={{ marginTop: 10, fontSize: 10, color: t.textFaint, textAlign: "center", lineHeight: 1.5 }}>
-        {year}P = History + Age + Model. History = league average plus the regressed blend of his own seasons (most of the
-        change vs {lastYear} is this — regression to the mean). Age = the aging curve. Model = what iSwing+ / Stuff+ add.
-        Full projection and History rank by change vs {lastYear}, with percentiles against {lastYear} players. Age + model,
-        Age and Model rank by the adjustment itself, with percentiles against every projected player. Red = up, blue = down.
+        From {lastYear} to the {year} projection = regression (his history, pulled toward average) + age + model
+        (iSwing+ / Stuff+). Each view is {lastYear} plus some of those pieces: Full projection = all three, History =
+        regression, Age + model, Age, Model. Players rank by that change; percentiles rank the shown value against
+        {lastYear} players. Red = up, blue = down.
         Stats in <span style={{ color: t.accent, fontStyle: "italic" }}>orange italics</span> have a model layer.
       </div>
     </div>
@@ -193,7 +189,6 @@ export default function ProjectionMovers({ projSeason }) {
 
 function MoverTable({ title, rows, lastYear, year, reg, view }) {
   const def = projViewDef(view);
-  const viewLabel = def.short;
   const { theme: t } = useTheme();
   // the deepest blue bin is unreadable as text on a dark card — lift it there (same as the cards)
   const deltaColor = (c) => (!c ? t.textFaint
@@ -212,8 +207,9 @@ function MoverTable({ title, rows, lastYear, year, reg, view }) {
               <th style={{ ...th, textAlign: "left" }}>Player</th>
               <th style={th}>Age</th>
               <th style={th}>{lastYear}</th>
-              <th style={th}>{view === "history" ? "History" : `${year}P`}</th>
-              <th style={{ ...th, color: view === "model" ? t.accent : th.color, fontStyle: view === "model" ? "italic" : "normal" }}>{viewLabel}</th>
+              <th style={th} title={`${lastYear} + ${def.pieces.join(" + ")}`}>{def.short}</th>
+              <th style={{ ...th, color: view === "model" ? t.accent : th.color, fontStyle: view === "model" ? "italic" : "normal" }}
+                title={`Change vs ${lastYear}`}>Change</th>
               <th style={th}>Pctile</th>
             </tr>
           </thead>
@@ -227,7 +223,7 @@ function MoverTable({ title, rows, lastYear, year, reg, view }) {
                 </td>
                 <td style={td}>{r.p.proj?.age ?? "—"}</td>
                 <td style={td}>{r.cat.last.display}</td>
-                <td style={{ ...td, color: t.text, fontWeight: 700 }}>{def.pure ? r.cat.display : r.sh.display}</td>
+                <td style={{ ...td, color: t.text, fontWeight: 700 }}>{r.sh.display}</td>
                 <td style={{ ...td, fontStyle: "italic", fontWeight: 700, color: deltaColor(r.color) }}>{fmtDelta(r.score, r.dec)}</td>
                 <td style={td}>
                   {r.sh.pctile != null ? (

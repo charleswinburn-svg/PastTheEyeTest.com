@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, adjPoolFor, projShow, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projShow, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
@@ -69,7 +69,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
 
   // Projected seasons ("Show" picks the view — see PROJ_VIEWS): every projected
   // hitter's value per stat, for shading the change lines and for ranking the
-  // adjustment-only views (Age + model / Age / Model) against each other.
+  // views' change lines (see PROJ_VIEWS).
   const [projView, setProjView] = useProjView();
   const projPools = useProjPools(season);
   const projGroups = useMemo(() => {
@@ -88,9 +88,6 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
   }, [allHitters, xrvAll]);
   const deltaSpreads = useMemo(
     () => Object.fromEntries(Object.entries(projGroups).map(([k, v]) => [k, adjSpread(v, projView)])),
-    [projGroups, projView]);
-  const adjPools = useMemo(
-    () => Object.fromEntries(Object.entries(projGroups).map(([k, v]) => [k, adjPoolFor(v, projView)])),
     [projGroups, projView]);
 
   const saveCard = useCallback(async () => {
@@ -194,7 +191,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
               cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => {
                 // Projected seasons: show the projection built from the parts picked in "Show"
                 const sh = isProjection && !isDateRange
-                  ? projShow(cat, projView, projPools?.hitters?.[label], projPools?.hitterLower?.has(label), adjPools[label]) : null;
+                  ? projShow(cat, projView, projPools?.hitters?.[label], projPools?.hitterLower?.has(label)) : null;
                 return (
                   <BubblePercentileBar
                     key={label}
@@ -234,7 +231,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                 XRV_LABELS.map((label) => {
                   const m = xrvMetrics?.[label];
                   const sh = isProjection && seasonFallback && m
-                    ? projShow(m, projView, projPools?.xrv?.[label], false, adjPools[`xrv:${label}`]) : null;
+                    ? projShow(m, projView, projPools?.xrv?.[label], false) : null;
                   return (
                     <BubblePercentileBar
                       key={label}
