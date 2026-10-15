@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projAdj, useProjView, ProjViewSelect } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projShow, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
@@ -71,6 +71,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
   // "Show" (change vs last season, age + model, model, age); its spread across every
   // projected hitter sets how deep it's shaded.
   const [projView, setProjView] = useProjView();
+  const projPools = useProjPools(season);
   const deltaSpreads = useMemo(() => {
     const out = {};
     for (const hh of allHitters || []) {
@@ -184,16 +185,21 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                 }} />
               </div>
             ) : (
-              cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
-                <BubblePercentileBar
-                  key={label}
-                  label={label}
-                  pctile={cat.pctile}
-                  display={cat.display}
-                  badge={label === "iSwing+" && iswingNew}
-                  delta={isDateRange ? null : projAdj(cat, projView, deltaSpreads[label])}
-                />
-              ))
+              cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => {
+                // Projected seasons: show the projection built from the parts picked in "Show"
+                const sh = isProjection && !isDateRange
+                  ? projShow(cat, projView, projPools?.hitters?.[label], projPools?.hitterLower?.has(label)) : null;
+                return (
+                  <BubblePercentileBar
+                    key={label}
+                    label={label}
+                    pctile={sh ? sh.pctile : cat.pctile}
+                    display={sh ? sh.display : cat.display}
+                    badge={label === "iSwing+" && iswingNew}
+                    delta={sh ? projLine(cat, sh, projView, deltaSpreads[label]) : null}
+                  />
+                );
+              })
             )}
           </div>
 
@@ -219,15 +225,19 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                   }} />
                 </div>
               ) : (
-                XRV_LABELS.map((label) => (
-                  <BubblePercentileBar
-                    key={label}
-                    label={label}
-                    pctile={xrvMetrics?.[label]?.pctile ?? null}
-                    display={xrvMetrics?.[label]?.display ?? "—"}
-                    delta={seasonFallback ? projAdj(xrvMetrics?.[label], projView, deltaSpreads[`xrv:${label}`]) : null}
-                  />
-                ))
+                XRV_LABELS.map((label) => {
+                  const m = xrvMetrics?.[label];
+                  const sh = isProjection && seasonFallback && m ? projShow(m, projView, projPools?.xrv?.[label], false) : null;
+                  return (
+                    <BubblePercentileBar
+                      key={label}
+                      label={label}
+                      pctile={sh ? sh.pctile : (m?.pctile ?? null)}
+                      display={sh ? sh.display : (m?.display ?? "—")}
+                      delta={sh ? projLine(m, sh, projView, deltaSpreads[`xrv:${label}`]) : null}
+                    />
+                  );
+                })
               )}
             </div>
           )}

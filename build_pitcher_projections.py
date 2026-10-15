@@ -271,7 +271,10 @@ def main():
     out["pitcher_metrics"] = [{"key": lab, "label": lab, "lower_better": lb} for lab, _p, lb in CARD]
     out["pitcher_meta"] = {"percentiles_vs": f"{LAST} actual (min {CARD_POOL_MIN_IP} IP; grades min {GRADE_POOL_MIN} pitches)",
                            "min_recent_ip": args.min_recent_ip,
-                           "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())}
+                           "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+                           "pools": bp.pool_lists(pool, [lab for lab, *_ in CARD]),
+                           "grade_pools": bp.pool_lists(gpool, [c for c, _ in GRADES]),
+                           "lower_better": [lab for lab, _p, lb in CARD if lb]}
 
     def _clean(o):
         if isinstance(o, dict):

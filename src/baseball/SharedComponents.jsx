@@ -59,13 +59,17 @@ export function projDelta(cat, spread) {
 }
 
 // ── Projected-card "Show" setting (shared by the cards and the Movers board) ──
-// What the small line under each projected value shows. Every projected value is
-// stored as history + age + model (parts); "change" is projection − last season.
+// Every projected value is stored as history + age + model ("parts"): history is
+// league average plus the regressed blend of the player's own seasons, age is the
+// aging curve, model is what iSwing+ / Stuff+ add. Each view shows the projection
+// built from some of those parts — the bar, value and percentile move with it — and
+// the small line under the value shows what that view adds.
 export const PROJ_VIEWS = [
-  { id: "change", label: "Change vs last season", short: "Change" },
-  { id: "signal", label: "Age + model (beyond his stats)", short: "Age + model" },
-  { id: "model",  label: "Model only (iSwing+ / Stuff+)", short: "Model" },
-  { id: "age",    label: "Aging only", short: "Age" },
+  { id: "change",  label: "Full projection — change vs last season", short: "Change", parts: ["history", "age", "model"] },
+  { id: "signal",  label: "Full projection — age + model added",     short: "Age + model", parts: ["history", "age", "model"] },
+  { id: "model",   label: "Stats + model",                            short: "Model", parts: ["history", "model"] },
+  { id: "age",     label: "Stats + age",                              short: "Age", parts: ["history", "age"] },
+  { id: "history", label: "Stats only (no age or model)",             short: "Change", parts: ["history"] },
 ];
 const PROJ_VIEW_KEY = "ptet-proj-view";
 const PROJ_VIEW_EVENT = "ptet-proj-view";
@@ -93,7 +97,7 @@ export function useProjView(fallback = "change") {
 export function ProjViewSelect({ value, onChange, style }) {
   const { theme: t } = useTheme();
   return (
-    <select value={value} onChange={e => onChange(e.target.value)} title="What the line under each projected value shows"
+    <select value={value} onChange={e => onChange(e.target.value)} title="Which parts of the projection to show"
       style={{ padding: "6px 10px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
                borderRadius: 6, fontSize: 12, fontFamily: "inherit", ...style }}>
       {PROJ_VIEWS.map(v => <option key={v.id} value={v.id}>Show: {v.label}</option>)}
@@ -101,38 +105,97 @@ export function ProjViewSelect({ value, onChange, style }) {
   );
 }
 
-// The chosen adjustment for one projected value, in the card's display units, or null.
-export function projAdjValue(cat, view) {
-  if (!cat) return null;
-  if (view === "change") return _rawDelta(cat);
-  const pp = cat.parts;
-  if (!pp) return null;
+// Percentile pools (last season's values per stat) for a projection season, read
+// once from the projection file's meta.
+const _poolCache = new Map();
+export function useProjPools(season) {
+  const isProj = typeof season === "string" && season.endsWith("P");
+  const [pools, setPools] = useState(null);
+  useEffect(() => {
+    if (!isProj) { setPools(null); return; }
+    let alive = true;
+    if (!_poolCache.has(season)) {
+      _poolCache.set(season, fetch(`/baseball_data_${season}.json`).then(r => (r.ok ? r.json() : null))
+        .then(d => d && {
+          hitters: d.meta?.pools || {}, xrv: d.meta?.xrv_pools || {},
+          pitchers: d.pitcher_meta?.pools || {}, grades: d.pitcher_meta?.grade_pools || {},
+          hitterLower: new Set(d.meta?.lower_better || []),
+          pitcherLower: new Set(d.pitcher_meta?.lower_better || []),
+        }).catch(() => null));
+    }
+    _poolCache.get(season).then(p => { if (alive) setPools(p); });
+    return () => { alive = false; };
+  }, [season, isProj]);
+  return pools;
+}
+
+const _scaleOf = (cat) => {
   const shown = _deltaNum(cat.display), raw = Number(cat.value);
-  const scale = raw && shown != null && Math.abs(shown / raw) > 50 ? 100 : 1;   // K% etc. stored as fractions
-  const x = view === "model" ? pp.model : view === "age" ? pp.age : pp.age + pp.model;
-  return Number(x) * scale;
+  return raw && shown != null && Math.abs(shown / raw) > 50 ? 100 : 1;   // K% etc. stored as fractions
+};
+const _decOf = (cat) => (String(cat.display).split(".")[1] || "").length;
+// A raw value written the way this stat's card value is (".281", "28.0", "+5.2").
+function _formatLike(cat, raw) {
+  const dec = _decOf(cat);
+  let s = (raw * _scaleOf(cat)).toFixed(dec);
+  const d = String(cat.display);
+  if (d.startsWith(".") || d.startsWith("-.")) s = s.replace(/^(-?)0\./, "$1.");
+  if (d.startsWith("+") && !s.startsWith("-")) s = `+${s}`;
+  return s;
+}
+
+// What the card shows for one projected stat under a view:
+//   { display, pctile, line }  — line = the number for the small line, in display units.
+// Full-projection views keep the stored value and percentile; the others rebuild the
+// value from its parts and rank it against last season's pool.
+export function projShow(cat, view, pool, lowerBetter = false) {
+  if (!cat) return null;
+  const v = PROJ_VIEWS.find(x => x.id === view) || PROJ_VIEWS[0];
+  const full = v.parts.length === 3;
+  const pp = cat.parts;
+  if (!full && !pp) return { display: cat.display, pctile: cat.pctile, line: null, partial: true };
+  const raw = full ? Number(cat.value) : v.parts.reduce((a, k) => a + Number(pp[k] || 0), 0);
+  let pctile = cat.pctile;
+  if (!full) {
+    if (Array.isArray(pool) && pool.length) {
+      let lo = 0, hi = pool.length;                       // count of pool values < raw
+      while (lo < hi) { const m = (lo + hi) >> 1; if (pool[m] < raw) lo = m + 1; else hi = m; }
+      const p = (lo / pool.length) * 100;
+      pctile = Math.round((lowerBetter ? 100 - p : p) * 10) / 10;
+    } else pctile = null;
+  }
+  const scale = _scaleOf(cat);
+  const lastShown = cat.last ? _deltaNum(cat.last.display) : null;
+  let line = null;
+  if (view === "change" || view === "history") {
+    line = lastShown == null ? null : _deltaNum(_formatLike(cat, raw)) - lastShown;
+  } else if (pp) {
+    const add = view === "signal" ? ["age", "model"] : view === "model" ? ["model"] : ["age"];
+    line = add.reduce((a, k) => a + Number(pp[k] || 0), 0) * scale;
+  }
+  return { display: full ? cat.display : _formatLike(cat, raw), pctile, line };
 }
 
 export function adjSpread(cats, view) {
-  const ds = cats.map(c => projAdjValue(c, view)).filter(d => d != null && isFinite(d));
+  const ds = cats.map(c => projShow(c, view)?.line).filter(d => d != null && isFinite(d));
   if (ds.length < 10) return null;
   const rms = Math.sqrt(ds.reduce((acc, d) => acc + d * d, 0) / ds.length);
   return rms > 0 ? rms : null;
 }
 
-// {text, color} for the line under a projected value — same shading as the delta.
-// Stats with no model layer show nothing in "Model only".
-export function projAdj(cat, view, spread) {
-  const v = projAdjValue(cat, view);
+// {text, color} for the small line — same shading as the delta. Nothing is shown
+// for "model" on a stat with no model layer.
+export function projLine(cat, shown, view, spread) {
+  const v = shown?.line;
   if (v == null || !isFinite(v) || spread == null) return null;
-  const dec = (String(cat.display).split(".")[1] || "").length;
+  const dec = _decOf(cat);
   const d = +v.toFixed(dec);
   if (view === "model" && d === 0) return null;
   let txt = Math.abs(d).toFixed(dec);
   if (dec === 3 && txt.startsWith("0.")) txt = txt.slice(1);
   const p = Math.max(0, Math.min(100, 50 + 20 * d / spread));
   return {
-    text: `${d > 0 ? "+" : d < 0 ? "\u2212" : "\u00b1"}${txt}`,
+    text: `${d > 0 ? "+" : d < 0 ? "−" : "±"}${txt}`,
     color: pctToBin(p) === "45-55" ? null : binColor(p),
   };
 }

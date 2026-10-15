@@ -346,6 +346,18 @@ def parts_of(final, hist, age, ndigits):
             "model": round(float(final - hist - age), ndigits)}
 
 
+def pool_lists(df, labels):
+    """Sorted last-season values per stat — the percentile pool, so the card can
+    rank a projection built from only some of its parts (stats only, + age, + model)."""
+    out = {}
+    for lab in labels:
+        if lab in df.columns:
+            v = pd.to_numeric(df[lab], errors="coerce").dropna().values
+            if len(v):
+                out[lab] = [round(float(x), 5) for x in np.sort(v)]
+    return out
+
+
 def wrmse(err, w):
     return float(np.sqrt(np.average(err ** 2, weights=w)))
 
@@ -781,7 +793,10 @@ def main():
         "pitcher_metrics": [],
         "meta": {"projection": True, "target_season": TARGET, "percentiles_vs": f"{LAST} actual (min 100 PA)",
                  "min_recent_pa": args.min_recent_pa,
-                 "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())},
+                 "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+                 "pools": pool_lists(pool, [lab for lab, *_ in CARD_STATS]),
+                 "xrv_pools": pool_lists(xpool, XRV_STATS),
+                 "lower_better": [lab for lab, _f, lb, *_ in CARD_STATS if lb]},
     }
     def _clean(o):
         if isinstance(o, dict):

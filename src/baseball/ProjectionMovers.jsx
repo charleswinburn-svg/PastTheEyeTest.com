@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
-import { binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance, PROJ_VIEWS, useProjView, ProjViewSelect, projAdjValue, adjSpread, projAdj } from "./SharedComponents.jsx";
+import { binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance, PROJ_VIEWS, useProjView, ProjViewSelect, projShow, projLine, adjSpread } from "./SharedComponents.jsx";
 
 // LEADERBOARD → "{year} Movers": who the projection moves, and why.
 // Every projected value is split by the build scripts into three parts ("parts"):
@@ -89,20 +89,25 @@ export default function ProjectionMovers({ projSeason }) {
     if (!data || !active) return [];
     const players = (side === "hitters" ? data.hitters : data.pitchers) || [];
     const reg = MIN_REG[side];
+    // last season's values for re-ranking a partial projection (stats only / + age / + model)
+    const kind = active.key.split(":")[0], name = active.key.slice(active.key.indexOf(":") + 1);
+    const pool = kind === "xrv" ? data.meta?.xrv_pools?.[name]
+      : kind === "grade" ? data.pitcher_meta?.grade_pools?.[name]
+      : side === "hitters" ? data.meta?.pools?.[name] : data.pitcher_meta?.pools?.[name];
     const all = [];
     for (const p of players) {
       const cat = catFor(p, active.key, xrv);
       if (!cat?.last || num(cat.display) == null || num(cat.last.display) == null) continue;
       const dec = (String(cat.display).split(".")[1] || "").length;
       const d = +(num(cat.display) - num(cat.last.display)).toFixed(dec);
-      const raw = projAdjValue(cat, rank);
-      if (raw == null || !isFinite(raw)) continue;
-      const score = +raw.toFixed(dec);
+      const sh = projShow(cat, rank, pool, active.lowerBetter);
+      if (sh?.line == null || !isFinite(sh.line)) continue;
+      const score = +sh.line.toFixed(dec);
       const sign = active.lowerBetter ? -1 : 1;
-      all.push({ p, cat, d, dec, score, better: sign * score, dBetter: sign * d, sample: p[reg.field] });
+      all.push({ p, cat, sh, d, dec, score, better: sign * score, dBetter: sign * d, sample: p[reg.field] });
     }
     const spread = adjSpread(all.map(r => r.cat), rank);
-    for (const r of all) r.color = projAdj(r.cat, rank, spread)?.color || null;
+    for (const r of all) r.color = projLine(r.cat, r.sh, rank, spread)?.color || null;
     return all;
   }, [data, xrv, active, side, rank]);
 
@@ -199,7 +204,9 @@ function MoverTable({ title, rows, lastYear, year, reg, view }) {
               <th style={{ ...th, textAlign: "left" }}>Player</th>
               <th style={th}>Age</th>
               <th style={th}>{lastYear}</th>
-              <th style={th}>{year}P</th>
+              <th style={th} title="The value shown under the current 'Show' setting">{{
+                change: `${year}P`, signal: `${year}P`, model: "Stats+Model", age: "Stats+Age", history: "Stats only",
+              }[view] || `${year}P`}</th>
               <th style={{ ...th, color: view === "model" ? t.accent : th.color, fontStyle: view === "model" ? "italic" : "normal" }}>{viewLabel}</th>
               <th style={th}>Pctile</th>
             </tr>
@@ -214,14 +221,14 @@ function MoverTable({ title, rows, lastYear, year, reg, view }) {
                 </td>
                 <td style={td}>{r.p.proj?.age ?? "—"}</td>
                 <td style={td}>{r.cat.last.display}</td>
-                <td style={{ ...td, color: t.text, fontWeight: 700 }}>{r.cat.display}</td>
+                <td style={{ ...td, color: t.text, fontWeight: 700 }}>{r.sh.display}</td>
                 <td style={{ ...td, fontStyle: "italic", fontWeight: 700, color: deltaColor(r.color) }}>{fmtDelta(r.score, r.dec)}</td>
                 <td style={td}>
-                  {r.cat.pctile != null ? (
+                  {r.sh.pctile != null ? (
                     <span style={{ display: "inline-block", minWidth: 28, padding: "1px 6px", borderRadius: 10, fontSize: 11,
                       fontFamily: NUM_FONT, fontWeight: 800, lineHeight: 1.2,
-                      background: binColor(r.cat.pctile), color: textOnBin(r.cat.pctile), textAlign: "center" }}>
-                      {Math.round(r.cat.pctile)}
+                      background: binColor(r.sh.pctile), color: textOnBin(r.sh.pctile), textAlign: "center" }}>
+                      {Math.round(r.sh.pctile)}
                     </span>
                   ) : "—"}
                 </td>
