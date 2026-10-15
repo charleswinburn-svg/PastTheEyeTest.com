@@ -2,14 +2,25 @@ import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import { deltaSpread, projDelta, binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance } from "./SharedComponents.jsx";
 
-// LEADERBOARD → "{year} Movers": biggest projected risers and fallers vs last season.
-// Reads the projection files directly (baseball_data_{proj}.json + hitter_xrv_{proj}.json),
-// so it works whatever season is picked in the menu. A "riser" is a player projected to
-// get BETTER at the stat (lower ERA-type stats going down count as rising); the delta
-// itself is colored like the card: red = number goes up, blue = number goes down.
+// LEADERBOARD → "{year} Movers": who the projection moves, and why.
+// Every projected value is split by the build scripts into three parts ("parts"):
+//   history — league average + the regressed blend of the player's own seasons
+//   age     — the fitted aging adjustment
+//   model   — what iSwing+ / Stuff+ (and xRV reconciliation) add on top
+// Ranking by the raw change vs last season mostly re-ranks last season's extremes
+// (regression to the mean), so the default ranks by age + model: what the projection
+// says BEYOND the player's own stat line. A "riser" gets better at the stat (for
+// lower-is-better stats a drop counts). Change colors match the cards: red = up, blue = down.
+// Reads the projection files directly, so it works whatever season is picked in the menu.
 
 const GRADE_LABELS = { stuff_plus: "Stuff+", loc_plus: "Location+", tun_plus: "Tunnel+", pitch_plus: "Pitch+" };
 const XRV_LABELS = ["xRV/600", "Contact Quality", "Whiff", "Decision", "Chase"];
+const RANKS = [
+  { id: "signal", label: "Age + model (beyond his stats)" },
+  { id: "model",  label: "Model only (iSwing+ / Stuff+)" },
+  { id: "age",    label: "Aging only" },
+  { id: "change", label: "Raw change vs last season" },
+];
 const MIN_REG = { hitters: { field: "pa", n: 300, unit: "PA" }, pitchers: { field: "ip", n: 50, unit: "IP" } };
 
 const num = (s) => {
@@ -20,6 +31,12 @@ const fmtDelta = (d, dec) => {
   let txt = Math.abs(d).toFixed(dec);
   if (dec === 3 && txt.startsWith("0.")) txt = txt.slice(1);
   return `${d > 0 ? "+" : d < 0 ? "−" : "±"}${txt}`;
+};
+
+// Same style as the card's own display (".349" for pitchers, "0.423" for hitters).
+const fmtVal = (v, dec, like) => {
+  const s = v.toFixed(dec);
+  return String(like).startsWith(".") ? s.replace(/^(-?)0\./, "$1.") : s;
 };
 
 const _cache = new Map();
@@ -37,6 +54,7 @@ export default function ProjectionMovers({ projSeason }) {
   const [side, setSide] = useState("hitters");
   const [stat, setStat] = useState(null);
   const [regulars, setRegulars] = useState(true);
+  const [rank, setRank] = useState("signal");
   const year = String(projSeason).slice(0, 4);
   const lastYear = Number(year) - 1;
 
@@ -75,18 +93,38 @@ export default function ProjectionMovers({ projSeason }) {
       else if (kind === "grade") {
         const g = p.grades?.[name];
         if (g?.value != null && g?.last != null) {
-          cat = { display: Number(g.value).toFixed(1), last: { display: Number(g.last).toFixed(1) }, pctile: g.percentile };
+          cat = { display: Number(g.value).toFixed(1), value: g.value, last: { display: Number(g.last).toFixed(1) },
+                  pctile: g.percentile, parts: g.parts };
         }
       } else if (kind === "xrv") cat = xrv?.[String(p.player_id)]?.metrics?.[name];
       if (!cat?.last || num(cat.display) == null || num(cat.last.display) == null) continue;
       const dec = (String(cat.display).split(".")[1] || "").length;
       const d = +(num(cat.display) - num(cat.last.display)).toFixed(dec);
-      all.push({ p, cat, d, dec, better: active.lowerBetter ? -d : d, sample: p[reg.field] });
+      // parts are stored in the stat's raw units; the display may be ×100 (K% etc.)
+      const raw = Number(cat.value);
+      const scale = raw && Math.abs(num(cat.display) / raw) > 50 ? 100 : 1;
+      const pt = cat.parts ? {
+        history: cat.parts.history * scale, age: cat.parts.age * scale, model: cat.parts.model * scale,
+      } : null;
+      const score = rank === "change" ? d
+        : !pt ? null
+        : rank === "model" ? pt.model : rank === "age" ? pt.age : pt.age + pt.model;
+      if (score == null) continue;
+      all.push({ p, cat, d, dec, pt, score, better: active.lowerBetter ? -score : score, sample: p[reg.field] });
     }
     const spread = deltaSpread(all.map(r => r.cat));
     for (const r of all) r.color = projDelta(r.cat, spread)?.color || null;
+    // spreads for coloring the age / model columns the same way
+    const rms = (xs) => { const v = xs.filter(x => x != null); return v.length ? Math.sqrt(v.reduce((a, x) => a + x * x, 0) / v.length) : null; };
+    const sAge = rms(all.map(r => r.pt?.age)), sModel = rms(all.map(r => r.pt?.model));
+    const shade = (x, sp) => {
+      if (x == null || !sp) return null;
+      const pc = Math.max(0, Math.min(100, 50 + 20 * x / sp));
+      return pc >= 45 && pc < 55 ? null : binColor(pc);
+    };
+    for (const r of all) { r.ageColor = shade(r.pt?.age, sAge); r.modelColor = shade(r.pt?.model, sModel); }
     return all;
-  }, [data, xrv, active, side]);
+  }, [data, xrv, active, side, rank]);
 
   const shown = useMemo(() => {
     const reg = MIN_REG[side];
@@ -119,6 +157,12 @@ export default function ProjectionMovers({ projSeason }) {
         }}>
           {stats.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
         </select>
+        <select value={rank} onChange={e => setRank(e.target.value)} title="What to rank by" style={{
+          padding: "6px 10px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
+          borderRadius: 6, fontSize: 12, fontFamily: "inherit",
+        }}>
+          {RANKS.map(r => <option key={r.id} value={r.id}>Rank by: {r.label}</option>)}
+        </select>
         {pill(regulars, `${reg.n}+ ${reg.unit} in ${lastYear}`, () => setRegulars(v => !v))}
         <span style={{ fontSize: 11, color: t.textFaint }}>
           {shown.length} {side} · {year} projection vs {lastYear}
@@ -126,15 +170,19 @@ export default function ProjectionMovers({ projSeason }) {
         </span>
       </div>
 
-      {!shown.length ? msg("No players with both a projection and a last-season value for this stat.") : (
+      {!shown.length ? msg(rank === "change"
+        ? "No players with both a projection and a last-season value for this stat."
+        : "This stat has no projection breakdown — rebuild the projections with the latest scripts, or rank by raw change.") : (
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           <MoverTable title={`Biggest risers — ${active.label}`} rows={risers} lastYear={lastYear} year={year} reg={reg} />
           <MoverTable title={`Biggest fallers — ${active.label}`} rows={fallers} lastYear={lastYear} year={year} reg={reg} />
         </div>
       )}
       <div style={{ marginTop: 10, fontSize: 10, color: t.textFaint, textAlign: "center", lineHeight: 1.5 }}>
-        Change = {year} projection − {lastYear} actual. Red = the number goes up, blue = it goes down, shaded by how big
-        the change is compared with everyone else's. Percentile = the {year} projection's rank against {lastYear} players.
+        {year}P = History + Age + Model. History = league average plus the regressed blend of his own seasons (this is
+        where most of the change vs {lastYear} comes from — regression to the mean). Age = the aging curve. Model = what
+        iSwing+ / Stuff+ add. Red = pushes the number up, blue = down, shaded by size vs everyone else's.
+        Percentile = the {year} projection's rank against {lastYear} players.
       </div>
     </div>
   );
@@ -145,11 +193,11 @@ function MoverTable({ title, rows, lastYear, year, reg }) {
   // the deepest blue bin is unreadable as text on a dark card — lift it there (same as the cards)
   const deltaColor = (c) => (!c ? t.textFaint
     : c === BIN_COLORS["0-10"] && hexLuminance(t.cardBg || t.bg) < 0.4 ? "#4F8FD6" : c);
-  const th = { padding: "6px 8px", fontSize: 10, fontWeight: 700, color: t.textFaint, textTransform: "uppercase",
+  const th = { padding: "6px 5px", fontSize: 10, fontWeight: 700, color: t.textFaint, textTransform: "uppercase",
                letterSpacing: "0.06em", borderBottom: `1px solid ${t.tableHeaderBorder}`, textAlign: "right", whiteSpace: "nowrap" };
-  const td = { padding: "5px 8px", fontSize: 12, color: t.textSecondary, textAlign: "right", fontFamily: NUM_FONT, whiteSpace: "nowrap" };
+  const td = { padding: "5px 5px", fontSize: 12, color: t.textSecondary, textAlign: "right", fontFamily: NUM_FONT, whiteSpace: "nowrap" };
   return (
-    <div style={{ flex: "1 1 420px", minWidth: 0, background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 10, overflow: "hidden" }}>
+    <div style={{ flex: "1 1 560px", minWidth: 0, background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 10, overflow: "hidden" }}>
       <div style={{ padding: "10px 12px 6px", fontSize: 12, fontWeight: 800, color: t.text }}>{title}</div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -159,8 +207,11 @@ function MoverTable({ title, rows, lastYear, year, reg }) {
               <th style={{ ...th, textAlign: "left" }}>Player</th>
               <th style={th}>Age</th>
               <th style={th}>{lastYear}</th>
+              <th style={th} title="League average + the regressed blend of his own seasons">History</th>
+              <th style={th} title="Aging adjustment">Age</th>
+              <th style={th} title="What iSwing+ / Stuff+ add">Model</th>
               <th style={th}>{year}P</th>
-              <th style={th}>Change</th>
+              <th style={th} title={`${year}P − ${lastYear}`}>Change</th>
               <th style={th}>Pctile</th>
             </tr>
           </thead>
@@ -174,6 +225,9 @@ function MoverTable({ title, rows, lastYear, year, reg }) {
                 </td>
                 <td style={td}>{r.p.proj?.age ?? "—"}</td>
                 <td style={td}>{r.cat.last.display}</td>
+                <td style={{ ...td, color: t.textMuted }}>{r.pt ? fmtVal(r.pt.history, r.dec, r.cat.display) : "—"}</td>
+                <td style={{ ...td, fontStyle: "italic", color: deltaColor(r.ageColor) }}>{r.pt ? fmtDelta(r.pt.age, r.dec) : "—"}</td>
+                <td style={{ ...td, fontStyle: "italic", color: deltaColor(r.modelColor) }}>{r.pt ? fmtDelta(r.pt.model, r.dec) : "—"}</td>
                 <td style={{ ...td, color: t.text, fontWeight: 700 }}>{r.cat.display}</td>
                 <td style={{ ...td, fontStyle: "italic", fontWeight: 700, color: deltaColor(r.color) }}>{fmtDelta(r.d, r.dec)}</td>
                 <td style={td}>

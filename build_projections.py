@@ -323,6 +323,29 @@ class LearnedMarcel:
                 "age_a1": round(float(a1), 5), "age_a2": round(float(a2), 6)}
 
 
+def decompose(sp, base, keys):
+    """Split the base projection into (history blend, age term) per key, in the stat's
+    units: history = league avg + the regressed blend of his own seasons; age = the
+    fitted age adjustment. Whatever the final projection adds on top (iSwing+/Stuff+
+    layers, xRV reconciliation) is the 'model' part."""
+    rel, lg, _has = sp.base_predict(base, keys)
+    _w, _k, a1, a2 = base._unpack(base.p)
+    if sp.use_age:
+        a = np.nan_to_num(sp._age(keys) - AGE_CENTER)
+        age = a1 * a + a2 * a * a
+    else:
+        age = np.zeros(len(keys))
+    return lg + rel - age, age
+
+
+def parts_of(final, hist, age, ndigits):
+    """{"history", "age", "model"} for one projected value, or None."""
+    if not all(np.isfinite(x) for x in (final, hist, age)):
+        return None
+    return {"history": round(float(hist), ndigits), "age": round(float(age), ndigits),
+            "model": round(float(final - hist - age), ndigits)}
+
+
 def wrmse(err, w):
     return float(np.sqrt(np.average(err ** 2, weights=w)))
 
@@ -646,6 +669,9 @@ def main():
         p, has, used = sp.predict(base, layer, keys)
         proj[label] = np.where(has, p, np.nan)
         layer_used[label] = int(used.sum())
+        hist_part, age_part = decompose(sp, base, keys)
+        proj[f"__hist__{label}"] = hist_part
+        proj[f"__age__{label}"] = age_part
 
     # ── iSwing+ itself (its own learned weights) ──
     if "iswing" in signals:
@@ -711,6 +737,7 @@ def main():
                 cats[lab] = {"pctile": None, "value": None, "display": "—"}
                 continue
             cats[lab] = {"value": round(float(v), 4), "display": fmt_value(lab, v),
+                         "parts": parts_of(v, r.get(f"__hist__{lab}", np.nan), r.get(f"__age__{lab}", np.nan), 4),
                          "pctile": ecdf_pct(pool[lab].values, v, lb)}
             if pid in last.index and np.isfinite(last.at[pid, lab]):
                 lv = float(last.at[pid, lab])
@@ -738,6 +765,7 @@ def main():
             for lab in XRV_STATS:
                 v = float(r[lab])
                 metrics[lab] = {"value": round(v, 2), "display": f"{v:+.1f}",
+                                "parts": parts_of(v, r.get(f"__hist__{lab}", np.nan), r.get(f"__age__{lab}", np.nan), 3),
                                 "pctile": ecdf_pct(xpool[lab].values, v, False)}
                 if pid in last.index and np.isfinite(last.at[pid, lab]):
                     lv = float(last.at[pid, lab])

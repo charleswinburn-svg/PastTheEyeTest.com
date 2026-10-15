@@ -194,9 +194,12 @@ def main():
         pv, has, used = sp.predict(base, layer, keys)
         proj[label] = np.where(has, pv, np.nan)
         layer_used[label] = int(used.sum())
-    # K-BB% has to agree with the K% and BB% shown next to it
+        proj[f"__hist__{label}"], proj[f"__age__{label}"] = bp.decompose(sp, base, keys)
+    # K-BB% has to agree with the K% and BB% shown next to it (and so do its parts)
     if {"K%", "BB%", "K-BB%"} <= set(proj.columns):
         proj["K-BB%"] = proj["K%"] - proj["BB%"]
+        for part in ("__hist__", "__age__"):
+            proj[f"{part}K-BB%"] = proj[f"{part}K%"] - proj[f"{part}BB%"]
     for col, _lab in GRADES:
         if col in signals:
             sp = signals[col]
@@ -204,6 +207,7 @@ def main():
             if m is not None:
                 pv, has, _ = sp.predict(m, None, keys)
                 proj[col] = np.where(has, pv, np.nan)
+                proj[f"__hist__{col}"], proj[f"__age__{col}"] = bp.decompose(sp, m, keys)
                 report.append({"stat": col, "denom": "pitches", "lags": sp.J, **m.describe(),
                                "n_fit": m.n_fit, "layer": "base"})
 
@@ -225,6 +229,7 @@ def main():
                 cats[label] = {"pctile": None, "value": None, "display": "—"}
                 continue
             cats[label] = {"value": round(float(v), 6), "display": fmt(label, v),
+                           "parts": bp.parts_of(v, r.get(f"__hist__{label}", np.nan), r.get(f"__age__{label}", np.nan), 6),
                            "pctile": bp.ecdf_pct(pool[label].values, v, lb)}
             if pid in last.index and np.isfinite(last.at[pid, label]):
                 lv = float(last.at[pid, label])
@@ -234,7 +239,8 @@ def main():
             v = r.get(col, np.nan)
             if col not in proj.columns or not np.isfinite(v):
                 continue
-            g = {"value": round(float(v), 1), "percentile": bp.ecdf_pct(gpool[col].values, v, False)}
+            g = {"value": round(float(v), 1), "percentile": bp.ecdf_pct(gpool[col].values, v, False),
+                 "parts": bp.parts_of(v, r.get(f"__hist__{col}", np.nan), r.get(f"__age__{col}", np.nan), 2)}
             if pid in last.index and col in last.columns and np.isfinite(last.at[pid, col]):
                 g["last"] = round(float(last.at[pid, col]), 1)
             grades[col] = g
