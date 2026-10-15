@@ -719,6 +719,25 @@ def main():
                 v = np.array([var.get(c, 1.0) for c in comps])
                 proj.loc[i, comps] = vals.values + gap * v / v.sum()
 
+        # Same reconciliation for the history and age parts, so the breakdown adds up
+        # to the total in every "Show" view (stats only, + age, + model), not just the
+        # full projection. The model part (final − history − age) then adds up too.
+        for part in ("__hist__", "__age__"):
+            col = lambda c: f"{part}{c}"
+            if not all(col(c) in proj.columns for c in XRV_STATS):
+                continue
+            T = proj[col("xRV/600")]
+            chase = proj[col("Chase")]
+            other = proj[col(XRV_OTHER)].fillna(0.0) if col(XRV_OTHER) in proj.columns else 0.0
+            for comps, kind in XRV_GROUPS:
+                goal = T if kind == "total" else T - other if kind == "total_minus_other" else T - chase
+                vals = proj[[col(c) for c in comps]].astype(float)
+                ok = goal.notna() & vals.notna().all(axis=1)
+                gap = (goal - vals.sum(axis=1))[ok]
+                v = np.array([var.get(c, 1.0) for c in comps])
+                for c, wi in zip(comps, v / v.sum()):
+                    proj.loc[ok, col(c)] = proj.loc[ok, col(c)] + gap * wi
+
     # ═══════════════════════════════════════════════════════════════════════
     # WRITE CARD FILES
     # ═══════════════════════════════════════════════════════════════════════
