@@ -39,6 +39,17 @@ const fmtVal = (v, dec, like) => {
   return String(like).startsWith(".") ? s.replace(/^(-?)0\./, "$1.") : s;
 };
 
+// One player's projected entry for a stat key ("cat:K%", "grade:stuff_plus", "xrv:Whiff").
+function catFor(p, key, xrv) {
+  const kind = key.split(":")[0], name = key.slice(key.indexOf(":") + 1);
+  if (kind === "cat") return p.categories?.[name] || null;
+  if (kind === "xrv") return xrv?.[String(p.player_id)]?.metrics?.[name] || null;
+  const g = p.grades?.[name];
+  if (g?.value == null || g?.last == null) return null;
+  return { display: Number(g.value).toFixed(1), value: g.value, last: { display: Number(g.last).toFixed(1) },
+           pctile: g.percentile, parts: g.parts };
+}
+
 const _cache = new Map();
 function loadJson(path) {
   if (!_cache.has(path)) {
@@ -75,6 +86,11 @@ export default function ProjectionMovers({ projSeason }) {
     } else if (xrv) {
       for (const l of [...XRV_LABELS].reverse()) out.unshift({ key: `xrv:${l}`, label: l, lowerBetter: false });
     }
+    // A stat only has a model part where the backtest kept an iSwing+ / Stuff+ layer.
+    const players = (side === "hitters" ? data.hitters : data.pitchers) || [];
+    for (const st of out) {
+      st.hasModel = players.some(pl => Math.abs(catFor(pl, st.key, xrv)?.parts?.model ?? 0) > 1e-6);
+    }
     return out;
   }, [data, xrv, side]);
 
@@ -84,19 +100,10 @@ export default function ProjectionMovers({ projSeason }) {
   const rows = useMemo(() => {
     if (!data || !active) return [];
     const players = (side === "hitters" ? data.hitters : data.pitchers) || [];
-    const [kind, name] = [active.key.split(":")[0], active.key.slice(active.key.indexOf(":") + 1)];
     const reg = MIN_REG[side];
     const all = [];
     for (const p of players) {
-      let cat = null;
-      if (kind === "cat") cat = p.categories?.[name];
-      else if (kind === "grade") {
-        const g = p.grades?.[name];
-        if (g?.value != null && g?.last != null) {
-          cat = { display: Number(g.value).toFixed(1), value: g.value, last: { display: Number(g.last).toFixed(1) },
-                  pctile: g.percentile, parts: g.parts };
-        }
-      } else if (kind === "xrv") cat = xrv?.[String(p.player_id)]?.metrics?.[name];
+      const cat = catFor(p, active.key, xrv);
       if (!cat?.last || num(cat.display) == null || num(cat.last.display) == null) continue;
       const dec = (String(cat.display).split(".")[1] || "").length;
       const d = +(num(cat.display) - num(cat.last.display)).toFixed(dec);
@@ -110,7 +117,8 @@ export default function ProjectionMovers({ projSeason }) {
         : !pt ? null
         : rank === "model" ? pt.model : rank === "age" ? pt.age : pt.age + pt.model;
       if (score == null) continue;
-      all.push({ p, cat, d, dec, pt, score, better: active.lowerBetter ? -score : score, sample: p[reg.field] });
+      const sign = active.lowerBetter ? -1 : 1;
+      all.push({ p, cat, d, dec, pt, score, better: sign * score, dBetter: sign * d, sample: p[reg.field] });
     }
     const spread = deltaSpread(all.map(r => r.cat));
     for (const r of all) r.color = projDelta(r.cat, spread)?.color || null;
@@ -130,8 +138,8 @@ export default function ProjectionMovers({ projSeason }) {
     const reg = MIN_REG[side];
     return regulars ? rows.filter(r => (r.sample ?? 0) >= reg.n) : rows;
   }, [rows, regulars, side]);
-  const risers = useMemo(() => [...shown].sort((a, b) => b.better - a.better).slice(0, 25), [shown]);
-  const fallers = useMemo(() => [...shown].sort((a, b) => a.better - b.better).slice(0, 25), [shown]);
+  const risers = useMemo(() => [...shown].sort((a, b) => (b.better - a.better) || (b.dBetter - a.dBetter)).slice(0, 25), [shown]);
+  const fallers = useMemo(() => [...shown].sort((a, b) => (a.better - b.better) || (a.dBetter - b.dBetter)).slice(0, 25), [shown]);
 
   const msg = (text) => <div style={{ color: t.textMuted, textAlign: "center", padding: 40, fontSize: 13 }}>{text}</div>;
   if (data === undefined) return msg(`Loading ${year} projections…`);
@@ -155,7 +163,7 @@ export default function ProjectionMovers({ projSeason }) {
           padding: "6px 10px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
           borderRadius: 6, fontSize: 12, fontFamily: "inherit",
         }}>
-          {stats.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+          {stats.map(s => <option key={s.key} value={s.key}>{s.label}{s.hasModel ? "  ◆ model" : ""}</option>)}
         </select>
         <select value={rank} onChange={e => setRank(e.target.value)} title="What to rank by" style={{
           padding: "6px 10px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
@@ -170,7 +178,14 @@ export default function ProjectionMovers({ projSeason }) {
         </span>
       </div>
 
-      {!shown.length ? msg(rank === "change"
+      {rank === "model" && active && !active.hasModel ? msg(
+        `${active.label} has no model layer, so its Model part is 0 for everyone` +
+        (active.key === "grade:stuff_plus" || active.key.startsWith("grade:")
+          ? " (the grades ARE the pitch model — nothing is layered on them)."
+          : " (the backtest found iSwing+ / Stuff+ didn't improve it).") +
+        ` Stats with a model layer: ${stats.filter(x => x.hasModel).map(x => x.label).join(", ") || "none"}.` +
+        " Or rank by Age + model / Aging only."
+      ) : !shown.length ? msg(rank === "change"
         ? "No players with both a projection and a last-season value for this stat."
         : "This stat has no projection breakdown — rebuild the projections with the latest scripts, or rank by raw change.") : (
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
