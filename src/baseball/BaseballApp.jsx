@@ -631,17 +631,6 @@ function BaseballApp() {
 
           <ThemeToggle />
 
-          {!isHitterTab(tab) && !isPitcherTab(tab) && tab !== "fielder" && (
-            <div style={{
-              fontSize: 10,
-              color: t.textFaint,
-              letterSpacing: "0.03em",
-              borderLeft: `1px solid ${t.divider}`,
-              paddingLeft: 16,
-            }}>
-              {String(season).endsWith("P") ? `${String(season).slice(0, 4)} Projected` : season} | {hitters.length} hitters | {pitchers.length} pitchers
-            </div>
-          )}
         </div>
       </div>
 
