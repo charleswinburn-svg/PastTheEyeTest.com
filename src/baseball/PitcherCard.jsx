@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, projShow, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
@@ -308,7 +308,13 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{isDateRange ? "Date range" : isProjection ? seasonLabel : `${season} Season`}</span>
+          <span>{isDateRange ? "Date range" : isProjection ? (
+            <>
+              {seasonLabel} ·{" "}
+              {/* which "Show" view the card is on — saved PNGs carry it too */}
+              <span style={{ color: t.accent, fontWeight: 700 }}>{projViewDef(projView).label}</span>
+            </>
+          ) : `${season} Season`}</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>

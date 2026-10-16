@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projShow, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
@@ -260,7 +260,13 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{isDateRange ? "Date range" : isProjection ? seasonLabel : `${season} Season`}</span>
+          <span>{isDateRange ? "Date range" : isProjection ? (
+            <>
+              {seasonLabel} ·{" "}
+              {/* which "Show" view the card is on — saved PNGs carry it too */}
+              <span style={{ color: t.accent, fontWeight: 700 }}>{projViewDef(projView).label}</span>
+            </>
+          ) : `${season} Season`}</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
