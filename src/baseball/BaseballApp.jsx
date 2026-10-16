@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useLayoutEffect } from "react";
 import HitterCard from "./HitterCard.jsx";
 import PitcherCard from "./PitcherCard.jsx";
 import FielderCard from "./FielderCard.jsx";
@@ -364,8 +364,28 @@ function BaseballApp() {
   const winWidth = useWindowWidth();
   // The desktop tab row (8 tabs) is ~1045px wide, so it clumps/overflows on phones
   // in BOTH orientations (portrait ~390, landscape ~670-930) and on tablets. Collapse
-  // the whole nav to the ≡ menu below 1100px; real computers (≥1100) keep the full bar.
-  const isMobile = winWidth < 1100;
+  // the whole nav to the ≡ menu below 1100px. Above that the bar also collapses
+  // whenever the tabs + the controls on the right don't actually fit (browser zoom,
+  // long player names, an extra tab) — measured, so it never overlaps at any zoom.
+  const navRowRef = useRef(null);
+  const navTabsRef = useRef(null);
+  const navRightRef = useRef(null);
+  const [collapseBelow, setCollapseBelow] = useState(0);   // window width that last didn't fit
+  const isMobile = winWidth < Math.max(1100, collapseBelow);
+  useLayoutEffect(() => {
+    if (isMobile) return;
+    const row = navRowRef.current, tabsEl = navTabsRef.current, right = navRightRef.current;
+    if (!row || !tabsEl || !right) return;
+    const check = () => {
+      const cs = getComputedStyle(row);
+      const avail = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      if (tabsEl.scrollWidth + right.offsetWidth + 24 > avail) setCollapseBelow(window.innerWidth + 1);
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(row); ro.observe(right);
+    return () => ro.disconnect();
+  }, [isMobile, tab, season]);
 
   // Label of the currently-selected tab (parent · sub) for the collapsed mobile bar.
   const activeParentTab = TABS.find(tb => tb.id === tab || tb.dropdown?.some(s => s.id === tab));
@@ -377,7 +397,7 @@ function BaseballApp() {
   return (
     <div style={{ minHeight: "100vh", background: t.bg, transition: "background 0.3s" }} onClick={handleBackdropClick}>
       {/* ── Full-Width Navigation Bar ── */}
-      <div style={{
+      <div ref={navRowRef} style={{
         background: t.headerBgSolid || t.headerBg,
         borderBottom: `2px solid ${t.accent}`,
         padding: isMobile ? "0 8px" : "0 24px",
@@ -468,15 +488,18 @@ function BaseballApp() {
             )}
           </div>
         ) : (
-          // Desktop: absolutely centered, dropdown inside each tab's relative container
-          <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "stretch", height: "100%" }}>
+          // Desktop: centered in the space left of the controls (a flex item, so it can
+          // never slide under them); dropdown inside each tab's relative container
+          <div style={{ flex: "1 1 auto", minWidth: 0, display: "flex", justifyContent: "center", alignItems: "stretch" }}>
+          <div ref={navTabsRef} style={{ display: "flex", alignItems: "stretch", flexShrink: 0 }}>
             {TABS.map(tb => (
               <div key={tb.id} style={{ position: "relative", display: "flex", alignItems: "stretch" }} onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={(e) => handleTabClick(tb, e)}
                   style={{
-                    padding: "16px 18px",
-                    fontSize: 12,
+                    // scales a little with the window so more widths fit before collapsing
+                    padding: "16px clamp(9px, 0.95vw, 18px)",
+                    fontSize: "clamp(11px, 0.72vw, 12px)",
                     fontWeight: isTabActive(tb.id) ? 700 : 600,
                     letterSpacing: "0.05em",
                     whiteSpace: "nowrap",
@@ -538,16 +561,18 @@ function BaseballApp() {
               </div>
             ))}
           </div>
+          </div>
         )}
 
         {/* Right: Season selector, player selector, theme toggle, stats */}
-        <div style={{
+        <div ref={navRightRef} style={{
           display: "flex", alignItems: "center", gap: isMobile ? 8 : 16,
           marginLeft: isMobile ? 0 : "auto",
+          flexShrink: isMobile ? 1 : 0,
           width: isMobile ? "100%" : "auto",
           padding: isMobile ? "6px 4px" : 0,
           borderTop: isMobile ? `1px solid ${t.divider}` : "none",
-          flexWrap: "wrap",
+          flexWrap: isMobile ? "wrap" : "nowrap",
         }}>
           {/* Season Selector */}
           <select
@@ -568,7 +593,9 @@ function BaseballApp() {
             }}
           >
             {SEASONS.map(s => (
-              <option key={s} value={s} style={{ background: t.inputBg, color: t.text }}>{s}</option>
+              <option key={s} value={s} style={{ background: t.inputBg, color: t.text }}>
+                {String(s).endsWith("P") ? `${String(s).slice(0, 4)} Projected` : s}
+              </option>
             ))}
           </select>
 
@@ -612,7 +639,7 @@ function BaseballApp() {
               borderLeft: `1px solid ${t.divider}`,
               paddingLeft: 16,
             }}>
-              {season} | {hitters.length} hitters | {pitchers.length} pitchers
+              {String(season).endsWith("P") ? `${String(season).slice(0, 4)} Projected` : season} | {hitters.length} hitters | {pitchers.length} pitchers
             </div>
           )}
         </div>
