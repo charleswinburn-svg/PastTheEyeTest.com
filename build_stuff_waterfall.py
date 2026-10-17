@@ -10,7 +10,8 @@ to what /leaderboard publishes. Per pitch, LightGBM's exact TreeSHAP contributio
 (pred_contrib) split the predicted xRV across features; they are averaged per
 pitcher × pitch type, measured against the average qualified pitcher's pitch of that
 type, and converted to Stuff+ points with that type's slope of the Stuff+ transform
-(−100 / (stuff_std[pt] · rescale.stdev) points per unit of xRV).
+(−100 / (stuff_std[pt] · rescale.stdev) points per unit of xRV, or that season's own
+published slope — see below).
 
 The waterfall runs 100 → "Avg {type}" (the league-average pitch of that type) →
 one bar per trait → the published Stuff+. The small leftover from the ±4σ clamp and
@@ -21,9 +22,10 @@ Platoon: the same breakdown is built separately vs same-handed hitters (RHP vs R
 LHP vs LHH) and vs opposite-handed hitters, each against the league-average pitch of
 that type vs that side, and reconciled to the published L/R split grades (≥30 pitches).
 
-Each season's Stuff+ rescale is read back from that season's published grades (a
-linear fit of published vs raw grade), so older seasons scored with an earlier rescale
-still convert at their own slope.
+Each season was graded with the norms of its own scoring run, so the xRV → Stuff+ map
+is read back from that season's published grades: per pitch type, published stuff_plus
+is exactly linear in the published mean xRV ("stuff"), and that line gives the season's
+slope. The current norm file is used only when it reproduces the season (today's).
 
 Output: {out}/stuff_waterfall_{season}.json
   {"meta": {...}, "<pitcher_id>": {"name", "throws", "n", "types": {"FF": {"stuff_plus",
@@ -81,28 +83,57 @@ def plus_from_stuff(s, norm_pt, rescale):
     return round(100.0 + (raw - rescale["mean"]) / rescale["stdev"] * 10.0, 1)
 
 
-def raw_from_stuff(s, norm_pt):
-    s = round(s * 100, 3) / 100
-    z = max(-CLAMP, min(CLAMP, (s - norm_pt["stuff_mean"]) / norm_pt["stuff_std"]))
-    return round(100 - 10 * z, 1)
+class Grader:
+    """xRV_stuff (pitcher × type mean) → Stuff+ for one pitch type, plus its slope."""
+
+    def __init__(self, npt=None, rescale=None, line=None):
+        self.npt, self.rescale, self.line = npt, rescale, line
+        if line:
+            self.slope = line[1] * 100.0                                  # pts per unit xRV
+        else:
+            self.slope = -100.0 / (npt["stuff_std"] * rescale["stdev"])
+
+    def __call__(self, s):
+        if self.line:
+            a, b = self.line
+            return round(a + b * (round(s * 100, 3)), 1)
+        return plus_from_stuff(s, self.npt, self.rescale)
 
 
-def fit_rescale(pairs, stored):
-    """Recover the rescale a season was published with: published = 100 + (raw − mean)/stdev·10.
-    Falls back to the stored (latest) rescale when there are too few pairs."""
-    if len(pairs) < 20:
-        return stored, None
-    raw, pub = np.array(pairs, dtype=float).T
-    b, a = np.polyfit(raw, pub, 1)
-    if b <= 0:
-        return stored, None
-    fit = {"stdev": 10.0 / b, "mean": (100.0 - a) / b}
+def season_graders(published, norms, stored, remap):
+    """Per pitch type graders for this season. Uses the current norms when they reproduce
+    the published grades from the published xRV; otherwise each type's own published line."""
+    pairs = {}
+    for t in published.values():
+        if not isinstance(t, dict):
+            continue
+        for pt, g in t.items():
+            if isinstance(g, dict) and g.get("stuff") is not None and g.get("stuff_plus") is not None:
+                pairs.setdefault(pt, []).append((g["stuff"], g["stuff_plus"]))
 
-    def err(r):
-        return float(np.max(np.abs(pub - np.round(100.0 + (raw - r["mean"]) / r["stdev"] * 10.0, 1))))
-    # Published values are rounded, so the fit is a hair noisy: keep the stored rescale
-    # whenever it reproduces the season at least as well (it's exact for the current one).
-    return (stored, err(stored)) if err(stored) <= err(fit) else (fit, err(fit))
+    def npt_of(pt):
+        n = norms.get(remap.get(pt, pt))
+        return n if n and n.get("stuff_std", 0) > 0 else None
+
+    stored_err = 0.0
+    for pt, v in pairs.items():
+        if npt_of(pt):
+            stored_err = max(stored_err, max(abs(plus_from_stuff(x / 100, npt_of(pt), stored) - y) for x, y in v))
+    use_stored = not pairs or stored_err <= 0.15
+
+    graders, fitted = {}, {}
+    for pt in set(pairs) | {k for k in norms if not k.startswith("_")}:
+        v = np.array(pairs.get(pt, []), dtype=float)
+        if not use_stored and len(v) >= 8:
+            b, a = np.polyfit(v[:, 0], v[:, 1], 1)
+            keep = np.abs(v[:, 1] - (a + b * v[:, 0])) <= 0.3        # drop ±4σ-clamped pitchers
+            if keep.sum() >= 8:
+                b, a = np.polyfit(v[keep, 0], v[keep, 1], 1)
+            graders[pt] = Grader(line=(a, b))
+            fitted[pt] = float(np.max(np.abs(v[keep, 1] - (a + b * v[keep, 0]))))
+        elif npt_of(pt):
+            graders[pt] = Grader(npt_of(pt), stored)
+    return graders, use_stored, stored_err, fitted
 
 
 def bars(r, avg, gcols, slope, base, target):
@@ -219,16 +250,25 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
         n = norms.get(sp.PITCH_TYPE_REMAP.get(pt, pt))
         return n if n and n.get("stuff_std", 0) > 0 else None
 
-    # This season's rescale, read back from its own published grades
-    pairs = []
+    graders, use_stored, stored_err, fitted = season_graders(published, norms, stored, sp.PITCH_TYPE_REMAP)
+    if use_stored:
+        log(f"Stuff+ scale: current norm file (reproduces {season}'s published grades, max error {stored_err:.1f})")
+    else:
+        log(f"Stuff+ scale: {season}'s own (current norm file is off by up to {stored_err:.1f} — "
+            f"{season} was graded with its own norms); per-type line fit max error "
+            f"{max(fitted.values(), default=0):.1f}")
+
+    # Does today's model reproduce the xRV this season was published with?
+    xgap = []
     for _, r in per.iterrows():
-        npt, pub = npt_of(r["pitch_type"]), pub_of(str(int(r["pitcher"])), r["pitch_type"])
-        if npt and pub is not None:
-            pairs.append((raw_from_stuff(float(r["xrv"]), npt), pub))
-    rescale, fit_resid = fit_rescale(pairs, stored)
-    src = "stored" if rescale is stored else "fitted to published"
-    log(f"Stuff+ rescale ({src}): mean={rescale['mean']:.3f} stdev={rescale['stdev']:.3f}"
-        + (f"  max error vs published {fit_resid:.1f}" if fit_resid is not None else ""))
+        g = (published.get(str(int(r["pitcher"])), {}).get(r["pitch_type"]) or {})
+        gr = graders.get(r["pitch_type"])
+        if g.get("stuff") is not None and gr:
+            xgap.append(abs(round(float(r["xrv"]) * 100, 3) - g["stuff"]) * abs(gr.slope) / 100)
+    if xgap:
+        q = np.percentile(xgap, [50, 95, 100])
+        log(f"Model vs published xRV, in Stuff+ points: median {q[0]:.1f}, 95th pct {q[1]:.1f}, max {q[2]:.1f}"
+            + ("" if q[1] <= 1.0 else "  ⚠ today's model/parquet don't reproduce this season's xRV"))
 
     names = {}
     if "player_name" in df.columns:
@@ -237,7 +277,7 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
 
     out = {"meta": {"season": season, "model": meta.get("config", ""),
                     "groups": [{"key": k, "label": l, "features": fs} for k, l, fs in groups],
-                    "min_n": MIN_N, "rescale": rescale,
+                    "min_n": MIN_N, "scale": "current norms" if use_stored else "season fit",
                     "method": "LightGBM TreeSHAP contributions vs the average qualified pitch of the same type"}}
     worst = {"overall": 0.0, "same": 0.0, "oppo": 0.0}
     rows_out = side_rows = clamped = 0
@@ -246,13 +286,13 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
         return out.setdefault(pid, {"name": names.get(int(pid), ""), "throws": throws.get(int(pid), ""),
                                     "n": 0, "types": {}})
 
-    def graded(d, npt, stand_col, side):
+    def graded(d, grade, stand_col, side):
         """Targets (published where available) + percentile for one pitch type (× side)."""
         targets = []
         for _, r in d.iterrows():
             pid = str(int(r["pitcher"]))
             pub = pub_of(pid, r["pitch_type"], r[stand_col] if stand_col else None)
-            mine = plus_from_stuff(float(r["xrv"]), npt, rescale)
+            mine = grade(float(r["xrv"]))
             if pub is not None:
                 worst[side] = max(worst[side], abs(pub - mine))
             targets.append(pub if pub is not None else mine)
@@ -261,17 +301,19 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
 
     for pt, d in per.groupby("pitch_type"):
         npt = npt_of(pt)
-        if not npt:
+        grade = graders.get(pt) or (Grader(npt, stored) if npt else None)
+        if not grade:
             log(f"  {pt}: no norms — skipped")
             continue
-        slope = -100.0 / (npt["stuff_std"] * rescale["stdev"])      # Stuff+ points per unit xRV
+        slope = grade.slope                                          # Stuff+ points per unit xRV
         avg = d[gcols + ["xrv"]].mean()                              # average qualified pitcher's pitch
-        base = plus_from_stuff(float(avg["xrv"]), npt, rescale)
-        d, pct = graded(d, npt, None, "overall")
+        base = grade(float(avg["xrv"]))
+        d, pct = graded(d, grade, None, "overall")
         for (_, r), p in zip(d.iterrows(), pct):
             pid = str(int(r["pitcher"]))
             target = float(r["target"])
-            clamped += abs((float(r["xrv"]) - npt["stuff_mean"]) / npt["stuff_std"]) > CLAMP
+            if npt:
+                clamped += abs((float(r["xrv"]) - npt["stuff_mean"]) / npt["stuff_std"]) > CLAMP
             e = entry(pid)
             e["types"][pt] = {"stuff_plus": round(target, 1), "pct": int(round(p)),
                               "n": int(r["n"]), "base": base, "c": bars(r, avg, gcols, slope, base, target)}
@@ -283,8 +325,8 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
             if ds.empty:
                 continue
             savg = ds[gcols + ["xrv"]].mean()                        # avg qualified pitch of this type vs this side
-            sbase = bases[side] = plus_from_stuff(float(savg["xrv"]), npt, rescale)
-            ds, spct = graded(ds, npt, "stand", side)
+            sbase = bases[side] = grade(float(savg["xrv"]))
+            ds, spct = graded(ds, grade, "stand", side)
             for (_, r), p in zip(ds.iterrows(), spct):
                 t = (out.get(str(int(r["pitcher"]))) or {}).get("types", {}).get(pt)
                 if t is None:
@@ -304,7 +346,7 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
     if published:
         for k, v in worst.items():
             log(f"  Recomputed vs published Stuff+ ({k}): max difference {v:.1f} "
-                f"({'OK' if v <= 0.15 else 'bars reconciled to published — parquet or models differ from when ' + str(season) + ' was scored'})")
+                f"({'OK' if v <= 0.3 else 'bars reconciled to published — see the xRV line above'})")
     log(f"  Pitch types beyond the ±4σ clamp: {clamped} (their residual is folded into the bars)")
     return True
 
