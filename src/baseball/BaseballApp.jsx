@@ -8,6 +8,7 @@ import RaceToTwoStrikes from "./RaceToTwoStrikes.jsx";
 import EVLAChart from "./EVLAChart.jsx";
 import TeamScatter from "./TeamScatter.jsx";
 import ISwingWaterfall from "./ISwingWaterfall.jsx";
+import StuffWaterfall from "./StuffWaterfall.jsx";
 import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv, NewBadge, useISwingNew } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
@@ -80,6 +81,7 @@ const TABS = [
       { id: "hitter_season", label: "Hitter Season" },
       { id: "hitter_plinko", label: "Hitter Plinko" },
       { id: "hitter_iswing", label: "Hitter iSwing+", isNew: true },
+      { id: "pitcher_stuff_wf", label: "Pitcher Stuff+", isNew: true },
     ]
   },
   {
@@ -318,7 +320,7 @@ function BaseballApp() {
   const aaaReady = !!aaaData;
 
   // Helper to check if tab is active (handles dropdown sub-items)
-  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_plinko", "hitter_game", "hitter_season", "hitter_plinko", "hitter_iswing"].includes(id);
+  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_plinko", "hitter_game", "hitter_season", "hitter_plinko", "hitter_iswing", "pitcher_stuff_wf"].includes(id);
   const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
   const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
   const isLeaderboardTab = (id) => ["hitter_lb", "hitter_xrv_lb", "pitcher_lb", "pitch_modeling_lb"].includes(id);
@@ -754,11 +756,14 @@ function BaseballApp() {
             </div>
           )
         )}
-        {isSummaryTab(tab) && tab !== "hitter_iswing" && (
+        {isSummaryTab(tab) && tab !== "hitter_iswing" && tab !== "pitcher_stuff_wf" && (
           <Summaries season={season} initialSubTab={summarySubTab} />
         )}
         {tab === "hitter_iswing" && (
           <ISwingWaterfall season={season} hitters={hittersFull} />
+        )}
+        {tab === "pitcher_stuff_wf" && (
+          <StuffWaterfall season={season} pitchers={pitchersFull} />
         )}
         {tab === "hitter_lb" && (
           pipelineReady ? (
