@@ -27,6 +27,10 @@ is read back from that season's published grades: per pitch type, published stuf
 is exactly linear in the published mean xRV ("stuff"), and that line gives the season's
 slope. The current norm file is used only when it reproduces the season (today's).
 
+meta.league[PT][overall|same|oppo] = {xrv, c: {group: xRV}} holds those league-average
+pitches in raw xRV, so the site can break a single game down against the same baseline
+(with grades and contributions from the API's /stuff_breakdown).
+
 Output: {out}/stuff_waterfall_{season}.json
   {"meta": {...}, "<pitcher_id>": {"name", "throws", "n", "types": {"FF": {"stuff_plus",
    "pct", "n", "base", "c": {group: pts}, "same": {...}, "oppo": {...}}, ...}}}
@@ -332,6 +336,9 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
             continue
         slope = grade.slope                                          # Stuff+ points per unit xRV
         avg = d[gcols + ["xrv"]].mean()                              # average qualified pitcher's pitch
+        league = out["meta"].setdefault("league", {}).setdefault(pt, {})
+        league["overall"] = {"xrv": round(float(avg["xrv"]), 6),
+                             "c": {g: round(float(avg[g]), 6) for g in gcols}}
         base = grade(float(avg["xrv"]))
         d, pct = graded(d, grade, None, "overall")
         for (_, r), p in zip(d.iterrows(), pct):
@@ -350,6 +357,8 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
             if ds.empty:
                 continue
             savg = ds[gcols + ["xrv"]].mean()                        # avg qualified pitch of this type vs this side
+            league[side] = {"xrv": round(float(savg["xrv"]), 6),
+                            "c": {g: round(float(savg[g]), 6) for g in gcols}}
             sbase = bases[side] = grade(float(savg["xrv"]))
             ds, spct = graded(ds, grade, "stand", side)
             for (_, r), p in zip(ds.iterrows(), spct):
