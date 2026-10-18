@@ -6,7 +6,7 @@ import {
   TEAM_IDS, MLB_TEAM_PRIMARY,
 } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
-import { fetchGameLog, fetchSavantGameData, scorePitchCode } from "./mlbApi.js";
+import { fetchGameLog, fetchSavantGameData, fetchPlayByPlay, fetchBoxscore, scorePitchCode } from "./mlbApi.js";
 
 // One-season Stuff+ waterfall per pitch type (SUMMARIES → Pitcher Stuff+), split by
 // platoon: vs same-handed hitters | vs opposite-handed hitters, side by side.
@@ -175,24 +175,81 @@ const savantPitch = (r, pid) => ({
   },
 });
 
-const _gameCache = new Map();
-function loadGame(pid, gamePk) {
-  const key = `${pid}_${gamePk}`;
-  if (!_gameCache.has(key)) {
-    _gameCache.set(key, (async () => {
-      const rows = (await fetchSavantGameData(gamePk)) || [];
-      const mine = rows.filter(r => String(r.pitcher) === String(pid) && r.pitch_type &&
-        r.pitch_type !== "UN" && r.pitch_type !== "PO" && r.release_speed && r.plate_x && r.plate_z);
-      if (!mine.length) return { empty: true };
-      const r = await fetch(`${PITCH_PLUS_API}/stuff_breakdown`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pitches: mine.map(x => savantPitch(x, pid)) }),
+// Live / just-finished games (no Statcast CSV yet): the pitcher's pitches from MLB's
+// play-by-play, which /stuff_breakdown accepts as-is (it uses MLB's published break).
+function pbpPitches(pbp, pid) {
+  const out = [];
+  for (const play of pbp?.allPlays || []) {
+    if (String(play.matchup?.pitcher?.id) !== String(pid)) continue;
+    for (const evt of play.playEvents || []) {
+      const code = evt.details?.type?.code;
+      const pd = evt.pitchData;
+      if (!evt.isPitch || !pd?.startSpeed || pd.coordinates?.pX == null || !code || code === "UN" || code === "PO") continue;
+      out.push({
+        pitcher_id: Number(pid),
+        _stand: play.matchup?.batSide?.code || "R",
+        _p_throws: play.matchup?.pitchHand?.code || "R",
+        details: { type: { code } },
+        pitchData: pd,
       });
-      if (!r.ok) throw new Error(`API ${r.status}`);
-      return await r.json();
-    })().catch(e => { _gameCache.delete(key); return { error: String(e.message || e) }; }));
+    }
+  }
+  return out;
+}
+
+async function scoreGame(pid, gamePk) {
+  const rows = (await fetchSavantGameData(gamePk).catch(() => null)) || [];
+  let pitches = rows
+    .filter(r => String(r.pitcher) === String(pid) && r.pitch_type && r.pitch_type !== "UN" &&
+      r.pitch_type !== "PO" && r.release_speed && r.plate_x && r.plate_z)
+    .map(x => savantPitch(x, pid));
+  let source = "statcast";
+  if (!pitches.length) {
+    pitches = pbpPitches(await fetchPlayByPlay(gamePk), pid);
+    source = "gameday";
+  }
+  if (!pitches.length) return { empty: true };
+  const r = await fetch(`${PITCH_PLUS_API}/stuff_breakdown`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pitches }),
+  });
+  if (!r.ok) throw new Error(`API ${r.status}`);
+  return { ...(await r.json()), source, at: Date.now() };
+}
+
+// Finished games are cached; live ones are rescored on every call.
+const _gameCache = new Map();
+function loadGame(pid, gamePk, live = false) {
+  const key = `${pid}_${gamePk}`;
+  if (live || !_gameCache.has(key)) {
+    const job = scoreGame(pid, gamePk).catch(e => { _gameCache.delete(key); return { error: String(e.message || e) }; });
+    if (live) { _gameCache.delete(key); return job; }
+    _gameCache.set(key, job);
   }
   return _gameCache.get(key);
+}
+
+// Today's / yesterday's games (Eastern time) the pitcher has pitched in that are still in
+// progress or final but may not be in his MLB game log yet.
+async function recentGames(teamId, pid) {
+  const day = (offset) => new Date(Date.now() - offset * 864e5).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const out = [];
+  for (const d of [day(1), day(0)]) {
+    const res = await fetch(`/mlb-api/api/v1/schedule?sportId=1&date=${d}&teamId=${teamId}`).catch(() => null);
+    const js = res?.ok ? await res.json() : null;
+    for (const g of js?.dates?.[0]?.games || []) {
+      const state = g.status?.abstractGameState;
+      if (state !== "Live" && state !== "Final") continue;
+      const home = g.teams?.home?.team?.id === teamId;
+      const opp = (home ? g.teams?.away : g.teams?.home)?.team;
+      const box = await fetchBoxscore(g.gamePk).catch(() => null);
+      const side = home ? box?.teams?.home : box?.teams?.away;
+      if (!(side?.pitchers || []).map(String).includes(String(pid))) continue;
+      out.push({ gamePk: g.gamePk, date: d, opp: ABBR_BY_TEAM_ID[opp?.id] || opp?.name || "", home,
+                 live: state === "Live" });
+    }
+  }
+  return out;
 }
 
 const fmtGameDate = (d) => {
@@ -245,15 +302,26 @@ export default function StuffWaterfall({ season, pitchers }) {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [data, pitcherById, mode]);
 
-  // Game log for the chosen pitcher (newest first).
+  const pitcher = pid ? pitcherById.get(pid) : null;
+  const fallbackTeamId = useFallbackTeamId(pid ? Number(pid) : null, !!pid && !pitcher?.team);
+  const team = pitcher?.team || ABBR_BY_TEAM_ID[fallbackTeamId] || null;
+  const teamId = pitcher?.team_id ?? TEAM_IDS[team] ?? fallbackTeamId ?? null;
+  const seasonYear = Number(String(season).replace(/\D/g, ""));
+  const isCurrentSeason = seasonYear === new Date().getFullYear();
+
+  // Game log for the chosen pitcher (newest first), plus today's/yesterday's games in
+  // the current season that the game log doesn't have yet (live or just final).
   useEffect(() => {
     setGames(null); setGamePk(null);
     if (mode !== "game" || !pid) return;
     let alive = true;
-    fetchGameLog(pid, String(season).replace(/\D/g, ""))
-      .then(splits => {
+    Promise.all([
+      fetchGameLog(pid, seasonYear).catch(() => []),
+      isCurrentSeason && teamId ? recentGames(teamId, pid).catch(() => []) : [],
+    ])
+      .then(([splits, recent]) => {
         if (!alive) return;
-        const list = splits
+        const logged = splits
           .filter(s => s.game?.gamePk)
           .map(s => ({
             gamePk: s.game.gamePk,
@@ -264,22 +332,32 @@ export default function StuffWaterfall({ season, pitchers }) {
             pitches: s.stat?.numberOfPitches,
           }))
           .reverse();
+        const liveNow = new Set(recent.filter(g => g.live).map(g => g.gamePk));
+        for (const g of logged) g.live = liveNow.has(g.gamePk);
+        const have = new Set(logged.map(g => g.gamePk));
+        const extra = recent.filter(g => !have.has(g.gamePk)).reverse();
+        const list = [...extra, ...logged];
         setGames(list);
         if (list.length) setGamePk(list[0].gamePk);
       })
       .catch(() => alive && setGames([]));
     return () => { alive = false; };
-  }, [mode, pid, season]);
+  }, [mode, pid, seasonYear, isCurrentSeason, teamId]);
 
+  const gameInfo = games?.find(g => g.gamePk === gamePk) || null;
+  const isLive = !!gameInfo?.live;
+
+  // Score the chosen game; a live one is rescored every minute.
   useEffect(() => {
     setGame(null);
     if (mode !== "game" || !pid || !gamePk) return;
     let alive = true;
-    loadGame(pid, gamePk).then(r => { if (alive) setGame(r); });
-    return () => { alive = false; };
-  }, [mode, pid, gamePk]);
+    const run = () => loadGame(pid, gamePk, isLive).then(r => { if (alive && !(r?.error && isLive)) setGame(r); });
+    run();
+    const timer = isLive ? setInterval(run, 60000) : null;
+    return () => { alive = false; if (timer) clearInterval(timer); };
+  }, [mode, pid, gamePk, isLive]);
 
-  const gameInfo = games?.find(g => g.gamePk === gamePk) || null;
   const rec = data && pid ? data[pid] : null;
   const gameTypes = useMemo(
     () => (mode === "game" && game?.by_pitch_type && data?.meta ? gameRows(game, data.meta) : null),
@@ -321,13 +399,10 @@ export default function StuffWaterfall({ season, pitchers }) {
     return { order, range: { R: Math.max(10, Math.ceil(needed / step) * step), step } };
   }, [row]);
 
-  const pitcher = pid ? pitcherById.get(pid) : null;
-  const fallbackTeamId = useFallbackTeamId(pid ? Number(pid) : null, !!pid && !pitcher?.team);
-  const team = pitcher?.team || ABBR_BY_TEAM_ID[fallbackTeamId] || null;
   const name = pitcher?.name || rec?.name || "";
   const barColor = readableOn(teamMarkColor(team) || t.accentSecondary, isDark);
   const minN = mode === "game" ? 1 : data?.meta?.min_n || 30;
-  const gameLabel = gameInfo ? `${fmtGameDate(gameInfo.date)} ${gameInfo.home ? "vs" : "@"} ${gameInfo.opp}` : "";
+  const gameLabel = gameInfo ? `${fmtGameDate(gameInfo.date)} ${gameInfo.home ? "vs" : "@"} ${gameInfo.opp}${gameInfo.live ? " (Live)" : ""}` : "";
 
   const saveCard = async () => {
     if (!cardRef.current) return;
@@ -358,7 +433,7 @@ export default function StuffWaterfall({ season, pitchers }) {
     if (games === null) status = msg("Loading games…");
     else if (!games.length) status = msg(`No ${season} games for this pitcher.`);
     else if (!game) status = msg("Loading game…");
-    else if (game.empty) status = msg("No Statcast pitch data for this game yet.");
+    else if (game.empty) status = msg(isLive ? "He hasn't thrown a pitch in this game yet." : "No pitch data for this game yet.");
     else if (game.error) status = msg(`Couldn't score this game (${game.error}).`);
   } else if (mode === "season" && data && pid && !rec) status = msg("Select a pitcher");
 
@@ -380,7 +455,7 @@ export default function StuffWaterfall({ season, pitchers }) {
           <select value={gamePk || ""} onChange={(e) => setGamePk(Number(e.target.value))} style={{ ...ctl, cursor: "pointer" }}>
             {games.map(g => (
               <option key={g.gamePk} value={g.gamePk}>
-                {fmtGameDate(g.date)} {g.home ? "vs" : "@"} {g.opp}{g.ip ? ` · ${g.ip} IP` : ""}{g.pitches ? ` · ${g.pitches} P` : ""}
+                {g.live ? "● LIVE · " : ""}{fmtGameDate(g.date)} {g.home ? "vs" : "@"} {g.opp}{g.ip ? ` · ${g.ip} IP` : ""}{g.pitches ? ` · ${g.pitches} P` : ""}
               </option>
             ))}
           </select>
@@ -404,6 +479,11 @@ export default function StuffWaterfall({ season, pitchers }) {
           </button>
         ))}
         {data === undefined && <span style={{ fontSize: 11, color: t.textMuted }}>Loading {season} Stuff+…</span>}
+        {mode === "game" && isLive && game?.at && (
+          <span style={{ fontSize: 11, color: t.textMuted }}>
+            <span style={{ color: "#E5484D" }}>●</span> Live · updated {new Date(game.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+          </span>
+        )}
       </div>
 
       {status}
@@ -435,6 +515,7 @@ export default function StuffWaterfall({ season, pitchers }) {
                 Same-handed = RHP vs RHH or LHP vs LHH. Each column starts from the {season} league-average {pitchName(activePt).toLowerCase()} thrown
                 to that side; each bar after it is how much that trait moved {mode === "game" ? "this game's" : "this pitch's"} Stuff+ versus that average, from the
                 Stuff model's own feature contributions. Both columns share one scale and trait order. Solid = helped, striped = hurt.
+                {mode === "game" && game?.source === "gameday" && " Pitch data from MLB Gameday until Statcast posts the game; grades can shift slightly when it does."}
               </div>
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
                 <span>Created by: @PastTheEyeTest on X</span>
