@@ -6,6 +6,7 @@ import {
   TEAM_IDS, MLB_TEAM_PRIMARY,
 } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
+import { fetchGameLog, fetchSavantGameData, scorePitchCode } from "./mlbApi.js";
 
 // One-season Stuff+ waterfall per pitch type (SUMMARIES → Pitcher Stuff+), split by
 // platoon: vs same-handed hitters | vs opposite-handed hitters, side by side.
@@ -14,6 +15,9 @@ import FitToWidth from "../FitToWidth.jsx";
 //                                     same: { stuff_plus, pct, n, base, c }, oppo: {…} } } }
 // `base` is the league-average pitch of that type (vs that side); the bars are the Stuff
 // model's TreeSHAP contributions vs that average and sum exactly to stuff_plus − base.
+// Game view: one game's Statcast pitches go to the API's /stuff_breakdown (same grades as
+// /score_aggregate, no minimum pitch count) and are broken down against the season's
+// league-average pitches (meta.league) the same way.
 
 const PITCH_NAMES = {
   FF: "Four-Seamer", SI: "Sinker", FC: "Cutter", SL: "Slider", ST: "Sweeper", SV: "Slurve",
@@ -47,6 +51,9 @@ function readableOn(hex, isDark) {
 }
 
 const FONT = "'Pliant', sans-serif";
+// The name banner matches the hitter/pitcher cards (the site font); the rest is Pliant.
+const BANNER_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 
 // html2canvas draws each inline <svg> as a standalone image, which can't see the page's
 // web fonts, so the PNG's chart text fell back to a system font. For the capture only,
@@ -92,12 +99,117 @@ const handedness = (throws, side) => {
   return `${throws}HP vs ${bat}HH`;
 };
 
+// Trait bars in Stuff+ points that sum exactly to target − base (build_stuff_waterfall.bars).
+function reconcile(pts, shift) {
+  const keys = Object.keys(pts);
+  const spread = keys.reduce((a, k) => a + Math.abs(pts[k]), 0);
+  const sum = keys.reduce((a, k) => a + pts[k], 0);
+  const out = {};
+  for (const k of keys) {
+    const v = spread > 1e-9 ? pts[k] + (shift - sum) * Math.abs(pts[k]) / spread : pts[k];
+    out[k] = Math.round(v * 10) / 10;
+  }
+  const resid = Math.round((shift - Object.values(out).reduce((a, v) => a + v, 0)) * 10) / 10;
+  if (resid && keys.length) {
+    const big = keys.reduce((m, k) => (Math.abs(out[k]) > Math.abs(out[m]) ? k : m), keys[0]);
+    out[big] = Math.round((out[big] + resid) * 10) / 10;
+  }
+  for (const k of keys) if (out[k] === 0) delete out[k];
+  return out;
+}
+
+// /stuff_breakdown response → the same row shape the season card uses.
+function gameRows(resp, meta) {
+  const { norms, rescale } = resp.scale || {};
+  const groups = meta?.groups || [];
+  const out = {};
+  for (const [pt, g] of Object.entries(resp.by_pitch_type || {})) {
+    if (g.stuff_plus == null) continue;                    // no norms for this type
+    const nm = norms?.[pt];
+    const lg = meta?.league?.[pt];
+    const grade = (x) => {
+      const z = Math.max(-4, Math.min(4, (x - nm.stuff_mean) / nm.stuff_std));
+      let raw = 100 - 10 * z;
+      if (rescale?.stdev > 0) raw = 100 + (raw - rescale.mean) / rescale.stdev * 10;
+      return Math.round(raw * 10) / 10;
+    };
+    const one = (gs, base) => {
+      if (!gs || gs.stuff_plus == null) return null;
+      if (!nm || !base) return { stuff_plus: gs.stuff_plus, n: gs.n };
+      const slope = -100 / (nm.stuff_std * (rescale?.stdev > 0 ? rescale.stdev : 10));
+      const pts = {};
+      for (const grp of groups) {
+        const gc = grp.features.reduce((a, f) => a + (gs.c?.[f] || 0), 0);
+        pts[grp.key] = (gc - (base.c?.[grp.key] || 0)) * slope;
+      }
+      const b = grade(base.xrv);
+      return { stuff_plus: gs.stuff_plus, n: gs.n, base: b, c: reconcile(pts, gs.stuff_plus - b) };
+    };
+    out[pt] = {
+      ...one(g, lg?.overall),
+      same: one(g.same, lg?.same || lg?.overall),
+      oppo: one(g.oppo, lg?.oppo || lg?.overall),
+    };
+  }
+  return out;
+}
+
+// One Savant CSV row → the /score_aggregate payload the Pitcher Game summary sends.
+const sv = (v) => { const f = parseFloat(v); return isNaN(f) ? null : f; };
+const savantPitch = (r, pid) => ({
+  pitcher_id: Number(pid),
+  _stand: r.stand || "R",
+  _p_throws: r.p_throws || "R",
+  _pitchType: r.pitch_type,
+  _pfx_direct: true,
+  details: { type: { code: scorePitchCode(r.pitch_type) } },
+  pitchData: {
+    startSpeed: sv(r.release_speed), extension: sv(r.release_extension),
+    strikeZoneTop: sv(r.sz_top), strikeZoneBottom: sv(r.sz_bot),
+    coordinates: {
+      pfxX: sv(r.pfx_x), pfxZ: sv(r.pfx_z), pX: sv(r.plate_x), pZ: sv(r.plate_z),
+      x0: sv(r.release_pos_x), z0: sv(r.release_pos_z),
+      vX0: sv(r.vx0), vY0: sv(r.vy0), vZ0: sv(r.vz0), aX: sv(r.ax), aY: sv(r.ay), aZ: sv(r.az),
+    },
+    breaks: { spinRate: sv(r.release_spin_rate), spinDirection: sv(r.spin_axis) },
+  },
+});
+
+const _gameCache = new Map();
+function loadGame(pid, gamePk) {
+  const key = `${pid}_${gamePk}`;
+  if (!_gameCache.has(key)) {
+    _gameCache.set(key, (async () => {
+      const rows = (await fetchSavantGameData(gamePk)) || [];
+      const mine = rows.filter(r => String(r.pitcher) === String(pid) && r.pitch_type &&
+        r.pitch_type !== "UN" && r.pitch_type !== "PO" && r.release_speed && r.plate_x && r.plate_z);
+      if (!mine.length) return { empty: true };
+      const r = await fetch(`${PITCH_PLUS_API}/stuff_breakdown`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pitches: mine.map(x => savantPitch(x, pid)) }),
+      });
+      if (!r.ok) throw new Error(`API ${r.status}`);
+      return await r.json();
+    })().catch(e => { _gameCache.delete(key); return { error: String(e.message || e) }; }));
+  }
+  return _gameCache.get(key);
+}
+
+const fmtGameDate = (d) => {
+  const dt = new Date(`${d}T12:00:00`);
+  return isNaN(dt) ? d : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+
 export default function StuffWaterfall({ season, pitchers }) {
   const { theme: t, isDark } = useTheme();
   const cardRef = useRef(null);
   const [data, setData] = useState(undefined);   // undefined = loading, null = no file
   const [pid, setPid] = useState(null);
   const [pt, setPt] = useState(null);
+  const [mode, setMode] = useState("season");    // "season" | "game"
+  const [games, setGames] = useState(null);      // game log for pid/season
+  const [gamePk, setGamePk] = useState(null);
+  const [game, setGame] = useState(null);        // /stuff_breakdown response (or {empty}/{error})
 
   useEffect(() => {
     let alive = true;
@@ -106,10 +218,10 @@ export default function StuffWaterfall({ season, pitchers }) {
     return () => { alive = false; };
   }, [season]);
 
-  // Drop the selection when the new season doesn't have that pitcher.
+  // Season view: drop the selection when the new season doesn't have that pitcher.
   useEffect(() => {
-    if (data && pid && !data[pid]) setPid(null);
-  }, [data, pid]);
+    if (mode === "season" && data && pid && !data[pid]) setPid(null);
+  }, [data, pid, mode]);
 
   const pitcherById = useMemo(() => {
     const m = new Map();
@@ -119,24 +231,70 @@ export default function StuffWaterfall({ season, pitchers }) {
 
   const options = useMemo(() => {
     if (!data) return [];
-    return Object.entries(data)
-      .filter(([k, r]) => k !== "meta" && r?.types)
-      .map(([id, r]) => {
+    const ids = new Set(Object.keys(data).filter(k => k !== "meta" && data[k]?.types));
+    // Any pitcher can have a game breakdown, not just those with a qualified season pitch.
+    if (mode === "game") for (const id of pitcherById.keys()) ids.add(id);
+    return [...ids]
+      .map(id => {
         const p = pitcherById.get(id);
-        const name = p?.name || r.name || id;
-        const types = Object.keys(r.types).join(" · ");
-        return { value: id, name, label: `${name}${p?.team ? ` (${p.team})` : ""} — ${types}` };
+        const r = data[id];
+        const name = p?.name || r?.name || id;
+        const types = r?.types && mode === "season" ? ` — ${Object.keys(r.types).join(" · ")}` : "";
+        return { value: id, name, label: `${name}${p?.team ? ` (${p.team})` : ""}${types}` };
       })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [data, pitcherById]);
+  }, [data, pitcherById, mode]);
 
+  // Game log for the chosen pitcher (newest first).
+  useEffect(() => {
+    setGames(null); setGamePk(null);
+    if (mode !== "game" || !pid) return;
+    let alive = true;
+    fetchGameLog(pid, String(season).replace(/\D/g, ""))
+      .then(splits => {
+        if (!alive) return;
+        const list = splits
+          .filter(s => s.game?.gamePk)
+          .map(s => ({
+            gamePk: s.game.gamePk,
+            date: s.date,
+            opp: ABBR_BY_TEAM_ID[s.opponent?.id] || s.opponent?.name || "",
+            home: s.isHome,
+            ip: s.stat?.inningsPitched,
+            pitches: s.stat?.numberOfPitches,
+          }))
+          .reverse();
+        setGames(list);
+        if (list.length) setGamePk(list[0].gamePk);
+      })
+      .catch(() => alive && setGames([]));
+    return () => { alive = false; };
+  }, [mode, pid, season]);
+
+  useEffect(() => {
+    setGame(null);
+    if (mode !== "game" || !pid || !gamePk) return;
+    let alive = true;
+    loadGame(pid, gamePk).then(r => { if (alive) setGame(r); });
+    return () => { alive = false; };
+  }, [mode, pid, gamePk]);
+
+  const gameInfo = games?.find(g => g.gamePk === gamePk) || null;
   const rec = data && pid ? data[pid] : null;
+  const gameTypes = useMemo(
+    () => (mode === "game" && game?.by_pitch_type && data?.meta ? gameRows(game, data.meta) : null),
+    [mode, game, data]);
+  const view = mode === "game"
+    ? (gameTypes ? { throws: game.throws, types: gameTypes,
+                     n: Object.values(gameTypes).reduce((a, g) => a + g.n, 0) } : null)
+    : rec;
+
   // Pitch types by usage; keep the chosen type if this pitcher throws it, else his main pitch.
   const types = useMemo(
-    () => (rec ? Object.entries(rec.types).sort((a, b) => b[1].n - a[1].n).map(([k]) => k) : []),
-    [rec]);
+    () => (view ? Object.entries(view.types).sort((a, b) => b[1].n - a[1].n).map(([k]) => k) : []),
+    [view]);
   const activePt = types.includes(pt) ? pt : types[0] || null;
-  const row = rec && activePt ? rec.types[activePt] : null;
+  const row = view && activePt ? view.types[activePt] : null;
 
   const groupLabels = useMemo(() => {
     const m = {};
@@ -146,14 +304,14 @@ export default function StuffWaterfall({ season, pitchers }) {
 
   // Both columns share one trait order (by combined size) and one x-axis range.
   const { order, range } = useMemo(() => {
-    if (!row) return { order: [], range: 10 };
+    if (!row) return { order: [], range: { R: 10, step: 5 } };
     const tot = {};
     for (const s of SIDES) for (const [f, v] of Object.entries(row[s.key]?.c || {})) tot[f] = (tot[f] || 0) + Math.abs(v);
     const order = Object.keys(tot).filter(f => tot[f] > 0).sort((a, b) => tot[b] - tot[a]);
     let maxDev = 1;
     for (const s of SIDES) {
       const r = row[s.key];
-      if (!r) continue;
+      if (!r || r.base == null) continue;
       let run = r.base;
       maxDev = Math.max(maxDev, Math.abs(run - 100), Math.abs(r.stuff_plus - 100));
       for (const f of order) { run += r.c[f] || 0; maxDev = Math.max(maxDev, Math.abs(run - 100)); }
@@ -168,38 +326,72 @@ export default function StuffWaterfall({ season, pitchers }) {
   const team = pitcher?.team || ABBR_BY_TEAM_ID[fallbackTeamId] || null;
   const name = pitcher?.name || rec?.name || "";
   const barColor = readableOn(teamMarkColor(team) || t.accentSecondary, isDark);
-  const minN = data?.meta?.min_n || 30;
+  const minN = mode === "game" ? 1 : data?.meta?.min_n || 30;
+  const gameLabel = gameInfo ? `${fmtGameDate(gameInfo.date)} ${gameInfo.home ? "vs" : "@"} ${gameInfo.opp}` : "";
 
   const saveCard = async () => {
     if (!cardRef.current) return;
     const undo = await embedPliant(cardRef.current);
+    const when = mode === "game" && gameInfo ? gameInfo.date : season;
     try {
-      await saveCardAsPng(cardRef, `${name.replace(/\s+/g, "_")}_${activePt}_Stuff_platoon_${season}.png`);
+      await saveCardAsPng(cardRef, `${name.replace(/\s+/g, "_")}_${activePt}_Stuff_platoon_${when}.png`);
     } finally {
       undo();
     }
   };
 
   const msg = (text) => <div style={{ color: t.textMuted, textAlign: "center", padding: 40, fontSize: 13 }}>{text}</div>;
-  const usage = (k) => (rec ? Math.round((100 * rec.types[k].n) / rec.n) : 0);
+  const usage = (k) => (view ? Math.round((100 * view.types[k].n) / view.n) : 0);
+  const ctl = { padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, fontFamily: FONT };
+  const toggle = (id, label) => (
+    <button key={id} type="button" onClick={() => setMode(id)} aria-pressed={mode === id}
+      style={{ padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: FONT, border: "none",
+               background: mode === id ? t.accent : "transparent", color: mode === id ? "#fff" : t.textMuted }}>
+      {label}
+    </button>
+  );
+
+  let status = null;
+  if (data === null) status = msg(`No Stuff+ breakdown for ${season} yet.`);
+  else if (data && !pid) status = msg("Select a pitcher");
+  else if (mode === "game" && pid) {
+    if (games === null) status = msg("Loading games…");
+    else if (!games.length) status = msg(`No ${season} games for this pitcher.`);
+    else if (!game) status = msg("Loading game…");
+    else if (game.empty) status = msg("No Statcast pitch data for this game yet.");
+    else if (game.error) status = msg(`Couldn't score this game (${game.error}).`);
+  } else if (mode === "season" && data && pid && !rec) status = msg("Select a pitcher");
 
   return (
     <div style={{ padding: "16px 20px", fontFamily: FONT }}>
       <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "inline-flex", border: `1px solid ${t.inputBorder}`, borderRadius: 6, overflow: "hidden" }}>
+          {toggle("season", "Season")}
+          {toggle("game", "Game")}
+        </div>
         <SearchableSelect
           value={pid || ""}
           options={options}
           onChange={(v) => setPid(v || null)}
           placeholder="Search pitcher…"
-          style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12, minWidth: 320, fontFamily: FONT }}
+          style={{ ...ctl, minWidth: 320 }}
         />
+        {mode === "game" && games?.length > 0 && (
+          <select value={gamePk || ""} onChange={(e) => setGamePk(Number(e.target.value))} style={{ ...ctl, cursor: "pointer" }}>
+            {games.map(g => (
+              <option key={g.gamePk} value={g.gamePk}>
+                {fmtGameDate(g.date)} {g.home ? "vs" : "@"} {g.opp}{g.ip ? ` · ${g.ip} IP` : ""}{g.pitches ? ` · ${g.pitches} P` : ""}
+              </option>
+            ))}
+          </select>
+        )}
         {types.map(k => (
           <button
             key={k}
             type="button"
             onClick={() => setPt(k)}
             aria-pressed={k === activePt}
-            title={`${pitchName(k)} · ${rec.types[k].n} pitches`}
+            title={`${pitchName(k)} · ${view.types[k].n} pitches`}
             style={{
               padding: "5px 12px", fontSize: 11, fontWeight: 700, borderRadius: 14, cursor: "pointer",
               fontFamily: FONT,
@@ -214,31 +406,34 @@ export default function StuffWaterfall({ season, pitchers }) {
         {data === undefined && <span style={{ fontSize: 11, color: t.textMuted }}>Loading {season} Stuff+…</span>}
       </div>
 
-      {data === null && msg(`No Stuff+ breakdown for ${season} yet.`)}
-      {data && !rec && msg("Select a pitcher")}
+      {status}
 
-      {row && (
+      {!status && row && (
         <>
           <FitToWidth designWidth={1100}>
             <div ref={cardRef} style={{ fontFamily: FONT, background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 1100, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
-              <PlayerHeader
-                name={name}
-                team={team}
-                teamId={pitcher?.team_id ?? fallbackTeamId}
-                season={season}
-                playerId={Number(pid)}
-                subtitle={`${season} ${pitchName(activePt)} Stuff+ Breakdown`}
-              />
+              <div style={{ fontFamily: BANNER_FONT }}>
+                <PlayerHeader
+                  name={name}
+                  team={team}
+                  teamId={pitcher?.team_id ?? fallbackTeamId}
+                  season={season}
+                  playerId={Number(pid)}
+                  subtitle={mode === "game"
+                    ? `${gameLabel} · ${pitchName(activePt)} Stuff+ Breakdown`
+                    : `${season} ${pitchName(activePt)} Stuff+ Breakdown`}
+                />
+              </div>
               <SummaryStrip row={row} pt={activePt} usage={usage(activePt)} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, padding: "8px 14px 0" }}>
                 {SIDES.map(s => (
-                  <SidePanel key={s.key} side={s} r={row[s.key]} pt={activePt} throws={rec.throws}
+                  <SidePanel key={s.key} side={s} r={row[s.key]} pt={activePt} throws={view.throws}
                     order={order} range={range} labels={groupLabels} color={barColor} minN={minN} />
                 ))}
               </div>
               <div style={{ padding: "8px 24px 6px", fontSize: 10, color: t.textFaint, lineHeight: 1.4, textAlign: "center" }}>
-                Same-handed = RHP vs RHH or LHP vs LHH. Each column starts from the league-average {pitchName(activePt).toLowerCase()} thrown
-                to that side; each bar after it is how much that trait moved this pitch's Stuff+ versus that average, from the
+                Same-handed = RHP vs RHH or LHP vs LHH. Each column starts from the {season} league-average {pitchName(activePt).toLowerCase()} thrown
+                to that side; each bar after it is how much that trait moved {mode === "game" ? "this game's" : "this pitch's"} Stuff+ versus that average, from the
                 Stuff model's own feature contributions. Both columns share one scale and trait order. Solid = helped, striped = hurt.
               </div>
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
@@ -275,7 +470,7 @@ function SummaryStrip({ row, pt, usage }) {
     <div style={{ padding: "14px 16px 4px" }}>
       <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", gap: 30 }}>
         {stat(`${pt} Stuff+`, row.stuff_plus.toFixed(1))}
-        {stat(`Pctile (${pt})`, pctPill(row.pct))}
+        {row.pct != null && stat(`Pctile (${pt})`, pctPill(row.pct))}
         {stat("Pitches", row.n)}
         {stat("Usage", `${usage}%`)}
       </div>
@@ -298,14 +493,20 @@ function SidePanel({ side, r, pt, throws, order, range, labels, color, minN }) {
         <>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 18, padding: "6px 0 0", fontSize: 12, color: t.textMuted, fontWeight: 700 }}>
             <span>Stuff+ <span style={{ fontSize: 20, fontWeight: 800, color: t.text }}>{r.stuff_plus.toFixed(1)}</span></span>
-            <span>Pctile {pctPill(r.pct, 14)}</span>
-            <span>{r.n} pitches</span>
+            {r.pct != null && <span>Pctile {pctPill(r.pct, 14)}</span>}
+            <span>{r.n} {r.n === 1 ? "pitch" : "pitches"}</span>
           </div>
-          <Waterfall row={r} pt={pt} order={order} range={range} labels={labels} color={color} idSuffix={side.key} />
+          {r.base != null ? (
+            <Waterfall row={r} pt={pt} order={order} range={range} labels={labels} color={color} idSuffix={side.key} />
+          ) : (
+            <div style={{ color: t.textMuted, textAlign: "center", padding: "40px 12px", fontSize: 12 }}>
+              No league-average {pitchName(pt).toLowerCase()} to compare against this season
+            </div>
+          )}
         </>
       ) : (
         <div style={{ color: t.textMuted, textAlign: "center", padding: "60px 12px", fontSize: 13 }}>
-          Fewer than {minN} pitches vs. {side.short} hitters
+          {minN > 1 ? `Fewer than ${minN} pitches` : "No pitches"} vs. {side.short} hitters
         </div>
       )}
     </div>
