@@ -54,8 +54,10 @@ function readableOn(hex, isDark) {
   return hex;
 }
 
-// The whole card (header, numbers, chart) is set in Pliant.
+// The card (numbers, chart) is set in Pliant; the name banner uses the site font like the other cards.
 const FONT = "'Pliant', sans-serif";
+// The name banner matches the hitter/pitcher cards (the site font); the rest is Pliant.
+const BANNER_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
 const fmtPts = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}`;
 
@@ -163,14 +165,16 @@ export default function ISwingWaterfall({ season, hitters }) {
         <>
           <FitToWidth designWidth={700}>
             <div ref={cardRef} style={{ fontFamily: FONT, background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`, overflow: "hidden", maxWidth: 700, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
-              <PlayerHeader
-                name={name}
-                team={team}
-                teamId={hitter?.team_id ?? fallbackTeamId}
-                season={season}
-                playerId={Number(pid)}
-                subtitle={`${season} iSwing+ Breakdown`}
-              />
+              <div style={{ fontFamily: BANNER_FONT }}>
+                <PlayerHeader
+                  name={name}
+                  team={team}
+                  teamId={hitter?.team_id ?? fallbackTeamId}
+                  season={season}
+                  playerId={Number(pid)}
+                  subtitle={`${season} iSwing+ Breakdown`}
+                />
+              </div>
               <SummaryStrip rec={rec} isNew={isNew} />
               <Waterfall rec={rec} color={barColor} />
               <div style={{ padding: "2px 20px 6px", fontSize: 10, color: t.textFaint, lineHeight: 1.4, textAlign: "center" }}>
