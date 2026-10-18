@@ -101,8 +101,12 @@ class Grader:
 
 
 def season_graders(published, norms, stored, remap):
-    """Per pitch type graders for this season. Uses the current norms when they reproduce
-    the published grades from the published xRV; otherwise each type's own published line."""
+    """Per pitch type graders for this season, the first of these that reproduces the
+    published grades from the published xRV:
+      1. the current norm file (today's season),
+      2. the current per-type norms with this season's own Stuff+ rescale (a season scored
+         with today's norms — its rescale is refit to its own population at scoring time),
+      3. each pitch type's own published line (a season graded with older per-type norms)."""
     pairs = {}
     for t in published.values():
         if not isinstance(t, dict):
@@ -115,25 +119,49 @@ def season_graders(published, norms, stored, remap):
         n = norms.get(remap.get(pt, pt))
         return n if n and n.get("stuff_std", 0) > 0 else None
 
-    stored_err = 0.0
+    def err(rescale):
+        e = 0.0
+        for pt, v in pairs.items():
+            if npt_of(pt):
+                e = max(e, max(abs(plus_from_stuff(x / 100, npt_of(pt), rescale) - y) for x, y in v))
+        return e
+
+    types = set(pairs) | {k for k in norms if not k.startswith("_")}
+    stored_err = err(stored)
+    if not pairs or stored_err <= 0.15:
+        return {pt: Grader(npt_of(pt), stored) for pt in types if npt_of(pt)}, "current norm file", stored_err
+
+    # 2. published = 100 + (raw − mean)/stdev·10, raw = 100 − 10·clip(z) from today's per-type norms
+    raw, pub = [], []
     for pt, v in pairs.items():
         if npt_of(pt):
-            stored_err = max(stored_err, max(abs(plus_from_stuff(x / 100, npt_of(pt), stored) - y) for x, y in v))
-    use_stored = not pairs or stored_err <= 0.15
+            for x, y in v:
+                raw.append(round(100 - 10 * max(-CLAMP, min(CLAMP, (x / 100 - npt_of(pt)["stuff_mean"])
+                                                           / npt_of(pt)["stuff_std"])), 1))
+                pub.append(y)
+    if len(raw) >= 20:
+        k, c = np.polyfit(raw, pub, 1)
+        if k > 0:
+            own = {"stdev": 10.0 / k, "mean": (100.0 - c) / k}
+            own_err = err(own)
+            if own_err <= 0.15:
+                return ({pt: Grader(npt_of(pt), own) for pt in types if npt_of(pt)},
+                        f"current per-type norms, season rescale mean={own['mean']:.3f} stdev={own['stdev']:.3f}",
+                        own_err)
 
-    graders, fitted = {}, {}
-    for pt in set(pairs) | {k for k in norms if not k.startswith("_")}:
+    graders, worst = {}, 0.0
+    for pt in types:
         v = np.array(pairs.get(pt, []), dtype=float)
-        if not use_stored and len(v) >= 8:
+        if len(v) >= 8:
             b, a = np.polyfit(v[:, 0], v[:, 1], 1)
             keep = np.abs(v[:, 1] - (a + b * v[:, 0])) <= 0.3        # drop ±4σ-clamped pitchers
             if keep.sum() >= 8:
                 b, a = np.polyfit(v[keep, 0], v[keep, 1], 1)
             graders[pt] = Grader(line=(a, b))
-            fitted[pt] = float(np.max(np.abs(v[keep, 1] - (a + b * v[keep, 0]))))
+            worst = max(worst, float(np.max(np.abs(v[keep, 1] - (a + b * v[keep, 0])))))
         elif npt_of(pt):
             graders[pt] = Grader(npt_of(pt), stored)
-    return graders, use_stored, stored_err, fitted
+    return graders, "per-type published lines (older per-type norms)", worst
 
 
 def bars(r, avg, gcols, slope, base, target):
@@ -250,13 +278,8 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
         n = norms.get(sp.PITCH_TYPE_REMAP.get(pt, pt))
         return n if n and n.get("stuff_std", 0) > 0 else None
 
-    graders, use_stored, stored_err, fitted = season_graders(published, norms, stored, sp.PITCH_TYPE_REMAP)
-    if use_stored:
-        log(f"Stuff+ scale: current norm file (reproduces {season}'s published grades, max error {stored_err:.1f})")
-    else:
-        log(f"Stuff+ scale: {season}'s own (current norm file is off by up to {stored_err:.1f} — "
-            f"{season} was graded with its own norms); per-type line fit max error "
-            f"{max(fitted.values(), default=0):.1f}")
+    graders, mode, scale_err = season_graders(published, norms, stored, sp.PITCH_TYPE_REMAP)
+    log(f"Stuff+ scale: {mode} (reproduces published grades within {scale_err:.1f})")
 
     # Does today's model reproduce the xRV this season was published with?
     xgap = []
@@ -277,7 +300,7 @@ def build_season(season, parquet, grades_path, out_dir, sp, meta, models, feats,
 
     out = {"meta": {"season": season, "model": meta.get("config", ""),
                     "groups": [{"key": k, "label": l, "features": fs} for k, l, fs in groups],
-                    "min_n": MIN_N, "scale": "current norms" if use_stored else "season fit",
+                    "min_n": MIN_N, "scale": mode,
                     "method": "LightGBM TreeSHAP contributions vs the average qualified pitch of the same type"}}
     worst = {"overall": 0.0, "same": 0.0, "oppo": 0.0}
     rows_out = side_rows = clamped = 0
