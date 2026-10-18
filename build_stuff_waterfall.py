@@ -157,6 +157,8 @@ def season_graders(published, norms, stored, remap):
             keep = np.abs(v[:, 1] - (a + b * v[:, 0])) <= 0.3        # drop ±4σ-clamped pitchers
             if keep.sum() >= 8:
                 b, a = np.polyfit(v[keep, 0], v[keep, 1], 1)
+            else:
+                keep = np.ones(len(v), bool)                           # too few to trim: keep the plain fit
             graders[pt] = Grader(line=(a, b))
             worst = max(worst, float(np.max(np.abs(v[keep, 1] - (a + b * v[keep, 0])))))
         elif npt_of(pt):
