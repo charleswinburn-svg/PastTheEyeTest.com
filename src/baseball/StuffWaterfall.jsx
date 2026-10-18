@@ -328,7 +328,6 @@ export default function StuffWaterfall({ season, pitchers }) {
   const barColor = readableOn(teamMarkColor(team) || t.accentSecondary, isDark);
   const minN = mode === "game" ? 1 : data?.meta?.min_n || 30;
   const gameLabel = gameInfo ? `${fmtGameDate(gameInfo.date)} ${gameInfo.home ? "vs" : "@"} ${gameInfo.opp}` : "";
-  const seasonRow = rec?.types?.[activePt] || null;
 
   const saveCard = async () => {
     if (!cardRef.current) return;
@@ -425,7 +424,7 @@ export default function StuffWaterfall({ season, pitchers }) {
                     : `${season} ${pitchName(activePt)} Stuff+ Breakdown`}
                 />
               </div>
-              <SummaryStrip row={row} pt={activePt} usage={usage(activePt)} seasonRow={mode === "game" ? seasonRow : null} season={season} />
+              <SummaryStrip row={row} pt={activePt} usage={usage(activePt)} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, padding: "8px 14px 0" }}>
                 {SIDES.map(s => (
                   <SidePanel key={s.key} side={s} r={row[s.key]} pt={activePt} throws={view.throws}
@@ -458,7 +457,7 @@ const pctPill = (pct, size = 20) => (
   </span>
 );
 
-function SummaryStrip({ row, pt, usage, seasonRow, season }) {
+function SummaryStrip({ row, pt, usage }) {
   const { theme: t } = useTheme();
   const stat = (label, value) => (
     <div style={{ textAlign: "center", minWidth: 100 }}>
@@ -472,7 +471,6 @@ function SummaryStrip({ row, pt, usage, seasonRow, season }) {
       <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", gap: 30 }}>
         {stat(`${pt} Stuff+`, row.stuff_plus.toFixed(1))}
         {row.pct != null && stat(`Pctile (${pt})`, pctPill(row.pct))}
-        {row.pct == null && stat(`${season} ${pt} Stuff+`, seasonRow ? seasonRow.stuff_plus.toFixed(1) : "—")}
         {stat("Pitches", row.n)}
         {stat("Usage", `${usage}%`)}
       </div>
