@@ -43,7 +43,7 @@ function pctOf(pool, v, lowerBetter) {
 }
 
 // Format a raw value like the stat's own display string (decimals, ×100 for stored decimals,
-// leading zero dropped for .xxx stats, explicit sign for xRV).
+// leading zero dropped only where the stat's display drops it, explicit sign for xRV).
 function formatter(cat, signed) {
   const disp = String(cat.display ?? "");
   const dec = (disp.split(".")[1] || "").replace(/[^0-9]/g, "").length;
@@ -52,7 +52,7 @@ function formatter(cat, signed) {
   return (v) => {
     if (v == null || !isFinite(v)) return "—";
     let s = (v * scale).toFixed(dec);
-    if (dec === 3) s = s.replace(/^(-?)0\./, "$1.");
+    if (dec === 3 && /^[−-]?\./.test(disp)) s = s.replace(/^(-?)0\./, "$1.");   // match the stat's own style
     return signed && v * scale > 0 ? `+${s}` : s.replace("-", "−");
   };
 }
