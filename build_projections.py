@@ -643,7 +643,8 @@ def coverage_text(meta):
     if not meta:
         return "(no interval)"
     if not meta.get("coverage"):
-        w = f", widened ×{meta['widened']:.2f} for season drift" if meta.get("widened") else ""
+        w = (f", widened ×{meta['widened']:.2f} for season drift" if (meta.get("widened") or 1) >= 1.02
+             else "; long-history stats show no extra season drift to add")
         return f"estimated from 1 backtest season ({meta['rows']} rows{w})"
     return "90% band coverage: " + " · ".join(f"{s} {v:.1f}%" for s, v in meta["coverage"].items())
 

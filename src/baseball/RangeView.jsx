@@ -82,7 +82,9 @@ function statList(data, xrv, side) {
   const players = (side === "hitters" ? data.hitters : data.pitchers) || [];
   const ciMeta = (side === "hitters" ? data.meta?.ci?.stats : data.pitcher_meta?.ci?.stats) || {};
   for (const st of out) {
-    st.widened = !!ciMeta[st.label]?.widened;
+    // one usable backtest season (bat tracking / pitch-model xRV): marked * in the tab
+    st.oneSeason = (ciMeta[st.label]?.n_seasons ?? 2) < 2;
+    st.widen = ciMeta[st.label]?.widened || 1;
     st.hasModel = players.some(pl => Math.abs(st.get(pl)?.parts?.model ?? 0) > 1e-6);
     st.hasCi = players.some(pl => st.get(pl)?.ci);
   }
@@ -222,11 +224,15 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
                 {tight} of {rows.length} ranges within 1 league SD
               </div>
               <RangeChart rows={rows} color={color} lastYear={lastYear} year={year} />
-              {rows.some(r => r.st.widened) && (
-                <div style={{ padding: "0 20px 4px", fontSize: 10, color: t.textFaint, textAlign: "center" }}>
-                  * Short history (bat tracking / pitch-model xRV): range estimated from one backtest season and widened for season-to-season drift.
-                </div>
-              )}
+              {rows.some(r => r.st.oneSeason) && (() => {
+                const w = Math.max(...rows.filter(r => r.st.oneSeason).map(r => r.st.widen));
+                return (
+                  <div style={{ padding: "0 20px 4px", fontSize: 10, color: t.textFaint, textAlign: "center" }}>
+                    * Short history (bat tracking / pitch-model xRV): range estimated from a single backtest season
+                    {w >= 1.02 ? `, widened ×${w.toFixed(2)} for season-to-season drift` : ""}.
+                  </div>
+                );
+              })()}
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
                 <span>Created by: @PastTheEyeTest on X</span>
                 <span style={{ fontStyle: "italic" }}>{year} projection · 90% / 50% ranges from walk-forward backtests</span>
@@ -291,7 +297,7 @@ function RangeChart({ rows, color, lastYear, year }) {
             <g key={r.st.key}>
               {i > 0 && <line x1={12} x2={W - 12} y1={y} y2={y} stroke={t.divider} strokeOpacity="0.5" />}
               <text x={labelW - 10} y={cy + 4} textAnchor="end" fontSize="12" fontWeight="700"
-                fill={model ? t.accent : t.text} fontStyle={model ? "italic" : "normal"}>{r.st.label}{r.st.widened ? "*" : ""}</text>
+                fill={model ? t.accent : t.text} fontStyle={model ? "italic" : "normal"}>{r.st.label}{r.st.oneSeason ? "*" : ""}</text>
               <rect x={x(r.a90)} y={cy - 7} width={Math.max(2, x(r.b90) - x(r.a90))} height={14} rx="3" fill={color} fillOpacity="0.28" />
               <rect x={x(r.a50)} y={cy - 7} width={Math.max(2, x(r.b50) - x(r.a50))} height={14} rx="3" fill={color} fillOpacity="0.7" />
               {r.last != null && <circle cx={x(r.last)} cy={cy} r="5" fill="none" stroke={t.textMuted} strokeWidth="1.8" />}
@@ -355,7 +361,7 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
                    fontFamily: FONT, color: st.hasModel ? t.accent : t.textSecondary, fontStyle: st.hasModel ? "italic" : "normal" }}>
           {stats.map(s => (
             <option key={s.key} value={s.key} style={{ background: t.inputBg, color: s.hasModel ? t.accent : t.textSecondary,
-              fontStyle: s.hasModel ? "italic" : "normal" }}>{s.label}{s.widened ? "*" : ""}</option>
+              fontStyle: s.hasModel ? "italic" : "normal" }}>{s.label}{s.oneSeason ? "*" : ""}</option>
           ))}
         </select>
         {SORTS.map(s => pill(sort === s.id, s.label, () => setSort(s.id), s.id))}

@@ -59,8 +59,8 @@ The build prints a calibration check per stat, e.g.
 Each season is scored with a band fit only on the other seasons; ~90% everywhere means the
 bands are honest. Stats with only one usable backtest season (bat tracking and pitch-model xRV,
 whose data starts in 2023–24) can't see season drift, so their edges are widened by the median
-ratio of out-of-season to in-sample band width across the long-history stats, and they're marked
-with * in the tab. Bands come from the base model's backtest, so where an iSwing+/Stuff+ layer
+ratio of out-of-season to in-sample band width across the long-history stats (on the 2015–2026
+history that ratio is ≈1.00, so in practice no widening), and they're marked with * in the tab. Bands come from the base model's backtest, so where an iSwing+/Stuff+ layer
 is used they're slightly conservative.
 
 The tab draws each range on one axis — standard deviations from the last season's league
