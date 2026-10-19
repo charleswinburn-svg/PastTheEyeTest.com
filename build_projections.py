@@ -551,7 +551,20 @@ def fit_ci(rows, mask=None):
     z = _oos_z(rows, m)
     if len(z) < CI_MIN_ROWS // 2:
         return None
-    return {**_spread(rows, m), "q": [float(x) for x in np.quantile(z, CI_Q)]}
+    spread = _spread(rows, m)
+    z_in = rows["err"][m] / ci_sigma(spread, rows["H"][m], rows["k"][m], rows["nt"][m])
+    return {**spread, "q": [float(x) for x in np.quantile(z, CI_Q)],
+            "q_in": [float(x) for x in np.quantile(z_in, CI_Q)],
+            "n_seasons": int(len(np.unique(rows["season"][m])))}
+
+
+def drift_widen(metas):
+    """How much wider the honest (out-of-season) 90% band is than an in-sample one, across
+    the stats with ≥3 backtest seasons — applied to stats with a single backtest season,
+    whose bands can't see season-to-season drift on their own."""
+    r = [(m["q"][3] - m["q"][0]) / (m["q_in"][3] - m["q_in"][0])
+         for m in metas.values() if m.get("n_seasons", 0) >= 3 and m["q_in"][3] > m["q_in"][0]]
+    return max(1.0, float(np.median(r))) if r else 1.0
 
 
 def ci_sigma(fit, H, k, n):
@@ -572,7 +585,7 @@ def ci_coverage(rows):
     return out
 
 
-def ci_bounds(sp, model, keys, center, last_season):
+def ci_bounds(sp, model, keys, center, last_season, widen=1.0):
     """90%/50% bands around the final projections `center` for keys (target season).
     The luck term assumes his recent playing time: the learned-weight average of his last
     two seasons' samples, clamped between the stat's minimum and a full season (90th
@@ -581,6 +594,9 @@ def ci_bounds(sp, model, keys, center, last_season):
     fit = fit_ci(rows) if rows is not None else None
     if fit is None:
         return None
+    widened = fit["n_seasons"] < 2 and widen > 1.0
+    if widened:
+        fit = {**fit, "q": [x * widen for x in fit["q"]]}
     H, k = hist_weight(sp, model, keys)
     w, *_ = model._unpack(model.p)
     recent = np.full(len(keys), np.nan)
@@ -607,6 +623,8 @@ def ci_bounds(sp, model, keys, center, last_season):
     b["n"] = n
     cov = ci_coverage(rows)
     meta = {**{key: round(fit[key], 8) for key in ("c0", "a", "b")}, "q": [round(x, 4) for x in fit["q"]],
+            "q_in": [round(x, 4) for x in fit["q_in"]], "n_seasons": fit["n_seasons"],
+            "widened": round(widen, 3) if widened else None,
             "coverage": cov, "full_n": round(full, 1), "floor_n": floor, "denom": sp.s.denom_col,
             "scale": "logit" if scale else "linear",
             "rows": int(len(rows["err"]))}
@@ -625,7 +643,8 @@ def coverage_text(meta):
     if not meta:
         return "(no interval)"
     if not meta.get("coverage"):
-        return f"90% band from {meta['rows']} backtest rows (coverage check needs ≥2 backtest seasons)"
+        w = f", widened ×{meta['widened']:.2f} for season drift" if meta.get("widened") else ""
+        return f"estimated from 1 backtest season ({meta['rows']} rows{w})"
     return "90% band coverage: " + " · ".join(f"{s} {v:.1f}%" for s, v in meta["coverage"].items())
 
 
@@ -864,16 +883,13 @@ def main():
         proj[f"__age__{label}"] = age_part
 
     # ── iSwing+ itself (its own learned weights) ──
-    iswing_ci = None
     if "iswing" in signals:
         sp = signals["iswing"]
         m = sp.fit_base(set(sp.s.seasons))
         if m is not None:
             p, has, _ = sp.predict(m, None, keys)
             proj["iSwing+"] = np.where(has, p, np.nan)
-            isw_targets = [x for x in sp.s.seasons[1:] if x not in SKIP_TARGET_SEASONS]
-            ci_backtest(sp, isw_targets[-CI_SEASONS:])
-            iswing_ci = (sp, m)
+
             proj["__hist__iSwing+"], proj["__age__iSwing+"] = decompose(sp, m, keys)
             report.append({"stat": "iSwing+", "denom": "n_swings", "lags": sp.J, **m.describe(),
                            "n_fit": m.n_fit, "layer": "base"})
@@ -927,10 +943,10 @@ def main():
         r = ci_bounds(sp, base, keys, proj[label].values, LAST)
         if r is not None:
             ci[label], ci_meta[label] = r
-    if iswing_ci is not None:
-        r = ci_bounds(iswing_ci[0], iswing_ci[1], keys, proj["iSwing+"].values, LAST)
-        if r is not None:
-            ci["iSwing+"], ci_meta["iSwing+"] = r
+    widen = drift_widen(ci_meta)          # for stats with only one backtest season
+    for label, (sp, base, _layer, _lb) in projectors.items():
+        if label in ci_meta and ci_meta[label]["n_seasons"] < 2:
+            ci[label], ci_meta[label] = ci_bounds(sp, base, keys, proj[label].values, LAST, widen)
     log("\nConfidence intervals (band fit on the other backtest seasons, scored on each):")
     for label in ci_meta:
         if not label.startswith("_"):
@@ -956,8 +972,7 @@ def main():
             v = float(r["iSwing+"])
             cats["iSwing+"] = {"value": round(v, 1), "display": str(int(round(v))),
                                "pctile": ecdf_pct(isw_pool, v, False),
-                               "parts": parts_of(v, r.get("__hist__iSwing+", np.nan), r.get("__age__iSwing+", np.nan), 3),
-                               "ci": ci_entry(ci.get("iSwing+"), i, 1)}
+                               "parts": parts_of(v, r.get("__hist__iSwing+", np.nan), r.get("__age__iSwing+", np.nan), 3)}
             if isw is not None:
                 lv = isw[(isw.player_id == pid) & (isw.season == LAST)]["iswing"]
                 if len(lv):

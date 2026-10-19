@@ -31,7 +31,8 @@ Notes
 
 ## Confidence intervals (2027 RANGES → Hitter / Pitcher Confidence Intervals)
 
-Every projected stat (card stats, xRV, iSwing+, Stuff+/Loc+/Tun+/Pitch+) gets a 90% range
+Every projected stat line (hitter card stats and xRV, pitcher card stats — not iSwing+ or the
+pitch-modeling grades) gets a 90% range
 and a 50% core, written into the projection files as `ci = {lo, lo50, hi50, hi, n}` with the
 fitted parameters in `meta.ci` / `pitcher_meta.ci`.
 
@@ -56,7 +57,10 @@ The build prints a calibration check per stat, e.g.
     K%    90% band coverage: 2022 89.4% · 2023 90.8% · …
 
 Each season is scored with a band fit only on the other seasons; ~90% everywhere means the
-bands are honest. Bands come from the base model's backtest, so where an iSwing+/Stuff+ layer
+bands are honest. Stats with only one usable backtest season (bat tracking and pitch-model xRV,
+whose data starts in 2023–24) can't see season drift, so their edges are widened by the median
+ratio of out-of-season to in-sample band width across the long-history stats, and they're marked
+with * in the tab. Bands come from the base model's backtest, so where an iSwing+/Stuff+ layer
 is used they're slightly conservative.
 
 The tab draws each range on one axis — standard deviations from the last season's league

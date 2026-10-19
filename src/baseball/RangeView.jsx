@@ -19,7 +19,6 @@ import FitToWidth from "../FitToWidth.jsx";
 
 const FONT = "'Pliant', sans-serif";
 const BANNER_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-const GRADE_LABELS = { stuff_plus: "Stuff+", loc_plus: "Location+", tun_plus: "Tunnel+", pitch_plus: "Pitch+" };
 const XRV_LABELS = ["xRV/600", "Contact Quality", "Whiff", "Decision"];
 const MIN_REG = { hitters: { field: "pa", n: 300, unit: "PA" }, pitchers: { field: "ip", n: 50, unit: "IP" } };
 
@@ -58,14 +57,13 @@ function formatter(cat, signed) {
   };
 }
 
-// Every stat for one side: { key, label, lowerBetter, get(player) → cat, pool }.
+// Every stat for one side: { key, label, lowerBetter, get(player) → cat, pool, widened }.
+// (iSwing+ and the pitch-modeling grades are model outputs, not stat lines — no ranges.)
 function statList(data, xrv, side) {
   if (!data) return [];
   const out = [];
   if (side === "hitters") {
     const pools = data.meta?.pools || {};
-    if (pools["iSwing+"]) out.push({ key: "cat:iSwing+", label: "iSwing+", lowerBetter: false, pool: pools["iSwing+"],
-      get: p => p.categories?.["iSwing+"] });
     for (const l of XRV_LABELS) {
       out.push({ key: `xrv:${l}`, label: l, lowerBetter: false, signed: true, pool: data.meta?.xrv_pools?.[l],
         get: p => xrv?.[String(p.player_id)]?.metrics?.[l] });
@@ -75,15 +73,6 @@ function statList(data, xrv, side) {
         get: p => p.categories?.[m.label] });
     }
   } else {
-    const gp = data.pitcher_meta?.grade_pools || {};
-    for (const [k, l] of Object.entries(GRADE_LABELS)) {
-      out.push({ key: `grade:${k}`, label: l, lowerBetter: false, pool: gp[k],
-        get: p => {
-          const g = p.grades?.[k];
-          return g ? { value: g.value, display: Number(g.value).toFixed(1), ci: g.ci, parts: g.parts,
-                       last: g.last != null ? { value: g.last, display: Number(g.last).toFixed(1) } : null } : null;
-        } });
-    }
     const pools = data.pitcher_meta?.pools || {};
     for (const m of data.pitcher_metrics || []) {
       out.push({ key: `cat:${m.label}`, label: m.label, lowerBetter: !!m.lower_better, pool: pools[m.label],
@@ -91,7 +80,9 @@ function statList(data, xrv, side) {
     }
   }
   const players = (side === "hitters" ? data.hitters : data.pitchers) || [];
+  const ciMeta = (side === "hitters" ? data.meta?.ci?.stats : data.pitcher_meta?.ci?.stats) || {};
   for (const st of out) {
+    st.widened = !!ciMeta[st.label]?.widened;
     st.hasModel = players.some(pl => Math.abs(st.get(pl)?.parts?.model ?? 0) > 1e-6);
     st.hasCi = players.some(pl => st.get(pl)?.ci);
   }
@@ -231,6 +222,11 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
                 {tight} of {rows.length} ranges within 1 league SD
               </div>
               <RangeChart rows={rows} color={color} lastYear={lastYear} year={year} />
+              {rows.some(r => r.st.widened) && (
+                <div style={{ padding: "0 20px 4px", fontSize: 10, color: t.textFaint, textAlign: "center" }}>
+                  * Short history (bat tracking / pitch-model xRV): range estimated from one backtest season and widened for season-to-season drift.
+                </div>
+              )}
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
                 <span>Created by: @PastTheEyeTest on X</span>
                 <span style={{ fontStyle: "italic" }}>{year} projection · 90% / 50% ranges from walk-forward backtests</span>
@@ -295,7 +291,7 @@ function RangeChart({ rows, color, lastYear, year }) {
             <g key={r.st.key}>
               {i > 0 && <line x1={12} x2={W - 12} y1={y} y2={y} stroke={t.divider} strokeOpacity="0.5" />}
               <text x={labelW - 10} y={cy + 4} textAnchor="end" fontSize="12" fontWeight="700"
-                fill={model ? t.accent : t.text} fontStyle={model ? "italic" : "normal"}>{r.st.label}</text>
+                fill={model ? t.accent : t.text} fontStyle={model ? "italic" : "normal"}>{r.st.label}{r.st.widened ? "*" : ""}</text>
               <rect x={x(r.a90)} y={cy - 7} width={Math.max(2, x(r.b90) - x(r.a90))} height={14} rx="3" fill={color} fillOpacity="0.28" />
               <rect x={x(r.a50)} y={cy - 7} width={Math.max(2, x(r.b50) - x(r.a50))} height={14} rx="3" fill={color} fillOpacity="0.7" />
               {r.last != null && <circle cx={x(r.last)} cy={cy} r="5" fill="none" stroke={t.textMuted} strokeWidth="1.8" />}
@@ -359,7 +355,7 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
                    fontFamily: FONT, color: st.hasModel ? t.accent : t.textSecondary, fontStyle: st.hasModel ? "italic" : "normal" }}>
           {stats.map(s => (
             <option key={s.key} value={s.key} style={{ background: t.inputBg, color: s.hasModel ? t.accent : t.textSecondary,
-              fontStyle: s.hasModel ? "italic" : "normal" }}>{s.label}</option>
+              fontStyle: s.hasModel ? "italic" : "normal" }}>{s.label}{s.widened ? "*" : ""}</option>
           ))}
         </select>
         {SORTS.map(s => pill(sort === s.id, s.label, () => setSort(s.id), s.id))}
