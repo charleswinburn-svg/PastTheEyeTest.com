@@ -135,6 +135,7 @@ def main():
         sp = PitcherProjector(label, ser, ages, signals, J)
         targets = [s for s in ser.seasons[1:] if s not in bp.SKIP_TARGET_SEASONS]
         wf = bp.walkforward_base(sp, targets[-3:])
+        bp.ci_backtest(sp, targets[-bp.CI_SEASONS:])
         base_all = sp.fit_base(set(ser.seasons))
         if base_all is None:
             print(f"{label:18s}  (too few rows to fit — skipped)")
@@ -200,6 +201,7 @@ def main():
         proj["K-BB%"] = proj["K%"] - proj["BB%"]
         for part in ("__hist__", "__age__"):
             proj[f"{part}K-BB%"] = proj[f"{part}K%"] - proj[f"{part}BB%"]
+    grade_models = {}
     for col, _lab in GRADES:
         if col in signals:
             sp = signals[col]
@@ -207,9 +209,25 @@ def main():
             if m is not None:
                 pv, has, _ = sp.predict(m, None, keys)
                 proj[col] = np.where(has, pv, np.nan)
+                bp.ci_backtest(sp, [x for x in sp.s.seasons[1:] if x not in bp.SKIP_TARGET_SEASONS][-bp.CI_SEASONS:])
+                grade_models[col] = (sp, m)
                 proj[f"__hist__{col}"], proj[f"__age__{col}"] = bp.decompose(sp, m, keys)
                 report.append({"stat": col, "denom": "pitches", "lags": sp.J, **m.describe(),
                                "n_fit": m.n_fit, "layer": "base"})
+
+    # ── 90% confidence intervals around the final projections ──
+    ci, ci_meta = {}, {}
+    for label, (sp, base, _layer, _lb) in projectors.items():
+        r = bp.ci_bounds(sp, base, keys, proj[label].values, LAST)
+        if r is not None:
+            ci[label], ci_meta[label] = r
+    for col, (sp, m) in grade_models.items():
+        r = bp.ci_bounds(sp, m, keys, proj[col].values, LAST)
+        if r is not None:
+            ci[col], ci_meta[col] = r
+    print("\nConfidence intervals (band fit on the other backtest seasons, scored on each):")
+    for label, m in ci_meta.items():
+        print(f"  {label:18s} {bp.coverage_text(m)}   (full season = {m['full_n']:.0f} {m['denom']})")
 
     # ── Card JSON ──
     last = h[h["season"] == LAST].drop_duplicates("player_id").set_index("player_id")
@@ -219,7 +237,7 @@ def main():
     nn = lambda x: None if x is None or (isinstance(x, float) and not np.isfinite(x)) or pd.isna(x) else x
 
     pitchers = []
-    for _, r in proj.iterrows():
+    for i, r in proj.iterrows():
         pid = int(r["player_id"])
         info = latest.loc[pid]
         cats = {}
@@ -230,7 +248,8 @@ def main():
                 continue
             cats[label] = {"value": round(float(v), 6), "display": fmt(label, v),
                            "parts": bp.parts_of(v, r.get(f"__hist__{label}", np.nan), r.get(f"__age__{label}", np.nan), 6),
-                           "pctile": bp.ecdf_pct(pool[label].values, v, lb)}
+                           "pctile": bp.ecdf_pct(pool[label].values, v, lb),
+                           "ci": bp.ci_entry(ci.get(label), i, 6)}
             if pid in last.index and np.isfinite(last.at[pid, label]):
                 lv = float(last.at[pid, label])
                 cats[label]["last"] = {"value": round(lv, 6), "display": fmt(label, lv)}
@@ -240,7 +259,8 @@ def main():
             if col not in proj.columns or not np.isfinite(v):
                 continue
             g = {"value": round(float(v), 1), "percentile": bp.ecdf_pct(gpool[col].values, v, False),
-                 "parts": bp.parts_of(v, r.get(f"__hist__{col}", np.nan), r.get(f"__age__{col}", np.nan), 2)}
+                 "parts": bp.parts_of(v, r.get(f"__hist__{col}", np.nan), r.get(f"__age__{col}", np.nan), 2),
+                 "ci": bp.ci_entry(ci.get(col), i, 1)}
             if pid in last.index and col in last.columns and np.isfinite(last.at[pid, col]):
                 g["last"] = round(float(last.at[pid, col]), 1)
             grades[col] = g
@@ -274,7 +294,8 @@ def main():
                            "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
                            "pools": bp.pool_lists(pool, [lab for lab, *_ in CARD]),
                            "grade_pools": bp.pool_lists(gpool, [c for c, _ in GRADES]),
-                           "lower_better": [lab for lab, _p, lb in CARD if lb]}
+                           "lower_better": [lab for lab, _p, lb in CARD if lb],
+                           "ci": {"level": 90, "core": 50, "stats": ci_meta}}
 
     def _clean(o):
         if isinstance(o, dict):

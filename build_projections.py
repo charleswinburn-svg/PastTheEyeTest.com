@@ -55,7 +55,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import least_squares
+from scipy.optimize import least_squares, nnls
 
 warnings.filterwarnings("ignore")
 
@@ -105,6 +105,8 @@ MIN_FIT_ROWS = 150
 AGE_CENTER = 28.0
 SKIP_TARGET_SEASONS = {2020}   # 60-game season: fine as an input, not as a target
 LAYER_MIN_GAIN = 0.002   # a layer must cut error by ≥0.2% to be used
+CI_Q = (0.05, 0.25, 0.75, 0.95)   # 90% band and its 50% core
+CI_MIN_ROWS = 100        # backtest rows needed to fit a stat's interval
 
 
 def log(*a):
@@ -453,6 +455,181 @@ VARIANT_SIGNALS = {
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# CONFIDENCE INTERVALS — learned from the walk-forward backtest's own misses.
+#   spread:  err² ≈ c0 + a/(H + k) + b/n
+#     H = Σ w_j·n_j (his weighted history), k = the stat's regression constant, so the
+#     talent term shrinks with a longer/fuller track record; b/n is one season's luck at
+#     sample n. Fit by non-negative least squares.
+#   edges:   empirical 5/25/75/95th percentiles of err/σ (skewed, fat-tailed misses
+#            are kept as they are, no normal assumption).
+# ═══════════════════════════════════════════════════════════════════════════
+def hist_weight(sp, model, keys):
+    """H = Σ w_j·n_j over his past seasons, with the model's learned weights; and its k."""
+    _X, N, _ = sp.s.design(keys, sp.J)
+    w, k, _a1, _a2 = model._unpack(model.p)
+    return (N * w).sum(1), float(k)
+
+
+CI_SEASONS = 6           # backtest seasons the intervals learn from (walk-forward)
+CI_MIN_TRAIN_SEASONS = 2 # ...each trained on at least this many target seasons
+
+
+def prop_scale(sp):
+    """Rates (labels with %, and Blasts/Contact) get their bands on the logit scale, so a
+    5% K-rate's range is proportional to its level and stays inside 0–100%. Returns the
+    stat's full scale (1 for decimals, 100 for percents) or None for other stats."""
+    if "%" not in sp.label and sp.label != "Blasts/Contact":
+        return None
+    vals = np.array([v for v, _n in sp.s.v.values()])
+    if vals.min() < 0:
+        return None
+    return 1.0 if vals.max() <= 1 else (100.0 if vals.max() <= 100 else None)
+
+
+def _link(scale):
+    if scale is None:
+        return (lambda v: v), (lambda u: u)
+    eps = 1e-4
+    g = lambda v: np.log(np.clip(v / scale, eps, 1 - eps) / (1 - np.clip(v / scale, eps, 1 - eps)))
+    return g, (lambda u: scale / (1 + np.exp(-u)))
+
+
+def ci_backtest(sp, seasons):
+    """Walk-forward misses for the intervals: each season T projected from seasons < T
+    only, every projectable row kept (not just those with last season). err = actual −
+    projection, on the logit scale for rates (see prop_scale)."""
+    g, _ = _link(prop_scale(sp))
+    rows = []
+    for T in seasons:
+        train = {s for s in sp.s.seasons if s < T}
+        # A fit on a single target season can run away (e.g. a wild age curve) and isn't
+        # what the real projection, trained on every season, looks like — skip it.
+        if len({s for _p, s in sp.s.targets(train)[0]}) < CI_MIN_TRAIN_SEASONS:
+            continue
+        learned = sp.fit_base(train)
+        if learned is None:
+            continue
+        keys, y, w = eval_rows(sp, T)
+        if not keys:
+            continue
+        pl, has, _ = sp.predict(learned, None, keys)
+        H, k = hist_weight(sp, learned, keys)
+        rows.append({"err": (g(y) - g(pl))[has], "H": H[has], "k": np.full(has.sum(), k),
+                     "nt": w[has], "season": np.full(has.sum(), T)})
+    sp.ci_rows = {key: np.concatenate([r[key] for r in rows]) for key in rows[0]} if rows else None
+    return sp.ci_rows
+
+
+def _spread(rows, m):
+    A = np.column_stack([np.ones(m.sum()), 1.0 / (rows["H"][m] + rows["k"][m]), 1.0 / rows["nt"][m]])
+    coef, _ = nnls(A, rows["err"][m] ** 2)
+    return {"c0": float(coef[0]), "a": float(coef[1]), "b": float(coef[2])}
+
+
+def _oos_z(rows, m):
+    """Each season's misses standardized by a spread fit on the OTHER seasons, so the
+    edges include season-to-season drift (in-sample z would understate it)."""
+    seasons = np.unique(rows["season"][m])
+    if len(seasons) < 2:
+        sp_ = _spread(rows, m)
+        return rows["err"][m] / ci_sigma(sp_, rows["H"][m], rows["k"][m], rows["nt"][m])
+    zs = []
+    for T in seasons:
+        other = m & (rows["season"] != T)
+        if other.sum() < CI_MIN_ROWS // 2:
+            continue
+        sp_ = _spread(rows, other)
+        t = m & (rows["season"] == T)
+        zs.append(rows["err"][t] / ci_sigma(sp_, rows["H"][t], rows["k"][t], rows["nt"][t]))
+    return np.concatenate(zs) if zs else np.array([])
+
+
+def fit_ci(rows, mask=None):
+    m = np.ones(len(rows["err"]), bool) if mask is None else mask
+    if m.sum() < CI_MIN_ROWS:
+        return None
+    z = _oos_z(rows, m)
+    if len(z) < CI_MIN_ROWS // 2:
+        return None
+    return {**_spread(rows, m), "q": [float(x) for x in np.quantile(z, CI_Q)]}
+
+
+def ci_sigma(fit, H, k, n):
+    return np.sqrt(np.maximum(fit["c0"] + fit["a"] / (H + k) + fit["b"] / n, 1e-12))
+
+
+def ci_coverage(rows):
+    """Honest check: each backtest season scored with a band (spread AND edges) fit only on
+    the other seasons — the share of actual outcomes inside the 90% band, ≈90% if calibrated."""
+    out = {}
+    for T in np.unique(rows["season"]):
+        fit = fit_ci(rows, rows["season"] != T)
+        if fit is None:
+            continue
+        m = rows["season"] == T
+        z = rows["err"][m] / ci_sigma(fit, rows["H"][m], rows["k"][m], rows["nt"][m])
+        out[int(T)] = round(float(np.mean((z >= fit["q"][0]) & (z <= fit["q"][3])) * 100), 1)
+    return out
+
+
+def ci_bounds(sp, model, keys, center, last_season):
+    """90%/50% bands around the final projections `center` for keys (target season).
+    The luck term assumes his recent playing time: the learned-weight average of his last
+    two seasons' samples, clamped between the stat's minimum and a full season (90th
+    percentile of last season's qualified samples). Returns (dict of arrays, meta) or None."""
+    rows = getattr(sp, "ci_rows", None)
+    fit = fit_ci(rows) if rows is not None else None
+    if fit is None:
+        return None
+    H, k = hist_weight(sp, model, keys)
+    w, *_ = model._unpack(model.p)
+    recent = np.full(len(keys), np.nan)
+    for i, (pid, T) in enumerate(keys):
+        num = den = 0.0
+        for j in range(1, min(2, len(w)) + 1):
+            vn = sp.s.v.get((pid, T - j))
+            if vn is not None:
+                num += w[j - 1] * vn[1]; den += w[j - 1]
+        if den:
+            recent[i] = num / den
+    last_n = np.array([n for (_p, s), (_v, n) in sp.s.v.items() if s == last_season and n >= sp.s.min_target])
+    full = float(np.percentile(last_n, 90)) if len(last_n) else float(sp.s.min_target)
+    floor = float(sp.s.min_target)
+    n = np.clip(np.nan_to_num(recent, nan=floor), floor, max(full, floor))
+    sig = ci_sigma(fit, H, k, n)
+    scale = prop_scale(sp)
+    g, ginv = _link(scale)
+    vals = np.array([v for v, _n in sp.s.v.values()])
+    lo_clip = 0.0 if vals.min() >= 0 else -np.inf
+    c = np.asarray(center, float)
+    # actual = projection + err (on the stat's own scale, or logit for rates)
+    b = {name: np.maximum(ginv(g(c) + sig * q), lo_clip) for name, q in zip(("lo", "lo50", "hi50", "hi"), fit["q"])}
+    b["n"] = n
+    cov = ci_coverage(rows)
+    meta = {**{key: round(fit[key], 8) for key in ("c0", "a", "b")}, "q": [round(x, 4) for x in fit["q"]],
+            "coverage": cov, "full_n": round(full, 1), "floor_n": floor, "denom": sp.s.denom_col,
+            "scale": "logit" if scale else "linear",
+            "rows": int(len(rows["err"]))}
+    return b, meta
+
+
+def ci_entry(b, i, ndigits):
+    if b is None or not np.isfinite(b["lo"][i]):
+        return None
+    return {"lo": round(float(b["lo"][i]), ndigits), "lo50": round(float(b["lo50"][i]), ndigits),
+            "hi50": round(float(b["hi50"][i]), ndigits), "hi": round(float(b["hi"][i]), ndigits),
+            "n": int(round(float(b["n"][i])))}
+
+
+def coverage_text(meta):
+    if not meta:
+        return "(no interval)"
+    if not meta.get("coverage"):
+        return f"90% band from {meta['rows']} backtest rows (coverage check needs ≥2 backtest seasons)"
+    return "90% band coverage: " + " · ".join(f"{s} {v:.1f}%" for s, v in meta["coverage"].items())
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # BACKTESTS
 # ═══════════════════════════════════════════════════════════════════════════
 def eval_rows(sp, T):
@@ -614,6 +791,7 @@ def main():
 
         target_seasons = [s for s in ser.seasons[1:] if s not in SKIP_TARGET_SEASONS]
         wf = walkforward_base(sp, target_seasons[-3:])
+        ci_backtest(sp, target_seasons[-CI_SEASONS:])
         base_all = sp.fit_base(set(ser.seasons))
         if base_all is None:
             log(f"{label:22s}  (too few rows to fit — skipped)")
@@ -686,12 +864,16 @@ def main():
         proj[f"__age__{label}"] = age_part
 
     # ── iSwing+ itself (its own learned weights) ──
+    iswing_ci = None
     if "iswing" in signals:
         sp = signals["iswing"]
         m = sp.fit_base(set(sp.s.seasons))
         if m is not None:
             p, has, _ = sp.predict(m, None, keys)
             proj["iSwing+"] = np.where(has, p, np.nan)
+            isw_targets = [x for x in sp.s.seasons[1:] if x not in SKIP_TARGET_SEASONS]
+            ci_backtest(sp, isw_targets[-CI_SEASONS:])
+            iswing_ci = (sp, m)
             proj["__hist__iSwing+"], proj["__age__iSwing+"] = decompose(sp, m, keys)
             report.append({"stat": "iSwing+", "denom": "n_swings", "lags": sp.J, **m.describe(),
                            "n_fit": m.n_fit, "layer": "base"})
@@ -739,6 +921,22 @@ def main():
                 for c, wi in zip(comps, v / v.sum()):
                     proj.loc[ok, col(c)] = proj.loc[ok, col(c)] + gap * wi
 
+    # ── 90% confidence intervals around the final projections ──
+    ci, ci_meta = {}, {}
+    for label, (sp, base, _layer, _lb) in projectors.items():
+        r = ci_bounds(sp, base, keys, proj[label].values, LAST)
+        if r is not None:
+            ci[label], ci_meta[label] = r
+    if iswing_ci is not None:
+        r = ci_bounds(iswing_ci[0], iswing_ci[1], keys, proj["iSwing+"].values, LAST)
+        if r is not None:
+            ci["iSwing+"], ci_meta["iSwing+"] = r
+    log("\nConfidence intervals (band fit on the other backtest seasons, scored on each):")
+    for label in ci_meta:
+        if not label.startswith("_"):
+            m = ci_meta[label]
+            log(f"  {label:22s} {coverage_text(m)}   (full season = {m['full_n']:.0f} {m['denom']})")
+
     # ═══════════════════════════════════════════════════════════════════════
     # WRITE CARD FILES
     # ═══════════════════════════════════════════════════════════════════════
@@ -750,7 +948,7 @@ def main():
                 if isw is not None else np.array([]))
 
     hitters, xrv_out = [], {}
-    for _, r in proj.iterrows():
+    for i, r in proj.iterrows():
         pid = int(r["player_id"])
         info = latest.loc[pid]
         cats = {}
@@ -758,7 +956,8 @@ def main():
             v = float(r["iSwing+"])
             cats["iSwing+"] = {"value": round(v, 1), "display": str(int(round(v))),
                                "pctile": ecdf_pct(isw_pool, v, False),
-                               "parts": parts_of(v, r.get("__hist__iSwing+", np.nan), r.get("__age__iSwing+", np.nan), 3)}
+                               "parts": parts_of(v, r.get("__hist__iSwing+", np.nan), r.get("__age__iSwing+", np.nan), 3),
+                               "ci": ci_entry(ci.get("iSwing+"), i, 1)}
             if isw is not None:
                 lv = isw[(isw.player_id == pid) & (isw.season == LAST)]["iswing"]
                 if len(lv):
@@ -771,7 +970,8 @@ def main():
                 continue
             cats[lab] = {"value": round(float(v), 4), "display": fmt_value(lab, v),
                          "parts": parts_of(v, r.get(f"__hist__{lab}", np.nan), r.get(f"__age__{lab}", np.nan), 4),
-                         "pctile": ecdf_pct(pool[lab].values, v, lb)}
+                         "pctile": ecdf_pct(pool[lab].values, v, lb),
+                         "ci": ci_entry(ci.get(lab), i, 4)}
             if pid in last.index and np.isfinite(last.at[pid, lab]):
                 lv = float(last.at[pid, lab])
                 cats[lab]["last"] = {"value": round(lv, 4), "display": fmt_value(lab, lv)}
@@ -799,7 +999,8 @@ def main():
                 v = float(r[lab])
                 metrics[lab] = {"value": round(v, 2), "display": f"{v:+.1f}",
                                 "parts": parts_of(v, r.get(f"__hist__{lab}", np.nan), r.get(f"__age__{lab}", np.nan), 3),
-                                "pctile": ecdf_pct(xpool[lab].values, v, False)}
+                                "pctile": ecdf_pct(xpool[lab].values, v, False),
+                                "ci": ci_entry(ci.get(lab), i, 2)}
                 if pid in last.index and np.isfinite(last.at[pid, lab]):
                     lv = float(last.at[pid, lab])
                     metrics[lab]["last"] = {"value": round(lv, 2), "display": f"{lv:+.1f}"}
@@ -819,7 +1020,12 @@ def main():
                            **({"iSwing+": [round(float(x), 5) for x in np.sort(isw_pool[np.isfinite(isw_pool)])]}
                               if len(isw_pool) else {})},
                  "xrv_pools": pool_lists(xpool, XRV_STATS),
-                 "lower_better": [lab for lab, _f, lb, *_ in CARD_STATS if lb]},
+                 "lower_better": [lab for lab, _f, lb, *_ in CARD_STATS if lb],
+                 "ci": {"level": 90, "core": 50, "method": "walk-forward backtest misses; spread c0 + a/(H+k) + b/n; "
+                        "empirical 5/25/75/95th percentile edges; luck term at recent playing time "
+                        "(clamped to [minimum, full season]); base-model backtest, so slightly conservative "
+                        "where a model layer is used",
+                        "stats": {k: v for k, v in ci_meta.items() if not k.startswith("_")}}},
     }
     def _clean(o):
         if isinstance(o, dict):

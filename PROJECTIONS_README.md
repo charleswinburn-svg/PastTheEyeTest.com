@@ -28,3 +28,38 @@ Notes
 - Layers a stat can earn (held-out seasons decide): `grades` (projected Stuff+/Loc+/Tun+/Pitch+), `stuff` (Stuff+ only), `model_resid` (Pitch+ plus the regressed "beats his pitch model" residual, run-prevention stats only).
 - Every stat, FB velo included, gets its own aging curve (ages clamped to 22–37).
 - The projected pitcher card shows projected Stuff+/Location+/Tunnel+/Pitch+ bubbles from the file and hides the arsenal, distributions and rolling chart.
+
+## Confidence intervals (2027 RANGES → Hitter / Pitcher Confidence Intervals)
+
+Every projected stat (card stats, xRV, iSwing+, Stuff+/Loc+/Tun+/Pitch+) gets a 90% range
+and a 50% core, written into the projection files as `ci = {lo, lo50, hi50, hi, n}` with the
+fitted parameters in `meta.ci` / `pitcher_meta.ci`.
+
+How they're built (`build_projections.py`: `ci_backtest`, `fit_ci`, `ci_bounds`):
+
+1. **Backtest misses.** For up to the last 6 seasons, each season is projected only from the
+   seasons before it (seasons trained on fewer than 2 target seasons are skipped), and every
+   miss is kept: actual − projection, on the logit scale for rates (K%, BB%, Barrel %, …) so
+   a 5% K-rate's range is proportional to its level and stays inside 0–100%.
+2. **Spread per player.** `miss² ≈ c0 + a/(H + k) + b/n`, fit by non-negative least squares.
+   `H` = his weighted history (Σ weight × sample), `k` = the stat's regression constant, so a
+   long full-time track record narrows the talent part; `b/n` is one season of luck at sample `n`.
+3. **Edges.** The 5th/25th/75th/95th percentiles of the misses divided by their spread, each
+   season standardized by a spread fit on the *other* seasons — so year-to-year league drift
+   is in the band, and skewed misses stay skewed (no bell-curve assumption).
+4. **Playing time.** No playing-time projection exists, so `n` = his recent playing time
+   (learned-weight average of the last two seasons), between the stat's minimum and a full
+   season (90th percentile of last season's qualified samples).
+
+The build prints a calibration check per stat, e.g.
+
+    K%    90% band coverage: 2022 89.4% · 2023 90.8% · …
+
+Each season is scored with a band fit only on the other seasons; ~90% everywhere means the
+bands are honest. Bands come from the base model's backtest, so where an iSwing+/Stuff+ layer
+is used they're slightly conservative.
+
+The tab draws each range on one axis — standard deviations from the last season's league
+average, better to the right — so ranges compare across stats and elite players' ranges
+aren't squashed at the 100th percentile. Dots keep the cards' percentile colors. "Floors &
+Ceilings" ranks players by ceiling (95th), floor (5th) or range width for one stat.

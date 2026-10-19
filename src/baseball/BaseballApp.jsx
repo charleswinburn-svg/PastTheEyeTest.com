@@ -10,6 +10,7 @@ import TeamScatter from "./TeamScatter.jsx";
 import ISwingWaterfall from "./ISwingWaterfall.jsx";
 import StuffWaterfall from "./StuffWaterfall.jsx";
 import ProjectionMovers from "./ProjectionMovers.jsx";
+import RangeView from "./RangeView.jsx";
 import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv, NewBadge, useISwingNew } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
@@ -100,6 +101,14 @@ const TABS = [
       ...(PROJ_SEASON ? [{ id: "proj_movers", label: `${PROJ_SEASON.slice(0, 4)} Movers`, isNew: true }] : []),
     ]
   },
+  ...(PROJ_SEASON ? [{
+    id: "ranges",
+    label: `${PROJ_SEASON.slice(0, 4)} RANGES`,
+    dropdown: [
+      { id: "proj_ci_hitters", label: "Hitter Confidence Intervals", isNew: true },
+      { id: "proj_ci_pitchers", label: "Pitcher Confidence Intervals", isNew: true },
+    ],
+  }] : []),
   { id: "team_plots", label: "TEAM PLOTS" },
   { id: "race2k",     label: "RACE TO 2K" },
   { id: "evla",       label: "EV/LA FAN" },
@@ -332,6 +341,7 @@ function BaseballApp() {
   const isTabActive = (tabId) => {
     if (tabId === "summaries") return isSummaryTab(tab);
     if (tabId === "leaderboard") return isLeaderboardTab(tab);
+    if (tabId === "ranges") return tab === "proj_ci_hitters" || tab === "proj_ci_pitchers";
     if (tabId === "hitter") return isHitterTab(tab);
     if (tabId === "pitcher") return isPitcherTab(tab);
     return tab === tabId;
@@ -694,7 +704,7 @@ function BaseballApp() {
       {/* ── Content ── */}
       <div style={{
         padding: isSummaryTab(tab) ? 0 : isMobile ? "12px 24px" : 24,
-        maxWidth: tab.includes("lb") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : (tab === "hitter" || tab === "pitcher" || tab === "pitcher_aaa") ? 1100 : 640,
+        maxWidth: tab.includes("lb") || tab.startsWith("proj_") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : (tab === "hitter" || tab === "pitcher" || tab === "pitcher_aaa") ? 1100 : 640,
         margin: "0 auto",
       }}>
         {tab === "hitter" && (
@@ -839,6 +849,9 @@ function BaseballApp() {
         )}
         {tab === "proj_movers" && PROJ_SEASON && (
           <ProjectionMovers projSeason={PROJ_SEASON} />
+        )}
+        {(tab === "proj_ci_hitters" || tab === "proj_ci_pitchers") && PROJ_SEASON && (
+          <RangeView key={tab} projSeason={PROJ_SEASON} side={tab === "proj_ci_hitters" ? "hitters" : "pitchers"} />
         )}
         {tab === "pitch_modeling_lb" && (
           <PitchModelingLeaderboard season={season} pitchers={pitchersFull} />
