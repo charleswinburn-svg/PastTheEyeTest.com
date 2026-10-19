@@ -67,3 +67,16 @@ The tab draws each range on one axis — standard deviations from the last seaso
 average, better to the right — so ranges compare across stats and elite players' ranges
 aren't squashed at the 100th percentile. Dots keep the cards' percentile colors. "Floors &
 Ceilings" ranks players by ceiling (95th), floor (5th) or range width for one stat.
+
+### Lean correction ("regress toward players like him")
+
+Marcel-style regression pulls every player toward the playing-time-weighted league average,
+which is mostly regulars, so thin-history players (who are worse on average) were projected
+too high — the backtests showed hitters' xSLG/xwOBACON finishing ~0.3 spreads below their
+projections. Each stat can earn a correction `+ β · k/(H + k)`: largest for the thinnest
+history, ~0 for a long full-time career. β is fit on the backtest misses and kept only if,
+walk-forward (fit on earlier backtest seasons, scored on each later one), it lowers the error
+in at least 2/3 of the tests; stats with fewer than 3 backtest seasons (xRV, bat tracking)
+aren't corrected. The build prints a `lean fix` line per stat (β, RMSE before → after,
+APPLIED / not applied). The correction is part of the "history" piece, so the Show views
+still add up, and the intervals are re-centred on the corrected projection.

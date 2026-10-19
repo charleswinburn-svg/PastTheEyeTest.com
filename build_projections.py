@@ -515,9 +515,62 @@ def ci_backtest(sp, seasons):
         pl, has, _ = sp.predict(learned, None, keys)
         H, k = hist_weight(sp, learned, keys)
         rows.append({"err": (g(y) - g(pl))[has], "H": H[has], "k": np.full(has.sum(), k),
-                     "nt": w[has], "season": np.full(has.sum(), T)})
+                     "nt": w[has], "season": np.full(has.sum(), T), "y": y[has], "pl": pl[has]})
     sp.ci_rows = {key: np.concatenate([r[key] for r in rows]) for key in rows[0]} if rows else None
     return sp.ci_rows
+
+
+BIAS_MIN_SEASONS = 3      # backtest seasons needed before a lean correction can be validated
+
+
+def fit_bias(sp):
+    """Marcel regresses everyone toward the playing-time-weighted league average — mostly
+    regulars — so thin-history players (who are worse on average) get projected too high.
+    Correction: + β·k/(H+k), largest for the thinnest history, ~0 for long full-time careers.
+    β is fit on the backtest misses and kept only if, walk-forward (β fit on earlier backtest
+    seasons, scored on each later one), it lowers the error in at least 2/3 of the tests.
+    When kept, the interval misses are re-centred on the corrected projection."""
+    sp.bias = None
+    rows = getattr(sp, "ci_rows", None)
+    if rows is None:
+        return None
+    x = rows["k"] / (rows["H"] + rows["k"])
+    e = rows["y"] - rows["pl"]
+    seasons = sorted(np.unique(rows["season"]).tolist())
+    if len(seasons) < BIAS_MIN_SEASONS:
+        return {"kept": False, "why": f"{len(seasons)} backtest season(s)"}
+    wins, tests, before, after = 0, 0, [], []
+    for T in seasons[2:]:
+        tr, te = rows["season"] < T, rows["season"] == T
+        b = float(x[tr] @ e[tr] / (x[tr] @ x[tr]))
+        r0 = float(np.sqrt(np.mean(e[te] ** 2))); r1 = float(np.sqrt(np.mean((e[te] - b * x[te]) ** 2)))
+        tests += 1; wins += r1 < r0; before.append(r0); after.append(r1)
+    beta = float(x @ e / (x @ x))
+    kept = wins >= max(2, int(np.ceil(2 * tests / 3)))
+    out = {"beta": round(beta, 6), "kept": bool(kept), "wins": int(wins), "tests": int(tests),
+           "rmse_before": round(float(np.mean(before)), 6), "rmse_after": round(float(np.mean(after)), 6)}
+    if kept:
+        sp.bias = beta
+        g, _ = _link(prop_scale(sp))
+        rows["err"] = g(rows["y"]) - g(rows["pl"] + beta * x)
+    return out
+
+
+def bias_adjust(sp, model, keys):
+    """The kept lean correction for target keys (0 where none)."""
+    if getattr(sp, "bias", None) is None:
+        return np.zeros(len(keys))
+    H, k = hist_weight(sp, model, keys)
+    return sp.bias * k / (H + k)
+
+
+def bias_text(b):
+    if not b:
+        return ""
+    if "why" in b:
+        return f"lean fix: n/a ({b['why']})"
+    return (f"lean fix β={b['beta']:+.4g}: walk-forward RMSE {b['rmse_before']:.4g}→{b['rmse_after']:.4g}, "
+            f"better in {b['wins']}/{b['tests']} → {'APPLIED' if b['kept'] else 'not applied'}")
 
 
 def _spread(rows, m):
@@ -812,6 +865,7 @@ def main():
         target_seasons = [s for s in ser.seasons[1:] if s not in SKIP_TARGET_SEASONS]
         wf = walkforward_base(sp, target_seasons[-3:])
         ci_backtest(sp, target_seasons[-CI_SEASONS:])
+        sp.bias_info = fit_bias(sp)
         base_all = sp.fit_base(set(ser.seasons))
         if base_all is None:
             log(f"{label:22s}  (too few rows to fit — skipped)")
@@ -854,8 +908,10 @@ def main():
                 + "  ".join(f"{v}={lc[v]:.4f}" for v in variants)
                 + (f"  | walk-forward: " + "  ".join(f"{v}={layer_cmp['walkforward'][v]:.4f}" for v in variants)
                    if layer_cmp["walkforward"] else ""))
+        if sp.bias_info and "why" not in sp.bias_info:
+            log(f"{'':22s}  {bias_text(sp.bias_info)}")
         rep = {"stat": label, "denom": den, "lags": J, **d, "n_fit": base_all.n_fit,
-               "layer": chosen, "walkforward": wf, "layer_check": layer_cmp}
+               "layer": chosen, "walkforward": wf, "layer_check": layer_cmp, "lean_fix": sp.bias_info}
         if layer is not None:
             rep["layer_coef"] = [round(float(c), 5) for c in layer["coef"]]
             rep["layer_signal_models"] = {nm: m.describe() for nm, (_p, m) in layer["sig_models"].items()}
@@ -877,10 +933,11 @@ def main():
     layer_used = {}
     for label, (sp, base, layer, _lb) in projectors.items():
         p, has, used = sp.predict(base, layer, keys)
-        proj[label] = np.where(has, p, np.nan)
+        fix = bias_adjust(sp, base, keys)          # regression toward "players like him"
+        proj[label] = np.where(has, p + fix, np.nan)
         layer_used[label] = int(used.sum())
         hist_part, age_part = decompose(sp, base, keys)
-        proj[f"__hist__{label}"] = hist_part
+        proj[f"__hist__{label}"] = hist_part + fix
         proj[f"__age__{label}"] = age_part
 
     # ── iSwing+ itself (its own learned weights) ──

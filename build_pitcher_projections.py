@@ -136,6 +136,7 @@ def main():
         targets = [s for s in ser.seasons[1:] if s not in bp.SKIP_TARGET_SEASONS]
         wf = bp.walkforward_base(sp, targets[-3:])
         bp.ci_backtest(sp, targets[-bp.CI_SEASONS:])
+        sp.bias_info = bp.fit_bias(sp)
         base_all = sp.fit_base(set(ser.seasons))
         if base_all is None:
             print(f"{label:18s}  (too few rows to fit — skipped)")
@@ -173,8 +174,10 @@ def main():
             lc = layer_cmp["loso"]
             print(f"{'':18s}  layer check, LOSO on {lc['n']} rows: "
                   + "  ".join(f"{v}={lc[v]:.4f}" for v in variants))
+        if sp.bias_info and "why" not in sp.bias_info:
+            print(f"{'':18s}  {bp.bias_text(sp.bias_info)}")
         rep = {"stat": label, "denom": den, "lags": J, **d, "n_fit": base_all.n_fit,
-               "layer": chosen, "walkforward": wf, "layer_check": layer_cmp}
+               "layer": chosen, "walkforward": wf, "layer_check": layer_cmp, "lean_fix": sp.bias_info}
         if layer is not None:
             rep["layer_coef"] = [round(float(c), 5) for c in layer["coef"]]
         report.append(rep)
@@ -193,9 +196,11 @@ def main():
     layer_used = {}
     for label, (sp, base, layer, _lb) in projectors.items():
         pv, has, used = sp.predict(base, layer, keys)
-        proj[label] = np.where(has, pv, np.nan)
+        fix = bp.bias_adjust(sp, base, keys)       # regression toward "pitchers like him"
+        proj[label] = np.where(has, pv + fix, np.nan)
         layer_used[label] = int(used.sum())
         proj[f"__hist__{label}"], proj[f"__age__{label}"] = bp.decompose(sp, base, keys)
+        proj[f"__hist__{label}"] = proj[f"__hist__{label}"] + fix
     # K-BB% has to agree with the K% and BB% shown next to it (and so do its parts)
     if {"K%", "BB%", "K-BB%"} <= set(proj.columns):
         proj["K-BB%"] = proj["K%"] - proj["BB%"]
