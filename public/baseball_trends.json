@@ -140,6 +140,26 @@
         "BB%": 9.1
       }
     ],
+    "Junior Caminero": [
+      {
+        "season": 2026,
+        "xSLG": 0.499,
+        "xwOBACON": 0.411,
+        "Avg Exit Velocity": 92.7,
+        "90th % EV": 110.5,
+        "Barrel %": 13.1,
+        "Blasts/Contact": 0.2379,
+        "LA+SwtSpt%": 27.1,
+        "Avg Bat Speed": 79.4571,
+        "Fast Swing %": 0.8495,
+        "Avg Swing Length": 8.71,
+        "Chase %": 30.5,
+        "K%": 18.4,
+        "Z-Contact%": 84.5,
+        "Whiff %": 24.1,
+        "BB%": 11.3
+      }
+    ],
     "Alex Bregman": [
       {
         "season": 2026,
@@ -158,26 +178,6 @@
         "Z-Contact%": 90.3,
         "Whiff %": 15.6,
         "BB%": 10.8
-      }
-    ],
-    "Junior Caminero": [
-      {
-        "season": 2026,
-        "xSLG": 0.499,
-        "xwOBACON": 0.411,
-        "Avg Exit Velocity": 92.7,
-        "90th % EV": 110.5,
-        "Barrel %": 13.1,
-        "Blasts/Contact": 0.2376,
-        "LA+SwtSpt%": 27.1,
-        "Avg Bat Speed": 79.4485,
-        "Fast Swing %": 0.8487,
-        "Avg Swing Length": 8.7105,
-        "Chase %": 30.5,
-        "K%": 18.4,
-        "Z-Contact%": 84.5,
-        "Whiff %": 24.1,
-        "BB%": 11.3
       }
     ],
     "Gunnar Henderson": [
@@ -240,26 +240,6 @@
         "BB%": 11.6
       }
     ],
-    "Trea Turner": [
-      {
-        "season": 2026,
-        "xSLG": 0.363,
-        "xwOBACON": 0.338,
-        "Avg Exit Velocity": 88.5,
-        "90th % EV": 103.6,
-        "Barrel %": 6.0,
-        "Blasts/Contact": 0.1206,
-        "LA+SwtSpt%": 31.7,
-        "Avg Bat Speed": 71.578,
-        "Fast Swing %": 0.1905,
-        "Avg Swing Length": 7.6042,
-        "Chase %": 34.6,
-        "K%": 21.0,
-        "Z-Contact%": 84.6,
-        "Whiff %": 27.7,
-        "BB%": 6.9
-      }
-    ],
     "Sal Stewart": [
       {
         "season": 2026,
@@ -278,6 +258,26 @@
         "Z-Contact%": 78.8,
         "Whiff %": 27.0,
         "BB%": 9.0
+      }
+    ],
+    "Trea Turner": [
+      {
+        "season": 2026,
+        "xSLG": 0.363,
+        "xwOBACON": 0.338,
+        "Avg Exit Velocity": 88.5,
+        "90th % EV": 103.6,
+        "Barrel %": 6.0,
+        "Blasts/Contact": 0.1206,
+        "LA+SwtSpt%": 31.7,
+        "Avg Bat Speed": 71.578,
+        "Fast Swing %": 0.1905,
+        "Avg Swing Length": 7.6042,
+        "Chase %": 34.6,
+        "K%": 21.0,
+        "Z-Contact%": 84.6,
+        "Whiff %": 27.7,
+        "BB%": 6.9
       }
     ],
     "Bryan Reynolds": [
@@ -480,26 +480,6 @@
         "BB%": 10.4
       }
     ],
-    "Geraldo Perdomo": [
-      {
-        "season": 2026,
-        "xSLG": 0.355,
-        "xwOBACON": 0.315,
-        "Avg Exit Velocity": 87.6,
-        "90th % EV": 100.0,
-        "Barrel %": 3.1,
-        "Blasts/Contact": 0.0804,
-        "LA+SwtSpt%": 36.5,
-        "Avg Bat Speed": 67.302,
-        "Fast Swing %": 0.0168,
-        "Avg Swing Length": 6.9567,
-        "Chase %": 20.9,
-        "K%": 12.6,
-        "Z-Contact%": 92.7,
-        "Whiff %": 11.8,
-        "BB%": 14.1
-      }
-    ],
     "Brice Turang": [
       {
         "season": 2026,
@@ -518,6 +498,26 @@
         "Z-Contact%": 82.9,
         "Whiff %": 23.1,
         "BB%": 13.2
+      }
+    ],
+    "Geraldo Perdomo": [
+      {
+        "season": 2026,
+        "xSLG": 0.355,
+        "xwOBACON": 0.315,
+        "Avg Exit Velocity": 87.6,
+        "90th % EV": 100.0,
+        "Barrel %": 3.1,
+        "Blasts/Contact": 0.0804,
+        "LA+SwtSpt%": 36.5,
+        "Avg Bat Speed": 67.302,
+        "Fast Swing %": 0.0168,
+        "Avg Swing Length": 6.9567,
+        "Chase %": 20.9,
+        "K%": 12.6,
+        "Z-Contact%": 92.7,
+        "Whiff %": 11.8,
+        "BB%": 14.1
       }
     ],
     "Manny Machado": [
@@ -608,36 +608,16 @@
         "Avg Exit Velocity": 91.1,
         "90th % EV": 104.0,
         "Barrel %": 9.9,
-        "Blasts/Contact": 0.1412,
+        "Blasts/Contact": 0.141,
         "LA+SwtSpt%": 38.8,
-        "Avg Bat Speed": 70.267,
-        "Fast Swing %": 0.1291,
-        "Avg Swing Length": 7.1247,
+        "Avg Bat Speed": 70.2597,
+        "Fast Swing %": 0.129,
+        "Avg Swing Length": 7.1235,
         "Chase %": 29.0,
         "K%": 24.4,
         "Z-Contact%": 81.8,
         "Whiff %": 22.5,
         "BB%": 10.3
-      }
-    ],
-    "Ben Rice": [
-      {
-        "season": 2026,
-        "xSLG": 0.511,
-        "xwOBACON": 0.458,
-        "Avg Exit Velocity": 91.9,
-        "90th % EV": 105.5,
-        "Barrel %": 14.3,
-        "Blasts/Contact": 0.1814,
-        "LA+SwtSpt%": 38.4,
-        "Avg Bat Speed": 72.6224,
-        "Fast Swing %": 0.2435,
-        "Avg Swing Length": 7.683,
-        "Chase %": 24.5,
-        "K%": 24.3,
-        "Z-Contact%": 83.6,
-        "Whiff %": 25.4,
-        "BB%": 12.7
       }
     ],
     "Jordan Walker": [
@@ -658,6 +638,26 @@
         "Z-Contact%": 78.7,
         "Whiff %": 32.3,
         "BB%": 7.5
+      }
+    ],
+    "Ben Rice": [
+      {
+        "season": 2026,
+        "xSLG": 0.511,
+        "xwOBACON": 0.458,
+        "Avg Exit Velocity": 91.9,
+        "90th % EV": 105.5,
+        "Barrel %": 14.3,
+        "Blasts/Contact": 0.1814,
+        "LA+SwtSpt%": 38.4,
+        "Avg Bat Speed": 72.6224,
+        "Fast Swing %": 0.2435,
+        "Avg Swing Length": 7.683,
+        "Chase %": 24.5,
+        "K%": 24.3,
+        "Z-Contact%": 83.6,
+        "Whiff %": 25.4,
+        "BB%": 12.7
       }
     ],
     "Jackson Merrill": [
@@ -688,11 +688,11 @@
         "Avg Exit Velocity": 90.4,
         "90th % EV": 108.5,
         "Barrel %": 8.9,
-        "Blasts/Contact": 0.1638,
+        "Blasts/Contact": 0.1639,
         "LA+SwtSpt%": 32.2,
-        "Avg Bat Speed": 77.4173,
-        "Fast Swing %": 0.725,
-        "Avg Swing Length": 7.7131,
+        "Avg Bat Speed": 77.4245,
+        "Fast Swing %": 0.7256,
+        "Avg Swing Length": 7.7142,
         "Chase %": 35.3,
         "K%": 23.8,
         "Z-Contact%": 82.4,
@@ -760,26 +760,6 @@
         "BB%": 9.5
       }
     ],
-    "Brandon Nimmo": [
-      {
-        "season": 2026,
-        "xSLG": 0.441,
-        "xwOBACON": 0.406,
-        "Avg Exit Velocity": 92.1,
-        "90th % EV": 105.5,
-        "Barrel %": 8.9,
-        "Blasts/Contact": 0.164,
-        "LA+SwtSpt%": 34.2,
-        "Avg Bat Speed": 72.4159,
-        "Fast Swing %": 0.2853,
-        "Avg Swing Length": 7.0187,
-        "Chase %": 29.0,
-        "K%": 22.7,
-        "Z-Contact%": 82.8,
-        "Whiff %": 23.9,
-        "BB%": 7.8
-      }
-    ],
     "Luis Arraez": [
       {
         "season": 2026,
@@ -798,6 +778,26 @@
         "Z-Contact%": 94.2,
         "Whiff %": 7.1,
         "BB%": 5.2
+      }
+    ],
+    "Brandon Nimmo": [
+      {
+        "season": 2026,
+        "xSLG": 0.441,
+        "xwOBACON": 0.406,
+        "Avg Exit Velocity": 92.1,
+        "90th % EV": 105.5,
+        "Barrel %": 8.9,
+        "Blasts/Contact": 0.164,
+        "LA+SwtSpt%": 34.2,
+        "Avg Bat Speed": 72.4159,
+        "Fast Swing %": 0.2853,
+        "Avg Swing Length": 7.0187,
+        "Chase %": 29.0,
+        "K%": 22.7,
+        "Z-Contact%": 82.8,
+        "Whiff %": 23.9,
+        "BB%": 7.8
       }
     ],
     "Daylen Lile": [
@@ -840,26 +840,6 @@
         "BB%": 7.6
       }
     ],
-    "Julio Rodr\u00edguez": [
-      {
-        "season": 2026,
-        "xSLG": 0.439,
-        "xwOBACON": 0.399,
-        "Avg Exit Velocity": 90.1,
-        "90th % EV": 107.5,
-        "Barrel %": 8.8,
-        "Blasts/Contact": 0.1775,
-        "LA+SwtSpt%": 31.6,
-        "Avg Bat Speed": 76.5708,
-        "Fast Swing %": 0.6723,
-        "Avg Swing Length": 7.7672,
-        "Chase %": 38.6,
-        "K%": 22.2,
-        "Z-Contact%": 85.2,
-        "Whiff %": 26.5,
-        "BB%": 7.2
-      }
-    ],
     "CJ Abrams": [
       {
         "season": 2026,
@@ -878,6 +858,26 @@
         "Z-Contact%": 81.0,
         "Whiff %": 29.6,
         "BB%": 8.7
+      }
+    ],
+    "Julio Rodr\u00edguez": [
+      {
+        "season": 2026,
+        "xSLG": 0.439,
+        "xwOBACON": 0.399,
+        "Avg Exit Velocity": 90.1,
+        "90th % EV": 107.5,
+        "Barrel %": 8.8,
+        "Blasts/Contact": 0.1775,
+        "LA+SwtSpt%": 31.6,
+        "Avg Bat Speed": 76.5708,
+        "Fast Swing %": 0.6723,
+        "Avg Swing Length": 7.7672,
+        "Chase %": 38.6,
+        "K%": 22.2,
+        "Z-Contact%": 85.2,
+        "Whiff %": 26.5,
+        "BB%": 7.2
       }
     ],
     "Josh Naylor": [
@@ -1000,26 +1000,6 @@
         "BB%": 13.3
       }
     ],
-    "Elly De La Cruz": [
-      {
-        "season": 2026,
-        "xSLG": 0.506,
-        "xwOBACON": 0.489,
-        "Avg Exit Velocity": 94.7,
-        "90th % EV": 110.2,
-        "Barrel %": 16.3,
-        "Blasts/Contact": 0.2302,
-        "LA+SwtSpt%": 36.2,
-        "Avg Bat Speed": 76.1954,
-        "Fast Swing %": 0.6114,
-        "Avg Swing Length": 7.1808,
-        "Chase %": 25.1,
-        "K%": 27.5,
-        "Z-Contact%": 79.7,
-        "Whiff %": 28.1,
-        "BB%": 11.3
-      }
-    ],
     "Kazuma Okamoto": [
       {
         "season": 2026,
@@ -1060,6 +1040,26 @@
         "BB%": 12.7
       }
     ],
+    "Elly De La Cruz": [
+      {
+        "season": 2026,
+        "xSLG": 0.506,
+        "xwOBACON": 0.489,
+        "Avg Exit Velocity": 94.7,
+        "90th % EV": 110.2,
+        "Barrel %": 16.3,
+        "Blasts/Contact": 0.2302,
+        "LA+SwtSpt%": 36.2,
+        "Avg Bat Speed": 76.1954,
+        "Fast Swing %": 0.6114,
+        "Avg Swing Length": 7.1808,
+        "Chase %": 25.1,
+        "K%": 27.5,
+        "Z-Contact%": 79.7,
+        "Whiff %": 28.1,
+        "BB%": 11.3
+      }
+    ],
     "Christian Walker": [
       {
         "season": 2026,
@@ -1080,26 +1080,6 @@
         "BB%": 8.0
       }
     ],
-    "Mike Trout": [
-      {
-        "season": 2026,
-        "xSLG": 0.487,
-        "xwOBACON": 0.462,
-        "Avg Exit Velocity": 90.1,
-        "90th % EV": 108.3,
-        "Barrel %": 16.0,
-        "Blasts/Contact": 0.1626,
-        "LA+SwtSpt%": 38.0,
-        "Avg Bat Speed": 74.6726,
-        "Fast Swing %": 0.4849,
-        "Avg Swing Length": 7.4534,
-        "Chase %": 20.7,
-        "K%": 26.0,
-        "Z-Contact%": 84.2,
-        "Whiff %": 25.6,
-        "BB%": 16.9
-      }
-    ],
     "Seiya Suzuki": [
       {
         "season": 2026,
@@ -1118,6 +1098,26 @@
         "Z-Contact%": 86.1,
         "Whiff %": 23.5,
         "BB%": 12.8
+      }
+    ],
+    "Mike Trout": [
+      {
+        "season": 2026,
+        "xSLG": 0.487,
+        "xwOBACON": 0.462,
+        "Avg Exit Velocity": 90.1,
+        "90th % EV": 108.3,
+        "Barrel %": 16.0,
+        "Blasts/Contact": 0.1626,
+        "LA+SwtSpt%": 38.0,
+        "Avg Bat Speed": 74.6726,
+        "Fast Swing %": 0.4849,
+        "Avg Swing Length": 7.4534,
+        "Chase %": 20.7,
+        "K%": 26.0,
+        "Z-Contact%": 84.2,
+        "Whiff %": 25.6,
+        "BB%": 16.9
       }
     ],
     "Rafael Devers": [
@@ -1260,26 +1260,6 @@
         "BB%": 7.6
       }
     ],
-    "Kyle Tucker": [
-      {
-        "season": 2026,
-        "xSLG": 0.393,
-        "xwOBACON": 0.343,
-        "Avg Exit Velocity": 88.5,
-        "90th % EV": 102.3,
-        "Barrel %": 6.4,
-        "Blasts/Contact": 0.1,
-        "LA+SwtSpt%": 34.2,
-        "Avg Bat Speed": 71.3963,
-        "Fast Swing %": 0.193,
-        "Avg Swing Length": 7.308,
-        "Chase %": 23.9,
-        "K%": 16.7,
-        "Z-Contact%": 86.0,
-        "Whiff %": 20.8,
-        "BB%": 12.4
-      }
-    ],
     "Salvador Perez": [
       {
         "season": 2026,
@@ -1298,6 +1278,26 @@
         "Z-Contact%": 86.2,
         "Whiff %": 25.0,
         "BB%": 4.0
+      }
+    ],
+    "Kyle Tucker": [
+      {
+        "season": 2026,
+        "xSLG": 0.393,
+        "xwOBACON": 0.343,
+        "Avg Exit Velocity": 88.5,
+        "90th % EV": 102.3,
+        "Barrel %": 6.4,
+        "Blasts/Contact": 0.1,
+        "LA+SwtSpt%": 34.2,
+        "Avg Bat Speed": 71.3963,
+        "Fast Swing %": 0.193,
+        "Avg Swing Length": 7.308,
+        "Chase %": 23.9,
+        "K%": 16.7,
+        "Z-Contact%": 86.0,
+        "Whiff %": 20.8,
+        "BB%": 12.4
       }
     ],
     "Ketel Marte": [
@@ -1380,26 +1380,6 @@
         "BB%": 3.7
       }
     ],
-    "Luke Keaschall": [
-      {
-        "season": 2026,
-        "xSLG": 0.369,
-        "xwOBACON": 0.315,
-        "Avg Exit Velocity": 85.4,
-        "90th % EV": 101.4,
-        "Barrel %": 3.8,
-        "Blasts/Contact": 0.0803,
-        "LA+SwtSpt%": 35.3,
-        "Avg Bat Speed": 69.1601,
-        "Fast Swing %": 0.0941,
-        "Avg Swing Length": 6.7034,
-        "Chase %": 22.6,
-        "K%": 14.0,
-        "Z-Contact%": 90.0,
-        "Whiff %": 16.9,
-        "BB%": 9.5
-      }
-    ],
     "Jake Burger": [
       {
         "season": 2026,
@@ -1418,6 +1398,26 @@
         "Z-Contact%": 80.1,
         "Whiff %": 34.2,
         "BB%": 9.0
+      }
+    ],
+    "Luke Keaschall": [
+      {
+        "season": 2026,
+        "xSLG": 0.369,
+        "xwOBACON": 0.315,
+        "Avg Exit Velocity": 85.4,
+        "90th % EV": 101.4,
+        "Barrel %": 3.8,
+        "Blasts/Contact": 0.0803,
+        "LA+SwtSpt%": 35.3,
+        "Avg Bat Speed": 69.1601,
+        "Fast Swing %": 0.0941,
+        "Avg Swing Length": 6.7034,
+        "Chase %": 22.6,
+        "K%": 14.0,
+        "Z-Contact%": 90.0,
+        "Whiff %": 16.9,
+        "BB%": 9.5
       }
     ],
     "Mauricio Dub\u00f3n": [
@@ -1520,26 +1520,6 @@
         "BB%": 8.9
       }
     ],
-    "Chandler Simpson": [
-      {
-        "season": 2026,
-        "xSLG": 0.297,
-        "xwOBACON": 0.267,
-        "Avg Exit Velocity": 83.7,
-        "90th % EV": 96.4,
-        "Barrel %": 0.0,
-        "Blasts/Contact": 0.0281,
-        "LA+SwtSpt%": 25.7,
-        "Avg Bat Speed": 65.0875,
-        "Fast Swing %": 0.0051,
-        "Avg Swing Length": 6.569,
-        "Chase %": 31.2,
-        "K%": 7.8,
-        "Z-Contact%": 93.2,
-        "Whiff %": 10.8,
-        "BB%": 4.2
-      }
-    ],
     "Spencer Torkelson": [
       {
         "season": 2026,
@@ -1558,6 +1538,26 @@
         "Z-Contact%": 79.9,
         "Whiff %": 32.4,
         "BB%": 11.6
+      }
+    ],
+    "Chandler Simpson": [
+      {
+        "season": 2026,
+        "xSLG": 0.297,
+        "xwOBACON": 0.267,
+        "Avg Exit Velocity": 83.7,
+        "90th % EV": 96.4,
+        "Barrel %": 0.0,
+        "Blasts/Contact": 0.0281,
+        "LA+SwtSpt%": 25.7,
+        "Avg Bat Speed": 65.0875,
+        "Fast Swing %": 0.0051,
+        "Avg Swing Length": 6.569,
+        "Chase %": 31.2,
+        "K%": 7.8,
+        "Z-Contact%": 93.2,
+        "Whiff %": 10.8,
+        "BB%": 4.2
       }
     ],
     "Vladimir Guerrero Jr.": [
@@ -1940,26 +1940,6 @@
         "BB%": 3.8
       }
     ],
-    "Hunter Goodman": [
-      {
-        "season": 2026,
-        "xSLG": 0.456,
-        "xwOBACON": 0.432,
-        "Avg Exit Velocity": 89.8,
-        "90th % EV": 107.1,
-        "Barrel %": 14.5,
-        "Blasts/Contact": 0.1597,
-        "LA+SwtSpt%": 32.2,
-        "Avg Bat Speed": 74.9648,
-        "Fast Swing %": 0.4892,
-        "Avg Swing Length": 7.3322,
-        "Chase %": 40.4,
-        "K%": 30.5,
-        "Z-Contact%": 77.9,
-        "Whiff %": 34.0,
-        "BB%": 8.0
-      }
-    ],
     "Andy Pages": [
       {
         "season": 2026,
@@ -1978,6 +1958,26 @@
         "Z-Contact%": 88.9,
         "Whiff %": 22.1,
         "BB%": 8.5
+      }
+    ],
+    "Hunter Goodman": [
+      {
+        "season": 2026,
+        "xSLG": 0.456,
+        "xwOBACON": 0.432,
+        "Avg Exit Velocity": 89.8,
+        "90th % EV": 107.1,
+        "Barrel %": 14.5,
+        "Blasts/Contact": 0.1597,
+        "LA+SwtSpt%": 32.2,
+        "Avg Bat Speed": 74.9648,
+        "Fast Swing %": 0.4892,
+        "Avg Swing Length": 7.3322,
+        "Chase %": 40.4,
+        "K%": 30.5,
+        "Z-Contact%": 77.9,
+        "Whiff %": 34.0,
+        "BB%": 8.0
       }
     ],
     "Jackson Chourio": [
@@ -2020,26 +2020,6 @@
         "BB%": 7.2
       }
     ],
-    "Brandon Marsh": [
-      {
-        "season": 2026,
-        "xSLG": 0.401,
-        "xwOBACON": 0.379,
-        "Avg Exit Velocity": 89.2,
-        "90th % EV": 103.4,
-        "Barrel %": 8.0,
-        "Blasts/Contact": 0.145,
-        "LA+SwtSpt%": 40.8,
-        "Avg Bat Speed": 71.6039,
-        "Fast Swing %": 0.1625,
-        "Avg Swing Length": 7.27,
-        "Chase %": 36.3,
-        "K%": 25.0,
-        "Z-Contact%": 87.2,
-        "Whiff %": 24.9,
-        "BB%": 6.0
-      }
-    ],
     "Cam Smith": [
       {
         "season": 2026,
@@ -2058,6 +2038,26 @@
         "Z-Contact%": 80.5,
         "Whiff %": 29.1,
         "BB%": 7.7
+      }
+    ],
+    "Brandon Marsh": [
+      {
+        "season": 2026,
+        "xSLG": 0.401,
+        "xwOBACON": 0.379,
+        "Avg Exit Velocity": 89.2,
+        "90th % EV": 103.4,
+        "Barrel %": 8.0,
+        "Blasts/Contact": 0.145,
+        "LA+SwtSpt%": 40.8,
+        "Avg Bat Speed": 71.6039,
+        "Fast Swing %": 0.1625,
+        "Avg Swing Length": 7.27,
+        "Chase %": 36.3,
+        "K%": 25.0,
+        "Z-Contact%": 87.2,
+        "Whiff %": 24.9,
+        "BB%": 6.0
       }
     ],
     "Cody Bellinger": [
@@ -2126,11 +2126,11 @@
         "Avg Exit Velocity": 91.4,
         "90th % EV": 105.7,
         "Barrel %": 6.3,
-        "Blasts/Contact": 0.1831,
+        "Blasts/Contact": 0.1834,
         "LA+SwtSpt%": 35.1,
-        "Avg Bat Speed": 71.5052,
-        "Fast Swing %": 0.1852,
-        "Avg Swing Length": 7.156,
+        "Avg Bat Speed": 71.5163,
+        "Fast Swing %": 0.1854,
+        "Avg Swing Length": 7.1569,
         "Chase %": 21.1,
         "K%": 14.7,
         "Z-Contact%": 91.2,
@@ -2286,11 +2286,11 @@
         "Avg Exit Velocity": 88.6,
         "90th % EV": 103.7,
         "Barrel %": 4.1,
-        "Blasts/Contact": 0.1293,
+        "Blasts/Contact": 0.1295,
         "LA+SwtSpt%": 35.3,
-        "Avg Bat Speed": 70.1653,
-        "Fast Swing %": 0.1138,
-        "Avg Swing Length": 7.2408,
+        "Avg Bat Speed": 70.1749,
+        "Fast Swing %": 0.1139,
+        "Avg Swing Length": 7.2411,
         "Chase %": 28.5,
         "K%": 12.7,
         "Z-Contact%": 90.7,
@@ -2378,26 +2378,6 @@
         "BB%": 9.0
       }
     ],
-    "Jazz Chisholm Jr.": [
-      {
-        "season": 2026,
-        "xSLG": 0.366,
-        "xwOBACON": 0.37,
-        "Avg Exit Velocity": 90.4,
-        "90th % EV": 104.4,
-        "Barrel %": 8.2,
-        "Blasts/Contact": 0.1449,
-        "LA+SwtSpt%": 29.9,
-        "Avg Bat Speed": 72.881,
-        "Fast Swing %": 0.2826,
-        "Avg Swing Length": 7.8561,
-        "Chase %": 29.4,
-        "K%": 29.5,
-        "Z-Contact%": 76.7,
-        "Whiff %": 30.9,
-        "BB%": 10.5
-      }
-    ],
     "Masyn Winn": [
       {
         "season": 2026,
@@ -2416,6 +2396,26 @@
         "Z-Contact%": 85.0,
         "Whiff %": 23.7,
         "BB%": 9.0
+      }
+    ],
+    "Jazz Chisholm Jr.": [
+      {
+        "season": 2026,
+        "xSLG": 0.366,
+        "xwOBACON": 0.37,
+        "Avg Exit Velocity": 90.4,
+        "90th % EV": 104.4,
+        "Barrel %": 8.2,
+        "Blasts/Contact": 0.1449,
+        "LA+SwtSpt%": 29.9,
+        "Avg Bat Speed": 72.881,
+        "Fast Swing %": 0.2826,
+        "Avg Swing Length": 7.8561,
+        "Chase %": 29.4,
+        "K%": 29.5,
+        "Z-Contact%": 76.7,
+        "Whiff %": 30.9,
+        "BB%": 10.5
       }
     ],
     "Garrett Mitchell": [
@@ -2538,26 +2538,6 @@
         "BB%": 12.3
       }
     ],
-    "Travis Bazzana": [
-      {
-        "season": 2026,
-        "xSLG": 0.347,
-        "xwOBACON": 0.319,
-        "Avg Exit Velocity": 87.6,
-        "90th % EV": 102.2,
-        "Barrel %": 5.2,
-        "Blasts/Contact": 0.098,
-        "LA+SwtSpt%": 30.0,
-        "Avg Bat Speed": 69.7701,
-        "Fast Swing %": 0.1225,
-        "Avg Swing Length": 6.9982,
-        "Chase %": 27.3,
-        "K%": 20.7,
-        "Z-Contact%": 86.2,
-        "Whiff %": 23.2,
-        "BB%": 10.8
-      }
-    ],
     "George Springer": [
       {
         "season": 2026,
@@ -2576,6 +2556,26 @@
         "Z-Contact%": 85.4,
         "Whiff %": 23.5,
         "BB%": 9.1
+      }
+    ],
+    "Travis Bazzana": [
+      {
+        "season": 2026,
+        "xSLG": 0.347,
+        "xwOBACON": 0.319,
+        "Avg Exit Velocity": 87.6,
+        "90th % EV": 102.2,
+        "Barrel %": 5.2,
+        "Blasts/Contact": 0.098,
+        "LA+SwtSpt%": 30.0,
+        "Avg Bat Speed": 69.7701,
+        "Fast Swing %": 0.1225,
+        "Avg Swing Length": 6.9982,
+        "Chase %": 27.3,
+        "K%": 20.7,
+        "Z-Contact%": 86.2,
+        "Whiff %": 23.2,
+        "BB%": 10.8
       }
     ],
     "Kyle Stowers": [
@@ -2658,26 +2658,6 @@
         "BB%": 5.7
       }
     ],
-    "Willy Adames": [
-      {
-        "season": 2026,
-        "xSLG": 0.391,
-        "xwOBACON": 0.374,
-        "Avg Exit Velocity": 87.4,
-        "90th % EV": 103.2,
-        "Barrel %": 8.9,
-        "Blasts/Contact": 0.1214,
-        "LA+SwtSpt%": 36.7,
-        "Avg Bat Speed": 72.3094,
-        "Fast Swing %": 0.2544,
-        "Avg Swing Length": 8.1825,
-        "Chase %": 31.6,
-        "K%": 27.5,
-        "Z-Contact%": 82.9,
-        "Whiff %": 28.9,
-        "BB%": 7.3
-      }
-    ],
     "Heriberto Hern\u00e1ndez": [
       {
         "season": 2026,
@@ -2696,6 +2676,26 @@
         "Z-Contact%": 78.0,
         "Whiff %": 32.5,
         "BB%": 10.3
+      }
+    ],
+    "Willy Adames": [
+      {
+        "season": 2026,
+        "xSLG": 0.391,
+        "xwOBACON": 0.374,
+        "Avg Exit Velocity": 87.4,
+        "90th % EV": 103.2,
+        "Barrel %": 8.9,
+        "Blasts/Contact": 0.1214,
+        "LA+SwtSpt%": 36.7,
+        "Avg Bat Speed": 72.3094,
+        "Fast Swing %": 0.2544,
+        "Avg Swing Length": 8.1825,
+        "Chase %": 31.6,
+        "K%": 27.5,
+        "Z-Contact%": 82.9,
+        "Whiff %": 28.9,
+        "BB%": 7.3
       }
     ],
     "Cedric Mullins": [
@@ -2718,26 +2718,6 @@
         "BB%": 8.6
       }
     ],
-    "Christian Yelich": [
-      {
-        "season": 2026,
-        "xSLG": 0.385,
-        "xwOBACON": 0.38,
-        "Avg Exit Velocity": 88.9,
-        "90th % EV": 104.3,
-        "Barrel %": 9.6,
-        "Blasts/Contact": 0.1403,
-        "LA+SwtSpt%": 29.5,
-        "Avg Bat Speed": 73.1683,
-        "Fast Swing %": 0.3102,
-        "Avg Swing Length": 7.5957,
-        "Chase %": 24.4,
-        "K%": 27.0,
-        "Z-Contact%": 79.8,
-        "Whiff %": 29.6,
-        "BB%": 9.8
-      }
-    ],
     "Ty France": [
       {
         "season": 2026,
@@ -2756,6 +2736,26 @@
         "Z-Contact%": 83.0,
         "Whiff %": 28.1,
         "BB%": 7.4
+      }
+    ],
+    "Christian Yelich": [
+      {
+        "season": 2026,
+        "xSLG": 0.385,
+        "xwOBACON": 0.38,
+        "Avg Exit Velocity": 88.9,
+        "90th % EV": 104.3,
+        "Barrel %": 9.6,
+        "Blasts/Contact": 0.1403,
+        "LA+SwtSpt%": 29.5,
+        "Avg Bat Speed": 73.1683,
+        "Fast Swing %": 0.3102,
+        "Avg Swing Length": 7.5957,
+        "Chase %": 24.4,
+        "K%": 27.0,
+        "Z-Contact%": 79.8,
+        "Whiff %": 29.6,
+        "BB%": 9.8
       }
     ],
     "Eugenio Su\u00e1rez": [
@@ -3178,26 +3178,6 @@
         "BB%": 8.2
       }
     ],
-    "Jacob Young": [
-      {
-        "season": 2026,
-        "xSLG": 0.383,
-        "xwOBACON": 0.337,
-        "Avg Exit Velocity": 87.7,
-        "90th % EV": 103.0,
-        "Barrel %": 5.7,
-        "Blasts/Contact": 0.1318,
-        "LA+SwtSpt%": 36.3,
-        "Avg Bat Speed": 69.6136,
-        "Fast Swing %": 0.0257,
-        "Avg Swing Length": 7.1818,
-        "Chase %": 27.5,
-        "K%": 16.6,
-        "Z-Contact%": 87.7,
-        "Whiff %": 20.8,
-        "BB%": 7.0
-      }
-    ],
     "Wyatt Langford": [
       {
         "season": 2026,
@@ -3216,6 +3196,26 @@
         "Z-Contact%": 82.7,
         "Whiff %": 25.3,
         "BB%": 11.7
+      }
+    ],
+    "Jacob Young": [
+      {
+        "season": 2026,
+        "xSLG": 0.383,
+        "xwOBACON": 0.337,
+        "Avg Exit Velocity": 87.7,
+        "90th % EV": 103.0,
+        "Barrel %": 5.7,
+        "Blasts/Contact": 0.1318,
+        "LA+SwtSpt%": 36.3,
+        "Avg Bat Speed": 69.6136,
+        "Fast Swing %": 0.0257,
+        "Avg Swing Length": 7.1818,
+        "Chase %": 27.5,
+        "K%": 16.6,
+        "Z-Contact%": 87.7,
+        "Whiff %": 20.8,
+        "BB%": 7.0
       }
     ],
     "Nathan Church": [
@@ -3238,26 +3238,6 @@
         "BB%": 5.3
       }
     ],
-    "Ronald Acu\u00f1a Jr.": [
-      {
-        "season": 2026,
-        "xSLG": 0.495,
-        "xwOBACON": 0.428,
-        "Avg Exit Velocity": 89.6,
-        "90th % EV": 107.3,
-        "Barrel %": 13.0,
-        "Blasts/Contact": 0.1681,
-        "LA+SwtSpt%": 34.7,
-        "Avg Bat Speed": 75.6727,
-        "Fast Swing %": 0.5864,
-        "Avg Swing Length": 7.6033,
-        "Chase %": 28.6,
-        "K%": 22.0,
-        "Z-Contact%": 77.7,
-        "Whiff %": 29.0,
-        "BB%": 11.3
-      }
-    ],
     "Francisco Lindor": [
       {
         "season": 2026,
@@ -3276,6 +3256,26 @@
         "Z-Contact%": 84.5,
         "Whiff %": 25.0,
         "BB%": 9.8
+      }
+    ],
+    "Ronald Acu\u00f1a Jr.": [
+      {
+        "season": 2026,
+        "xSLG": 0.495,
+        "xwOBACON": 0.428,
+        "Avg Exit Velocity": 89.6,
+        "90th % EV": 107.3,
+        "Barrel %": 13.0,
+        "Blasts/Contact": 0.1681,
+        "LA+SwtSpt%": 34.7,
+        "Avg Bat Speed": 75.6727,
+        "Fast Swing %": 0.5864,
+        "Avg Swing Length": 7.6033,
+        "Chase %": 28.6,
+        "K%": 22.0,
+        "Z-Contact%": 77.7,
+        "Whiff %": 29.0,
+        "BB%": 11.3
       }
     ],
     "Andrew Benintendi": [
@@ -3478,26 +3478,6 @@
         "BB%": 4.6
       }
     ],
-    "Spencer Horwitz": [
-      {
-        "season": 2026,
-        "xSLG": 0.345,
-        "xwOBACON": 0.306,
-        "Avg Exit Velocity": 86.8,
-        "90th % EV": 101.2,
-        "Barrel %": 5.7,
-        "Blasts/Contact": 0.0951,
-        "LA+SwtSpt%": 30.3,
-        "Avg Bat Speed": 68.6988,
-        "Fast Swing %": 0.0452,
-        "Avg Swing Length": 6.9413,
-        "Chase %": 24.5,
-        "K%": 16.2,
-        "Z-Contact%": 91.1,
-        "Whiff %": 16.4,
-        "BB%": 12.0
-      }
-    ],
     "Ryan O'Hearn": [
       {
         "season": 2026,
@@ -3516,6 +3496,26 @@
         "Z-Contact%": 86.6,
         "Whiff %": 22.5,
         "BB%": 7.8
+      }
+    ],
+    "Spencer Horwitz": [
+      {
+        "season": 2026,
+        "xSLG": 0.345,
+        "xwOBACON": 0.306,
+        "Avg Exit Velocity": 86.8,
+        "90th % EV": 101.2,
+        "Barrel %": 5.7,
+        "Blasts/Contact": 0.0951,
+        "LA+SwtSpt%": 30.3,
+        "Avg Bat Speed": 68.6988,
+        "Fast Swing %": 0.0452,
+        "Avg Swing Length": 6.9413,
+        "Chase %": 24.5,
+        "K%": 16.2,
+        "Z-Contact%": 91.1,
+        "Whiff %": 16.4,
+        "BB%": 12.0
       }
     ],
     "Nathan Lukes": [
@@ -3658,26 +3658,6 @@
         "BB%": 7.0
       }
     ],
-    "Corey Seager": [
-      {
-        "season": 2026,
-        "xSLG": 0.484,
-        "xwOBACON": 0.421,
-        "Avg Exit Velocity": 91.7,
-        "90th % EV": 106.6,
-        "Barrel %": 14.8,
-        "Blasts/Contact": 0.1879,
-        "LA+SwtSpt%": 35.6,
-        "Avg Bat Speed": 71.4838,
-        "Fast Swing %": 0.1242,
-        "Avg Swing Length": 6.7022,
-        "Chase %": 28.8,
-        "K%": 23.6,
-        "Z-Contact%": 78.2,
-        "Whiff %": 32.9,
-        "BB%": 10.3
-      }
-    ],
     "Mickey Moniak": [
       {
         "season": 2026,
@@ -3696,6 +3676,26 @@
         "Z-Contact%": 82.0,
         "Whiff %": 30.3,
         "BB%": 5.0
+      }
+    ],
+    "Corey Seager": [
+      {
+        "season": 2026,
+        "xSLG": 0.484,
+        "xwOBACON": 0.421,
+        "Avg Exit Velocity": 91.7,
+        "90th % EV": 106.6,
+        "Barrel %": 14.8,
+        "Blasts/Contact": 0.1879,
+        "LA+SwtSpt%": 35.6,
+        "Avg Bat Speed": 71.4838,
+        "Fast Swing %": 0.1242,
+        "Avg Swing Length": 6.7022,
+        "Chase %": 28.8,
+        "K%": 23.6,
+        "Z-Contact%": 78.2,
+        "Whiff %": 32.9,
+        "BB%": 10.3
       }
     ],
     "Zack Gelof": [
@@ -3738,26 +3738,6 @@
         "BB%": 18.2
       }
     ],
-    "Taylor Walls": [
-      {
-        "season": 2026,
-        "xSLG": 0.261,
-        "xwOBACON": 0.268,
-        "Avg Exit Velocity": 85.6,
-        "90th % EV": 98.5,
-        "Barrel %": 2.2,
-        "Blasts/Contact": 0.0459,
-        "LA+SwtSpt%": 32.1,
-        "Avg Bat Speed": 68.1269,
-        "Fast Swing %": 0.0182,
-        "Avg Swing Length": 7.0939,
-        "Chase %": 25.6,
-        "K%": 24.2,
-        "Z-Contact%": 84.8,
-        "Whiff %": 22.0,
-        "BB%": 10.4
-      }
-    ],
     "Trevor Larnach": [
       {
         "season": 2026,
@@ -3775,6 +3755,26 @@
         "K%": 18.2,
         "Z-Contact%": 86.0,
         "Whiff %": 26.8,
+        "BB%": 10.4
+      }
+    ],
+    "Taylor Walls": [
+      {
+        "season": 2026,
+        "xSLG": 0.261,
+        "xwOBACON": 0.268,
+        "Avg Exit Velocity": 85.6,
+        "90th % EV": 98.5,
+        "Barrel %": 2.2,
+        "Blasts/Contact": 0.0459,
+        "LA+SwtSpt%": 32.1,
+        "Avg Bat Speed": 68.1269,
+        "Fast Swing %": 0.0182,
+        "Avg Swing Length": 7.0939,
+        "Chase %": 25.6,
+        "K%": 24.2,
+        "Z-Contact%": 84.8,
+        "Whiff %": 22.0,
         "BB%": 10.4
       }
     ],
@@ -3806,11 +3806,11 @@
         "Avg Exit Velocity": 89.6,
         "90th % EV": 106.5,
         "Barrel %": 8.4,
-        "Blasts/Contact": 0.1524,
+        "Blasts/Contact": 0.1527,
         "LA+SwtSpt%": 39.3,
-        "Avg Bat Speed": 74.4347,
-        "Fast Swing %": 0.4385,
-        "Avg Swing Length": 7.5392,
+        "Avg Bat Speed": 74.4456,
+        "Fast Swing %": 0.4391,
+        "Avg Swing Length": 7.5403,
         "Chase %": 27.3,
         "K%": 23.1,
         "Z-Contact%": 86.8,
@@ -3838,26 +3838,6 @@
         "BB%": 9.6
       }
     ],
-    "Carson Kelly": [
-      {
-        "season": 2026,
-        "xSLG": 0.372,
-        "xwOBACON": 0.324,
-        "Avg Exit Velocity": 86.7,
-        "90th % EV": 102.6,
-        "Barrel %": 5.2,
-        "Blasts/Contact": 0.1243,
-        "LA+SwtSpt%": 31.6,
-        "Avg Bat Speed": 70.5882,
-        "Fast Swing %": 0.086,
-        "Avg Swing Length": 6.9413,
-        "Chase %": 25.2,
-        "K%": 16.5,
-        "Z-Contact%": 89.7,
-        "Whiff %": 19.8,
-        "BB%": 9.4
-      }
-    ],
     "Jake Cronenworth": [
       {
         "season": 2026,
@@ -3878,24 +3858,24 @@
         "BB%": 8.9
       }
     ],
-    "Colt Keith": [
+    "Carson Kelly": [
       {
         "season": 2026,
-        "xSLG": 0.423,
-        "xwOBACON": 0.381,
-        "Avg Exit Velocity": 88.7,
-        "90th % EV": 103.8,
-        "Barrel %": 7.6,
-        "Blasts/Contact": 0.1756,
-        "LA+SwtSpt%": 38.1,
-        "Avg Bat Speed": 72.0052,
-        "Fast Swing %": 0.1975,
-        "Avg Swing Length": 6.8991,
-        "Chase %": 24.6,
-        "K%": 19.9,
-        "Z-Contact%": 86.0,
-        "Whiff %": 22.3,
-        "BB%": 7.6
+        "xSLG": 0.372,
+        "xwOBACON": 0.324,
+        "Avg Exit Velocity": 86.7,
+        "90th % EV": 102.6,
+        "Barrel %": 5.2,
+        "Blasts/Contact": 0.1243,
+        "LA+SwtSpt%": 31.6,
+        "Avg Bat Speed": 70.5882,
+        "Fast Swing %": 0.086,
+        "Avg Swing Length": 6.9413,
+        "Chase %": 25.2,
+        "K%": 16.5,
+        "Z-Contact%": 89.7,
+        "Whiff %": 19.8,
+        "BB%": 9.4
       }
     ],
     "Zach McKinstry": [
@@ -3918,24 +3898,24 @@
         "BB%": 9.9
       }
     ],
-    "Francisco Alvarez": [
+    "Colt Keith": [
       {
         "season": 2026,
-        "xSLG": 0.431,
-        "xwOBACON": 0.426,
-        "Avg Exit Velocity": 90.8,
-        "90th % EV": 108.0,
-        "Barrel %": 15.4,
-        "Blasts/Contact": 0.1933,
-        "LA+SwtSpt%": 32.9,
-        "Avg Bat Speed": 74.1869,
-        "Fast Swing %": 0.4286,
-        "Avg Swing Length": 7.2915,
-        "Chase %": 31.8,
-        "K%": 30.7,
-        "Z-Contact%": 77.3,
-        "Whiff %": 34.8,
-        "BB%": 9.3
+        "xSLG": 0.423,
+        "xwOBACON": 0.381,
+        "Avg Exit Velocity": 88.7,
+        "90th % EV": 103.8,
+        "Barrel %": 7.6,
+        "Blasts/Contact": 0.1756,
+        "LA+SwtSpt%": 38.1,
+        "Avg Bat Speed": 72.0052,
+        "Fast Swing %": 0.1975,
+        "Avg Swing Length": 6.8991,
+        "Chase %": 24.6,
+        "K%": 19.9,
+        "Z-Contact%": 86.0,
+        "Whiff %": 22.3,
+        "BB%": 7.6
       }
     ],
     "Gleyber Torres": [
@@ -3956,6 +3936,26 @@
         "Z-Contact%": 84.2,
         "Whiff %": 22.5,
         "BB%": 13.6
+      }
+    ],
+    "Francisco Alvarez": [
+      {
+        "season": 2026,
+        "xSLG": 0.431,
+        "xwOBACON": 0.426,
+        "Avg Exit Velocity": 90.8,
+        "90th % EV": 108.0,
+        "Barrel %": 15.4,
+        "Blasts/Contact": 0.1933,
+        "LA+SwtSpt%": 32.9,
+        "Avg Bat Speed": 74.1869,
+        "Fast Swing %": 0.4286,
+        "Avg Swing Length": 7.2915,
+        "Chase %": 31.8,
+        "K%": 30.7,
+        "Z-Contact%": 77.3,
+        "Whiff %": 34.8,
+        "BB%": 9.3
       }
     ],
     "Oneil Cruz": [
@@ -4126,11 +4126,11 @@
         "Avg Exit Velocity": 86.2,
         "90th % EV": 101.1,
         "Barrel %": 4.0,
-        "Blasts/Contact": 0.0934,
+        "Blasts/Contact": 0.0932,
         "LA+SwtSpt%": 33.1,
-        "Avg Bat Speed": 69.2923,
-        "Fast Swing %": 0.0431,
-        "Avg Swing Length": 7.2788,
+        "Avg Bat Speed": 69.2795,
+        "Fast Swing %": 0.043,
+        "Avg Swing Length": 7.2778,
         "Chase %": 32.5,
         "K%": 17.0,
         "Z-Contact%": 85.4,
@@ -4418,24 +4418,24 @@
         "BB%": 7.5
       }
     ],
-    "Jonny DeLuca": [
+    "Jos\u00e9 Ferm\u00edn": [
       {
         "season": 2026,
-        "xSLG": 0.325,
-        "xwOBACON": 0.309,
-        "Avg Exit Velocity": 85.8,
-        "90th % EV": 104.6,
-        "Barrel %": 3.6,
-        "Blasts/Contact": 0.1294,
-        "LA+SwtSpt%": 28.7,
-        "Avg Bat Speed": 73.4618,
-        "Fast Swing %": 0.3398,
-        "Avg Swing Length": 7.8183,
-        "Chase %": 35.9,
-        "K%": 21.1,
-        "Z-Contact%": 85.5,
-        "Whiff %": 24.9,
-        "BB%": 4.6
+        "xSLG": 0.336,
+        "xwOBACON": 0.296,
+        "Avg Exit Velocity": 86.1,
+        "90th % EV": 99.1,
+        "Barrel %": 2.1,
+        "Blasts/Contact": 0.0807,
+        "LA+SwtSpt%": 34.6,
+        "Avg Bat Speed": 67.9582,
+        "Fast Swing %": 0.0224,
+        "Avg Swing Length": 7.3633,
+        "Chase %": 22.1,
+        "K%": 13.5,
+        "Z-Contact%": 90.1,
+        "Whiff %": 13.9,
+        "BB%": 8.1
       }
     ],
     "Oswald Peraza": [
@@ -4458,24 +4458,24 @@
         "BB%": 4.6
       }
     ],
-    "Jos\u00e9 Ferm\u00edn": [
+    "Jonny DeLuca": [
       {
         "season": 2026,
-        "xSLG": 0.336,
-        "xwOBACON": 0.296,
-        "Avg Exit Velocity": 86.1,
-        "90th % EV": 99.1,
-        "Barrel %": 2.1,
-        "Blasts/Contact": 0.0807,
-        "LA+SwtSpt%": 34.6,
-        "Avg Bat Speed": 67.9582,
-        "Fast Swing %": 0.0224,
-        "Avg Swing Length": 7.3633,
-        "Chase %": 22.1,
-        "K%": 13.5,
-        "Z-Contact%": 90.1,
-        "Whiff %": 13.9,
-        "BB%": 8.1
+        "xSLG": 0.325,
+        "xwOBACON": 0.309,
+        "Avg Exit Velocity": 85.8,
+        "90th % EV": 104.6,
+        "Barrel %": 3.6,
+        "Blasts/Contact": 0.1297,
+        "LA+SwtSpt%": 28.7,
+        "Avg Bat Speed": 73.4753,
+        "Fast Swing %": 0.3404,
+        "Avg Swing Length": 7.8208,
+        "Chase %": 35.9,
+        "K%": 21.1,
+        "Z-Contact%": 85.5,
+        "Whiff %": 24.9,
+        "BB%": 4.6
       }
     ],
     "Ryan Jeffers": [
@@ -4598,26 +4598,6 @@
         "BB%": 7.7
       }
     ],
-    "Jorge Soler": [
-      {
-        "season": 2026,
-        "xSLG": 0.362,
-        "xwOBACON": 0.383,
-        "Avg Exit Velocity": 88.5,
-        "90th % EV": 107.1,
-        "Barrel %": 10.9,
-        "Blasts/Contact": 0.151,
-        "LA+SwtSpt%": 35.1,
-        "Avg Bat Speed": 74.9431,
-        "Fast Swing %": 0.5121,
-        "Avg Swing Length": 7.9019,
-        "Chase %": 27.4,
-        "K%": 32.7,
-        "Z-Contact%": 74.9,
-        "Whiff %": 36.9,
-        "BB%": 9.7
-      }
-    ],
     "Yainer Diaz": [
       {
         "season": 2026,
@@ -4636,6 +4616,26 @@
         "Z-Contact%": 88.5,
         "Whiff %": 22.3,
         "BB%": 3.3
+      }
+    ],
+    "Jorge Soler": [
+      {
+        "season": 2026,
+        "xSLG": 0.362,
+        "xwOBACON": 0.383,
+        "Avg Exit Velocity": 88.5,
+        "90th % EV": 107.1,
+        "Barrel %": 10.9,
+        "Blasts/Contact": 0.151,
+        "LA+SwtSpt%": 35.1,
+        "Avg Bat Speed": 74.9431,
+        "Fast Swing %": 0.5121,
+        "Avg Swing Length": 7.9019,
+        "Chase %": 27.4,
+        "K%": 32.7,
+        "Z-Contact%": 74.9,
+        "Whiff %": 36.9,
+        "BB%": 9.7
       }
     ],
     "Ryan McMahon": [
@@ -4778,26 +4778,6 @@
         "BB%": 9.6
       }
     ],
-    "Mois\u00e9s Ballesteros": [
-      {
-        "season": 2026,
-        "xSLG": 0.361,
-        "xwOBACON": 0.336,
-        "Avg Exit Velocity": 90.1,
-        "90th % EV": 104.8,
-        "Barrel %": 8.4,
-        "Blasts/Contact": 0.1572,
-        "LA+SwtSpt%": 31.0,
-        "Avg Bat Speed": 72.2288,
-        "Fast Swing %": 0.2905,
-        "Avg Swing Length": 7.116,
-        "Chase %": 37.1,
-        "K%": 23.3,
-        "Z-Contact%": 83.0,
-        "Whiff %": 28.5,
-        "BB%": 8.5
-      }
-    ],
     "Matt Chapman": [
       {
         "season": 2026,
@@ -4816,6 +4796,26 @@
         "Z-Contact%": 84.6,
         "Whiff %": 23.1,
         "BB%": 10.5
+      }
+    ],
+    "Mois\u00e9s Ballesteros": [
+      {
+        "season": 2026,
+        "xSLG": 0.361,
+        "xwOBACON": 0.336,
+        "Avg Exit Velocity": 90.1,
+        "90th % EV": 104.8,
+        "Barrel %": 8.4,
+        "Blasts/Contact": 0.1572,
+        "LA+SwtSpt%": 31.0,
+        "Avg Bat Speed": 72.2288,
+        "Fast Swing %": 0.2905,
+        "Avg Swing Length": 7.116,
+        "Chase %": 37.1,
+        "K%": 23.3,
+        "Z-Contact%": 83.0,
+        "Whiff %": 28.5,
+        "BB%": 8.5
       }
     ],
     "Tim Tawa": [
@@ -4866,11 +4866,11 @@
         "Avg Exit Velocity": 90.5,
         "90th % EV": 103.9,
         "Barrel %": 7.7,
-        "Blasts/Contact": 0.1312,
+        "Blasts/Contact": 0.1315,
         "LA+SwtSpt%": 36.6,
-        "Avg Bat Speed": 72.7439,
-        "Fast Swing %": 0.299,
-        "Avg Swing Length": 7.3511,
+        "Avg Bat Speed": 72.7588,
+        "Fast Swing %": 0.2995,
+        "Avg Swing Length": 7.3495,
         "Chase %": 31.2,
         "K%": 26.7,
         "Z-Contact%": 84.1,
@@ -4998,26 +4998,6 @@
         "BB%": 9.5
       }
     ],
-    "Lars Nootbaar": [
-      {
-        "season": 2026,
-        "xSLG": 0.437,
-        "xwOBACON": 0.383,
-        "Avg Exit Velocity": 92.0,
-        "90th % EV": 106.4,
-        "Barrel %": 10.1,
-        "Blasts/Contact": 0.1864,
-        "LA+SwtSpt%": 34.9,
-        "Avg Bat Speed": 73.2528,
-        "Fast Swing %": 0.3463,
-        "Avg Swing Length": 6.8409,
-        "Chase %": 20.7,
-        "K%": 21.0,
-        "Z-Contact%": 87.3,
-        "Whiff %": 19.1,
-        "BB%": 13.8
-      }
-    ],
     "Dane Myers": [
       {
         "season": 2026,
@@ -5036,6 +5016,26 @@
         "Z-Contact%": 82.5,
         "Whiff %": 21.6,
         "BB%": 11.1
+      }
+    ],
+    "Lars Nootbaar": [
+      {
+        "season": 2026,
+        "xSLG": 0.437,
+        "xwOBACON": 0.383,
+        "Avg Exit Velocity": 92.0,
+        "90th % EV": 106.4,
+        "Barrel %": 10.1,
+        "Blasts/Contact": 0.1864,
+        "LA+SwtSpt%": 34.9,
+        "Avg Bat Speed": 73.2528,
+        "Fast Swing %": 0.3463,
+        "Avg Swing Length": 6.8409,
+        "Chase %": 20.7,
+        "K%": 21.0,
+        "Z-Contact%": 87.3,
+        "Whiff %": 19.1,
+        "BB%": 13.8
       }
     ],
     "Tommy Edman": [
@@ -5078,26 +5078,6 @@
         "BB%": 10.6
       }
     ],
-    "Joe Mack": [
-      {
-        "season": 2026,
-        "xSLG": 0.396,
-        "xwOBACON": 0.361,
-        "Avg Exit Velocity": 88.8,
-        "90th % EV": 103.9,
-        "Barrel %": 8.4,
-        "Blasts/Contact": 0.1474,
-        "LA+SwtSpt%": 26.9,
-        "Avg Bat Speed": 74.2567,
-        "Fast Swing %": 0.4339,
-        "Avg Swing Length": 7.391,
-        "Chase %": 28.1,
-        "K%": 24.8,
-        "Z-Contact%": 83.1,
-        "Whiff %": 25.5,
-        "BB%": 5.8
-      }
-    ],
     "Myles Straw": [
       {
         "season": 2026,
@@ -5116,6 +5096,26 @@
         "Z-Contact%": 91.0,
         "Whiff %": 12.7,
         "BB%": 8.2
+      }
+    ],
+    "Joe Mack": [
+      {
+        "season": 2026,
+        "xSLG": 0.396,
+        "xwOBACON": 0.361,
+        "Avg Exit Velocity": 88.8,
+        "90th % EV": 103.9,
+        "Barrel %": 8.4,
+        "Blasts/Contact": 0.1474,
+        "LA+SwtSpt%": 26.9,
+        "Avg Bat Speed": 74.2567,
+        "Fast Swing %": 0.4339,
+        "Avg Swing Length": 7.391,
+        "Chase %": 28.1,
+        "K%": 24.8,
+        "Z-Contact%": 83.1,
+        "Whiff %": 25.5,
+        "BB%": 5.8
       }
     ],
     "Owen Caissie": [
@@ -5158,24 +5158,24 @@
         "BB%": 11.9
       }
     ],
-    "Kyle Isbel": [
+    "Nick Fortes": [
       {
         "season": 2026,
-        "xSLG": 0.303,
-        "xwOBACON": 0.304,
-        "Avg Exit Velocity": 88.4,
-        "90th % EV": 103.5,
-        "Barrel %": 2.6,
-        "Blasts/Contact": 0.1223,
-        "LA+SwtSpt%": 24.7,
-        "Avg Bat Speed": 71.3371,
-        "Fast Swing %": 0.1385,
-        "Avg Swing Length": 7.1395,
-        "Chase %": 35.7,
-        "K%": 22.9,
-        "Z-Contact%": 93.6,
-        "Whiff %": 18.2,
-        "BB%": 4.6
+        "xSLG": 0.326,
+        "xwOBACON": 0.288,
+        "Avg Exit Velocity": 85.4,
+        "90th % EV": 103.1,
+        "Barrel %": 2.4,
+        "Blasts/Contact": 0.1579,
+        "LA+SwtSpt%": 25.2,
+        "Avg Bat Speed": 72.6847,
+        "Fast Swing %": 0.2589,
+        "Avg Swing Length": 7.5342,
+        "Chase %": 37.3,
+        "K%": 13.9,
+        "Z-Contact%": 88.0,
+        "Whiff %": 18.3,
+        "BB%": 3.7
       }
     ],
     "Griffin Conine": [
@@ -5198,24 +5198,24 @@
         "BB%": 10.5
       }
     ],
-    "Nick Fortes": [
+    "Kyle Isbel": [
       {
         "season": 2026,
-        "xSLG": 0.326,
-        "xwOBACON": 0.288,
-        "Avg Exit Velocity": 85.4,
-        "90th % EV": 103.1,
-        "Barrel %": 2.4,
-        "Blasts/Contact": 0.1579,
-        "LA+SwtSpt%": 25.2,
-        "Avg Bat Speed": 72.6847,
-        "Fast Swing %": 0.2589,
-        "Avg Swing Length": 7.5342,
-        "Chase %": 37.3,
-        "K%": 13.9,
-        "Z-Contact%": 88.0,
-        "Whiff %": 18.3,
-        "BB%": 3.7
+        "xSLG": 0.303,
+        "xwOBACON": 0.304,
+        "Avg Exit Velocity": 88.4,
+        "90th % EV": 103.5,
+        "Barrel %": 2.6,
+        "Blasts/Contact": 0.1223,
+        "LA+SwtSpt%": 24.7,
+        "Avg Bat Speed": 71.3371,
+        "Fast Swing %": 0.1385,
+        "Avg Swing Length": 7.1395,
+        "Chase %": 35.7,
+        "K%": 22.9,
+        "Z-Contact%": 93.6,
+        "Whiff %": 18.2,
+        "BB%": 4.6
       }
     ],
     "Rhys Hoskins": [
@@ -5478,26 +5478,6 @@
         "BB%": 8.7
       }
     ],
-    "Blaze Alexander": [
-      {
-        "season": 2026,
-        "xSLG": 0.452,
-        "xwOBACON": 0.425,
-        "Avg Exit Velocity": 92.3,
-        "90th % EV": 103.5,
-        "Barrel %": 6.6,
-        "Blasts/Contact": 0.1446,
-        "LA+SwtSpt%": 40.8,
-        "Avg Bat Speed": 72.183,
-        "Fast Swing %": 0.2393,
-        "Avg Swing Length": 7.4294,
-        "Chase %": 30.2,
-        "K%": 21.8,
-        "Z-Contact%": 80.4,
-        "Whiff %": 25.3,
-        "BB%": 6.6
-      }
-    ],
     "Taylor Trammell": [
       {
         "season": 2026,
@@ -5516,6 +5496,26 @@
         "Z-Contact%": 72.9,
         "Whiff %": 38.5,
         "BB%": 10.0
+      }
+    ],
+    "Blaze Alexander": [
+      {
+        "season": 2026,
+        "xSLG": 0.452,
+        "xwOBACON": 0.425,
+        "Avg Exit Velocity": 92.3,
+        "90th % EV": 103.5,
+        "Barrel %": 6.6,
+        "Blasts/Contact": 0.1446,
+        "LA+SwtSpt%": 40.8,
+        "Avg Bat Speed": 72.183,
+        "Fast Swing %": 0.2393,
+        "Avg Swing Length": 7.4294,
+        "Chase %": 30.2,
+        "K%": 21.8,
+        "Z-Contact%": 80.4,
+        "Whiff %": 25.3,
+        "BB%": 6.6
       }
     ],
     "Jos\u00e9 Tena": [
@@ -5598,26 +5598,6 @@
         "BB%": 14.6
       }
     ],
-    "Daniel Schneemann": [
-      {
-        "season": 2026,
-        "xSLG": 0.372,
-        "xwOBACON": 0.376,
-        "Avg Exit Velocity": 88.0,
-        "90th % EV": 102.8,
-        "Barrel %": 8.4,
-        "Blasts/Contact": 0.1296,
-        "LA+SwtSpt%": 33.7,
-        "Avg Bat Speed": 71.2128,
-        "Fast Swing %": 0.1133,
-        "Avg Swing Length": 7.0367,
-        "Chase %": 33.4,
-        "K%": 29.4,
-        "Z-Contact%": 83.0,
-        "Whiff %": 31.5,
-        "BB%": 8.4
-      }
-    ],
     "Ben Williamson": [
       {
         "season": 2026,
@@ -5638,24 +5618,24 @@
         "BB%": 7.7
       }
     ],
-    "Carlos Narv\u00e1ez": [
+    "Daniel Schneemann": [
       {
         "season": 2026,
-        "xSLG": 0.303,
-        "xwOBACON": 0.331,
-        "Avg Exit Velocity": 90.6,
-        "90th % EV": 102.7,
-        "Barrel %": 6.6,
-        "Blasts/Contact": 0.1014,
-        "LA+SwtSpt%": 35.1,
-        "Avg Bat Speed": 72.0652,
-        "Fast Swing %": 0.2012,
-        "Avg Swing Length": 7.5399,
-        "Chase %": 32.3,
-        "K%": 31.6,
-        "Z-Contact%": 76.4,
-        "Whiff %": 33.2,
-        "BB%": 6.7
+        "xSLG": 0.372,
+        "xwOBACON": 0.376,
+        "Avg Exit Velocity": 88.0,
+        "90th % EV": 102.8,
+        "Barrel %": 8.4,
+        "Blasts/Contact": 0.1296,
+        "LA+SwtSpt%": 33.7,
+        "Avg Bat Speed": 71.2128,
+        "Fast Swing %": 0.1133,
+        "Avg Swing Length": 7.0367,
+        "Chase %": 33.4,
+        "K%": 29.4,
+        "Z-Contact%": 83.0,
+        "Whiff %": 31.5,
+        "BB%": 8.4
       }
     ],
     "Aaron Judge": [
@@ -5676,6 +5656,26 @@
         "Z-Contact%": 78.0,
         "Whiff %": 32.8,
         "BB%": 15.1
+      }
+    ],
+    "Carlos Narv\u00e1ez": [
+      {
+        "season": 2026,
+        "xSLG": 0.303,
+        "xwOBACON": 0.331,
+        "Avg Exit Velocity": 90.6,
+        "90th % EV": 102.7,
+        "Barrel %": 6.6,
+        "Blasts/Contact": 0.1014,
+        "LA+SwtSpt%": 35.1,
+        "Avg Bat Speed": 72.0652,
+        "Fast Swing %": 0.2012,
+        "Avg Swing Length": 7.5399,
+        "Chase %": 32.3,
+        "K%": 31.6,
+        "Z-Contact%": 76.4,
+        "Whiff %": 33.2,
+        "BB%": 6.7
       }
     ],
     "Ryan Waldschmidt": [
@@ -6018,26 +6018,6 @@
         "BB%": 4.1
       }
     ],
-    "Pedro Ram\u00edrez": [
-      {
-        "season": 2026,
-        "xSLG": 0.342,
-        "xwOBACON": 0.313,
-        "Avg Exit Velocity": 89.0,
-        "90th % EV": 104.2,
-        "Barrel %": 4.1,
-        "Blasts/Contact": 0.1579,
-        "LA+SwtSpt%": 29.7,
-        "Avg Bat Speed": 72.1275,
-        "Fast Swing %": 0.2235,
-        "Avg Swing Length": 7.5291,
-        "Chase %": 33.0,
-        "K%": 18.4,
-        "Z-Contact%": 88.8,
-        "Whiff %": 20.2,
-        "BB%": 7.5
-      }
-    ],
     "Cooper Pratt": [
       {
         "season": 2026,
@@ -6056,6 +6036,26 @@
         "Z-Contact%": 86.9,
         "Whiff %": 21.8,
         "BB%": 9.8
+      }
+    ],
+    "Pedro Ram\u00edrez": [
+      {
+        "season": 2026,
+        "xSLG": 0.342,
+        "xwOBACON": 0.313,
+        "Avg Exit Velocity": 89.0,
+        "90th % EV": 104.2,
+        "Barrel %": 4.1,
+        "Blasts/Contact": 0.1579,
+        "LA+SwtSpt%": 29.7,
+        "Avg Bat Speed": 72.1275,
+        "Fast Swing %": 0.2235,
+        "Avg Swing Length": 7.5291,
+        "Chase %": 33.0,
+        "K%": 18.4,
+        "Z-Contact%": 88.8,
+        "Whiff %": 20.2,
+        "BB%": 7.5
       }
     ],
     "Christian V\u00e1zquez": [
@@ -6138,26 +6138,6 @@
         "BB%": 10.4
       }
     ],
-    "Kerry Carpenter": [
-      {
-        "season": 2026,
-        "xSLG": 0.388,
-        "xwOBACON": 0.376,
-        "Avg Exit Velocity": 89.8,
-        "90th % EV": 102.4,
-        "Barrel %": 9.6,
-        "Blasts/Contact": 0.1095,
-        "LA+SwtSpt%": 35.2,
-        "Avg Bat Speed": 71.7706,
-        "Fast Swing %": 0.1648,
-        "Avg Swing Length": 7.3918,
-        "Chase %": 36.3,
-        "K%": 29.0,
-        "Z-Contact%": 81.9,
-        "Whiff %": 28.6,
-        "BB%": 6.9
-      }
-    ],
     "Adolis Garc\u00eda": [
       {
         "season": 2026,
@@ -6176,6 +6156,26 @@
         "Z-Contact%": 78.3,
         "Whiff %": 34.6,
         "BB%": 8.1
+      }
+    ],
+    "Kerry Carpenter": [
+      {
+        "season": 2026,
+        "xSLG": 0.388,
+        "xwOBACON": 0.376,
+        "Avg Exit Velocity": 89.8,
+        "90th % EV": 102.4,
+        "Barrel %": 9.6,
+        "Blasts/Contact": 0.1095,
+        "LA+SwtSpt%": 35.2,
+        "Avg Bat Speed": 71.7706,
+        "Fast Swing %": 0.1648,
+        "Avg Swing Length": 7.3918,
+        "Chase %": 36.3,
+        "K%": 29.0,
+        "Z-Contact%": 81.9,
+        "Whiff %": 28.6,
+        "BB%": 6.9
       }
     ],
     "Agust\u00edn Ram\u00edrez": [
@@ -6218,26 +6218,6 @@
         "BB%": 10.2
       }
     ],
-    "Miguel Andujar": [
-      {
-        "season": 2026,
-        "xSLG": 0.376,
-        "xwOBACON": 0.327,
-        "Avg Exit Velocity": 88.3,
-        "90th % EV": 105.5,
-        "Barrel %": 4.5,
-        "Blasts/Contact": 0.118,
-        "LA+SwtSpt%": 26.4,
-        "Avg Bat Speed": 71.2125,
-        "Fast Swing %": 0.1921,
-        "Avg Swing Length": 7.5535,
-        "Chase %": 40.8,
-        "K%": 15.0,
-        "Z-Contact%": 88.3,
-        "Whiff %": 18.5,
-        "BB%": 4.3
-      }
-    ],
     "Miguel Amaya": [
       {
         "season": 2026,
@@ -6256,6 +6236,26 @@
         "Z-Contact%": 82.9,
         "Whiff %": 27.3,
         "BB%": 9.1
+      }
+    ],
+    "Miguel Andujar": [
+      {
+        "season": 2026,
+        "xSLG": 0.376,
+        "xwOBACON": 0.327,
+        "Avg Exit Velocity": 88.3,
+        "90th % EV": 105.5,
+        "Barrel %": 4.5,
+        "Blasts/Contact": 0.118,
+        "LA+SwtSpt%": 26.4,
+        "Avg Bat Speed": 71.2125,
+        "Fast Swing %": 0.1921,
+        "Avg Swing Length": 7.5535,
+        "Chase %": 40.8,
+        "K%": 15.0,
+        "Z-Contact%": 88.3,
+        "Whiff %": 18.5,
+        "BB%": 4.3
       }
     ],
     "Dalton Rushing": [
@@ -6498,26 +6498,6 @@
         "BB%": 10.3
       }
     ],
-    "Roman Anthony": [
-      {
-        "season": 2026,
-        "xSLG": 0.424,
-        "xwOBACON": 0.424,
-        "Avg Exit Velocity": 92.0,
-        "90th % EV": 106.9,
-        "Barrel %": 11.7,
-        "Blasts/Contact": 0.209,
-        "LA+SwtSpt%": 38.4,
-        "Avg Bat Speed": 75.5579,
-        "Fast Swing %": 0.5463,
-        "Avg Swing Length": 7.4515,
-        "Chase %": 23.7,
-        "K%": 27.3,
-        "Z-Contact%": 82.3,
-        "Whiff %": 29.0,
-        "BB%": 12.0
-      }
-    ],
     "Ke'Bryan Hayes": [
       {
         "season": 2026,
@@ -6536,6 +6516,26 @@
         "Z-Contact%": 89.0,
         "Whiff %": 23.4,
         "BB%": 5.4
+      }
+    ],
+    "Roman Anthony": [
+      {
+        "season": 2026,
+        "xSLG": 0.424,
+        "xwOBACON": 0.424,
+        "Avg Exit Velocity": 92.0,
+        "90th % EV": 106.9,
+        "Barrel %": 11.7,
+        "Blasts/Contact": 0.209,
+        "LA+SwtSpt%": 38.4,
+        "Avg Bat Speed": 75.5579,
+        "Fast Swing %": 0.5463,
+        "Avg Swing Length": 7.4515,
+        "Chase %": 23.7,
+        "K%": 27.3,
+        "Z-Contact%": 82.3,
+        "Whiff %": 29.0,
+        "BB%": 12.0
       }
     ],
     "Tyrone Taylor": [
@@ -6878,26 +6878,6 @@
         "BB%": 5.0
       }
     ],
-    "Christian Koss": [
-      {
-        "season": 2026,
-        "xSLG": 0.278,
-        "xwOBACON": 0.296,
-        "Avg Exit Velocity": 84.1,
-        "90th % EV": 100.8,
-        "Barrel %": 4.0,
-        "Blasts/Contact": 0.1,
-        "LA+SwtSpt%": 29.1,
-        "Avg Bat Speed": 69.3376,
-        "Fast Swing %": 0.0625,
-        "Avg Swing Length": 7.1034,
-        "Chase %": 39.5,
-        "K%": 26.7,
-        "Z-Contact%": 79.9,
-        "Whiff %": 30.1,
-        "BB%": 4.1
-      }
-    ],
     "Jorge Mateo": [
       {
         "season": 2026,
@@ -6916,6 +6896,26 @@
         "Z-Contact%": 80.4,
         "Whiff %": 32.0,
         "BB%": 5.0
+      }
+    ],
+    "Christian Koss": [
+      {
+        "season": 2026,
+        "xSLG": 0.278,
+        "xwOBACON": 0.296,
+        "Avg Exit Velocity": 84.1,
+        "90th % EV": 100.8,
+        "Barrel %": 4.0,
+        "Blasts/Contact": 0.1,
+        "LA+SwtSpt%": 29.1,
+        "Avg Bat Speed": 69.3376,
+        "Fast Swing %": 0.0625,
+        "Avg Swing Length": 7.1034,
+        "Chase %": 39.5,
+        "K%": 26.7,
+        "Z-Contact%": 79.9,
+        "Whiff %": 30.1,
+        "BB%": 4.1
       }
     ],
     "Edgar Quero": [
@@ -7158,26 +7158,6 @@
         "BB%": 9.4
       }
     ],
-    "Noelvi Marte": [
-      {
-        "season": 2026,
-        "xSLG": 0.304,
-        "xwOBACON": 0.294,
-        "Avg Exit Velocity": 87.9,
-        "90th % EV": 105.9,
-        "Barrel %": 5.1,
-        "Blasts/Contact": 0.1094,
-        "LA+SwtSpt%": 19.4,
-        "Avg Bat Speed": 72.2329,
-        "Fast Swing %": 0.272,
-        "Avg Swing Length": 7.3552,
-        "Chase %": 41.2,
-        "K%": 25.9,
-        "Z-Contact%": 87.8,
-        "Whiff %": 27.5,
-        "BB%": 5.0
-      }
-    ],
     "Lourdes Gurriel Jr.": [
       {
         "season": 2026,
@@ -7195,6 +7175,26 @@
         "K%": 18.9,
         "Z-Contact%": 88.2,
         "Whiff %": 24.2,
+        "BB%": 5.0
+      }
+    ],
+    "Noelvi Marte": [
+      {
+        "season": 2026,
+        "xSLG": 0.304,
+        "xwOBACON": 0.294,
+        "Avg Exit Velocity": 87.9,
+        "90th % EV": 105.9,
+        "Barrel %": 5.1,
+        "Blasts/Contact": 0.1094,
+        "LA+SwtSpt%": 19.4,
+        "Avg Bat Speed": 72.2329,
+        "Fast Swing %": 0.272,
+        "Avg Swing Length": 7.3552,
+        "Chase %": 41.2,
+        "K%": 25.9,
+        "Z-Contact%": 87.8,
+        "Whiff %": 27.5,
         "BB%": 5.0
       }
     ],
@@ -7278,6 +7278,26 @@
         "BB%": 3.1
       }
     ],
+    "Tommy White": [
+      {
+        "season": 2026,
+        "xSLG": 0.383,
+        "xwOBACON": 0.344,
+        "Avg Exit Velocity": 85.9,
+        "90th % EV": 102.1,
+        "Barrel %": 7.1,
+        "Blasts/Contact": 0.1119,
+        "LA+SwtSpt%": 30.3,
+        "Avg Bat Speed": 69.2799,
+        "Fast Swing %": 0.1275,
+        "Avg Swing Length": 7.3491,
+        "Chase %": 42.4,
+        "K%": 17.9,
+        "Z-Contact%": 87.0,
+        "Whiff %": 21.9,
+        "BB%": 2.6
+      }
+    ],
     "Petey Halpin": [
       {
         "season": 2026,
@@ -7296,26 +7316,6 @@
         "Z-Contact%": 80.5,
         "Whiff %": 25.1,
         "BB%": 4.6
-      }
-    ],
-    "Alex Call": [
-      {
-        "season": 2026,
-        "xSLG": 0.261,
-        "xwOBACON": 0.252,
-        "Avg Exit Velocity": 83.6,
-        "90th % EV": 97.2,
-        "Barrel %": 2.3,
-        "Blasts/Contact": 0.0338,
-        "LA+SwtSpt%": 27.7,
-        "Avg Bat Speed": 66.6207,
-        "Fast Swing %": 0.0317,
-        "Avg Swing Length": 6.7258,
-        "Chase %": 24.3,
-        "K%": 17.9,
-        "Z-Contact%": 89.5,
-        "Whiff %": 17.2,
-        "BB%": 11.8
       }
     ],
     "Victor Scott II": [
@@ -7338,24 +7338,24 @@
         "BB%": 8.2
       }
     ],
-    "Tommy White": [
+    "Alex Call": [
       {
         "season": 2026,
-        "xSLG": 0.383,
-        "xwOBACON": 0.344,
-        "Avg Exit Velocity": 85.9,
-        "90th % EV": 102.1,
-        "Barrel %": 7.1,
-        "Blasts/Contact": 0.1119,
-        "LA+SwtSpt%": 30.3,
-        "Avg Bat Speed": 69.2799,
-        "Fast Swing %": 0.1275,
-        "Avg Swing Length": 7.3491,
-        "Chase %": 42.4,
+        "xSLG": 0.261,
+        "xwOBACON": 0.252,
+        "Avg Exit Velocity": 83.6,
+        "90th % EV": 97.2,
+        "Barrel %": 2.3,
+        "Blasts/Contact": 0.0338,
+        "LA+SwtSpt%": 27.7,
+        "Avg Bat Speed": 66.6207,
+        "Fast Swing %": 0.0317,
+        "Avg Swing Length": 6.7258,
+        "Chase %": 24.3,
         "K%": 17.9,
-        "Z-Contact%": 87.0,
-        "Whiff %": 21.9,
-        "BB%": 2.6
+        "Z-Contact%": 89.5,
+        "Whiff %": 17.2,
+        "BB%": 11.8
       }
     ],
     "Leo Jim\u00e9nez": [
@@ -7478,26 +7478,6 @@
         "BB%": 9.8
       }
     ],
-    "Jahmai Jones": [
-      {
-        "season": 2026,
-        "xSLG": 0.428,
-        "xwOBACON": 0.439,
-        "Avg Exit Velocity": 90.6,
-        "90th % EV": 106.3,
-        "Barrel %": 10.8,
-        "Blasts/Contact": 0.1719,
-        "LA+SwtSpt%": 34.3,
-        "Avg Bat Speed": 73.2827,
-        "Fast Swing %": 0.3492,
-        "Avg Swing Length": 7.672,
-        "Chase %": 29.7,
-        "K%": 32.0,
-        "Z-Contact%": 76.8,
-        "Whiff %": 34.7,
-        "BB%": 9.4
-      }
-    ],
     "Brett Bateman": [
       {
         "season": 2026,
@@ -7516,6 +7496,26 @@
         "Z-Contact%": 92.2,
         "Whiff %": 14.7,
         "BB%": 9.9
+      }
+    ],
+    "Jahmai Jones": [
+      {
+        "season": 2026,
+        "xSLG": 0.428,
+        "xwOBACON": 0.439,
+        "Avg Exit Velocity": 90.6,
+        "90th % EV": 106.3,
+        "Barrel %": 10.8,
+        "Blasts/Contact": 0.1719,
+        "LA+SwtSpt%": 34.3,
+        "Avg Bat Speed": 73.2827,
+        "Fast Swing %": 0.3492,
+        "Avg Swing Length": 7.672,
+        "Chase %": 29.7,
+        "K%": 32.0,
+        "Z-Contact%": 76.8,
+        "Whiff %": 34.7,
+        "BB%": 9.4
       }
     ],
     "Jordan Beck": [
@@ -7538,26 +7538,6 @@
         "BB%": 7.8
       }
     ],
-    "Yohendrick Pi\u00f1ango": [
-      {
-        "season": 2026,
-        "xSLG": 0.398,
-        "xwOBACON": 0.383,
-        "Avg Exit Velocity": 90.9,
-        "90th % EV": 106.8,
-        "Barrel %": 8.0,
-        "Blasts/Contact": 0.1743,
-        "LA+SwtSpt%": 35.2,
-        "Avg Bat Speed": 75.595,
-        "Fast Swing %": 0.5741,
-        "Avg Swing Length": 7.1493,
-        "Chase %": 35.2,
-        "K%": 24.4,
-        "Z-Contact%": 80.0,
-        "Whiff %": 25.6,
-        "BB%": 6.1
-      }
-    ],
     "Thomas Saggese": [
       {
         "season": 2026,
@@ -7578,24 +7558,24 @@
         "BB%": 7.2
       }
     ],
-    "Samad Taylor": [
+    "Yohendrick Pi\u00f1ango": [
       {
         "season": 2026,
-        "xSLG": 0.328,
-        "xwOBACON": 0.37,
-        "Avg Exit Velocity": 85.9,
-        "90th % EV": 98.7,
-        "Barrel %": 3.6,
-        "Blasts/Contact": 0.0542,
-        "LA+SwtSpt%": 33.3,
-        "Avg Bat Speed": 69.1577,
-        "Fast Swing %": 0.0568,
-        "Avg Swing Length": 7.0175,
-        "Chase %": 30.2,
-        "K%": 25.7,
-        "Z-Contact%": 85.1,
-        "Whiff %": 25.2,
-        "BB%": 10.3
+        "xSLG": 0.398,
+        "xwOBACON": 0.383,
+        "Avg Exit Velocity": 90.9,
+        "90th % EV": 106.8,
+        "Barrel %": 8.0,
+        "Blasts/Contact": 0.1743,
+        "LA+SwtSpt%": 35.2,
+        "Avg Bat Speed": 75.595,
+        "Fast Swing %": 0.5741,
+        "Avg Swing Length": 7.1493,
+        "Chase %": 35.2,
+        "K%": 24.4,
+        "Z-Contact%": 80.0,
+        "Whiff %": 25.6,
+        "BB%": 6.1
       }
     ],
     "Wenceel P\u00e9rez": [
@@ -7616,6 +7596,26 @@
         "Z-Contact%": 87.6,
         "Whiff %": 18.2,
         "BB%": 8.0
+      }
+    ],
+    "Samad Taylor": [
+      {
+        "season": 2026,
+        "xSLG": 0.328,
+        "xwOBACON": 0.37,
+        "Avg Exit Velocity": 85.9,
+        "90th % EV": 98.7,
+        "Barrel %": 3.6,
+        "Blasts/Contact": 0.0542,
+        "LA+SwtSpt%": 33.3,
+        "Avg Bat Speed": 69.1577,
+        "Fast Swing %": 0.0568,
+        "Avg Swing Length": 7.0175,
+        "Chase %": 30.2,
+        "K%": 25.7,
+        "Z-Contact%": 85.1,
+        "Whiff %": 25.2,
+        "BB%": 10.3
       }
     ],
     "Jorge Barrosa": [
@@ -7738,6 +7738,26 @@
         "BB%": 5.4
       }
     ],
+    "James McCann": [
+      {
+        "season": 2026,
+        "xSLG": 0.431,
+        "xwOBACON": 0.39,
+        "Avg Exit Velocity": 89.9,
+        "90th % EV": 105.2,
+        "Barrel %": 11.1,
+        "Blasts/Contact": 0.1632,
+        "LA+SwtSpt%": 37.6,
+        "Avg Bat Speed": 71.9901,
+        "Fast Swing %": 0.2344,
+        "Avg Swing Length": 7.0402,
+        "Chase %": 39.9,
+        "K%": 25.3,
+        "Z-Contact%": 86.0,
+        "Whiff %": 30.2,
+        "BB%": 3.6
+      }
+    ],
     "Drew Cavanaugh": [
       {
         "season": 2026,
@@ -7776,26 +7796,6 @@
         "Z-Contact%": 82.5,
         "Whiff %": 25.6,
         "BB%": 6.0
-      }
-    ],
-    "James McCann": [
-      {
-        "season": 2026,
-        "xSLG": 0.431,
-        "xwOBACON": 0.39,
-        "Avg Exit Velocity": 89.9,
-        "90th % EV": 105.2,
-        "Barrel %": 11.1,
-        "Blasts/Contact": 0.1632,
-        "LA+SwtSpt%": 37.6,
-        "Avg Bat Speed": 71.9901,
-        "Fast Swing %": 0.2344,
-        "Avg Swing Length": 7.0402,
-        "Chase %": 39.9,
-        "K%": 25.3,
-        "Z-Contact%": 86.0,
-        "Whiff %": 30.2,
-        "BB%": 3.6
       }
     ],
     "Rafael Flores Jr.": [
@@ -7838,26 +7838,6 @@
         "BB%": 6.2
       }
     ],
-    "John Rave": [
-      {
-        "season": 2026,
-        "xSLG": 0.391,
-        "xwOBACON": 0.368,
-        "Avg Exit Velocity": 87.9,
-        "90th % EV": 103.8,
-        "Barrel %": 10.5,
-        "Blasts/Contact": 0.1771,
-        "LA+SwtSpt%": 31.1,
-        "Avg Bat Speed": 73.7892,
-        "Fast Swing %": 0.3656,
-        "Avg Swing Length": 7.2415,
-        "Chase %": 27.4,
-        "K%": 23.6,
-        "Z-Contact%": 83.1,
-        "Whiff %": 24.3,
-        "BB%": 10.6
-      }
-    ],
     "Daniel Susac": [
       {
         "season": 2026,
@@ -7876,6 +7856,26 @@
         "Z-Contact%": 88.6,
         "Whiff %": 23.8,
         "BB%": 5.0
+      }
+    ],
+    "John Rave": [
+      {
+        "season": 2026,
+        "xSLG": 0.391,
+        "xwOBACON": 0.368,
+        "Avg Exit Velocity": 87.9,
+        "90th % EV": 103.8,
+        "Barrel %": 10.5,
+        "Blasts/Contact": 0.1771,
+        "LA+SwtSpt%": 31.1,
+        "Avg Bat Speed": 73.7892,
+        "Fast Swing %": 0.3656,
+        "Avg Swing Length": 7.2415,
+        "Chase %": 27.4,
+        "K%": 23.6,
+        "Z-Contact%": 83.1,
+        "Whiff %": 24.3,
+        "BB%": 10.6
       }
     ],
     "Edwin Arroyo": [
@@ -7958,26 +7958,6 @@
         "BB%": 10.2
       }
     ],
-    "Jose Trevino": [
-      {
-        "season": 2026,
-        "xSLG": 0.295,
-        "xwOBACON": 0.271,
-        "Avg Exit Velocity": 85.8,
-        "90th % EV": 100.3,
-        "Barrel %": 2.4,
-        "Blasts/Contact": 0.0919,
-        "LA+SwtSpt%": 30.2,
-        "Avg Bat Speed": 68.4347,
-        "Fast Swing %": 0.0259,
-        "Avg Swing Length": 7.1482,
-        "Chase %": 37.6,
-        "K%": 18.6,
-        "Z-Contact%": 88.3,
-        "Whiff %": 21.5,
-        "BB%": 0.6
-      }
-    ],
     "Davis Schneider": [
       {
         "season": 2026,
@@ -7996,6 +7976,26 @@
         "Z-Contact%": 76.7,
         "Whiff %": 32.5,
         "BB%": 18.6
+      }
+    ],
+    "Jose Trevino": [
+      {
+        "season": 2026,
+        "xSLG": 0.295,
+        "xwOBACON": 0.271,
+        "Avg Exit Velocity": 85.8,
+        "90th % EV": 100.3,
+        "Barrel %": 2.4,
+        "Blasts/Contact": 0.0919,
+        "LA+SwtSpt%": 30.2,
+        "Avg Bat Speed": 68.4347,
+        "Fast Swing %": 0.0259,
+        "Avg Swing Length": 7.1482,
+        "Chase %": 37.6,
+        "K%": 18.6,
+        "Z-Contact%": 88.3,
+        "Whiff %": 21.5,
+        "BB%": 0.6
       }
     ],
     "Blake Dunn": [
@@ -8018,26 +8018,6 @@
         "BB%": 6.5
       }
     ],
-    "Sung-Mun Song": [
-      {
-        "season": 2026,
-        "xSLG": 0.267,
-        "xwOBACON": 0.251,
-        "Avg Exit Velocity": 87.3,
-        "90th % EV": 102.4,
-        "Barrel %": 3.8,
-        "Blasts/Contact": 0.0971,
-        "LA+SwtSpt%": 26.0,
-        "Avg Bat Speed": 71.856,
-        "Fast Swing %": 0.1455,
-        "Avg Swing Length": 7.6073,
-        "Chase %": 23.6,
-        "K%": 20.1,
-        "Z-Contact%": 84.5,
-        "Whiff %": 21.9,
-        "BB%": 12.3
-      }
-    ],
     "Graham Pauley": [
       {
         "season": 2026,
@@ -8058,6 +8038,26 @@
         "BB%": 5.2
       }
     ],
+    "Sung-Mun Song": [
+      {
+        "season": 2026,
+        "xSLG": 0.267,
+        "xwOBACON": 0.251,
+        "Avg Exit Velocity": 87.3,
+        "90th % EV": 102.4,
+        "Barrel %": 3.8,
+        "Blasts/Contact": 0.0971,
+        "LA+SwtSpt%": 26.0,
+        "Avg Bat Speed": 71.856,
+        "Fast Swing %": 0.1455,
+        "Avg Swing Length": 7.6073,
+        "Chase %": 23.6,
+        "K%": 20.1,
+        "Z-Contact%": 84.5,
+        "Whiff %": 21.9,
+        "BB%": 12.3
+      }
+    ],
     "Jake Meyers": [
       {
         "season": 2026,
@@ -8076,6 +8076,26 @@
         "Z-Contact%": 87.6,
         "Whiff %": 21.8,
         "BB%": 6.5
+      }
+    ],
+    "Dustin Harris": [
+      {
+        "season": 2026,
+        "xSLG": 0.36,
+        "xwOBACON": 0.321,
+        "Avg Exit Velocity": 85.2,
+        "90th % EV": 100.2,
+        "Barrel %": 1.7,
+        "Blasts/Contact": 0.087,
+        "LA+SwtSpt%": 39.8,
+        "Avg Bat Speed": 66.7744,
+        "Fast Swing %": 0.0312,
+        "Avg Swing Length": 6.558,
+        "Chase %": 33.2,
+        "K%": 13.2,
+        "Z-Contact%": 87.5,
+        "Whiff %": 19.3,
+        "BB%": 7.2
       }
     ],
     "H\u00e9ctor Rodr\u00edguez": [
@@ -8118,26 +8138,6 @@
         "BB%": 9.2
       }
     ],
-    "Dustin Harris": [
-      {
-        "season": 2026,
-        "xSLG": 0.36,
-        "xwOBACON": 0.321,
-        "Avg Exit Velocity": 85.2,
-        "90th % EV": 100.2,
-        "Barrel %": 1.7,
-        "Blasts/Contact": 0.087,
-        "LA+SwtSpt%": 39.8,
-        "Avg Bat Speed": 66.7744,
-        "Fast Swing %": 0.0312,
-        "Avg Swing Length": 6.558,
-        "Chase %": 33.2,
-        "K%": 13.2,
-        "Z-Contact%": 87.5,
-        "Whiff %": 19.3,
-        "BB%": 7.2
-      }
-    ],
     "Gabriel Arias": [
       {
         "season": 2026,
@@ -8178,26 +8178,6 @@
         "BB%": 6.0
       }
     ],
-    "Mitch Garver": [
-      {
-        "season": 2026,
-        "xSLG": 0.341,
-        "xwOBACON": 0.373,
-        "Avg Exit Velocity": 90.6,
-        "90th % EV": 104.1,
-        "Barrel %": 9.1,
-        "Blasts/Contact": 0.1366,
-        "LA+SwtSpt%": 28.6,
-        "Avg Bat Speed": 72.5004,
-        "Fast Swing %": 0.188,
-        "Avg Swing Length": 7.3977,
-        "Chase %": 24.9,
-        "K%": 32.9,
-        "Z-Contact%": 76.4,
-        "Whiff %": 33.7,
-        "BB%": 14.8
-      }
-    ],
     "Victor Robles": [
       {
         "season": 2026,
@@ -8216,6 +8196,26 @@
         "Z-Contact%": 89.0,
         "Whiff %": 21.6,
         "BB%": 6.0
+      }
+    ],
+    "Mitch Garver": [
+      {
+        "season": 2026,
+        "xSLG": 0.341,
+        "xwOBACON": 0.373,
+        "Avg Exit Velocity": 90.6,
+        "90th % EV": 104.1,
+        "Barrel %": 9.1,
+        "Blasts/Contact": 0.1366,
+        "LA+SwtSpt%": 28.6,
+        "Avg Bat Speed": 72.5004,
+        "Fast Swing %": 0.188,
+        "Avg Swing Length": 7.3977,
+        "Chase %": 24.9,
+        "K%": 32.9,
+        "Z-Contact%": 76.4,
+        "Whiff %": 33.7,
+        "BB%": 14.8
       }
     ],
     "Tyler Tolbert": [
@@ -8258,26 +8258,6 @@
         "BB%": 10.8
       }
     ],
-    "Ha-Seong Kim": [
-      {
-        "season": 2026,
-        "xSLG": 0.206,
-        "xwOBACON": 0.225,
-        "Avg Exit Velocity": 85.9,
-        "90th % EV": 102.0,
-        "Barrel %": 2.2,
-        "Blasts/Contact": 0.0753,
-        "LA+SwtSpt%": 21.7,
-        "Avg Bat Speed": 71.7607,
-        "Fast Swing %": 0.1752,
-        "Avg Swing Length": 7.0762,
-        "Chase %": 26.8,
-        "K%": 25.9,
-        "Z-Contact%": 86.7,
-        "Whiff %": 20.2,
-        "BB%": 10.9
-      }
-    ],
     "Adam Frazier": [
       {
         "season": 2026,
@@ -8296,6 +8276,26 @@
         "Z-Contact%": 84.4,
         "Whiff %": 26.4,
         "BB%": 7.5
+      }
+    ],
+    "Ha-Seong Kim": [
+      {
+        "season": 2026,
+        "xSLG": 0.206,
+        "xwOBACON": 0.225,
+        "Avg Exit Velocity": 85.9,
+        "90th % EV": 102.0,
+        "Barrel %": 2.2,
+        "Blasts/Contact": 0.0753,
+        "LA+SwtSpt%": 21.7,
+        "Avg Bat Speed": 71.7607,
+        "Fast Swing %": 0.1752,
+        "Avg Swing Length": 7.0762,
+        "Chase %": 26.8,
+        "K%": 25.9,
+        "Z-Contact%": 86.7,
+        "Whiff %": 20.2,
+        "BB%": 10.9
       }
     ],
     "Christian Moore": [
@@ -8378,26 +8378,6 @@
         "BB%": 6.2
       }
     ],
-    "Kyle Teel": [
-      {
-        "season": 2026,
-        "xSLG": 0.375,
-        "xwOBACON": 0.431,
-        "Avg Exit Velocity": 85.7,
-        "90th % EV": 104.6,
-        "Barrel %": 11.4,
-        "Blasts/Contact": 0.1212,
-        "LA+SwtSpt%": 41.4,
-        "Avg Bat Speed": 72.1134,
-        "Fast Swing %": 0.2915,
-        "Avg Swing Length": 6.9017,
-        "Chase %": 31.3,
-        "K%": 35.4,
-        "Z-Contact%": 76.8,
-        "Whiff %": 35.6,
-        "BB%": 13.2
-      }
-    ],
     "MJ Melendez": [
       {
         "season": 2026,
@@ -8418,24 +8398,24 @@
         "BB%": 11.8
       }
     ],
-    "Tommy Troy": [
+    "Kyle Teel": [
       {
         "season": 2026,
-        "xSLG": 0.393,
-        "xwOBACON": 0.36,
-        "Avg Exit Velocity": 84.9,
-        "90th % EV": 103.3,
-        "Barrel %": 9.4,
-        "Blasts/Contact": 0.1235,
-        "LA+SwtSpt%": 31.3,
-        "Avg Bat Speed": 71.9985,
-        "Fast Swing %": 0.2326,
-        "Avg Swing Length": 6.9625,
-        "Chase %": 27.7,
-        "K%": 23.8,
-        "Z-Contact%": 81.9,
-        "Whiff %": 25.9,
-        "BB%": 9.1
+        "xSLG": 0.375,
+        "xwOBACON": 0.431,
+        "Avg Exit Velocity": 85.7,
+        "90th % EV": 104.6,
+        "Barrel %": 11.4,
+        "Blasts/Contact": 0.1212,
+        "LA+SwtSpt%": 41.4,
+        "Avg Bat Speed": 72.1134,
+        "Fast Swing %": 0.2915,
+        "Avg Swing Length": 6.9017,
+        "Chase %": 31.3,
+        "K%": 35.4,
+        "Z-Contact%": 76.8,
+        "Whiff %": 35.6,
+        "BB%": 13.2
       }
     ],
     "Osleivis Basabe": [
@@ -8456,6 +8436,26 @@
         "Z-Contact%": 81.0,
         "Whiff %": 23.3,
         "BB%": 6.3
+      }
+    ],
+    "Tommy Troy": [
+      {
+        "season": 2026,
+        "xSLG": 0.393,
+        "xwOBACON": 0.36,
+        "Avg Exit Velocity": 84.9,
+        "90th % EV": 103.3,
+        "Barrel %": 9.4,
+        "Blasts/Contact": 0.1235,
+        "LA+SwtSpt%": 31.3,
+        "Avg Bat Speed": 71.9985,
+        "Fast Swing %": 0.2326,
+        "Avg Swing Length": 6.9625,
+        "Chase %": 27.7,
+        "K%": 23.8,
+        "Z-Contact%": 81.9,
+        "Whiff %": 25.9,
+        "BB%": 9.1
       }
     ],
     "Carlos Correa": [
@@ -8538,26 +8538,6 @@
         "BB%": 4.3
       }
     ],
-    "Jordan Lawlar": [
-      {
-        "season": 2026,
-        "xSLG": 0.401,
-        "xwOBACON": 0.406,
-        "Avg Exit Velocity": 88.4,
-        "90th % EV": 102.9,
-        "Barrel %": 7.0,
-        "Blasts/Contact": 0.1274,
-        "LA+SwtSpt%": 38.4,
-        "Avg Bat Speed": 69.5428,
-        "Fast Swing %": 0.0381,
-        "Avg Swing Length": 7.2072,
-        "Chase %": 26.7,
-        "K%": 28.7,
-        "Z-Contact%": 83.5,
-        "Whiff %": 26.9,
-        "BB%": 3.7
-      }
-    ],
     "Abimelec Ortiz": [
       {
         "season": 2026,
@@ -8576,6 +8556,26 @@
         "Z-Contact%": 85.0,
         "Whiff %": 23.4,
         "BB%": 5.1
+      }
+    ],
+    "Jordan Lawlar": [
+      {
+        "season": 2026,
+        "xSLG": 0.401,
+        "xwOBACON": 0.406,
+        "Avg Exit Velocity": 88.4,
+        "90th % EV": 102.9,
+        "Barrel %": 7.0,
+        "Blasts/Contact": 0.1274,
+        "LA+SwtSpt%": 38.4,
+        "Avg Bat Speed": 69.5428,
+        "Fast Swing %": 0.0381,
+        "Avg Swing Length": 7.2072,
+        "Chase %": 26.7,
+        "K%": 28.7,
+        "Z-Contact%": 83.5,
+        "Whiff %": 26.9,
+        "BB%": 3.7
       }
     ],
     "Matt Wallner": [
@@ -8698,26 +8698,6 @@
         "BB%": 5.5
       }
     ],
-    "Jim Jarvis": [
-      {
-        "season": 2026,
-        "xSLG": 0.304,
-        "xwOBACON": 0.294,
-        "Avg Exit Velocity": 89.0,
-        "90th % EV": 102.9,
-        "Barrel %": 3.3,
-        "Blasts/Contact": 0.1348,
-        "LA+SwtSpt%": 27.2,
-        "Avg Bat Speed": 70.9676,
-        "Fast Swing %": 0.1214,
-        "Avg Swing Length": 7.1153,
-        "Chase %": 28.0,
-        "K%": 18.5,
-        "Z-Contact%": 89.6,
-        "Whiff %": 18.8,
-        "BB%": 6.5
-      }
-    ],
     "Turner Hill": [
       {
         "season": 2026,
@@ -8738,24 +8718,24 @@
         "BB%": 10.5
       }
     ],
-    "Pavin Smith": [
+    "Jim Jarvis": [
       {
         "season": 2026,
-        "xSLG": 0.318,
-        "xwOBACON": 0.305,
-        "Avg Exit Velocity": 87.6,
-        "90th % EV": 103.8,
-        "Barrel %": 4.7,
-        "Blasts/Contact": 0.1118,
-        "LA+SwtSpt%": 23.5,
-        "Avg Bat Speed": 71.0251,
-        "Fast Swing %": 0.1134,
-        "Avg Swing Length": 7.434,
-        "Chase %": 27.7,
-        "K%": 20.5,
-        "Z-Contact%": 87.8,
-        "Whiff %": 19.7,
-        "BB%": 9.8
+        "xSLG": 0.304,
+        "xwOBACON": 0.294,
+        "Avg Exit Velocity": 89.0,
+        "90th % EV": 102.9,
+        "Barrel %": 3.3,
+        "Blasts/Contact": 0.1348,
+        "LA+SwtSpt%": 27.2,
+        "Avg Bat Speed": 70.9676,
+        "Fast Swing %": 0.1214,
+        "Avg Swing Length": 7.1153,
+        "Chase %": 28.0,
+        "K%": 18.5,
+        "Z-Contact%": 89.6,
+        "Whiff %": 18.8,
+        "BB%": 6.5
       }
     ],
     "Shay Whitcomb": [
@@ -8778,6 +8758,26 @@
         "BB%": 3.3
       }
     ],
+    "Pavin Smith": [
+      {
+        "season": 2026,
+        "xSLG": 0.318,
+        "xwOBACON": 0.305,
+        "Avg Exit Velocity": 87.6,
+        "90th % EV": 103.8,
+        "Barrel %": 4.7,
+        "Blasts/Contact": 0.1118,
+        "LA+SwtSpt%": 23.5,
+        "Avg Bat Speed": 71.0251,
+        "Fast Swing %": 0.1134,
+        "Avg Swing Length": 7.434,
+        "Chase %": 27.7,
+        "K%": 20.5,
+        "Z-Contact%": 87.8,
+        "Whiff %": 19.7,
+        "BB%": 9.8
+      }
+    ],
     "Nick Castellanos": [
       {
         "season": 2026,
@@ -8798,26 +8798,6 @@
         "BB%": 4.1
       }
     ],
-    "Joey Loperfido": [
-      {
-        "season": 2026,
-        "xSLG": 0.334,
-        "xwOBACON": 0.346,
-        "Avg Exit Velocity": 89.0,
-        "90th % EV": 103.5,
-        "Barrel %": 6.8,
-        "Blasts/Contact": 0.0915,
-        "LA+SwtSpt%": 32.9,
-        "Avg Bat Speed": 71.7451,
-        "Fast Swing %": 0.1872,
-        "Avg Swing Length": 7.7488,
-        "Chase %": 29.8,
-        "K%": 26.4,
-        "Z-Contact%": 76.5,
-        "Whiff %": 31.6,
-        "BB%": 11.6
-      }
-    ],
     "Sean Murphy": [
       {
         "season": 2026,
@@ -8836,6 +8816,26 @@
         "Z-Contact%": 80.8,
         "Whiff %": 31.9,
         "BB%": 9.1
+      }
+    ],
+    "Joey Loperfido": [
+      {
+        "season": 2026,
+        "xSLG": 0.334,
+        "xwOBACON": 0.346,
+        "Avg Exit Velocity": 89.0,
+        "90th % EV": 103.5,
+        "Barrel %": 6.8,
+        "Blasts/Contact": 0.0915,
+        "LA+SwtSpt%": 32.9,
+        "Avg Bat Speed": 71.7451,
+        "Fast Swing %": 0.1872,
+        "Avg Swing Length": 7.7488,
+        "Chase %": 29.8,
+        "K%": 26.4,
+        "Z-Contact%": 76.5,
+        "Whiff %": 31.6,
+        "BB%": 11.6
       }
     ],
     "Colby Thomas": [
@@ -8898,26 +8898,6 @@
         "BB%": 14.4
       }
     ],
-    "Lenyn Sosa": [
-      {
-        "season": 2026,
-        "xSLG": 0.345,
-        "xwOBACON": 0.309,
-        "Avg Exit Velocity": 88.7,
-        "90th % EV": 104.2,
-        "Barrel %": 5.6,
-        "Blasts/Contact": 0.1353,
-        "LA+SwtSpt%": 34.4,
-        "Avg Bat Speed": 72.3685,
-        "Fast Swing %": 0.2258,
-        "Avg Swing Length": 7.5907,
-        "Chase %": 50.0,
-        "K%": 21.4,
-        "Z-Contact%": 89.7,
-        "Whiff %": 21.5,
-        "BB%": 0.9
-      }
-    ],
     "Nick Yorke": [
       {
         "season": 2026,
@@ -8936,6 +8916,26 @@
         "Z-Contact%": 83.3,
         "Whiff %": 25.0,
         "BB%": 7.7
+      }
+    ],
+    "Lenyn Sosa": [
+      {
+        "season": 2026,
+        "xSLG": 0.345,
+        "xwOBACON": 0.309,
+        "Avg Exit Velocity": 88.7,
+        "90th % EV": 104.2,
+        "Barrel %": 5.6,
+        "Blasts/Contact": 0.1353,
+        "LA+SwtSpt%": 34.4,
+        "Avg Bat Speed": 72.3685,
+        "Fast Swing %": 0.2258,
+        "Avg Swing Length": 7.5907,
+        "Chase %": 50.0,
+        "K%": 21.4,
+        "Z-Contact%": 89.7,
+        "Whiff %": 21.5,
+        "BB%": 0.9
       }
     ],
     "Victor Bericoto": [
@@ -9018,26 +9018,6 @@
         "BB%": 14.0
       }
     ],
-    "Nelson Vel\u00e1zquez": [
-      {
-        "season": 2026,
-        "xSLG": 0.486,
-        "xwOBACON": 0.482,
-        "Avg Exit Velocity": 94.8,
-        "90th % EV": 107.6,
-        "Barrel %": 13.8,
-        "Blasts/Contact": 0.2195,
-        "LA+SwtSpt%": 41.5,
-        "Avg Bat Speed": 74.6553,
-        "Fast Swing %": 0.5202,
-        "Avg Swing Length": 7.4397,
-        "Chase %": 31.6,
-        "K%": 33.6,
-        "Z-Contact%": 73.6,
-        "Whiff %": 39.2,
-        "BB%": 8.0
-      }
-    ],
     "Brandon Lockridge": [
       {
         "season": 2026,
@@ -9058,6 +9038,46 @@
         "BB%": 9.7
       }
     ],
+    "Nelson Vel\u00e1zquez": [
+      {
+        "season": 2026,
+        "xSLG": 0.486,
+        "xwOBACON": 0.482,
+        "Avg Exit Velocity": 94.8,
+        "90th % EV": 107.6,
+        "Barrel %": 13.8,
+        "Blasts/Contact": 0.2195,
+        "LA+SwtSpt%": 41.5,
+        "Avg Bat Speed": 74.6553,
+        "Fast Swing %": 0.5202,
+        "Avg Swing Length": 7.4397,
+        "Chase %": 31.6,
+        "K%": 33.6,
+        "Z-Contact%": 73.6,
+        "Whiff %": 39.2,
+        "BB%": 8.0
+      }
+    ],
+    "Everson Pereira": [
+      {
+        "season": 2026,
+        "xSLG": 0.4,
+        "xwOBACON": 0.403,
+        "Avg Exit Velocity": 88.5,
+        "90th % EV": 104.9,
+        "Barrel %": 12.7,
+        "Blasts/Contact": 0.1587,
+        "LA+SwtSpt%": 39.7,
+        "Avg Bat Speed": 74.2923,
+        "Fast Swing %": 0.4712,
+        "Avg Swing Length": 8.0198,
+        "Chase %": 37.4,
+        "K%": 33.3,
+        "Z-Contact%": 78.4,
+        "Whiff %": 37.8,
+        "BB%": 5.4
+      }
+    ],
     "Harrison Bader": [
       {
         "season": 2026,
@@ -9076,26 +9096,6 @@
         "Z-Contact%": 78.7,
         "Whiff %": 32.0,
         "BB%": 3.6
-      }
-    ],
-    "Everson Pereira": [
-      {
-        "season": 2026,
-        "xSLG": 0.4,
-        "xwOBACON": 0.404,
-        "Avg Exit Velocity": 88.5,
-        "90th % EV": 104.9,
-        "Barrel %": 12.7,
-        "Blasts/Contact": 0.1587,
-        "LA+SwtSpt%": 39.7,
-        "Avg Bat Speed": 74.2923,
-        "Fast Swing %": 0.4712,
-        "Avg Swing Length": 8.0198,
-        "Chase %": 37.4,
-        "K%": 33.3,
-        "Z-Contact%": 78.4,
-        "Whiff %": 37.8,
-        "BB%": 5.4
       }
     ],
     "Joshua B\u00e1ez": [
@@ -16337,7 +16337,7 @@
         "FIP": 3.943426,
         "Avg Exit Velo": 88.9,
         "Barrel%": 7.6,
-        "xBA": 0.257,
+        "xBA": 0.256,
         "xSLG": 0.406,
         "xwOBA": 0.34,
         "Avg FB Velo": 97.780998,
@@ -18238,7 +18238,7 @@
         "Avg Exit Velo": 90.9,
         "Barrel%": 17.0,
         "xBA": 0.253,
-        "xSLG": 0.469,
+        "xSLG": 0.468,
         "xwOBA": 0.363,
         "Avg FB Velo": 96.932584,
         "Whiff%": 37.7,
@@ -21562,7 +21562,7 @@
         "FIP": 3.552506,
         "Avg Exit Velo": 91.2,
         "Barrel%": 8.0,
-        "xBA": 0.229,
+        "xBA": 0.228,
         "xSLG": 0.417,
         "xwOBA": 0.325,
         "Avg FB Velo": 94.28877,
