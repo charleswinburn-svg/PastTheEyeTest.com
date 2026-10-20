@@ -232,7 +232,6 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
   const reg = MIN_REG[side];
   // playing time the luck term assumes: PA for hitters, innings for pitchers
   const ptRow = rows.find(r => r.n && r.denom === (side === "hitters" ? "pa" : "ip")) || rows.find(r => r.n);
-  const tight = rows.filter(r => r.bands[90].b - r.bands[90].a <= 1).length;
 
   const save = () => saveCardAsPng(cardRef, `${(p?.name || "player").replace(/\s+/g, "_")}_${year}_ranges.png`);
 
@@ -256,10 +255,11 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
                   subtitle={`${year} Projection · 25 / 50 / 75 / 90% Confidence Intervals`} />
               </div>
               <div style={{ textAlign: "center", padding: "12px 16px 2px", fontSize: 12, color: t.textMuted, fontWeight: 700 }}>
-                {p.proj?.age != null && <>Age {p.proj.age} · </>}
-                {p[reg.field] != null && <>{p[reg.field]} {reg.unit} in {lastYear} · </>}
-                {ptRow?.n != null && <>ranges assume ~{ptRow.n} {UNITS[ptRow.denom] || ""} · </>}
-                {tight} of {rows.length} 90% ranges within 1 league SD
+                {[
+                  p.proj?.age != null && `Age ${p.proj.age}`,
+                  p[reg.field] != null && `${p[reg.field]} ${reg.unit} in ${lastYear}`,
+                  ptRow?.n != null && `ranges assume ~${ptRow.n} ${UNITS[ptRow.denom] || ""}`.trim(),
+                ].filter(Boolean).join(" · ")}
               </div>
               <RangeChart rows={rows} shades={bandShades(color, t.cardBg, isDark)} lastYear={lastYear} year={year} />
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
