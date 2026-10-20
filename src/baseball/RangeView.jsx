@@ -19,7 +19,7 @@ import FitToWidth from "../FitToWidth.jsx";
 
 const FONT = "'Pliant', sans-serif";
 const BANNER_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-const XRV_LABELS = ["xRV/600", "Contact Quality", "Whiff", "Decision"];
+const XRV_LABELS = ["xRV/600", "Decision", "Contact Quality", "Whiff"];
 const MIN_REG = { hitters: { field: "pa", n: 300, unit: "PA" }, pitchers: { field: "ip", n: 50, unit: "IP" } };
 
 const _cache = new Map();
@@ -57,7 +57,7 @@ function formatter(cat, signed) {
   };
 }
 
-// Every stat for one side: { key, label, lowerBetter, get(player) → cat, pool, widened }.
+// Every stat for one side: { key, label, lowerBetter, get(player) → cat, pool }.
 // (iSwing+ and the pitch-modeling grades are model outputs, not stat lines — no ranges.)
 function statList(data, xrv, side) {
   if (!data) return [];
@@ -80,12 +80,7 @@ function statList(data, xrv, side) {
     }
   }
   const players = (side === "hitters" ? data.hitters : data.pitchers) || [];
-  const ciMeta = (side === "hitters" ? data.meta?.ci?.stats : data.pitcher_meta?.ci?.stats) || {};
   for (const st of out) {
-    // one usable backtest season (bat tracking / pitch-model xRV): marked * in the tab
-    st.oneSeason = (ciMeta[st.label]?.n_seasons ?? 2) < 2;
-    st.widen = ciMeta[st.label]?.widened || 1;
-    st.hasModel = players.some(pl => Math.abs(st.get(pl)?.parts?.model ?? 0) > 1e-6);
     st.hasCi = players.some(pl => st.get(pl)?.ci);
   }
   return out.filter(st => st.hasCi && st.pool?.length);
@@ -235,15 +230,6 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
                 {tight} of {rows.length} 90% ranges within 1 league SD
               </div>
               <RangeChart rows={rows} color={color} lastYear={lastYear} year={year} />
-              {rows.some(r => r.st.oneSeason) && (() => {
-                const w = Math.max(...rows.filter(r => r.st.oneSeason).map(r => r.st.widen));
-                return (
-                  <div style={{ padding: "0 20px 4px", fontSize: 10, color: t.textFaint, textAlign: "center" }}>
-                    * Short history (bat tracking / pitch-model xRV): range estimated from a single backtest season
-                    {w >= 1.02 ? `, widened ×${w.toFixed(2)} for season-to-season drift` : ""}.
-                  </div>
-                );
-              })()}
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
                 <span>Created by: @PastTheEyeTest on X</span>
                 <span style={{ fontStyle: "italic" }}>{year} projection · 25 / 50 / 75 / 90% ranges from walk-forward backtests</span>
@@ -306,12 +292,11 @@ function RangeChart({ rows, color, lastYear, year }) {
         </g>
         {rows.map((r, i) => {
           const y = top + i * rowH, cy = y + rowH / 2;
-          const model = r.st.hasModel;
           return (
             <g key={r.st.key}>
               {i > 0 && <line x1={12} x2={W - 12} y1={y} y2={y} stroke={t.divider} strokeOpacity="0.5" />}
               <text x={labelW - 10} y={cy + 4} textAnchor="end" fontSize="12" fontWeight="700"
-                fill={model ? t.accent : t.text} fontStyle={model ? "italic" : "normal"}>{r.st.label}{r.st.oneSeason ? "*" : ""}</text>
+                fill={t.text}>{r.st.label}</text>
               {LEVELS.map(lv => (
                 <rect key={lv} x={x(r.bands[lv].a)} y={cy - 7} width={Math.max(2, x(r.bands[lv].b) - x(r.bands[lv].a))}
                   height={14} rx="3" fill={color} fillOpacity={OPACITY[lv]}>
@@ -378,12 +363,11 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
   return (
     <>
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 12 }}>
-        <select value={st.key} onChange={e => setStatKey(e.target.value)} title="Orange italic = stat has an iSwing+ / Stuff+ model layer"
+        <select value={st.key} onChange={e => setStatKey(e.target.value)}
           style={{ padding: "6px 10px", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 6, fontSize: 12,
-                   fontFamily: FONT, color: st.hasModel ? t.accent : t.textSecondary, fontStyle: st.hasModel ? "italic" : "normal" }}>
+                   fontFamily: FONT, color: t.textSecondary }}>
           {stats.map(s => (
-            <option key={s.key} value={s.key} style={{ background: t.inputBg, color: s.hasModel ? t.accent : t.textSecondary,
-              fontStyle: s.hasModel ? "italic" : "normal" }}>{s.label}{s.oneSeason ? "*" : ""}</option>
+            <option key={s.key} value={s.key} style={{ background: t.inputBg, color: t.textSecondary }}>{s.label}</option>
           ))}
         </select>
         {LEVELS.map(lv => pill(level === lv, `${lv}%`, () => setLevel(lv), `lv${lv}`))}
