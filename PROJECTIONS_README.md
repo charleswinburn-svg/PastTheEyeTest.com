@@ -32,8 +32,10 @@ Notes
 ## Confidence intervals (2027 RANGES → Hitter / Pitcher Confidence Intervals)
 
 Every projected stat line (hitter card stats and xRV, pitcher card stats — not iSwing+ or the
-pitch-modeling grades) gets nested 90% / 75% / 50% / 25% ranges (a fan chart), written into the projection files as
-`ci = {lo, hi, lo75, hi75, lo50, hi50, lo25, hi25, n}` (lo/hi = 90%; the set is `CI_LEVEL_LIST`) with the
+pitch-modeling grades) gets its 2027 outcome percentiles, written into the projection files as
+`ci = {p5, p10, p12_5, p25, p37_5, p50, p62_5, p75, p87_5, p90, p95, n, denom}`. The tab draws nested
+90 / 75 / 50 / 25% bands from them (`CI_LEVEL_LIST`) and lists the 10th/25th/50th/75th/90th
+percentile outcomes beside each stat (`CI_SHOW`), worse → better with the
 fitted parameters in `meta.ci` / `pitcher_meta.ci`.
 
 How they're built (`build_projections.py`: `ci_backtest`, `fit_ci`, `ci_bounds`):
@@ -45,7 +47,7 @@ How they're built (`build_projections.py`: `ci_backtest`, `fit_ci`, `ci_bounds`)
 2. **Spread per player.** `miss² ≈ c0 + a/(H + k) + b/n`, fit by non-negative least squares.
    `H` = his weighted history (Σ weight × sample), `k` = the stat's regression constant, so a
    long full-time track record narrows the talent part; `b/n` is one season of luck at sample `n`.
-3. **Edges.** The matching percentiles (5/12.5/25/37.5/62.5/75/87.5/95th) of the misses divided by their spread, each
+3. **Edges.** The matching percentiles of the standardized misses (5th … 95th) of the misses divided by their spread, each
    season standardized by a spread fit on the *other* seasons — so year-to-year league drift
    is in the band, and skewed misses stay skewed (no bell-curve assumption).
 4. **Playing time.** No playing-time projection exists, so `n` = his recent playing time

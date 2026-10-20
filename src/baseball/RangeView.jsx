@@ -6,8 +6,8 @@ import {
 import FitToWidth from "../FitToWidth.jsx";
 
 // "{year} RANGES" → Hitter / Pitcher Confidence Intervals.
-// Each projected stat carries nested 90% / 75% / 50% / 25% bands (proj[stat].ci = {lo, hi,
-// lo75, hi75, lo50, hi50, lo25, hi25, n}; lo/hi = 90%) from build_projections.py: learned from the projection's own walk-forward
+// Each projected stat carries its 2027 outcome percentiles (proj[stat].ci = {p5, p10, p12_5,
+// p25, …, p95, n, denom}) from build_projections.py: learned from the projection's own walk-forward
 // misses, tighter for players with a long, full track record, wider for thin histories.
 // Everything is drawn on one axis — standard deviations from the 2026 league average,
 // better to the right (lower-is-better stats flipped) — so certainty compares across stats
@@ -100,7 +100,11 @@ const Z_MAX = 3.5;
 // Nested bands, widest first, with their fill opacity (one place to change the set).
 const LEVELS = [90, 75, 50, 25];
 const OPACITY = { 90: 0.2, 75: 0.38, 50: 0.62, 25: 0.9 };
-const BAND_KEYS = Object.fromEntries(LEVELS.map(L => [L, L === 90 ? ["lo", "hi"] : [`lo${L}`, `hi${L}`]]));
+const pkey = (p) => "p" + String(p).replace(".", "_");
+const BAND_KEYS = Object.fromEntries(LEVELS.map(L => [L, [pkey((100 - L) / 2), pkey(100 - (100 - L) / 2)]]));
+// Outcome percentiles listed beside each stat, worse → better (flipped for lower-is-better).
+const SHOW = [10, 25, 50, 75, 90];
+const UNITS = { pa: "PA", pa_xrv: "PA", bip: "BIP", swings: "swings", bf: "BF", ip: "IP", pitches: "pitches" };
 
 // One stat for one player, on the SD axis (better to the right). `bands[level]` holds each
 // band's floor/ceiling (worse/better end), SD positions and percentiles; floorV/ceilV/…
@@ -115,14 +119,16 @@ function rangeRow(st, p, level = 90) {
   const bands = {};
   for (const lv of LEVELS) {
     const [kl, kh] = BAND_KEYS[lv];
-    const lo = cat.ci[kl] ?? cat.ci.lo, hi = cat.ci[kh] ?? cat.ci.hi;
+    const lo = cat.ci[kl], hi = cat.ci[kh];
+    if (lo == null || hi == null) return null;
     // "floor" / "ceiling" in the better direction
     const worst = st.lowerBetter ? hi : lo, best = st.lowerBetter ? lo : hi;
     bands[lv] = { a: Z(worst), b: Z(best), floorV: worst, ceilV: best, floorP: P(worst), ceilP: P(best),
                   width: Math.abs(hi - lo) };
   }
+  const pcts = SHOW.map(q => cat.ci[pkey(st.lowerBetter ? 100 - q : q)]);
   return {
-    st, cat, f, n: cat.ci.n, bands, ...bands[level],
+    st, cat, f, n: cat.ci.n, denom: cat.ci.denom, bands, pcts, ...bands[level],
     proj: Z(cat.value), projP: P(cat.value), last: cat.last?.value != null ? Z(cat.last.value) : null,
   };
 }
@@ -199,7 +205,8 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
 
   const color = readableOn(teamMarkColor(p?.team) || t.accentSecondary, isDark);
   const reg = MIN_REG[side];
-  const ptRow = rows.find(r => r.n && (side === "hitters" ? r.st.key === "cat:K%" : r.st.key === "cat:K%")) || rows.find(r => r.n);
+  // playing time the luck term assumes: PA for hitters, innings for pitchers
+  const ptRow = rows.find(r => r.n && r.denom === (side === "hitters" ? "pa" : "ip")) || rows.find(r => r.n);
   const tight = rows.filter(r => r.bands[90].b - r.bands[90].a <= 1).length;
 
   const save = () => saveCardAsPng(cardRef, `${(p?.name || "player").replace(/\s+/g, "_")}_${year}_ranges.png`);
@@ -216,9 +223,9 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
         <div style={{ color: t.textMuted, textAlign: "center", padding: 40, fontSize: 13 }}>Select a {side === "hitters" ? "hitter" : "pitcher"}</div>
       ) : (
         <>
-          <FitToWidth designWidth={884}>
+          <FitToWidth designWidth={1084}>
             <div ref={cardRef} style={{ fontFamily: FONT, background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
-                                        overflow: "hidden", maxWidth: 884, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
+                                        overflow: "hidden", maxWidth: 1084, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
               <div style={{ fontFamily: BANNER_FONT }}>
                 <PlayerHeader name={p.name} team={p.team} teamId={p.team_id} season={year} playerId={Number(p.player_id)}
                   subtitle={`${year} Projection · 25 / 50 / 75 / 90% Confidence Intervals`} />
@@ -226,7 +233,7 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
               <div style={{ textAlign: "center", padding: "12px 16px 2px", fontSize: 12, color: t.textMuted, fontWeight: 700 }}>
                 {p.proj?.age != null && <>Age {p.proj.age} · </>}
                 {p[reg.field] != null && <>{p[reg.field]} {reg.unit} in {lastYear} · </>}
-                {ptRow?.n != null && <>ranges assume ~{ptRow.n} {side === "hitters" ? "PA" : reg.unit} · </>}
+                {ptRow?.n != null && <>ranges assume ~{ptRow.n} {UNITS[ptRow.denom] || ""} · </>}
                 {tight} of {rows.length} 90% ranges within 1 league SD
               </div>
               <RangeChart rows={rows} color={color} lastYear={lastYear} year={year} />
@@ -248,8 +255,10 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
 
 function RangeChart({ rows, color, lastYear, year }) {
   const { theme: t } = useTheme();
-  const W = 860, labelW = 168, valW = 170, rowH = 34, top = 34, bottom = 40;
+  const W = 1060, labelW = 168, valW = 404, rowH = 34, top = 40, bottom = 40;
   const plotL = labelW, plotR = W - valW - 12, plotW = plotR - plotL;
+  // right-hand columns: the projection, then the outcome percentiles
+  const projX = W - valW + 62, colW = 64, colX = (i) => projX + 22 + (i + 1) * colW;
   const H = top + rows.length * rowH + bottom;
   const x = (z) => plotL + ((z + Z_MAX) / (2 * Z_MAX)) * plotW;
   const yBottom = top + rows.length * rowH;
@@ -274,9 +283,13 @@ function RangeChart({ rows, color, lastYear, year }) {
           SD FROM {lastYear} LEAGUE AVERAGE
         </text>
         <text x={plotR} y={H - 6} textAnchor="end" fontSize="10" fontWeight="700" fill={t.textMuted}>BETTER →</text>
-        <text x={W - valW / 2 - 6} y={top - 12} textAnchor="middle" fontSize="9.5" fontWeight="800" fill={t.textFaint} letterSpacing="0.06em">
-          {year} · FLOOR – CEILING
-        </text>
+        <text x={projX} y={top - 12} textAnchor="end" fontSize="9.5" fontWeight="800" fill={t.textFaint} letterSpacing="0.06em">PROJ</text>
+        <text x={(colX(0) + colX(SHOW.length - 1)) / 2 - colW / 2 + 10} y={top - 26} textAnchor="middle" fontSize="9" fontWeight="700"
+          fill={t.textFaint} letterSpacing="0.05em">{year} OUTCOME PERCENTILE · WORSE → BETTER</text>
+        {SHOW.map((q, i) => (
+          <text key={q} x={colX(i)} y={top - 12} textAnchor="end" fontSize="9.5" fontWeight="800"
+            fill={q === 50 ? t.textMuted : t.textFaint} letterSpacing="0.04em">{q}TH</text>
+        ))}
         {/* legend */}
         <g transform={`translate(${plotL}, ${top - 18})`} fontSize="9.5" fill={t.textMuted}>
           {[...LEVELS].reverse().map((lv, i) => (
@@ -305,13 +318,11 @@ function RangeChart({ rows, color, lastYear, year }) {
               ))}
               {r.last != null && <circle cx={x(r.last)} cy={cy} r="5" fill="none" stroke={t.textMuted} strokeWidth="1.8" />}
               <circle cx={x(r.proj)} cy={cy} r="6.5" fill={binColor(r.projP)} stroke={t.cardBg} strokeWidth="2" />
-              <text x={W - valW - 2} y={cy + 4} fontSize="13" fontWeight="800" fill={t.text}>{r.cat.display}</text>
-              <text x={W - 14} y={cy} textAnchor="end" fontSize="11" fontWeight="700" fill={t.textMuted}>
-                <tspan fontSize="8.5" fill={t.textFaint}>90 </tspan>{r.f(r.bands[90].floorV)} – {r.f(r.bands[90].ceilV)}
-              </text>
-              <text x={W - 14} y={cy + 12} textAnchor="end" fontSize="9.5" fontWeight="600" fill={t.textFaint}>
-                <tspan fontSize="8">50 </tspan>{r.f(r.bands[50].floorV)} – {r.f(r.bands[50].ceilV)}
-              </text>
+              <text x={projX} y={cy + 4.5} textAnchor="end" fontSize="13.5" fontWeight="800" fill={t.text}>{r.cat.display}</text>
+              {r.pcts.map((v, j) => (
+                <text key={j} x={colX(j)} y={cy + 4} textAnchor="end" fontSize="11.5"
+                  fontWeight={SHOW[j] === 50 ? 800 : 600} fill={SHOW[j] === 50 ? t.textSecondary : t.textMuted}>{r.f(v)}</text>
+              ))}
             </g>
           );
         })}

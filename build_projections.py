@@ -105,11 +105,13 @@ MIN_FIT_ROWS = 150
 AGE_CENTER = 28.0
 SKIP_TARGET_SEASONS = {2020}   # 60-game season: fine as an input, not as a target
 LAYER_MIN_GAIN = 0.002   # a layer must cut error by ≥0.2% to be used
-CI_LEVEL_LIST = (90, 75, 50, 25)   # nested central bands (%); lo/hi = the widest (90%)
-CI_Q = tuple(sorted([(1 - L / 100) / 2 for L in CI_LEVEL_LIST] + [1 - (1 - L / 100) / 2 for L in CI_LEVEL_LIST]))
-CI_NAMES = tuple([("lo" if L == 90 else f"lo{L}") for L in CI_LEVEL_LIST]
-                 + [("hi" if L == 90 else f"hi{L}") for L in reversed(CI_LEVEL_LIST)])
-CI_LEVELS = {L: (i, len(CI_Q) - 1 - i) for i, L in enumerate(CI_LEVEL_LIST)}   # level → (low, high) q index
+CI_LEVEL_LIST = (90, 75, 50, 25)   # nested central bands (%) drawn in the ranges tab
+CI_SHOW = (10, 25, 50, 75, 90)     # outcome percentiles listed beside each stat
+# Every outcome percentile written per stat: the bands' edges plus the listed ones.
+CI_PCTS = tuple(sorted({p for L in CI_LEVEL_LIST for p in ((100 - L) / 2, 100 - (100 - L) / 2)} | set(CI_SHOW)))
+CI_Q = tuple(p / 100 for p in CI_PCTS)
+CI_NAMES = tuple("p" + f"{p:g}".replace(".", "_") for p in CI_PCTS)        # p5, p10, p12_5, … p95
+CI_LEVELS = {L: (CI_PCTS.index((100 - L) / 2), CI_PCTS.index(100 - (100 - L) / 2)) for L in CI_LEVEL_LIST}
 CI_MIN_ROWS = 100        # backtest rows needed to fit a stat's interval
 
 
@@ -680,7 +682,10 @@ def ci_bounds(sp, model, keys, center, last_season, widen=1.0):
     c = np.asarray(center, float)
     # actual = projection + err (on the stat's own scale, or logit for rates)
     b = {name: np.maximum(ginv(g(c) + sig * q), lo_clip) for name, q in zip(CI_NAMES, fit["q"])}
+    lo_i, hi_i = CI_LEVELS[90]
+    b["lo"], b["hi"] = b[CI_NAMES[lo_i]], b[CI_NAMES[hi_i]]      # the 90% band, for checks
     b["n"] = n
+    b["denom"] = sp.s.denom_col
     cov = ci_coverage(rows)
     meta = {**{key: round(fit[key], 8) for key in ("c0", "a", "b")}, "q": [round(x, 4) for x in fit["q"]],
             "q_in": [round(x, 4) for x in fit["q_in"]], "n_seasons": fit["n_seasons"],
@@ -694,7 +699,8 @@ def ci_bounds(sp, model, keys, center, last_season, widen=1.0):
 def ci_entry(b, i, ndigits):
     if b is None or not np.isfinite(b["lo"][i]):
         return None
-    return {**{name: round(float(b[name][i]), ndigits) for name in CI_NAMES}, "n": int(round(float(b["n"][i])))}
+    return {**{name: round(float(b[name][i]), ndigits) for name in CI_NAMES}, "n": int(round(float(b["n"][i]))),
+            "denom": b.get("denom")}
 
 
 def coverage_text(meta):
@@ -1102,7 +1108,7 @@ def main():
                               if len(isw_pool) else {})},
                  "xrv_pools": pool_lists(xpool, XRV_STATS),
                  "lower_better": [lab for lab, _f, lb, *_ in CARD_STATS if lb],
-                 "ci": {"levels": list(CI_LEVEL_LIST), "method": "walk-forward backtest misses; spread c0 + a/(H+k) + b/n; "
+                 "ci": {"levels": list(CI_LEVEL_LIST), "percentiles": list(CI_PCTS), "show": list(CI_SHOW), "method": "walk-forward backtest misses; spread c0 + a/(H+k) + b/n; "
                         "empirical 5/25/75/95th percentile edges; luck term at recent playing time "
                         "(clamped to [minimum, full season]); base-model backtest, so slightly conservative "
                         "where a model layer is used",
