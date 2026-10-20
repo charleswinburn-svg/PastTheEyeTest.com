@@ -297,7 +297,7 @@ def main():
                            "pools": bp.pool_lists(pool, [lab for lab, *_ in CARD]),
                            "grade_pools": bp.pool_lists(gpool, [c for c, _ in GRADES]),
                            "lower_better": [lab for lab, _p, lb in CARD if lb],
-                           "ci": {"levels": [90, 95, 99], "stats": ci_meta}}
+                           "ci": {"levels": list(bp.CI_LEVEL_LIST), "stats": ci_meta}}
 
     def _clean(o):
         if isinstance(o, dict):

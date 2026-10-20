@@ -105,9 +105,11 @@ MIN_FIT_ROWS = 150
 AGE_CENTER = 28.0
 SKIP_TARGET_SEASONS = {2020}   # 60-game season: fine as an input, not as a target
 LAYER_MIN_GAIN = 0.002   # a layer must cut error by ≥0.2% to be used
-CI_Q = (0.005, 0.025, 0.05, 0.95, 0.975, 0.995)   # 99% / 95% / 90% bands
-CI_NAMES = ("lo99", "lo95", "lo", "hi", "hi95", "hi99")   # lo/hi = the 90% band
-CI_LEVELS = {90: (2, 3), 95: (1, 4), 99: (0, 5)}          # level → (low q index, high q index)
+CI_LEVEL_LIST = (90, 75, 50, 25)   # nested central bands (%); lo/hi = the widest (90%)
+CI_Q = tuple(sorted([(1 - L / 100) / 2 for L in CI_LEVEL_LIST] + [1 - (1 - L / 100) / 2 for L in CI_LEVEL_LIST]))
+CI_NAMES = tuple([("lo" if L == 90 else f"lo{L}") for L in CI_LEVEL_LIST]
+                 + [("hi" if L == 90 else f"hi{L}") for L in reversed(CI_LEVEL_LIST)])
+CI_LEVELS = {L: (i, len(CI_Q) - 1 - i) for i, L in enumerate(CI_LEVEL_LIST)}   # level → (low, high) q index
 CI_MIN_ROWS = 100        # backtest rows needed to fit a stat's interval
 
 
@@ -617,8 +619,9 @@ def drift_widen(metas):
     """How much wider the honest (out-of-season) 90% band is than an in-sample one, across
     the stats with ≥3 backtest seasons — applied to stats with a single backtest season,
     whose bands can't see season-to-season drift on their own."""
-    r = [(m["q"][3] - m["q"][2]) / (m["q_in"][3] - m["q_in"][2])
-         for m in metas.values() if m.get("n_seasons", 0) >= 3 and m["q_in"][3] > m["q_in"][2]]
+    a, b = CI_LEVELS[90]
+    r = [(m["q"][b] - m["q"][a]) / (m["q_in"][b] - m["q_in"][a])
+         for m in metas.values() if m.get("n_seasons", 0) >= 3 and m["q_in"][b] > m["q_in"][a]]
     return max(1.0, float(np.median(r))) if r else 1.0
 
 
@@ -704,7 +707,7 @@ def coverage_text(meta):
         return f"estimated from 1 backtest season ({meta['rows']} rows{w})"
     avg = lambda lv: np.mean(list(cov[lv].values())) if cov.get(lv) else float("nan")
     return ("90% band: " + " · ".join(f"{s} {v:.1f}%" for s, v in cov[90].items())
-            + f"  | avg 90% {avg(90):.1f} · 95% {avg(95):.1f} · 99% {avg(99):.1f}")
+            + "  | avg " + " · ".join(f"{L}% {avg(L):.1f}" for L in CI_LEVEL_LIST))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1099,7 +1102,7 @@ def main():
                               if len(isw_pool) else {})},
                  "xrv_pools": pool_lists(xpool, XRV_STATS),
                  "lower_better": [lab for lab, _f, lb, *_ in CARD_STATS if lb],
-                 "ci": {"levels": [90, 95, 99], "method": "walk-forward backtest misses; spread c0 + a/(H+k) + b/n; "
+                 "ci": {"levels": list(CI_LEVEL_LIST), "method": "walk-forward backtest misses; spread c0 + a/(H+k) + b/n; "
                         "empirical 5/25/75/95th percentile edges; luck term at recent playing time "
                         "(clamped to [minimum, full season]); base-model backtest, so slightly conservative "
                         "where a model layer is used",

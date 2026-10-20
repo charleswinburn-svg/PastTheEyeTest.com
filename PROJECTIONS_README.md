@@ -32,8 +32,8 @@ Notes
 ## Confidence intervals (2027 RANGES → Hitter / Pitcher Confidence Intervals)
 
 Every projected stat line (hitter card stats and xRV, pitcher card stats — not iSwing+ or the
-pitch-modeling grades) gets nested 90% / 95% / 99% ranges, written into the projection files as
-`ci = {lo, hi, lo95, hi95, lo99, hi99, n}` (lo/hi = 90%) with the
+pitch-modeling grades) gets nested 90% / 75% / 50% / 25% ranges (a fan chart), written into the projection files as
+`ci = {lo, hi, lo75, hi75, lo50, hi50, lo25, hi25, n}` (lo/hi = 90%; the set is `CI_LEVEL_LIST`) with the
 fitted parameters in `meta.ci` / `pitcher_meta.ci`.
 
 How they're built (`build_projections.py`: `ci_backtest`, `fit_ci`, `ci_bounds`):
@@ -45,7 +45,7 @@ How they're built (`build_projections.py`: `ci_backtest`, `fit_ci`, `ci_bounds`)
 2. **Spread per player.** `miss² ≈ c0 + a/(H + k) + b/n`, fit by non-negative least squares.
    `H` = his weighted history (Σ weight × sample), `k` = the stat's regression constant, so a
    long full-time track record narrows the talent part; `b/n` is one season of luck at sample `n`.
-3. **Edges.** The 0.5/2.5/5/95/97.5/99.5th percentiles of the misses divided by their spread, each
+3. **Edges.** The matching percentiles (5/12.5/25/37.5/62.5/75/87.5/95th) of the misses divided by their spread, each
    season standardized by a spread fit on the *other* seasons — so year-to-year league drift
    is in the band, and skewed misses stay skewed (no bell-curve assumption).
 4. **Playing time.** No playing-time projection exists, so `n` = his recent playing time
@@ -54,10 +54,7 @@ How they're built (`build_projections.py`: `ci_backtest`, `fit_ci`, `ci_bounds`)
 
 The build prints a calibration check per stat, e.g.
 
-    K%    90% band: 2022 89.4% · 2023 90.8% · …  | avg 90% 89.9 · 95% 94.8 · 99% 98.9
-
-(the 99% edge rests on the most extreme 1% of misses, so it's the least precise — especially
-for bat tracking, which has one backtest season)
+    K%    90% band: 2022 89.4% · 2023 90.8% · …  | avg 90% 89.9 · 75% 74.6 · 50% 49.8 · 25% 24.9
 
 Each season is scored with a band fit only on the other seasons; ~90% everywhere means the
 bands are honest. Stats with only one usable backtest season (bat tracking and pitch-model xRV,

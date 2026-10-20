@@ -6,14 +6,14 @@ import {
 import FitToWidth from "../FitToWidth.jsx";
 
 // "{year} RANGES" → Hitter / Pitcher Confidence Intervals.
-// Each projected stat carries nested 90% / 95% / 99% bands (proj[stat].ci = {lo, hi, lo95,
-// hi95, lo99, hi99, n}; lo/hi = 90%) from build_projections.py: learned from the projection's own walk-forward
+// Each projected stat carries nested 90% / 75% / 50% / 25% bands (proj[stat].ci = {lo, hi,
+// lo75, hi75, lo50, hi50, lo25, hi25, n}; lo/hi = 90%) from build_projections.py: learned from the projection's own walk-forward
 // misses, tighter for players with a long, full track record, wider for thin histories.
 // Everything is drawn on one axis — standard deviations from the 2026 league average,
 // better to the right (lower-is-better stats flipped) — so certainty compares across stats
 // with different units, and an elite player's range isn't squashed against the 100th
 // percentile the way a percentile axis would. Dots keep the cards' percentile colors.
-//   Player view: one fan interval per stat (darkest = 90%, then 95%, lightest = 99%, dot = projection,
+//   Player view: one fan chart per stat (lightest = 90% … darkest = 25%, dot = projection,
 //                ring = 2026 actual).
 //   Board view:  floors and ceilings for one stat across players.
 
@@ -102,8 +102,10 @@ function poolStats(st) {
 }
 const Z_MAX = 3.5;
 
-const LEVELS = [90, 95, 99];
-const BAND_KEYS = { 90: ["lo", "hi"], 95: ["lo95", "hi95"], 99: ["lo99", "hi99"] };
+// Nested bands, widest first, with their fill opacity (one place to change the set).
+const LEVELS = [90, 75, 50, 25];
+const OPACITY = { 90: 0.2, 75: 0.38, 50: 0.62, 25: 0.9 };
+const BAND_KEYS = Object.fromEntries(LEVELS.map(L => [L, L === 90 ? ["lo", "hi"] : [`lo${L}`, `hi${L}`]]));
 
 // One stat for one player, on the SD axis (better to the right). `bands[level]` holds each
 // band's floor/ceiling (worse/better end), SD positions and percentiles; floorV/ceilV/…
@@ -178,7 +180,8 @@ export default function RangeView({ projSeason, side }) {
         ? <PlayerRanges stats={stats} players={players} side={side} year={year} lastYear={lastYear} />
         : <RangeBoard stats={stats} players={players} side={side} year={year} lastYear={lastYear} />}
       <div style={{ marginTop: 12, fontSize: 10, color: t.textFaint, textAlign: "center", lineHeight: 1.5 }}>
-        90% / 95% / 99% ranges: where the {year} stat should land 9, 19 and 99 times in 10 / 20 / 100, learned from how far past projections missed
+        90% / 75% / 50% / 25% ranges: the {year} stat should land inside each band that share of the time (the 50% band is a coin flip,
+        the 90% band 9 times in 10), learned from how far past projections missed
         (each season projected only from the seasons before it). A long, full-time track record narrows the range; a thin
         history widens it. Playing time is assumed at his recent level, up to a full season. Axis = standard deviations
         from the {lastYear} league average, better to the right; dot colors are {lastYear} percentiles, like the cards.
@@ -223,7 +226,7 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
                                         overflow: "hidden", maxWidth: 884, margin: "0 auto", boxShadow: `0 4px 24px ${t.shadow}` }}>
               <div style={{ fontFamily: BANNER_FONT }}>
                 <PlayerHeader name={p.name} team={p.team} teamId={p.team_id} season={year} playerId={Number(p.player_id)}
-                  subtitle={`${year} Projection · 90 / 95 / 99% Confidence Intervals`} />
+                  subtitle={`${year} Projection · 25 / 50 / 75 / 90% Confidence Intervals`} />
               </div>
               <div style={{ textAlign: "center", padding: "12px 16px 2px", fontSize: 12, color: t.textMuted, fontWeight: 700 }}>
                 {p.proj?.age != null && <>Age {p.proj.age} · </>}
@@ -243,7 +246,7 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
               })()}
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
                 <span>Created by: @PastTheEyeTest on X</span>
-                <span style={{ fontStyle: "italic" }}>{year} projection · 90 / 95 / 99% ranges from walk-forward backtests</span>
+                <span style={{ fontStyle: "italic" }}>{year} projection · 25 / 50 / 75 / 90% ranges from walk-forward backtests</span>
               </div>
             </div>
           </FitToWidth>
@@ -267,7 +270,8 @@ function RangeChart({ rows, color, lastYear, year }) {
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "4px 10px 0" }}>
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ maxWidth: "100%", height: "auto", fontFamily: FONT }} role="img"
-        aria-label={rows.map(r => `${r.st.label}: projected ${r.cat.display}, 90% range ${r.f(r.bands[90].floorV)} to ${r.f(r.bands[90].ceilV)}, 99% range ${r.f(r.bands[99].floorV)} to ${r.f(r.bands[99].ceilV)}`).join("; ")}>
+        aria-label={rows.map(r => `${r.st.label}: projected ${r.cat.display}, ` +
+          LEVELS.map(L => `${L}% range ${r.f(r.bands[L].floorV)} to ${r.f(r.bands[L].ceilV)}`).join(", ")).join("; ")}>
         {/* ±1 SD of the league (about its middle two-thirds) */}
         <rect x={x(-1)} y={top - 6} width={x(1) - x(-1)} height={yBottom - top + 6} fill={t.text} fillOpacity="0.035" />
         {[-3, -2, -1, 0, 1, 2, 3].map(v => (
@@ -289,16 +293,16 @@ function RangeChart({ rows, color, lastYear, year }) {
         </text>
         {/* legend */}
         <g transform={`translate(${plotL}, ${top - 18})`} fontSize="9.5" fill={t.textMuted}>
-          {[[90, 0.8], [95, 0.45], [99, 0.2]].map(([lv, op], i) => (
+          {[...LEVELS].reverse().map((lv, i) => (
             <g key={lv} transform={`translate(${i * 56}, 0)`}>
-              <rect x="0" y="-7" width="22" height="8" rx="2" fill={color} fillOpacity={op} />
+              <rect x="0" y="-7" width="22" height="8" rx="2" fill={color} fillOpacity={OPACITY[lv]} />
               <text x="27" y="0">{lv}%</text>
             </g>
           ))}
-          <circle cx="176" cy="-3" r="4.5" fill={t.text} />
-          <text x="185" y="0">{year} projection</text>
-          <circle cx="270" cy="-3" r="4" fill="none" stroke={t.textMuted} strokeWidth="1.6" />
-          <text x="279" y="0">{lastYear} actual</text>
+          <circle cx="232" cy="-3" r="4.5" fill={t.text} />
+          <text x="241" y="0">{year} projection</text>
+          <circle cx="326" cy="-3" r="4" fill="none" stroke={t.textMuted} strokeWidth="1.6" />
+          <text x="335" y="0">{lastYear} actual</text>
         </g>
         {rows.map((r, i) => {
           const y = top + i * rowH, cy = y + rowH / 2;
@@ -308,9 +312,9 @@ function RangeChart({ rows, color, lastYear, year }) {
               {i > 0 && <line x1={12} x2={W - 12} y1={y} y2={y} stroke={t.divider} strokeOpacity="0.5" />}
               <text x={labelW - 10} y={cy + 4} textAnchor="end" fontSize="12" fontWeight="700"
                 fill={model ? t.accent : t.text} fontStyle={model ? "italic" : "normal"}>{r.st.label}{r.st.oneSeason ? "*" : ""}</text>
-              {[[99, 0.2], [95, 0.45], [90, 0.8]].map(([lv, op]) => (
+              {LEVELS.map(lv => (
                 <rect key={lv} x={x(r.bands[lv].a)} y={cy - 7} width={Math.max(2, x(r.bands[lv].b) - x(r.bands[lv].a))}
-                  height={14} rx="3" fill={color} fillOpacity={op}>
+                  height={14} rx="3" fill={color} fillOpacity={OPACITY[lv]}>
                   <title>{`${lv}%: ${r.f(r.bands[lv].floorV)} – ${r.f(r.bands[lv].ceilV)}`}</title>
                 </rect>
               ))}
@@ -321,7 +325,7 @@ function RangeChart({ rows, color, lastYear, year }) {
                 <tspan fontSize="8.5" fill={t.textFaint}>90 </tspan>{r.f(r.bands[90].floorV)} – {r.f(r.bands[90].ceilV)}
               </text>
               <text x={W - 14} y={cy + 12} textAnchor="end" fontSize="9.5" fontWeight="600" fill={t.textFaint}>
-                <tspan fontSize="8">99 </tspan>{r.f(r.bands[99].floorV)} – {r.f(r.bands[99].ceilV)}
+                <tspan fontSize="8">50 </tspan>{r.f(r.bands[50].floorV)} – {r.f(r.bands[50].ceilV)}
               </text>
             </g>
           );
@@ -401,7 +405,7 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
                 <th style={th}>Floor ({level}%)</th>
                 <th style={th}>Ceiling ({level}%)</th>
                 <th style={th}>Range</th>
-                <th style={{ ...th, textAlign: "center" }}>vs {lastYear} league · 90 / 95 / 99%</th>
+                <th style={{ ...th, textAlign: "center" }}>vs {lastYear} league · 25 / 50 / 75 / 90%</th>
               </tr>
             </thead>
             <tbody>
@@ -433,9 +437,9 @@ function MiniFan({ r }) {
   return (
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", margin: "0 auto" }}>
       <line x1={x(0)} x2={x(0)} y1={1} y2={H - 1} stroke={t.textFaint} strokeDasharray="2 2" />
-      {[[99, 0.18], [95, 0.4], [90, 0.75]].map(([lv, op]) => (
+      {LEVELS.map(lv => (
         <rect key={lv} x={x(r.bands[lv].a)} y={5} width={Math.max(2, x(r.bands[lv].b) - x(r.bands[lv].a))}
-          height={8} rx="2" fill={t.accent} fillOpacity={op} />
+          height={8} rx="2" fill={t.accent} fillOpacity={OPACITY[lv]} />
       ))}
       <circle cx={x(r.proj)} cy={9} r="4" fill={binColor(r.projP)} stroke={t.cardBg} strokeWidth="1.5" />
     </svg>
