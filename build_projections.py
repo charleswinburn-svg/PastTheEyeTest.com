@@ -105,7 +105,9 @@ MIN_FIT_ROWS = 150
 AGE_CENTER = 28.0
 SKIP_TARGET_SEASONS = {2020}   # 60-game season: fine as an input, not as a target
 LAYER_MIN_GAIN = 0.002   # a layer must cut error by ≥0.2% to be used
-CI_Q = (0.05, 0.25, 0.75, 0.95)   # 90% band and its 50% core
+CI_Q = (0.005, 0.025, 0.05, 0.95, 0.975, 0.995)   # 99% / 95% / 90% bands
+CI_NAMES = ("lo99", "lo95", "lo", "hi", "hi95", "hi99")   # lo/hi = the 90% band
+CI_LEVELS = {90: (2, 3), 95: (1, 4), 99: (0, 5)}          # level → (low q index, high q index)
 CI_MIN_ROWS = 100        # backtest rows needed to fit a stat's interval
 
 
@@ -615,8 +617,8 @@ def drift_widen(metas):
     """How much wider the honest (out-of-season) 90% band is than an in-sample one, across
     the stats with ≥3 backtest seasons — applied to stats with a single backtest season,
     whose bands can't see season-to-season drift on their own."""
-    r = [(m["q"][3] - m["q"][0]) / (m["q_in"][3] - m["q_in"][0])
-         for m in metas.values() if m.get("n_seasons", 0) >= 3 and m["q_in"][3] > m["q_in"][0]]
+    r = [(m["q"][3] - m["q"][2]) / (m["q_in"][3] - m["q_in"][2])
+         for m in metas.values() if m.get("n_seasons", 0) >= 3 and m["q_in"][3] > m["q_in"][2]]
     return max(1.0, float(np.median(r))) if r else 1.0
 
 
@@ -625,16 +627,18 @@ def ci_sigma(fit, H, k, n):
 
 
 def ci_coverage(rows):
-    """Honest check: each backtest season scored with a band (spread AND edges) fit only on
-    the other seasons — the share of actual outcomes inside the 90% band, ≈90% if calibrated."""
-    out = {}
+    """Honest check: each backtest season scored with bands (spread AND edges) fit only on
+    the other seasons — the share of actual outcomes inside each band (≈ its level if
+    calibrated). Returns {level: {season: pct}}."""
+    out = {lv: {} for lv in CI_LEVELS}
     for T in np.unique(rows["season"]):
         fit = fit_ci(rows, rows["season"] != T)
         if fit is None:
             continue
         m = rows["season"] == T
         z = rows["err"][m] / ci_sigma(fit, rows["H"][m], rows["k"][m], rows["nt"][m])
-        out[int(T)] = round(float(np.mean((z >= fit["q"][0]) & (z <= fit["q"][3])) * 100), 1)
+        for lv, (a, b) in CI_LEVELS.items():
+            out[lv][int(T)] = round(float(np.mean((z >= fit["q"][a]) & (z <= fit["q"][b])) * 100), 1)
     return out
 
 
@@ -672,7 +676,7 @@ def ci_bounds(sp, model, keys, center, last_season, widen=1.0):
     lo_clip = 0.0 if vals.min() >= 0 else -np.inf
     c = np.asarray(center, float)
     # actual = projection + err (on the stat's own scale, or logit for rates)
-    b = {name: np.maximum(ginv(g(c) + sig * q), lo_clip) for name, q in zip(("lo", "lo50", "hi50", "hi"), fit["q"])}
+    b = {name: np.maximum(ginv(g(c) + sig * q), lo_clip) for name, q in zip(CI_NAMES, fit["q"])}
     b["n"] = n
     cov = ci_coverage(rows)
     meta = {**{key: round(fit[key], 8) for key in ("c0", "a", "b")}, "q": [round(x, 4) for x in fit["q"]],
@@ -687,19 +691,20 @@ def ci_bounds(sp, model, keys, center, last_season, widen=1.0):
 def ci_entry(b, i, ndigits):
     if b is None or not np.isfinite(b["lo"][i]):
         return None
-    return {"lo": round(float(b["lo"][i]), ndigits), "lo50": round(float(b["lo50"][i]), ndigits),
-            "hi50": round(float(b["hi50"][i]), ndigits), "hi": round(float(b["hi"][i]), ndigits),
-            "n": int(round(float(b["n"][i])))}
+    return {**{name: round(float(b[name][i]), ndigits) for name in CI_NAMES}, "n": int(round(float(b["n"][i])))}
 
 
 def coverage_text(meta):
     if not meta:
         return "(no interval)"
-    if not meta.get("coverage"):
+    cov = meta.get("coverage") or {}
+    if not cov.get(90):
         w = (f", widened ×{meta['widened']:.2f} for season drift" if (meta.get("widened") or 1) >= 1.02
              else "; long-history stats show no extra season drift to add")
         return f"estimated from 1 backtest season ({meta['rows']} rows{w})"
-    return "90% band coverage: " + " · ".join(f"{s} {v:.1f}%" for s, v in meta["coverage"].items())
+    avg = lambda lv: np.mean(list(cov[lv].values())) if cov.get(lv) else float("nan")
+    return ("90% band: " + " · ".join(f"{s} {v:.1f}%" for s, v in cov[90].items())
+            + f"  | avg 90% {avg(90):.1f} · 95% {avg(95):.1f} · 99% {avg(99):.1f}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1094,7 +1099,7 @@ def main():
                               if len(isw_pool) else {})},
                  "xrv_pools": pool_lists(xpool, XRV_STATS),
                  "lower_better": [lab for lab, _f, lb, *_ in CARD_STATS if lb],
-                 "ci": {"level": 90, "core": 50, "method": "walk-forward backtest misses; spread c0 + a/(H+k) + b/n; "
+                 "ci": {"levels": [90, 95, 99], "method": "walk-forward backtest misses; spread c0 + a/(H+k) + b/n; "
                         "empirical 5/25/75/95th percentile edges; luck term at recent playing time "
                         "(clamped to [minimum, full season]); base-model backtest, so slightly conservative "
                         "where a model layer is used",
