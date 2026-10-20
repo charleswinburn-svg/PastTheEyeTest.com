@@ -19,7 +19,7 @@ import FitToWidth from "../FitToWidth.jsx";
 
 const FONT = "'Pliant', sans-serif";
 const BANNER_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-const XRV_LABELS = ["xRV/600", "Decision", "Contact Quality", "Whiff"];
+const XRV_LABELS = ["xRV/600", "Contact Quality", "Whiff", "Decision"];   // same order as the hitter card
 const MIN_REG = { hitters: { field: "pa", n: 300, unit: "PA" }, pitchers: { field: "ip", n: 50, unit: "IP" } };
 
 const _cache = new Map();
