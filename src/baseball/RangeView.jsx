@@ -129,6 +129,8 @@ function rangeRow(st, p, level = 90) {
   const pcts = SHOW.map(q => cat.ci[pkey(st.lowerBetter ? 100 - q : q)]);
   return {
     st, cat, f, n: cat.ci.n, denom: cat.ci.denom, bands, pcts, ...bands[level],
+    // the card's own columns: floor = 10th, ceiling = 90th percentile outcome (worse → better)
+    pctsP: pcts.map(P), spread: Math.abs(pcts[pcts.length - 1] - pcts[0]),
     proj: Z(cat.value), projP: P(cat.value), last: cat.last?.value != null ? Z(cat.last.value) : null,
   };
 }
@@ -332,11 +334,12 @@ function RangeChart({ rows, color, lastYear, year }) {
 }
 
 // ── Board view: floors and ceilings for one stat ──
+// Same numbers as the player card: ceiling = 90th, floor = 10th percentile outcome.
 const SORTS = [
-  { id: "ceiling", label: "Highest ceiling", key: r => (r.st.lowerBetter ? r.ceilV : -r.ceilV) },
-  { id: "floor", label: "Safest floor", key: r => (r.st.lowerBetter ? r.floorV : -r.floorV) },
-  { id: "wide", label: "Widest range", key: r => -r.width },
-  { id: "tight", label: "Tightest range", key: r => r.width },
+  { id: "ceiling", label: "Highest ceiling (90th)", key: r => (r.st.lowerBetter ? 1 : -1) * r.pcts[r.pcts.length - 1] },
+  { id: "floor", label: "Safest floor (10th)", key: r => (r.st.lowerBetter ? 1 : -1) * r.pcts[0] },
+  { id: "wide", label: "Widest range", key: r => -r.spread },
+  { id: "tight", label: "Tightest range", key: r => r.spread },
 ];
 
 function RangeBoard({ stats, players, side, year, lastYear }) {
@@ -344,17 +347,16 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
   const [statKey, setStatKey] = useState(null);
   const [sort, setSort] = useState("ceiling");
   const [regulars, setRegulars] = useState(true);
-  const [level, setLevel] = useState(90);
   const st = stats.find(s => s.key === statKey) || stats[0];
   const reg = MIN_REG[side];
   const rows = useMemo(() => {
     const all = players
       .filter(p => !regulars || (p[reg.field] ?? 0) >= reg.n)
-      .map(p => { const r = rangeRow(st, p, level); return r && { ...r, p }; })
+      .map(p => { const r = rangeRow(st, p); return r && { ...r, p }; })
       .filter(Boolean);
     const k = SORTS.find(s => s.id === sort).key;
     return all.sort((a, b) => k(a) - k(b)).slice(0, 50);
-  }, [players, st, sort, regulars, reg, level]);
+  }, [players, st, sort, regulars, reg]);
 
   const pill = (on, label, onClick, key) => (
     <button key={key || label} type="button" onClick={onClick} aria-pressed={on} style={{
@@ -381,11 +383,10 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
             <option key={s.key} value={s.key} style={{ background: t.inputBg, color: t.textSecondary }}>{s.label}</option>
           ))}
         </select>
-        {LEVELS.map(lv => pill(level === lv, `${lv}%`, () => setLevel(lv), `lv${lv}`))}
         {SORTS.map(s => pill(sort === s.id, s.label, () => setSort(s.id), s.id))}
         {pill(regulars, `${reg.n}+ ${reg.unit} in ${lastYear}`, () => setRegulars(v => !v), "reg")}
         <span style={{ fontSize: 11, color: t.textFaint }}>
-          {st.lowerBetter ? "lower is better: floor = high end, ceiling = low end" : ""}
+          {st.lowerBetter ? "lower is better, so columns run high → low (worse → better)" : ""}
         </span>
       </div>
       <div style={{ background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 10, overflow: "hidden" }}>
@@ -397,9 +398,8 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
                 <th style={{ ...th, textAlign: "left" }}>Player</th>
                 <th style={th}>Age</th>
                 <th style={th}>{year} Proj</th>
-                <th style={th}>Floor ({level}%)</th>
-                <th style={th}>Ceiling ({level}%)</th>
-                <th style={th}>Range</th>
+                {SHOW.map(q => <th key={q} style={{ ...th, color: q === 50 ? t.textMuted : th.color }}>{q}th</th>)}
+                <th style={th} title="90th − 10th percentile outcome">Range</th>
                 <th style={{ ...th, textAlign: "center" }}>vs {lastYear} league · 25 / 50 / 75 / 90%</th>
               </tr>
             </thead>
@@ -412,9 +412,12 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
                   </td>
                   <td style={td}>{r.p.proj?.age ?? "—"}</td>
                   <td style={{ ...td, color: t.text, fontWeight: 800 }}>{r.cat.display}</td>
-                  <td style={td}>{r.f(r.floorV)}{pctPill(r.floorP)}</td>
-                  <td style={td}>{r.f(r.ceilV)}{pctPill(r.ceilP)}</td>
-                  <td style={td}>{r.f(r.width).replace(/^\+/, "")}</td>
+                  {r.pcts.map((v, j) => (
+                    <td key={j} style={{ ...td, fontWeight: SHOW[j] === 50 ? 800 : 400 }}>
+                      {r.f(v)}{(j === 0 || j === SHOW.length - 1) && pctPill(r.pctsP[j])}
+                    </td>
+                  ))}
+                  <td style={td}>{r.f(r.spread).replace(/^\+/, "")}</td>
                   <td style={{ ...td, textAlign: "center", padding: "3px 10px" }}><MiniFan r={r} /></td>
                 </tr>
               ))}
