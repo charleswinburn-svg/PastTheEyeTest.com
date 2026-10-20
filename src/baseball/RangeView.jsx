@@ -14,7 +14,7 @@ import FitToWidth from "../FitToWidth.jsx";
 // with different units, and an elite player's range isn't squashed against the 100th
 // percentile the way a percentile axis would. Dots keep the cards' percentile colors.
 //   Player view: one fan chart per stat (lightest = 90% … darkest = 25%, dot = projection,
-//                ring = 2026 actual).
+//                bold ring = 2026 actual).
 //   Board view:  floors and ceilings for one stat across players.
 
 const FONT = "'Pliant', sans-serif";
@@ -99,7 +99,30 @@ const Z_MAX = 3.5;
 
 // Nested bands, widest first, with their fill opacity (one place to change the set).
 const LEVELS = [90, 75, 50, 25];
-const OPACITY = { 90: 0.2, 75: 0.38, 50: 0.62, 25: 0.9 };
+// Bands are solid, widely stepped shades of one bright color (faint 90% → full-strength 25%),
+// so each band reads on its own whatever the team color. All the same height.
+const SHADE = { 90: 0.84, 75: 0.62, 50: 0.36, 25: 0 };      // share mixed toward the card background
+const BAND_H = { 90: 14, 75: 14, 50: 14, 25: 14 };
+function bandShades(base, bg, isDark) {
+  let c = base;
+  // brighten a dark team color on a dark card (darken a pale one on a light card) until it pops
+  for (let i = 0; i < 8 && (isDark ? hexLuminance(c) < 0.3 : hexLuminance(c) > 0.32); i++) {
+    c = mixHex(c, isDark ? "#ffffff" : "#000000", 0.14);
+  }
+  const back = /^#[0-9a-f]{6}$/i.test(bg || "") ? bg : (isDark ? "#121826" : "#ffffff");
+  return Object.fromEntries(LEVELS.map(L => [L, SHADE[L] ? mixHex(c, back, SHADE[L]) : c]));
+}
+
+// 2026 actual: a hollow white ring with a dark halo, the same size as the projection dot and
+// drawn over it, so it stays distinct from the colored dot even when they overlap.
+function ActualRing({ cx, cy, r, color, halo }) {
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={halo} strokeWidth="4.5" />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="2.4" />
+    </g>
+  );
+}
 const pkey = (p) => "p" + String(p).replace(".", "_");
 const BAND_KEYS = Object.fromEntries(LEVELS.map(L => [L, [pkey((100 - L) / 2), pkey(100 - (100 - L) / 2)]]));
 // Outcome percentiles listed beside each stat, worse → better (flipped for lower-is-better).
@@ -238,7 +261,7 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
                 {ptRow?.n != null && <>ranges assume ~{ptRow.n} {UNITS[ptRow.denom] || ""} · </>}
                 {tight} of {rows.length} 90% ranges within 1 league SD
               </div>
-              <RangeChart rows={rows} color={color} lastYear={lastYear} year={year} />
+              <RangeChart rows={rows} shades={bandShades(color, t.cardBg, isDark)} lastYear={lastYear} year={year} />
               <div style={{ padding: "6px 16px 8px", display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textFaint }}>
                 <span>Created by: @PastTheEyeTest on X</span>
                 <span style={{ fontStyle: "italic" }}>{year} projection · 25 / 50 / 75 / 90% ranges from walk-forward backtests</span>
@@ -255,7 +278,7 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
   );
 }
 
-function RangeChart({ rows, color, lastYear, year }) {
+function RangeChart({ rows, shades, lastYear, year }) {
   const { theme: t } = useTheme();
   const W = 1060, labelW = 168, valW = 404, rowH = 34, top = 40, bottom = 40;
   const plotL = labelW, plotR = W - valW - 12, plotW = plotR - plotL;
@@ -296,14 +319,14 @@ function RangeChart({ rows, color, lastYear, year }) {
         <g transform={`translate(${plotL}, ${top - 18})`} fontSize="9.5" fill={t.textMuted}>
           {[...LEVELS].reverse().map((lv, i) => (
             <g key={lv} transform={`translate(${i * 56}, 0)`}>
-              <rect x="0" y="-7" width="22" height="8" rx="2" fill={color} fillOpacity={OPACITY[lv]} />
+              <rect x="0" y={-3 - BAND_H[lv] / 2} width="22" height={BAND_H[lv]} rx="2" fill={shades[lv]} />
               <text x="27" y="0">{lv}%</text>
             </g>
           ))}
-          <circle cx="232" cy="-3" r="4.5" fill={t.text} />
-          <text x="241" y="0">{year} projection</text>
-          <circle cx="326" cy="-3" r="4" fill="none" stroke={t.textMuted} strokeWidth="1.6" />
-          <text x="335" y="0">{lastYear} actual</text>
+          <circle cx="234" cy="-3" r="5" fill={t.text} stroke={t.cardBg} strokeWidth="1.5" />
+          <text x="244" y="0">{year} projection</text>
+          <ActualRing cx={330} cy={-3} r={5} color={t.text} halo={t.cardBg} />
+          <text x="341" y="0">{lastYear} actual</text>
         </g>
         {rows.map((r, i) => {
           const y = top + i * rowH, cy = y + rowH / 2;
@@ -313,13 +336,13 @@ function RangeChart({ rows, color, lastYear, year }) {
               <text x={labelW - 10} y={cy + 4} textAnchor="end" fontSize="12" fontWeight="700"
                 fill={t.text}>{r.st.label}</text>
               {LEVELS.map(lv => (
-                <rect key={lv} x={x(r.bands[lv].a)} y={cy - 7} width={Math.max(2, x(r.bands[lv].b) - x(r.bands[lv].a))}
-                  height={14} rx="3" fill={color} fillOpacity={OPACITY[lv]}>
+                <rect key={lv} x={x(r.bands[lv].a)} y={cy - BAND_H[lv] / 2} width={Math.max(2, x(r.bands[lv].b) - x(r.bands[lv].a))}
+                  height={BAND_H[lv]} rx="3" fill={shades[lv]}>
                   <title>{`${lv}%: ${r.f(r.bands[lv].floorV)} – ${r.f(r.bands[lv].ceilV)}`}</title>
                 </rect>
               ))}
-              {r.last != null && <circle cx={x(r.last)} cy={cy} r="5" fill="none" stroke={t.textMuted} strokeWidth="1.8" />}
               <circle cx={x(r.proj)} cy={cy} r="6.5" fill={binColor(r.projP)} stroke={t.cardBg} strokeWidth="2" />
+              {r.last != null && <ActualRing cx={x(r.last)} cy={cy} r={6.5} color={t.text} halo={t.cardBg} />}
               <text x={projX} y={cy + 4.5} textAnchor="end" fontSize="13.5" fontWeight="800" fill={t.text}>{r.cat.display}</text>
               {r.pcts.map((v, j) => (
                 <text key={j} x={colX(j)} y={cy + 4} textAnchor="end" fontSize="11.5"
@@ -430,14 +453,15 @@ function RangeBoard({ stats, players, side, year, lastYear }) {
 }
 
 function MiniFan({ r }) {
-  const { theme: t } = useTheme();
+  const { theme: t, isDark } = useTheme();
+  const shades = bandShades(t.accent, t.cardBg, isDark);
   const W = 190, H = 18, x = (z) => 4 + ((z + Z_MAX) / (2 * Z_MAX)) * (W - 8);
   return (
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", margin: "0 auto" }}>
       <line x1={x(0)} x2={x(0)} y1={1} y2={H - 1} stroke={t.textFaint} strokeDasharray="2 2" />
       {LEVELS.map(lv => (
-        <rect key={lv} x={x(r.bands[lv].a)} y={5} width={Math.max(2, x(r.bands[lv].b) - x(r.bands[lv].a))}
-          height={8} rx="2" fill={t.accent} fillOpacity={OPACITY[lv]} />
+        <rect key={lv} x={x(r.bands[lv].a)} y={9 - BAND_H[lv] / 4} width={Math.max(2, x(r.bands[lv].b) - x(r.bands[lv].a))}
+          height={BAND_H[lv] / 2} rx="2" fill={shades[lv]} />
       ))}
       <circle cx={x(r.proj)} cy={9} r="4" fill={binColor(r.projP)} stroke={t.cardBg} strokeWidth="1.5" />
     </svg>
