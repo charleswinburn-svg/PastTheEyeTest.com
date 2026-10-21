@@ -1,4 +1,4 @@
-import { useState, useEffect, useId, useMemo } from "react";
+import { useState, useEffect, useId, useMemo, useRef } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
 
@@ -901,74 +901,154 @@ export async function saveCardAsPng(cardRef, filename) {
 
 
 // ═══════════════════════════════════════════════════════════
-// SEARCHABLE PLAYER SELECT — input + datalist combo
-// Works with either a plain string[] of labels OR {label, value}[]
-// pairs. The current `value` is matched against option values (or
-// labels, if options are strings). Typing filters via the native
-// browser datalist; picking from the dropdown commits, hitting Enter
-// commits the best prefix match, and blur reverts to the last
-// committed value if the draft is invalid.
+// SEARCHABLE PLAYER SELECT — one search box for every tab
+// Options: string[] or {value, label, sublabel?, image?, logo?}[]. onChange(value, opt).
+// A styled list (headshot · name · sub-label · team logo) opens under the box; typing
+// filters it (accent-insensitive, prefix matches first, sub-label/team too), ↑/↓ move,
+// Enter picks, Esc closes, and leaving the box without a valid pick reverts it. Always
+// in the site font, and it fills the free space in its row.
 // ═══════════════════════════════════════════════════════════
+const SITE_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+const MAX_SHOWN = 50;
+
+function initialsOf(label) {
+  const parts = String(label).replace(/\(.*?\)/g, "").trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] || "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+}
+
+function OptionAvatar({ src, label, t }) {
+  const [bad, setBad] = useState(false);
+  useEffect(() => { setBad(false); }, [src]);
+  const box = { width: 28, height: 28, borderRadius: "50%", flexShrink: 0, overflow: "hidden",
+                background: t.inputBg, border: `1px solid ${t.cardBorder}`, display: "flex",
+                alignItems: "center", justifyContent: "center" };
+  return (
+    <span style={box}>
+      {src && !bad
+        ? <img src={src} alt="" loading="lazy" onError={() => setBad(true)}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        : <span style={{ fontSize: 10, fontWeight: 700, color: t.textMuted }}>{initialsOf(label)}</span>}
+    </span>
+  );
+}
+
+function HighlightMatch({ text, q }) {
+  if (!q) return text;
+  const i = norm(text).indexOf(q);
+  if (i < 0) return text;
+  return <>{text.slice(0, i)}<strong>{text.slice(i, i + q.length)}</strong>{text.slice(i + q.length)}</>;
+}
 
 export function SearchableSelect({
   value, options = [], onChange, style, placeholder = "Search…",
+  panelMinWidth = 0, panelAlign = "left",   // e.g. a narrow box in the nav bar opens a wider list to its left
 }) {
+  const { theme: t } = useTheme();
   const isObjOpts = options.length > 0 && typeof options[0] === "object";
-  const labels = useMemo(
-    () => isObjOpts ? options.map(o => String(o.label)) : options.map(String),
-    [options, isObjOpts],
-  );
-  const labelByValue = useMemo(() => {
-    if (!isObjOpts) return null;
-    const m = new Map();
-    for (const o of options) m.set(o.value, String(o.label));
-    return m;
-  }, [options, isObjOpts]);
+  const opts = useMemo(() => options.map(o => (isObjOpts
+    ? { ...o, label: String(o.label), n: norm(String(o.label)), ns: norm(String(o.sublabel || "")) }
+    : { value: o, label: String(o), n: norm(String(o)), ns: "" })), [options, isObjOpts]);
+  const byLabel = useMemo(() => new Map(opts.map(o => [o.label, o])), [opts]);
+  const currentLabel = isObjOpts ? (opts.find(o => o.value === value)?.label || "") : (value || "");
 
-  const currentLabel = isObjOpts ? (labelByValue.get(value) || "") : (value || "");
   const [draft, setDraft] = useState(currentLabel);
-  useEffect(() => { setDraft(currentLabel); }, [currentLabel]);
+  const [open, setOpen] = useState(false);
+  const [hi, setHi] = useState(0);
+  const listRef = useRef(null);
   const listId = useId();
+  useEffect(() => { setDraft(currentLabel); }, [currentLabel]);
 
-  const commit = (label) => {
-    if (!labels.includes(label)) return false;
-    if (isObjOpts) {
-      const opt = options.find(o => String(o.label) === label);
-      onChange?.(opt?.value, opt);
-    } else {
-      onChange?.(label);
+  const q = draft === currentLabel ? "" : norm(draft.trim());
+  const matches = useMemo(() => {
+    if (!q) return opts.slice(0, MAX_SHOWN);
+    const starts = [], words = [], rest = [];
+    for (const o of opts) {
+      if (o.n.startsWith(q)) starts.push(o);
+      else if (o.n.includes(" " + q)) words.push(o);
+      else if (o.n.includes(q) || o.ns.includes(q)) rest.push(o);
+      if (starts.length >= MAX_SHOWN) break;
     }
+    return [...starts, ...words, ...rest].slice(0, MAX_SHOWN);
+  }, [opts, q]);
+  useEffect(() => { setHi(0); }, [q]);
+  useEffect(() => {
+    const el = listRef.current?.children?.[hi];
+    if (open && el?.scrollIntoView) el.scrollIntoView({ block: "nearest" });
+  }, [hi, open]);
+
+  const commit = (o) => {
+    if (!o) return false;
+    setDraft(o.label);
+    setOpen(false);
+    if (isObjOpts) onChange?.(o.value, o); else onChange?.(o.label);
     return true;
   };
 
+  // Width/flex sizing goes on the wrapper so the box can fill its row; the rest styles the input.
+  const { minWidth, maxWidth, width, flex, fontFamily: _ignoredFont, ...inputStyle } = style || {};
+  const anyImages = opts.some(o => o.image || o.logo);
+
   return (
-    <>
+    <div style={{ position: "relative", flex: flex || "1 1 280px", minWidth: minWidth ?? 220,
+                  maxWidth: maxWidth ?? "100%", width: width ?? "auto", fontFamily: SITE_FONT }}>
       <input
-        list={listId}
+        role="combobox" aria-expanded={open} aria-controls={listId} aria-autocomplete="list"
+        aria-activedescendant={open && matches[hi] ? `${listId}-${hi}` : undefined}
         value={draft}
+        onFocus={e => { setOpen(true); e.target.select(); }}
         onChange={e => {
           const v = e.target.value;
-          setDraft(v);
-          if (labels.includes(v)) commit(v);
+          setDraft(v); setOpen(true);
+          if (byLabel.has(v)) commit(byLabel.get(v));
         }}
         onBlur={() => {
-          if (!labels.includes(draft)) setDraft(currentLabel);
+          setOpen(false);
+          if (!byLabel.has(draft)) setDraft(currentLabel);
         }}
         onKeyDown={e => {
-          if (e.key === "Enter") {
-            if (commit(draft)) return;
-            const lower = draft.toLowerCase();
-            const hit = labels.find(l => l.toLowerCase().startsWith(lower))
-                     || labels.find(l => l.toLowerCase().includes(lower));
-            if (hit) { setDraft(hit); commit(hit); }
-          }
+          if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); setHi(h => Math.min(h + 1, matches.length - 1)); }
+          else if (e.key === "ArrowUp") { e.preventDefault(); setHi(h => Math.max(h - 1, 0)); }
+          else if (e.key === "Enter") {
+            e.preventDefault();
+            if (byLabel.has(draft) && !open) { commit(byLabel.get(draft)); return; }
+            if (commit(matches[hi] || matches[0])) e.currentTarget.blur();
+          } else if (e.key === "Escape") { setOpen(false); setDraft(currentLabel); e.currentTarget.blur(); }
         }}
         placeholder={placeholder}
-        style={{ fontFamily: "inherit", outline: "none", ...style }}
+        style={{ outline: "none", ...inputStyle, width: "100%", boxSizing: "border-box", fontFamily: SITE_FONT }}
       />
-      <datalist id={listId}>
-        {labels.map(l => <option key={l} value={l} />)}
-      </datalist>
-    </>
+      {open && matches.length > 0 && (
+        <div ref={listRef} id={listId} role="listbox"
+          style={{ position: "absolute", top: "calc(100% + 4px)", zIndex: 1000, minWidth: panelMinWidth,
+                   ...(panelAlign === "right" ? { right: 0, left: panelMinWidth ? "auto" : 0 } : { left: 0, right: panelMinWidth ? "auto" : 0 }),
+                   width: panelMinWidth ? "max(100%, " + panelMinWidth + "px)" : undefined,
+                   maxHeight: 8 * 44, overflowY: "auto", background: t.cardBg, color: t.text,
+                   border: `1px solid ${t.cardBorder}`, borderRadius: 8, boxShadow: `0 10px 28px ${t.shadow || "rgba(0,0,0,0.35)"}`,
+                   padding: 4, fontFamily: SITE_FONT, textAlign: "left" }}>
+          {matches.map((o, i) => (
+            <div key={`${o.value}-${i}`} id={`${listId}-${i}`} role="option" aria-selected={i === hi}
+              onMouseDown={e => { e.preventDefault(); commit(o); }}
+              onMouseEnter={() => setHi(i)}
+              style={{ display: "flex", alignItems: "center", gap: 10, padding: anyImages ? "6px 10px" : "7px 10px",
+                       borderRadius: 6, cursor: "pointer", minHeight: anyImages ? 40 : 28,
+                       background: i === hi ? `${t.accent}26` : "transparent" }}>
+              {anyImages && <OptionAvatar src={o.image} label={o.label} t={t} />}
+              <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25 }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: t.text, whiteSpace: "nowrap",
+                              overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <HighlightMatch text={o.label} q={q} />
+                </div>
+                {o.sublabel && (
+                  <div style={{ fontSize: 11, color: t.textMuted, whiteSpace: "nowrap", overflow: "hidden",
+                                textOverflow: "ellipsis" }}>{o.sublabel}</div>
+                )}
+              </div>
+              {o.logo && <img src={o.logo} alt="" loading="lazy" onError={e => { e.currentTarget.style.display = "none"; }}
+                style={{ width: 22, height: 22, objectFit: "contain", flexShrink: 0 }} />}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

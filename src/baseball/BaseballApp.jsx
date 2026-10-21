@@ -11,7 +11,7 @@ import ISwingWaterfall from "./ISwingWaterfall.jsx";
 import StuffWaterfall from "./StuffWaterfall.jsx";
 import ProjectionMovers from "./ProjectionMovers.jsx";
 import RangeView from "./RangeView.jsx";
-import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv, NewBadge, useISwingNew } from "./SharedComponents.jsx";
+import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv, NewBadge, useISwingNew, getHeadshotUrl, getLogoUrl } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
 
 // ── Mobile breakpoint ──
@@ -327,6 +327,24 @@ function BaseballApp() {
   const aaaPitchersFull = useMemo(() => disambiguate(aaaData?.pitchers || []), [aaaData]);
   const aaaHitterNames = useMemo(() => aaaHittersFull.map(h => h.displayName).sort(), [aaaHittersFull]);
   const aaaPitcherNames = useMemo(() => aaaPitchersFull.map(p => p.displayName).sort(), [aaaPitchersFull]);
+
+  // Card search options: same names as before (value = display name), plus headshot + logo.
+  const searchOpts = (list, nameOf = p => p.displayName) => {
+    const seen = new Set(), out = [];
+    for (const p of list) {
+      const name = nameOf(p);
+      if (!name || seen.has(name)) continue;
+      seen.add(name);
+      out.push({ value: name, label: name, sublabel: p.team || "",
+                 image: getHeadshotUrl(p.player_id), logo: getLogoUrl(p.team, p.team_id) });
+    }
+    return out.sort((a, b) => a.label.localeCompare(b.label));
+  };
+  const hitterOpts = useMemo(() => searchOpts(hittersFull), [hittersFull]);
+  const pitcherOpts = useMemo(() => searchOpts(pitchersFull), [pitchersFull]);
+  const aaaHitterOpts = useMemo(() => searchOpts(aaaHittersFull), [aaaHittersFull]);
+  const aaaPitcherOpts = useMemo(() => searchOpts(aaaPitchersFull), [aaaPitchersFull]);
+  const fielderOpts = useMemo(() => searchOpts(fielders, f => f.name), [fielders]);
   const curAaaHitter  = useMemo(() => aaaHittersFull.find(h => h.displayName === selectedHitter)  || null, [aaaHittersFull, selectedHitter]);
   const curAaaPitcher = useMemo(() => aaaPitchersFull.find(p => p.displayName === selectedPitcher) || null, [aaaPitchersFull, selectedPitcher]);
 
@@ -613,18 +631,21 @@ function BaseballApp() {
           {(isHitterTab(tab) || isPitcherTab(tab) || tab === "fielder") && (
             <SearchableSelect
               value={isPitcherTab(tab) ? (selectedPitcher || "") : tab === "fielder" ? (selectedFielder || "") : (selectedHitter || "")}
-              options={(tab === "pitcher" ? pitcherNames
-                : tab === "pitcher_aaa" ? aaaPitcherNames
-                : tab === "hitter_aaa"  ? aaaHitterNames
-                : tab === "fielder"     ? fielderNames
-                : hitterNames)}
+              options={(tab === "pitcher" ? pitcherOpts
+                : tab === "pitcher_aaa" ? aaaPitcherOpts
+                : tab === "hitter_aaa"  ? aaaHitterOpts
+                : tab === "fielder"     ? fielderOpts
+                : hitterOpts)}
               onChange={name => {
                 if (isPitcherTab(tab)) setSelectedPitcher(name);
                 else if (tab === "fielder") setSelectedFielder(name);
                 else setSelectedHitter(name);
               }}
               placeholder="Search player…"
+              panelMinWidth={isMobile ? 0 : 340}
+              panelAlign="right"
               style={{
+                flex: isMobile ? "1 1 100%" : "0 1 280px",
                 padding: "6px 12px",
                 background: t.inputBg,
                 border: `1px solid ${t.inputBorder}`,

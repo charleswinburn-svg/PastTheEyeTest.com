@@ -1076,7 +1076,10 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
                 value={selectedPlayer?.id || ""}
                 options={gamePlayers.map(p => ({
                   value: p.id,
-                  label: `${p.name} (${p.team})${isPitcher ? ` — ${p.ip} IP` : ` — ${p.hits}/${p.abs}`}`,
+                  label: p.name,
+                  sublabel: `${p.team}${isPitcher ? ` · ${p.ip} IP` : ` · ${p.hits}-for-${p.abs}`}`,
+                  image: getHeadshotUrl(p.id),
+                  logo: getLogoUrl(p.team, p.teamId),
                 }))}
                 onChange={(_, opt) => {
                   const p = gamePlayers.find(x => x.id === opt?.value);
@@ -1098,7 +1101,10 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "center" }}>
             <SearchableSelect
               value={selectedPlayer?.id || ""}
-              options={playerList.map(p => ({ value: p.id, label: `${p.name} (${p.team})` }))}
+              options={playerList.map(p => ({
+                value: p.id, label: p.name, sublabel: p.team || "",
+                image: getHeadshotUrl(p.id), logo: getLogoUrl(p.team, p.teamId),
+              }))}
               onChange={(_, opt) => {
                 const p = playerList.find(x => x.id === opt?.value);
                 setSelectedPlayer(p || null);

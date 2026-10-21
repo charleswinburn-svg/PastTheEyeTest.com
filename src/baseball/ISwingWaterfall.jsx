@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import {
-  PlayerHeader, SearchableSelect, NewBadge, useISwingNew, useFallbackTeamId,
+  PlayerHeader, SearchableSelect, NewBadge, useISwingNew, useFallbackTeamId, getHeadshotUrl, getLogoUrl,
   saveCardAsPng, teamMarkColor, hexLuminance, mixHex, binColor, textOnBin,
   TEAM_IDS, MLB_TEAM_PRIMARY,
 } from "./SharedComponents.jsx";
@@ -110,7 +110,8 @@ export default function ISwingWaterfall({ season, hitters }) {
       .map(([id, r]) => {
         const h = hitterById.get(id);
         const name = h?.name || r.name;
-        return { value: id, name, label: `${name}${h?.team ? ` (${h.team})` : ""} — iSwing+ ${r.iswing}` };
+        return { value: id, name, label: name, sublabel: `${h?.team ? `${h.team} · ` : ""}iSwing+ ${r.iswing}`,
+                 image: getHeadshotUrl(id), logo: getLogoUrl(h?.team, h?.team_id) };
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [data, hitterById]);

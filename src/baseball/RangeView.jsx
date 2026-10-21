@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import {
-  PlayerHeader, SearchableSelect, saveCardAsPng, binColor, textOnBin, teamMarkColor, hexLuminance, mixHex,
+  PlayerHeader, SearchableSelect, saveCardAsPng, getHeadshotUrl, getLogoUrl, binColor, textOnBin, teamMarkColor, hexLuminance, mixHex,
 } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 
@@ -222,8 +222,9 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
   const cardRef = useRef(null);
   const [pid, setPid] = useState(null);
   const options = useMemo(() => players
-    .map(p => ({ value: String(p.player_id), name: p.name || String(p.player_id),
-                 label: `${p.name}${p.team ? ` (${p.team})` : ""}` }))
+    .map(p => ({ value: String(p.player_id), name: p.name || String(p.player_id), label: p.name || String(p.player_id),
+                 sublabel: [p.team, p.proj?.age != null ? `Age ${p.proj.age}` : null].filter(Boolean).join(" · "),
+                 image: getHeadshotUrl(p.player_id), logo: getLogoUrl(p.team, p.team_id) }))
     .sort((a, b) => a.name.localeCompare(b.name)), [players]);
   const p = players.find(x => String(x.player_id) === pid) || null;
   const rows = useMemo(() => (p ? stats.map(st => rangeRow(st, p)).filter(Boolean) : []), [p, stats]);
@@ -241,7 +242,7 @@ function PlayerRanges({ stats, players, side, year, lastYear }) {
         <SearchableSelect value={pid || ""} options={options} onChange={(v) => setPid(v || null)}
           placeholder={`Search ${side === "hitters" ? "hitter" : "pitcher"}…`}
           style={{ padding: "6px 12px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
-                   borderRadius: 6, fontSize: 12, minWidth: 320, fontFamily: FONT }} />
+                   borderRadius: 6, fontSize: 12, minWidth: 320 }} />
       </div>
       {!p ? (
         <div style={{ color: t.textMuted, textAlign: "center", padding: 40, fontSize: 13 }}>Select a {side === "hitters" ? "hitter" : "pitcher"}</div>

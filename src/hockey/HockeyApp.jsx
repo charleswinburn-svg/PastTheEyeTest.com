@@ -386,6 +386,9 @@ export default function HockeyApp(){
   const goalies=useMemo(()=>data?.goalies||[],[data]);
   const skaterNames=useMemo(()=>skaters.map(s=>s.display_name).sort(),[skaters]);
   const goalieNames=useMemo(()=>goalies.map(g=>g.name).sort(),[goalies]);
+  const hockeyOpts=(list,nameOf)=>[...list].sort((a,b)=>nameOf(a).localeCompare(nameOf(b))).map(p=>({value:nameOf(p),label:nameOf(p),sublabel:p.team,image:headshots?.[nameOf(p)]||null,logo:p.team?(logos?.[p.team]||LOGO_FALLBACK(p.team)):null}));
+  const skaterOpts=useMemo(()=>hockeyOpts(skaters,s=>s.display_name),[skaters,headshots,logos]);
+  const goalieOpts=useMemo(()=>hockeyOpts(goalies,g=>g.name),[goalies,headshots,logos]);
   const filteredSkaters=useMemo(()=>posFilter?skaters.filter(s=>s.pos_group===posFilter):skaters,[skaters,posFilter]);
   const mode=data?.mode||"3-Year Rolling";
 
@@ -479,10 +482,10 @@ export default function HockeyApp(){
           {(tab==="skater"||tab==="goalie")&&(
             <SearchableSelect
               value={tab==="goalie"?selectedGoalie||"":selectedSkater||""}
-              options={tab==="goalie"?goalieNames:skaterNames}
+              options={tab==="goalie"?goalieOpts:skaterOpts}
               onChange={name=>tab==="goalie"?setSelectedGoalie(name):setSelectedSkater(name)}
               placeholder={`Search ${tab==="goalie"?"goalie":"skater"}…`}
-              style={{padding:"8px 12px",background:"#0f172a",border:"1px solid #1e3a5f",borderRadius:6,color:"#f8fafc",fontSize:13,minWidth:isMobile?0:200,maxWidth:isMobile?"100%":280,width:isMobile?"100%":"auto",flexShrink:1}}
+              style={{padding:"8px 12px",background:"#0f172a",border:"1px solid #1e3a5f",borderRadius:6,color:"#f8fafc",fontSize:13,flex:isMobile?"1 1 100%":"1 1 280px",minWidth:isMobile?0:220,maxWidth:isMobile?"100%":420}}
             />
           )}
           {tab==="skater_lb"&&(

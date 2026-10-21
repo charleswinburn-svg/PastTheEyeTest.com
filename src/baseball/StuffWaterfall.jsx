@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import {
-  PlayerHeader, SearchableSelect, useFallbackTeamId,
+  PlayerHeader, SearchableSelect, useFallbackTeamId, getHeadshotUrl, getLogoUrl,
   saveCardAsPng, teamMarkColor, hexLuminance, mixHex, binColor, textOnBin,
   TEAM_IDS, MLB_TEAM_PRIMARY,
 } from "./SharedComponents.jsx";
@@ -296,8 +296,9 @@ export default function StuffWaterfall({ season, pitchers }) {
         const p = pitcherById.get(id);
         const r = data[id];
         const name = p?.name || r?.name || id;
-        const types = r?.types && mode === "season" ? ` — ${Object.keys(r.types).join(" · ")}` : "";
-        return { value: id, name, label: `${name}${p?.team ? ` (${p.team})` : ""}${types}` };
+        const types = r?.types && mode === "season" ? Object.keys(r.types).join(" · ") : "";
+        return { value: id, name, label: name, sublabel: [p?.team, types].filter(Boolean).join(" · "),
+                 image: getHeadshotUrl(id), logo: getLogoUrl(p?.team, p?.team_id) };
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [data, pitcherById, mode]);

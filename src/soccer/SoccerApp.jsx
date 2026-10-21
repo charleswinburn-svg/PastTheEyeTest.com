@@ -75,7 +75,8 @@ export default function SoccerApp() {
   const playerOptions = useMemo(() =>
     filteredPlayers.map(p => ({
       value: p.player_id,
-      label: `${p.name} — ${p.team}`,
+      label: p.name,
+      sublabel: p.team,
     })),
     [filteredPlayers]
   );
