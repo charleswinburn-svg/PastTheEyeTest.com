@@ -10,7 +10,7 @@
       "extension": 6.44
     },
     "CU": {
-      "count": 45416,
+      "count": 45417,
       "velo": 80.2,
       "spin": 2605,
       "zone_pct": 35.6,
@@ -74,7 +74,7 @@
       "extension": 6.42
     },
     "SL": {
-      "count": 93542,
+      "count": 93541,
       "velo": 86.3,
       "spin": 2434,
       "zone_pct": 39.0,
@@ -98,5 +98,5 @@
       "extension": 6.12
     }
   },
-  "generated_at": "2026-10-20 15:48:13 UTC"
+  "generated_at": "2026-10-21 16:01:01 UTC"
 }
