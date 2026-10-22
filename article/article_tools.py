@@ -329,6 +329,26 @@ def table_stability(S):
     return save_table(pd.DataFrame(rows), f"{S['side']}_stability")
 
 
+def plot_stability(S):
+    t = table_stability(S)
+    fig, ax = plt.subplots(figsize=(6.5, 6))
+    ax.scatter(t["implied_n_over_n_plus_k"], t["r_year_to_year"], color=PALETTE[0], zorder=3)
+    placed = []
+    for _, r in t.sort_values("r_year_to_year").iterrows():
+        x, y = r["implied_n_over_n_plus_k"], r["r_year_to_year"]
+        dy = 0.0
+        while any(abs(x - px) < 0.12 and abs(y + dy - py) < 0.022 for px, py in placed):
+            dy -= 0.022
+        placed.append((x, y + dy))
+        ax.annotate(r["stat"], (x, y), xytext=(x + 0.015, y + dy), fontsize=7, va="center",
+                    arrowprops=dict(arrowstyle="-", color="#94a3b8", lw=0.5) if dy else None)
+    ax.plot([0, 1], [0, 1], color=INK, lw=0.8)
+    ax.set(xlim=(0, 1.15), ylim=(0, 1), xlabel="Model: n / (n + k) at the typical sample",
+           ylabel="Data: year-to-year r", title=f"{S['side'].title()}: regression matches stickiness")
+    save(fig, f"{S['side']}_stability")
+    return fig
+
+
 def _full_n(r):
     sp = r["sp"]
     last_n = [n for (_p, s), (_v, n) in sp.s.v.items() if s == r["last"] and n >= sp.s.min_target]
@@ -353,23 +373,23 @@ def _grid(n, ncols=4, w=3.6, h=2.8):
     return fig, axes.flat
 
 
-def plot_weights(S, stats=None):
-    """How much each past season counts (last season = 1)."""
+def plot_weights(S, stats=None, ncols=2):
+    """How much each past season counts (last season = 1), one panel per stat family."""
     R = _visible(S)
     stats = stats or list(R)
-    fig, ax = plt.subplots(figsize=(9, 5))
-    fams = sorted({R[s]["family"] for s in stats})
-    for s in stats:
-        w = R[s]["desc"]["weights"]
-        c = PALETTE[fams.index(R[s]["family"]) % len(PALETTE)]
-        ax.plot(range(1, len(w) + 1), w, "-o", color=c, alpha=0.75, lw=1.6, ms=4)
-        ax.annotate(s, (len(w), w[-1]), fontsize=7, color=c, xytext=(4, 0), textcoords="offset points", va="center")
-    ax.plot([1, 2, 3, 4, 5], [1, .8, .6, .4, .2], "--", color=INK, lw=1.2, label="Marcel 5/4/3/2/1")
-    for i, f in enumerate(fams):
-        ax.plot([], [], "-o", color=PALETTE[i % len(PALETTE)], label=f)
-    ax.set(xlabel="Seasons back (1 = last season)", ylabel="Weight per unit of sample",
-           title=f"{S['side'].title()}: learned season weights", xticks=range(1, bp.MAX_LAGS + 1), ylim=(0, 1.08))
-    ax.legend(fontsize=8, loc="lower left")
+    fams = list(dict.fromkeys(R[s]["family"] for s in stats))
+    fig, axes = _grid(len(fams), ncols, 5.2, 3.6)
+    for ax, fam in zip(axes, fams):
+        mine = [s for s in stats if R[s]["family"] == fam]
+        for i, s in enumerate(mine):
+            w = R[s]["desc"]["weights"]
+            ax.plot(range(1, len(w) + 1), w, "-o", color=PALETTE[i % len(PALETTE)] if len(mine) <= len(PALETTE)
+                    else plt.cm.tab20(i % 20), lw=1.6, ms=4, label=s)
+        ax.plot([1, 2, 3, 4, 5], [1, .8, .6, .4, .2], "--", color=INK, lw=1.2, label="Marcel 5/4/3/2/1")
+        ax.set(title=fam, xticks=range(1, bp.MAX_LAGS + 1), ylim=(0, 1.05), xlabel="Seasons back (1 = last season)")
+        ax.legend(fontsize=7, ncol=2 if len(mine) > 6 else 1)
+    fig.suptitle(f"{S['side'].title()}: learned season weights (per unit of sample)", fontweight="bold")
+    fig.tight_layout()
     save(fig, f"{S['side']}_weights")
     return fig
 
@@ -488,6 +508,16 @@ def plot_backtest_scatter(S, stats, ncols=4):
     return fig
 
 
+def lean_examples(S, n=3):
+    """Stats to illustrate the lean correction: the applied ones with the biggest
+    error cut, else (none applied) the largest |β| as a counter-example."""
+    t = table_lean(S).dropna(subset=["beta"])
+    app = t[t["applied"] == True].assign(cut=lambda d: d["rmse_before"] / d["rmse_after"]).sort_values("cut", ascending=False)
+    if len(app):
+        return app["stat"].head(n).tolist()
+    return t.reindex(t["beta"].abs().sort_values(ascending=False).index)["stat"].head(1).tolist()
+
+
 def plot_lean(S, stat, bins=8):
     """Miss (actual − projection) by how thin a player's history is, before and after
     the lean correction β·k/(H+k)."""
@@ -572,7 +602,8 @@ def plot_coverage_heatmap(S, level=90):
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
             if np.isfinite(M[i, j]):
-                ax.text(j, i, f"{M[i, j]:.0f}", ha="center", va="center", fontsize=7)
+                ax.text(j, i, f"{M[i, j]:.0f}", ha="center", va="center", fontsize=7,
+                        color="white" if abs(M[i, j] - level) > 7 else INK)
     ax.set_xticks(range(len(seasons)), seasons)
     ax.set_yticks(range(len(data)), list(data))
     ax.grid(False)
