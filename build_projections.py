@@ -827,6 +827,8 @@ def main():
     ap.add_argument("--target", type=int, default=2027)
     ap.add_argument("--min-recent-pa", type=int, default=200,
                     help="project hitters with at least this many PA over the last 3 seasons")
+    ap.add_argument("--card-min-pa", type=int, default=100,
+                    help="...and every hitter with a last-season card (this many PA, the card minimum)")
     args = ap.parse_args()
     public, hist_dir, TARGET = Path(args.public), Path(args.history), args.target
     LAST = TARGET - 1
@@ -938,10 +940,14 @@ def main():
     recent = h[h["season"].between(TARGET - 3, LAST)]
     pa_recent = recent.groupby("player_id")["pa"].sum()
     in_recent = set(h[h["season"] >= LAST - 1]["player_id"])
-    pids = sorted(p for p in pa_recent.index if pa_recent[p] >= args.min_recent_pa and p in in_recent)
+    pids = {p for p in pa_recent.index if pa_recent[p] >= args.min_recent_pa and p in in_recent}
+    # Everyone with a last-season card gets a projection, however thin his history
+    carded = set(h[(h["season"] == LAST) & (h["pa"] >= args.card_min_pa)]["player_id"])
+    added = len(carded - pids)
+    pids = sorted(pids | carded)
     keys = [(p, TARGET) for p in pids]
     log(f"\nProjecting {TARGET} for {len(pids)} hitters (≥{args.min_recent_pa} PA over "
-        f"{TARGET-3}–{LAST}, active {LAST-1}–{LAST})")
+        f"{TARGET-3}–{LAST}, active {LAST-1}–{LAST}; +{added} more with a {LAST} card, ≥{args.card_min_pa} PA)")
 
     proj = pd.DataFrame({"player_id": pids})
     layer_used = {}
@@ -1101,7 +1107,7 @@ def main():
         "hitter_metrics": [{"key": lab, "label": lab, "lower_better": lb} for lab, _f, lb, *_ in CARD_STATS],
         "pitcher_metrics": [],
         "meta": {"projection": True, "target_season": TARGET, "percentiles_vs": f"{LAST} actual (min 100 PA)",
-                 "min_recent_pa": args.min_recent_pa,
+                 "min_recent_pa": args.min_recent_pa, "card_min_pa": args.card_min_pa,
                  "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
                  "pools": {**pool_lists(pool, [lab for lab, *_ in CARD_STATS]),
                            **({"iSwing+": [round(float(x), 5) for x in np.sort(isw_pool[np.isfinite(isw_pool)])]}

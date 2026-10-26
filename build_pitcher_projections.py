@@ -86,6 +86,8 @@ def main():
     ap.add_argument("--target", type=int, default=2027)
     ap.add_argument("--min-recent-ip", type=float, default=40,
                     help="project pitchers with at least this many IP over the last 3 seasons")
+    ap.add_argument("--card-min-ip", type=float, default=CARD_POOL_MIN_IP,
+                    help="...and every pitcher with a last-season card (this many IP, the card minimum)")
     args = ap.parse_args()
     public, hist_dir, T = Path(args.public), Path(args.history), args.target
     LAST = T - 1
@@ -187,10 +189,14 @@ def main():
     recent = h[h["season"].between(T - 3, LAST)]
     ip_recent = recent.groupby("player_id")["ip"].sum()
     active = set(h[h["season"] >= LAST - 1]["player_id"])
-    pids = sorted(pid for pid in ip_recent.index if ip_recent[pid] >= args.min_recent_ip and pid in active)
+    pids = {pid for pid in ip_recent.index if ip_recent[pid] >= args.min_recent_ip and pid in active}
+    # Everyone with a last-season card gets a projection, however thin his history
+    carded = set(h[(h["season"] == LAST) & (h["ip"] >= args.card_min_ip)]["player_id"])
+    added = len(carded - pids)
+    pids = sorted(pids | carded)
     keys = [(pid, T) for pid in pids]
     print(f"\nProjecting {T} for {len(pids)} pitchers (≥{args.min_recent_ip:g} IP over {T-3}–{LAST}, "
-          f"active {LAST-1}–{LAST})")
+          f"active {LAST-1}–{LAST}; +{added} more with a {LAST} card, ≥{args.card_min_ip:g} IP)")
 
     proj = pd.DataFrame({"player_id": pids})
     layer_used = {}
@@ -292,7 +298,7 @@ def main():
     out["pitchers"] = pitchers
     out["pitcher_metrics"] = [{"key": lab, "label": lab, "lower_better": lb} for lab, _p, lb in CARD]
     out["pitcher_meta"] = {"percentiles_vs": f"{LAST} actual (min {CARD_POOL_MIN_IP} IP; grades min {GRADE_POOL_MIN} pitches)",
-                           "min_recent_ip": args.min_recent_ip,
+                           "min_recent_ip": args.min_recent_ip, "card_min_ip": args.card_min_ip,
                            "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
                            "pools": bp.pool_lists(pool, [lab for lab, *_ in CARD]),
                            "grade_pools": bp.pool_lists(gpool, [c for c, _ in GRADES]),
