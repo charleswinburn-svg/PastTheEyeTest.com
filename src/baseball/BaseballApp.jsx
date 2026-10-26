@@ -54,9 +54,16 @@ function deduplicatePlayers(players) {
   return [...byKey.values()];
 }
 
-const SEASONS = ["2026", "2025", "2024", "2023"];
+const SEASONS = ["2027P", "2026", "2025", "2024", "2023"];
 // Projection season ("2027P") if one is listed — enables the Movers leaderboard.
 const PROJ_SEASON = SEASONS.find(x => String(x).endsWith("P")) || null;
+// Tabs that have a projection version; everything else is crossed out while the
+// projection season is selected.
+const PROJ_TABS = new Set(["hitter", "pitcher", "hitter_lb", "hitter_xrv_lb", "pitcher_lb",
+                           "proj_movers", "proj_ci_hitters", "proj_ci_pitchers"]);
+const PROJ_OFF_TITLE = "Not available for 2027 projections";
+// The site opens on this player's projected card.
+const DEFAULT_PLAYER = "Shohei Ohtani";
 
 const TABS = [
   {
@@ -153,13 +160,13 @@ function BaseballApp() {
   const [trends, setTrends] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [season, setSeason] = useState("2026");
-  const [tab, setTab] = useState("pitcher_game");
+  const [season, setSeason] = useState(PROJ_SEASON || "2026");
+  const [tab, setTab] = useState("hitter");
   const [summarySubTab, setSummarySubTab] = useState("pitcher_game");
   const [openDropdown, setOpenDropdown] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);   // mobile ≡ tab menu
-  const [selectedHitter, setSelectedHitter] = useState(null);
-  const [selectedPitcher, setSelectedPitcher] = useState(null);
+  const [selectedHitter, setSelectedHitter] = useState(DEFAULT_PLAYER);
+  const [selectedPitcher, setSelectedPitcher] = useState(DEFAULT_PLAYER);
   const [iswingData, setIswingData] = useState(null);
   const iswingNew = useISwingNew(season);
   const [xrvData, setXrvData] = useState(null);
@@ -365,8 +372,20 @@ function BaseballApp() {
     return tab === tabId;
   };
 
+  // Projection season: tabs/items with no projection version are crossed out and inert.
+  const isProjSeason = season === PROJ_SEASON;
+  const isOff = (id) => isProjSeason && !PROJ_TABS.has(id);
+  const isTabOff = (tb) => tb.dropdown ? tb.dropdown.every(sub => isOff(sub.id)) : isOff(tb.id);
+  const offStyle = { opacity: 0.35, textDecoration: "line-through", cursor: "not-allowed" };
+  const offProps = (off) => off ? { title: PROJ_OFF_TITLE, "aria-disabled": true } : {};
+  // Switching to the projection season from a tab it doesn't have → the hitter card.
+  useEffect(() => {
+    if (isProjSeason && !PROJ_TABS.has(tab)) { setTab("hitter"); setOpenDropdown(null); }
+  }, [season]);
+
   // Handle tab click with dropdown support
   const handleTabClick = (tb, e) => {
+    if (isTabOff(tb)) { e?.stopPropagation(); return; }
     if (tb.dropdown) {
       e.stopPropagation();
       setOpenDropdown(openDropdown === tb.id ? null : tb.id);
@@ -378,6 +397,7 @@ function BaseballApp() {
 
   // Handle dropdown item click
   const handleDropdownSelect = (subItem) => {
+    if (isOff(subItem.id)) return;
     setTab(subItem.id);
     setSummarySubTab(subItem.id);
     setOpenDropdown(null);
@@ -474,13 +494,14 @@ function BaseballApp() {
                 {TABS.map(tb => (
                   tb.dropdown ? (
                     <div key={tb.id}>
-                      <div style={{ padding: "10px 18px 4px", fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textFaint }}>
+                      <div {...offProps(isTabOff(tb))} style={{ padding: "10px 18px 4px", fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textFaint, ...(isTabOff(tb) ? offStyle : {}), cursor: "default" }}>
                         {tb.label}
                       </div>
                       {tb.dropdown.map(sub => (
                         <button
                           key={sub.id}
-                          onClick={() => { handleDropdownSelect(sub); setMenuOpen(false); }}
+                          onClick={() => { if (isOff(sub.id)) return; handleDropdownSelect(sub); setMenuOpen(false); }}
+                          {...offProps(isOff(sub.id))}
                           style={{
                             display: "block", width: "100%", textAlign: "left",
                             padding: "10px 18px 10px 30px", fontSize: 14,
@@ -488,6 +509,7 @@ function BaseballApp() {
                             color: tab === sub.id ? t.accent : t.textSecondary,
                             background: tab === sub.id ? (t.id === "dark" ? "rgba(245,158,11,0.12)" : "rgba(234,88,12,0.08)") : "transparent",
                             border: "none", cursor: "pointer", fontFamily: "inherit",
+                            ...(isOff(sub.id) ? offStyle : {}),
                           }}
                         >
                           {sub.label}
@@ -498,7 +520,8 @@ function BaseballApp() {
                   ) : (
                     <button
                       key={tb.id}
-                      onClick={() => { setTab(tb.id); setOpenDropdown(null); setMenuOpen(false); }}
+                      onClick={() => { if (isOff(tb.id)) return; setTab(tb.id); setOpenDropdown(null); setMenuOpen(false); }}
+                      {...offProps(isOff(tb.id))}
                       style={{
                         display: "block", width: "100%", textAlign: "left",
                         padding: "12px 18px", fontSize: 14, fontWeight: isTabActive(tb.id) ? 700 : 600,
@@ -506,6 +529,7 @@ function BaseballApp() {
                         color: isTabActive(tb.id) ? t.accent : t.textSecondary,
                         background: isTabActive(tb.id) ? (t.id === "dark" ? "rgba(245,158,11,0.12)" : "rgba(234,88,12,0.08)") : "transparent",
                         border: "none", cursor: "pointer", fontFamily: "inherit",
+                        ...(isOff(tb.id) ? offStyle : {}),
                       }}
                     >
                       {tb.label}
@@ -524,6 +548,7 @@ function BaseballApp() {
               <div key={tb.id} style={{ position: "relative", display: "flex", alignItems: "stretch" }} onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={(e) => handleTabClick(tb, e)}
+                  {...offProps(isTabOff(tb))}
                   style={{
                     // scales a little with the window so more widths fit before collapsing
                     padding: "16px clamp(9px, 0.95vw, 18px)",
@@ -541,6 +566,7 @@ function BaseballApp() {
                     display: "flex",
                     alignItems: "center",
                     gap: 6,
+                    ...(isTabOff(tb) ? offStyle : {}),
                   }}
                 >
                   {tb.label}
@@ -563,6 +589,7 @@ function BaseballApp() {
                       <button
                         key={sub.id}
                         onClick={() => handleDropdownSelect(sub)}
+                        {...offProps(isOff(sub.id))}
                         style={{
                           width: "100%",
                           padding: "12px 18px",
@@ -576,8 +603,9 @@ function BaseballApp() {
                           textAlign: "left",
                           fontFamily: "inherit",
                           transition: "all 0.15s",
+                          ...(isOff(sub.id) ? offStyle : {}),
                         }}
-                        onMouseEnter={(e) => { if (tab !== sub.id) e.target.style.background = t.id === "dark" ? "rgba(59,130,246,0.1)" : "rgba(37,99,235,0.05)"; }}
+                        onMouseEnter={(e) => { if (tab !== sub.id && !isOff(sub.id)) e.target.style.background = t.id === "dark" ? "rgba(59,130,246,0.1)" : "rgba(37,99,235,0.05)"; }}
                         onMouseLeave={(e) => { if (tab !== sub.id) e.target.style.background = "transparent"; }}
                       >
                         {sub.label}
@@ -666,7 +694,7 @@ function BaseballApp() {
       </div>
 
       {/* ── Date-range bar (hitter/pitcher cards) ── */}
-      {(isHitterTab(tab) || isPitcherTab(tab)) && (
+      {(isHitterTab(tab) || isPitcherTab(tab)) && !isProjSeason && (
         <div style={{
           display: "flex", alignItems: "center", gap: 8,
           padding: isMobile ? "8px 16px" : "8px 24px",
