@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew } from "./SharedComponents.jsx";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import FitToWidth from "../FitToWidth.jsx";
@@ -67,6 +67,29 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
     return { value: Math.round(w.value), pctile, n: w.n };
   }, [isDateRange, iswingGames, player?.player_id, dateFrom, dateTo, allHitters]);
 
+  // Projected seasons ("Show" picks the view — see PROJ_VIEWS): every projected
+  // hitter's value per stat, for shading the change lines and for ranking the
+  // views' change lines (see PROJ_VIEWS).
+  const [projView, setProjView] = useProjView();
+  const projPools = useProjPools(season);
+  const projGroups = useMemo(() => {
+    const out = {};
+    for (const hh of allHitters || []) {
+      for (const [label, cat] of Object.entries(hh.categories || {})) {
+        if (cat?.last || cat?.parts) (out[label] ||= []).push(cat);
+      }
+    }
+    for (const id in xrvAll || {}) {
+      for (const [label, m] of Object.entries(xrvAll[id]?.metrics || {})) {
+        if (m?.last || m?.parts) (out[`xrv:${label}`] ||= []).push(m);
+      }
+    }
+    return out;
+  }, [allHitters, xrvAll]);
+  const deltaSpreads = useMemo(
+    () => Object.fromEntries(Object.entries(projGroups).map(([k, v]) => [k, adjSpread(v, projView)])),
+    [projGroups, projView]);
+
   const saveCard = useCallback(async () => {
     if (!player) return;
     const safeName = player.name.replace(/\s+/g, "_");
@@ -112,12 +135,22 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
     ? `${dateFrom || "start"} → ${dateTo || "now"} | ${rangeCategories?._pa ?? "—"} PA`
     : null;
 
-  const subtitle = isAAA
+  // Projected seasons ("2027P"): label them "2027 Projected" and show the age they'll play at.
+  const isProjection = typeof season === "string" && season.endsWith("P");
+  const seasonLabel = isProjection ? `${season.slice(0, -1)} Projected` : season;
+  const subtitle = isProjection && !isDateRange
+    ? `${seasonLabel}${player.proj?.age ? ` | Age ${player.proj.age}` : ""}${player.pa ? ` | ${String(season).slice(0, 4) - 1}: ${player.pa} PA` : ""}`
+    : isAAA
     ? `Parent Org: ${player.parent_org_name || player.parent_org_abbr || "—"} | ${season} | ${player.pa || "—"} PA`
     : (dateSubtitle || buildBioSubtitle(bio, "bats") || `${season} | ${player.pa || "—"} PA`);
 
   return (
     <div>
+      {isProjection && !isDateRange && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <ProjViewSelect value={projView} onChange={setProjView} />
+        </div>
+      )}
       {/* === SAVEABLE CARD (scaled to fit width so it's never clipped on mobile) === */}
       <FitToWidth designWidth={1040}>
       <div
@@ -155,15 +188,21 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                 }} />
               </div>
             ) : (
-              cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
-                <BubblePercentileBar
-                  key={label}
-                  label={label}
-                  pctile={cat.pctile}
-                  display={cat.display}
-                  badge={label === "iSwing+" && iswingNew}
-                />
-              ))
+              cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => {
+                // Projected seasons: show the projection built from the parts picked in "Show"
+                const sh = isProjection && !isDateRange
+                  ? projShow(cat, projView, projPools?.hitters?.[label], projPools?.hitterLower?.has(label)) : null;
+                return (
+                  <BubblePercentileBar
+                    key={label}
+                    label={label}
+                    pctile={sh ? sh.pctile : cat.pctile}
+                    display={sh ? sh.display : cat.display}
+                    badge={label === "iSwing+" && iswingNew}
+                    delta={sh ? projLine(cat, sh, projView, deltaSpreads[label]) : null}
+                  />
+                );
+              })
             )}
           </div>
 
@@ -189,14 +228,20 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                   }} />
                 </div>
               ) : (
-                XRV_LABELS.map((label) => (
-                  <BubblePercentileBar
-                    key={label}
-                    label={label}
-                    pctile={xrvMetrics?.[label]?.pctile ?? null}
-                    display={xrvMetrics?.[label]?.display ?? "—"}
-                  />
-                ))
+                XRV_LABELS.map((label) => {
+                  const m = xrvMetrics?.[label];
+                  const sh = isProjection && seasonFallback && m
+                    ? projShow(m, projView, projPools?.xrv?.[label], false) : null;
+                  return (
+                    <BubblePercentileBar
+                      key={label}
+                      label={label}
+                      pctile={sh ? sh.pctile : (m?.pctile ?? null)}
+                      display={sh ? sh.display : (m?.display ?? "—")}
+                      delta={sh ? projLine(m, sh, projView, deltaSpreads[`xrv:${label}`]) : null}
+                    />
+                  );
+                })
               )}
             </div>
           )}
@@ -215,7 +260,13 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{isDateRange ? "Date range" : `${season} Season`}</span>
+          <span>{isDateRange ? "Date range" : isProjection ? (
+            <>
+              {seasonLabel} ·{" "}
+              {/* which "Show" view the card is on — saved PNGs carry it too */}
+              <span style={{ color: t.accent, fontWeight: 700 }}>{projViewDef(projView).label}</span>
+            </>
+          ) : `${season} Season`}</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>

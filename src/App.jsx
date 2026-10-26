@@ -9,7 +9,7 @@ const SPORTS = [
 ];
 
 export default function App() {
-  const [sport, setSport] = useState("hockey");
+  const [sport, setSport] = useState("baseball");
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0f1a" }}>

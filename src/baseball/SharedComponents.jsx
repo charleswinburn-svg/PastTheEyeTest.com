@@ -25,6 +25,212 @@ export const textOnBin = (p) => {
   return (p < 25 || p >= 75) ? "#fff" : "#111";
 };
 
+// ── Projection deltas (projected − last season) ──
+// Read from the card's display strings so the change carries the stat's own units
+// and decimals. Shaded with the percentile bins by how big the change is relative to
+// the spread of changes across all projected hitters: red = up, blue = down.
+const _deltaNum = (s) => {
+  const v = parseFloat(String(s ?? "").replace("\u2212", "-").replace(/[^0-9.+-]/g, ""));
+  return isFinite(v) ? v : null;
+};
+const _rawDelta = (cat) => {
+  if (!cat?.last) return null;
+  const a = _deltaNum(cat.display), b = _deltaNum(cat.last.display);
+  return a == null || b == null ? null : a - b;
+};
+export function deltaSpread(cats) {
+  const ds = cats.map(_rawDelta).filter(d => d != null);
+  if (ds.length < 10) return null;
+  const rms = Math.sqrt(ds.reduce((acc, d) => acc + d * d, 0) / ds.length);
+  return rms > 0 ? rms : null;
+}
+export function projDelta(cat, spread) {
+  const raw = _rawDelta(cat);
+  if (raw == null || spread == null) return null;
+  const dec = (String(cat.display).split(".")[1] || "").length;
+  const d = +raw.toFixed(dec);
+  let txt = Math.abs(d).toFixed(dec);
+  if (dec === 3 && txt.startsWith("0.")) txt = txt.slice(1);
+  const p = Math.max(0, Math.min(100, 50 + 20 * d / spread));
+  return {
+    text: `${d > 0 ? "+" : d < 0 ? "\u2212" : "\u00b1"}${txt}`,
+    color: pctToBin(p) === "45-55" ? null : binColor(p),
+  };
+}
+
+// ── Projected-card "Show" setting (shared by the cards and the Movers board) ──
+// Every projected value is stored as history + age + model ("parts"): history is
+// league average plus the regressed blend of the player's own seasons, age is the
+// aging curve, model is what iSwing+ / Stuff+ add. The move from last season to the
+// projection splits into three pieces:
+//   regression = history − last season,   age,   model
+// Each view is last season plus some of those pieces, so every view is a real stat
+// value: the bar and percentile rank it against last season's players, and the line
+// is always its change vs last season (= the pieces included).
+//   Full projection  regression + age + model   (the actual projection — the only one)
+//   History          regression                 (his stats alone, no age or model)
+//   Age + model      age + model
+//   Age              age
+//   Model            model
+export const PROJ_VIEWS = [
+  { id: "full",    label: "Full projection", short: "2027P",       pieces: ["regression", "age", "model"] },
+  { id: "history", label: "History",         short: "History",     pieces: ["regression"] },
+  { id: "signal",  label: "Age + model",     short: "Age + model", pieces: ["age", "model"] },
+  { id: "age",     label: "Age",             short: "Age",         pieces: ["age"] },
+  { id: "model",   label: "Model",           short: "Model",       pieces: ["model"] },
+];
+const PROJ_VIEW_KEY = "ptet-proj-view";
+const PROJ_VIEW_EVENT = "ptet-proj-view";
+const readProjView = (fallback) => {
+  try { const v = localStorage.getItem(PROJ_VIEW_KEY); return PROJ_VIEWS.some(x => x.id === v) ? v : fallback; }
+  catch { return fallback; }
+};
+
+// One remembered setting; changing it on a card also changes the board, and back.
+export function useProjView(fallback = "full") {
+  const [view, setView] = useState(() => readProjView(fallback));
+  useEffect(() => {
+    const on = (e) => setView(e.detail);
+    window.addEventListener(PROJ_VIEW_EVENT, on);
+    return () => window.removeEventListener(PROJ_VIEW_EVENT, on);
+  }, []);
+  const set = (v) => {
+    try { localStorage.setItem(PROJ_VIEW_KEY, v); } catch { /* storage blocked */ }
+    window.dispatchEvent(new CustomEvent(PROJ_VIEW_EVENT, { detail: v }));
+  };
+  return [view, set];
+}
+
+export function ProjViewSelect({ value, onChange, style }) {
+  const { theme: t } = useTheme();
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)} title="Which parts of the projection to show"
+      style={{ padding: "6px 10px", background: t.inputBg, color: t.textSecondary, border: `1px solid ${t.inputBorder}`,
+               borderRadius: 6, fontSize: 12, fontFamily: "inherit", ...style }}>
+      {PROJ_VIEWS.map(v => <option key={v.id} value={v.id}>Show: {v.label}</option>)}
+    </select>
+  );
+}
+
+// Percentile pools (last season's values per stat) for a projection season, read
+// once from the projection file's meta.
+const _poolCache = new Map();
+export function useProjPools(season) {
+  const isProj = typeof season === "string" && season.endsWith("P");
+  const [pools, setPools] = useState(null);
+  useEffect(() => {
+    if (!isProj) { setPools(null); return; }
+    let alive = true;
+    if (!_poolCache.has(season)) {
+      _poolCache.set(season, fetch(`/baseball_data_${season}.json`).then(r => (r.ok ? r.json() : null))
+        .then(d => d && {
+          hitters: d.meta?.pools || {}, xrv: d.meta?.xrv_pools || {},
+          pitchers: d.pitcher_meta?.pools || {}, grades: d.pitcher_meta?.grade_pools || {},
+          hitterLower: new Set(d.meta?.lower_better || []),
+          pitcherLower: new Set(d.pitcher_meta?.lower_better || []),
+        }).catch(() => null));
+    }
+    _poolCache.get(season).then(p => { if (alive) setPools(p); });
+    return () => { alive = false; };
+  }, [season, isProj]);
+  return pools;
+}
+
+const _scaleOf = (cat) => {
+  const shown = _deltaNum(cat.display), raw = Number(cat.value);
+  return raw && shown != null && Math.abs(shown / raw) > 50 ? 100 : 1;   // K% etc. stored as fractions
+};
+const _decOf = (cat) => (String(cat.display).split(".")[1] || "").length;
+// A raw value written the way this stat's card value is (".281", "28.0", "+5.2").
+function _formatLike(cat, raw) {
+  const dec = _decOf(cat);
+  let s = (raw * _scaleOf(cat)).toFixed(dec);
+  const d = String(cat.display);
+  if (d.startsWith(".") || d.startsWith("-.")) s = s.replace(/^(-?)0\./, "$1.");
+  if (d.startsWith("+") && !s.startsWith("-")) s = `+${s}`;
+  return s;
+}
+
+export const projViewDef = (view) => PROJ_VIEWS.find(x => x.id === view) || PROJ_VIEWS[0];
+
+function _ecdf(pool, x, lowerBetter) {
+  if (!Array.isArray(pool) || !pool.length || x == null || !isFinite(x)) return null;
+  let lo = 0, hi = pool.length;                                  // count of pool values < x
+  while (lo < hi) { const m = (lo + hi) >> 1; if (pool[m] < x) lo = m + 1; else hi = m; }
+  const p = (lo / pool.length) * 100;
+  return Math.round((lowerBetter ? 100 - p : p) * 10) / 10;
+}
+
+const _fmtSigned = (cat, x) => {
+  const dec = _decOf(cat);
+  const d = +x.toFixed(dec);
+  let txt = Math.abs(d).toFixed(dec);
+  if (dec === 3 && txt.startsWith("0.")) txt = txt.slice(1);
+  return `${d > 0 ? "+" : d < 0 ? "−" : "±"}${txt}`;
+};
+
+// Last season's value in the stat's raw units (what the parts are stored in).
+const _lastRaw = (cat) => {
+  if (!cat?.last) return null;
+  if (cat.last.value != null && isFinite(Number(cat.last.value))) return Number(cat.last.value);
+  const shown = _deltaNum(cat.last.display);
+  return shown == null ? null : shown / _scaleOf(cat);
+};
+
+// What the card shows for one projected stat under a view:
+//   { display, pctile, line, value }   value/line in display units; line = change vs last season
+// pool = last season's values (raw units) for the percentile.
+export function projShow(cat, view, pool, lowerBetter = false) {
+  if (!cat) return null;
+  const v = projViewDef(view);
+  const lastShown = cat.last ? _deltaNum(cat.last.display) : null;
+  if (v.id === "full") {
+    const shown = _deltaNum(cat.display);
+    return { display: cat.display, pctile: cat.pctile, value: shown,
+             line: lastShown == null || shown == null ? null : shown - lastShown };
+  }
+  const pp = cat.parts, last = _lastRaw(cat);
+  if (!pp) return { display: "—", pctile: null, line: null, value: null };
+  let raw;
+  if (last == null) {
+    // no last season: only History is defined (his stats alone)
+    if (v.id !== "history") return { display: "—", pctile: null, line: null, value: null };
+    raw = Number(pp.history);
+  } else {
+    const piece = { regression: Number(pp.history) - last, age: Number(pp.age), model: Number(pp.model) };
+    raw = last + v.pieces.reduce((a, k) => a + piece[k], 0);
+  }
+  const display = _formatLike(cat, raw);
+  const shown = _deltaNum(display);
+  return { display, pctile: _ecdf(pool, raw, lowerBetter), value: shown,
+           line: lastShown == null || shown == null ? null : shown - lastShown };
+}
+
+// Spread of a view's change lines across players — sets how deep each line is shaded.
+export function adjSpread(cats, view) {
+  const ds = cats.map(c => projShow(c, view)?.line).filter(d => d != null && isFinite(d));
+  if (ds.length < 10) return null;
+  const rms = Math.sqrt(ds.reduce((acc, d) => acc + d * d, 0) / ds.length);
+  return rms > 0 ? rms : null;
+}
+
+// Red (up) / blue (down) shade for a number, scaled by `spread`; null near zero.
+export function projShade(x, spread) {
+  if (x == null || !isFinite(x) || !spread) return null;
+  const p = Math.max(0, Math.min(100, 50 + 20 * x / spread));
+  return pctToBin(p) === "45-55" ? null : binColor(p);
+}
+
+// {text, color} for the small line under a value: its change vs last season.
+// Nothing for "Model" on a stat with no model layer.
+export function projLine(cat, shown, view, spread) {
+  const v = shown?.line;
+  if (v == null || !isFinite(v) || spread == null) return null;
+  const d = +v.toFixed(_decOf(cat));
+  if (view === "model" && d === 0 && !(Number(cat?.parts?.model) || 0)) return null;
+  return { text: _fmtSigned(cat, v), color: projShade(d, spread) };
+}
+
 // ── MLB team primary colors (all known abbreviation variants) ──
 export const MLB_TEAM_PRIMARY = {
   // Standard + Fangraphs/Savant variants
@@ -284,7 +490,7 @@ export function getLogoUrl(teamAbbr, teamId) {
 // BUBBLE PERCENTILE BAR
 // ═══════════════════════════════════════════════════════════
 
-export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, badge = false }) {
+export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, badge = false, delta = null }) {
   const { theme: t } = useTheme();
   const hasValue = pctile != null && isFinite(pctile);
   const barWidth = hasValue ? Math.max(3, pctile) : 0;
@@ -377,6 +583,17 @@ export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, 
         flexShrink: 0,
       }}>
         {display || "—"}
+        {delta && (
+          <div style={{
+            fontSize: 8.5, fontStyle: "italic", fontWeight: 600, lineHeight: 1, marginTop: 1,
+            // the deepest blue bin is unreadable as text on a dark card — lift it there
+            color: !delta.color ? t.textFaint
+              : delta.color === BIN_COLORS["0-10"] && hexLuminance(t.cardBg || t.bg) < 0.4 ? "#4F8FD6"
+              : delta.color,
+          }}>
+            {delta.text}
+          </div>
+        )}
       </div>
     </div>
   );
