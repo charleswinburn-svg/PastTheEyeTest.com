@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
@@ -17,10 +17,19 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   const [view, setView] = useState("results");   // "results" | "modeling"
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
+  // Projected seasons ("2027P") come entirely from the projection file: no API
+  // grades, arsenal, distributions or rolling chart exist for them.
+  const isProjection = typeof season === "string" && season.endsWith("P");
+  const seasonLabel = isProjection ? `${season.slice(0, -1)} Projected` : season;
 
   useEffect(() => {
     setPitchPlusData(null);
     if (!player?.player_id) return;
+    if (isProjection) {
+      const g = player.grades;
+      setPitchPlusData(g && Object.keys(g).length ? { ...g } : { qualified: false });
+      return;
+    }
     const isDateRange = !!(dateFrom || dateTo);
     let cancelled = false;
 
@@ -147,6 +156,28 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
   const displayCategories = rangeCategories ?? player?.categories;
   const isDateRange = !!(dateFrom || dateTo);
 
+  // Projected seasons ("Show" picks the view — see PROJ_VIEWS): every projected
+  // pitcher's value per stat, for shading the change lines and for ranking the
+  // views' change lines (see PROJ_VIEWS).
+  const [projView, setProjView] = useProjView();
+  const projPools = useProjPools(season);
+  const projGroups = useMemo(() => {
+    if (!isProjection) return {};
+    const out = {};
+    for (const pp of allPitchers || []) {
+      for (const [label, cat] of Object.entries(pp.categories || {})) {
+        if (cat?.last || cat?.parts) (out[label] ||= []).push(cat);
+      }
+      for (const [key, g] of Object.entries(pp.grades || {})) {
+        if (g?.value != null) (out[`grade:${key}`] ||= []).push(gradeCat(g));
+      }
+    }
+    return out;
+  }, [allPitchers, isProjection]);
+  const deltaSpreads = useMemo(
+    () => Object.fromEntries(Object.entries(projGroups).map(([k, v]) => [k, adjSpread(v, projView)])),
+    [projGroups, projView]);
+
   if (!player) {
     return (
       <div style={{ color: "#666", padding: 40, textAlign: "center" }}>
@@ -161,14 +192,21 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
     ? `${dateFrom || "start"} → ${dateTo || "now"}`
     : null;
 
-  const subtitle = isAAA
+  const subtitle = isProjection
+    ? `${seasonLabel}${player.proj?.age ? ` | Age ${player.proj.age}` : ""}${player.ip ? ` | ${String(season).slice(0, 4) - 1}: ${player.ip} IP` : ""}`
+    : isAAA
     ? `Parent Org: ${player?.parent_org_name || player?.parent_org_abbr || "—"} | ${season}${player?.ip ? ` | ${player.ip} IP` : ""}`
     : (dateSubtitle || buildBioSubtitle(bio, "throws") || `${season}${player.ip ? ` | ${player.ip} IP` : ""}`);
 
   return (
     <div>
+      {isProjection && !isDateRange && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <ProjViewSelect value={projView} onChange={setProjView} />
+        </div>
+      )}
       {/* === Results | Pitch Modeling toggle (outside the saved PNG) === */}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+      {!isProjection && <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
         <div style={{ display: "inline-flex", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 8, padding: 2 }}>
           {[["results", "Results"], ["modeling", "Pitch Modeling"]].map(([id, label]) => (
             <button
@@ -184,9 +222,9 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
             >{label}</button>
           ))}
         </div>
-      </div>
+      </div>}
 
-      {view === "modeling" ? (
+      {view === "modeling" && !isProjection ? (
         <PitchModelingCard player={player} season={season} isAAA={isAAA} dateFrom={dateFrom} dateTo={dateTo} />
       ) : (
       <>
@@ -212,7 +250,8 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           playerId={player.player_id}
           subtitle={subtitle}
         />
-        <ProBubblesRow data={pitchPlusData} theme={t} />
+        <ProBubblesRow data={pitchPlusData} theme={t} deltaSpreads={isProjection ? deltaSpreads : null} projView={projView}
+          gradePools={projPools?.grades} />
         {/* Two fluid columns (no divider): percentile bars + pitch arsenal */}
         <div style={{ display: "flex", gap: 36, flexWrap: "wrap", padding: "8px 12px 4px", position: "relative", minHeight: rangeLoading ? 80 : undefined }}>
           {/* Left column — percentile bars */}
@@ -229,18 +268,24 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
                 }} />
               </div>
             ) : (
-              cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => (
-                <BubblePercentileBar
-                  key={label}
-                  label={label}
-                  pctile={cat.pctile}
-                  display={cat.display}
-                />
-              ))
+              cats.filter(([, cat]) => cat.pctile != null).map(([label, cat]) => {
+                // Projected seasons: show the projection built from the parts picked in "Show"
+                const sh = isProjection && !isDateRange
+                  ? projShow(cat, projView, projPools?.pitchers?.[label], projPools?.pitcherLower?.has(label)) : null;
+                return (
+                  <BubblePercentileBar
+                    key={label}
+                    label={label}
+                    pctile={sh ? sh.pctile : cat.pctile}
+                    display={sh ? sh.display : cat.display}
+                    delta={sh ? projLine(cat, sh, projView, deltaSpreads[label]) : null}
+                  />
+                );
+              })
             )}
           </div>
-          {/* Right column — pitch arsenal figures */}
-          <div style={{ flex: "1 1 360px", minWidth: 300 }}>
+          {/* Right column — pitch arsenal figures (none for projections) */}
+          {!isProjection && <div style={{ flex: "1 1 360px", minWidth: 300 }}>
             <PitcherArsenal
               playerId={player.player_id}
               season={season}
@@ -248,22 +293,28 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
               dateFrom={dateFrom}
               dateTo={dateTo}
             />
-          </div>
+          </div>}
         </div>
         {/* === GRADE DISTRIBUTIONS (8 KDE figures) — inside cardRef so Save-as-PNG captures them === */}
-        <PitcherDistributions
+        {!isProjection && <PitcherDistributions
           playerId={player.player_id}
           season={season}
           isAAA={isAAA}
           dateFrom={dateFrom}
           dateTo={dateTo}
-        />
+        />}
         <div style={{
           padding: "8px 16px 10px",
           display: "flex", justifyContent: "space-between",
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{isDateRange ? "Date range" : `${season} Season`}</span>
+          <span>{isDateRange ? "Date range" : isProjection ? (
+            <>
+              {seasonLabel} ·{" "}
+              {/* which "Show" view the card is on — saved PNGs carry it too */}
+              <span style={{ color: t.accent, fontWeight: 700 }}>{projViewDef(projView).label}</span>
+            </>
+          ) : `${season} Season`}</span>
           <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
         </div>
       </div>
@@ -287,13 +338,13 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
       </div>
 
       {/* === ROLLING 10-IP CHART === */}
-      <RollingChart
+      {!isProjection && <RollingChart
         playerId={player.player_id}
         playerName={player.name}
         season={season}
         type="pitcher"
         cardMetrics={Object.keys(player.categories || {})}
-      />
+      />}
       </>
       )}
     </div>
@@ -313,7 +364,12 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
 // Loading state: live computation takes 30-60s (game log + per-game PBP +
 // /score round trip). Until pitchPlusData arrives, each bubble renders a
 // rotating spinner so users see the work is in progress.
-function ProBubblesRow({ data, theme }) {
+// A projected grade as a card-style category so projShow can rebuild and shade it.
+const gradeCat = (g) => ({ display: Number(g.value).toFixed(1), value: g.value,
+                           last: g.last != null ? { display: Number(g.last).toFixed(1), value: g.last } : null,
+                           parts: g.parts });
+
+function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gradePools = null }) {
   const t = theme;
   const metrics = [
     { key: "stuff_plus", label: "Stuff+" },
@@ -339,8 +395,12 @@ function ProBubblesRow({ data, theme }) {
       `}</style>
       {metrics.map(({ key, label }) => {
         const m = !placeholder ? data[key] : null;
-        const value = m?.value;
-        const pctile = m?.percentile;
+        // Projected seasons: the grade built from the parts picked in "Show"
+        const sh = deltaSpreads && m?.value != null
+          ? projShow({ ...gradeCat(m), pctile: m.percentile }, projView, gradePools?.[key], false) : null;
+        const value = sh ? (sh.value ?? null) : m?.value;
+        const valueText = value != null ? String(Math.round(value)) : "—";
+        const pctile = sh ? sh.pctile : m?.percentile;
         const fill = pctile != null ? binColor(pctile) : t.inputBg;
         const txt = pctile != null ? textOnBin(pctile) : t.textFaintest;
         return (
@@ -377,7 +437,7 @@ function ProBubblesRow({ data, theme }) {
                   fontFamily: NUM_FONT,
                   lineHeight: 1,
                 }}>
-                  {value != null ? Math.round(value) : "—"}
+                  {valueText}
                 </div>
               )}
             </div>
@@ -392,6 +452,14 @@ function ProBubblesRow({ data, theme }) {
                 ? `${ordinal(Math.round(pctile))} percentile${data?.seasonOnly ? " · season" : ""}`
                 : (isUnqualified ? "n/a" : isLoading ? "scoring…" : "—")}
             </div>
+            {deltaSpreads && sh?.line != null && value != null && (() => {
+              const d = projLine(gradeCat(m), sh, projView, deltaSpreads[`grade:${key}`]);
+              return d && (
+                <div style={{ fontSize: 9, fontStyle: "italic", fontWeight: 600, lineHeight: 1,
+                  color: d.color || t.textFaint, fontFamily: NUM_FONT }}>{d.text}</div>
+              );
+            })()}
+
           </div>
         );
       })}
