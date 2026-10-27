@@ -7,7 +7,7 @@
       "label": "\u2264 -10",
       "avg_ev": 76.0,
       "hard_hit_pct": 14.7,
-      "count": 49397
+      "count": 49398
     },
     {
       "label": "-10 to -5",
@@ -55,7 +55,7 @@
       "label": "25 to 30",
       "avg_ev": 85.8,
       "hard_hit_pct": 32.4,
-      "count": 14267
+      "count": 14268
     },
     {
       "label": "30 to 35",
@@ -73,7 +73,7 @@
       "label": "> 40",
       "avg_ev": 78.0,
       "hard_hit_pct": 6.1,
-      "count": 63263
+      "count": 63266
     }
   ],
   "players": [
@@ -10481,7 +10481,7 @@
       "player_id": 695657,
       "name": "Colson Montgomery",
       "team": "CWS",
-      "total_bbe": 720,
+      "total_bbe": 721,
       "buckets": [
         {
           "label": "\u2264 -10",
@@ -10551,9 +10551,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 78.5,
-          "hard_hit_pct": 8.5,
-          "count": 236
+          "avg_ev": 78.6,
+          "hard_hit_pct": 8.9,
+          "count": 237
         }
       ]
     },
@@ -19841,13 +19841,13 @@
       "player_id": 694378,
       "name": "Jacob Gonzalez",
       "team": "PIT",
-      "total_bbe": 351,
+      "total_bbe": 355,
       "buckets": [
         {
           "label": "\u2264 -10",
-          "avg_ev": 75.3,
-          "hard_hit_pct": 13.3,
-          "count": 45
+          "avg_ev": 75.1,
+          "hard_hit_pct": 13.0,
+          "count": 46
         },
         {
           "label": "-10 to -5",
@@ -19893,9 +19893,9 @@
         },
         {
           "label": "25 to 30",
-          "avg_ev": 86.3,
-          "hard_hit_pct": 27.3,
-          "count": 22
+          "avg_ev": 85.7,
+          "hard_hit_pct": 26.1,
+          "count": 23
         },
         {
           "label": "30 to 35",
@@ -19911,9 +19911,9 @@
         },
         {
           "label": "> 40",
-          "avg_ev": 75.9,
-          "hard_hit_pct": 3.6,
-          "count": 111
+          "avg_ev": 76.0,
+          "hard_hit_pct": 3.5,
+          "count": 113
         }
       ]
     },
@@ -47360,7 +47360,7 @@
   ],
   "meta": {
     "min_bbe": 30,
-    "total_bbe": 237008,
+    "total_bbe": 237013,
     "bucket_labels": [
       "\u2264 -10",
       "-10 to -5",
@@ -47375,6 +47375,6 @@
       "35 to 40",
       "> 40"
     ],
-    "generated_at": "2026-10-26 15:34:47 UTC"
+    "generated_at": "2026-10-27 15:31:15 UTC"
   }
 }
