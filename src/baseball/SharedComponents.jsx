@@ -61,23 +61,19 @@ export function projDelta(cat, spread) {
 // ── Projected-card "Show" setting (shared by the cards and the Movers board) ──
 // Every projected value is stored as history + age + model ("parts"): history is
 // league average plus the regressed blend of the player's own seasons, age is the
-// aging curve, model is what iSwing+ / Stuff+ add. The move from last season to the
-// projection splits into three pieces:
-//   regression = history − last season,   age,   model
-// Each view is last season plus some of those pieces, so every view is a real stat
-// value: the bar and percentile rank it against last season's players, and the line
-// is always its change vs last season (= the pieces included).
-//   Full projection  regression + age + model   (the actual projection — the only one)
-//   History          regression                 (his stats alone, no age or model)
-//   Age + model      age + model
-//   Age              age
-//   Model            model
+// aging curve, model is what iSwing+ / Stuff+ add. Each view builds up from his
+// record, so every view stays near the projection (a thin last season never fills
+// the card); the bar and percentile rank it against last season's players, and the
+// line under it is its change vs last season.
+//   Full projection   history + age + model   (the actual projection)
+//   History           history                 (his stats alone, no age or model)
+//   History + age     history + age
+//   History + model   history + model
 export const PROJ_VIEWS = [
-  { id: "full",    label: "Full projection", short: "2027P",       pieces: ["regression", "age", "model"] },
-  { id: "history", label: "History",         short: "History",     pieces: ["regression"] },
-  { id: "signal",  label: "Age + model",     short: "Age + model", pieces: ["age", "model"] },
-  { id: "age",     label: "Age",             short: "Age",         pieces: ["age"] },
-  { id: "model",   label: "Model",           short: "Model",       pieces: ["model"] },
+  { id: "full",    label: "Full projection", short: "2027P",     adds: ["age", "model"] },
+  { id: "history", label: "History",         short: "History",   adds: [] },
+  { id: "age",     label: "History + age",   short: "+ Age",     adds: ["age"] },
+  { id: "model",   label: "History + model", short: "+ Model",   adds: ["model"] },
 ];
 const PROJ_VIEW_KEY = "ptet-proj-view";
 const PROJ_VIEW_EVENT = "ptet-proj-view";
@@ -178,7 +174,8 @@ const _lastRaw = (cat) => {
 };
 
 // What the card shows for one projected stat under a view:
-//   { display, pctile, line, value }   value/line in display units; line = change vs last season
+//   { display, pctile, line, value, added }   value/line/added in display units;
+//   line = change vs last season, added = what the view adds on top of his history
 // pool = last season's values (raw units) for the percentile.
 export function projShow(cat, view, pool, lowerBetter = false) {
   if (!cat) return null;
@@ -186,24 +183,21 @@ export function projShow(cat, view, pool, lowerBetter = false) {
   const lastShown = cat.last ? _deltaNum(cat.last.display) : null;
   if (v.id === "full") {
     const shown = _deltaNum(cat.display);
+    const pp = cat.parts, histShown = pp ? _deltaNum(_formatLike(cat, Number(pp.history))) : null;
     return { display: cat.display, pctile: cat.pctile, value: shown,
-             line: lastShown == null || shown == null ? null : shown - lastShown };
+             line: lastShown == null || shown == null ? null : shown - lastShown,
+             added: shown == null || histShown == null ? null : shown - histShown };
   }
-  const pp = cat.parts, last = _lastRaw(cat);
-  if (!pp) return { display: "—", pctile: null, line: null, value: null };
-  let raw;
-  if (last == null) {
-    // no last season: only History is defined (his stats alone)
-    if (v.id !== "history") return { display: "—", pctile: null, line: null, value: null };
-    raw = Number(pp.history);
-  } else {
-    const piece = { regression: Number(pp.history) - last, age: Number(pp.age), model: Number(pp.model) };
-    raw = last + v.pieces.reduce((a, k) => a + piece[k], 0);
-  }
+  const pp = cat.parts;
+  if (!pp) return { display: "—", pctile: null, line: null, value: null, added: null };
+  const hist = Number(pp.history);
+  const raw = hist + v.adds.reduce((a, k) => a + Number(pp[k] || 0), 0);
   const display = _formatLike(cat, raw);
   const shown = _deltaNum(display);
+  const histShown = _deltaNum(_formatLike(cat, hist));
   return { display, pctile: _ecdf(pool, raw, lowerBetter), value: shown,
-           line: lastShown == null || shown == null ? null : shown - lastShown };
+           line: lastShown == null || shown == null ? null : shown - lastShown,
+           added: shown == null || histShown == null ? null : shown - histShown };
 }
 
 // Spread of a view's change lines across players — sets how deep each line is shaded.
