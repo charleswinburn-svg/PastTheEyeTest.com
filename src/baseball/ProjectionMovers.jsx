@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
-import { binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance, projViewDef, useProjView, ProjViewSelect, projShow, projShade, adjSpread } from "./SharedComponents.jsx";
+import { binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance, projViewDef, useProjView, ProjViewSelect, projShow, projShade } from "./SharedComponents.jsx";
 
 // LEADERBOARD → "{year} Movers": who the projection moves, and why.
 // Every projected value is split by the build scripts into three parts ("parts"):
 //   history — league average + the regressed blend of the player's own seasons
 //   age     — the fitted aging adjustment
 //   model   — what iSwing+ / Stuff+ (and xRV reconciliation) add on top
-// Ranking by the raw change vs last season mostly re-ranks last season's extremes
-// (regression to the mean), so the default ranks by age + model: what the projection
-// says BEYOND the player's own stat line. A "riser" gets better at the stat (for
+// Full projection / History rank by the change vs last season (much of it regression
+// to the mean); History + age / History + model rank by what age or the model adds on
+// top of his own record — what the projection says BEYOND his stat line. A "riser" gets better at the stat (for
 // lower-is-better stats a drop counts). Change colors match the cards: red = up, blue = down.
 // Reads the projection files directly, so it works whatever season is picked in the menu.
 
@@ -101,15 +101,18 @@ export default function ProjectionMovers({ projSeason }) {
       if (!cat?.last || num(cat.display) == null || num(cat.last.display) == null) continue;
       const dec = (String(cat.display).split(".")[1] || "").length;
       const d = +(num(cat.display) - num(cat.last.display)).toFixed(dec);
-      // every view = last season + some pieces; rank by its change vs last season
+      // Full / History: change vs last season; + Age / + Model: what that piece adds
       const sh = projShow(cat, rank, pool, active.lowerBetter);
-      const raw = sh?.line;
+      const raw = rank === "age" || rank === "model" ? sh?.added : sh?.line;
       if (raw == null || !isFinite(raw)) continue;
       const score = +raw.toFixed(dec);
       const sign = active.lowerBetter ? -1 : 1;
       all.push({ p, cat, sh, d, dec, score, better: sign * score, dBetter: sign * d, sample: p[reg.field] });
     }
-    const spread = adjSpread(allCats, rank);
+    // shade by the spread of this ranking's own scores
+    const sc = all.map(r => r.score).filter(x => isFinite(x));
+    const rms = sc.length >= 10 ? Math.sqrt(sc.reduce((a, x) => a + x * x, 0) / sc.length) : 0;
+    const spread = rms > 0 ? rms : null;
     for (const r of all) r.color = projShade(r.score, spread);
     return all;
   }, [data, xrv, active, side, rank]);
@@ -167,7 +170,7 @@ export default function ProjectionMovers({ projSeason }) {
           ? " (the grades ARE the pitch model — nothing is layered on them)."
           : " (the backtest found iSwing+ / Stuff+ didn't improve it).") +
         ` Stats with a model layer: ${stats.filter(x => x.hasModel).map(x => x.label).join(", ") || "none"}.` +
-        " Or pick Age + model or Age."
+        " Or pick History + age or Full projection."
       ) : !shown.length ? msg(rank === "full"
         ? "No players with both a projection and a last-season value for this stat."
         : "This stat has no projection breakdown — rebuild the projections with the latest scripts, or pick Full projection.") : (
@@ -177,10 +180,10 @@ export default function ProjectionMovers({ projSeason }) {
         </div>
       )}
       <div style={{ marginTop: 10, fontSize: 10, color: t.textFaint, textAlign: "center", lineHeight: 1.5 }}>
-        From {lastYear} to the {year} projection = regression (his history, pulled toward average) + age + model
-        (iSwing+ / Stuff+). Each view is {lastYear} plus some of those pieces: Full projection = all three, History =
-        regression, Age + model, Age, Model. Players rank by that change; percentiles rank the shown value against
-        {lastYear} players. Red = up, blue = down.
+        The {year} projection = his history (his seasons, pulled toward average) + age + model (iSwing+ / Stuff+).
+        Full projection and History rank by the change from {lastYear}; History + age and History + model rank by what
+        age or the model adds to his history. Percentiles rank the shown value against {lastYear} players.
+        Red = up, blue = down.
         Stats in <span style={{ color: t.accent, fontStyle: "italic" }}>orange italics</span> have a model layer.
       </div>
     </div>
@@ -207,9 +210,9 @@ function MoverTable({ title, rows, lastYear, year, reg, view }) {
               <th style={{ ...th, textAlign: "left" }}>Player</th>
               <th style={th}>Age</th>
               <th style={th}>{lastYear}</th>
-              <th style={th} title={`${lastYear} + ${def.pieces.join(" + ")}`}>{def.short}</th>
+              <th style={th} title={["history", ...def.adds].join(" + ")}>{def.short}</th>
               <th style={{ ...th, color: view === "model" ? t.accent : th.color, fontStyle: view === "model" ? "italic" : "normal" }}
-                title={`Change vs ${lastYear}`}>Change</th>
+                title={view === "age" || view === "model" ? "Added to his history" : `Change vs ${lastYear}`}>{view === "age" || view === "model" ? "Adds" : "Change"}</th>
               <th style={th}>Pctile</th>
             </tr>
           </thead>
