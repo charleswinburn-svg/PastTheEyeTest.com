@@ -168,15 +168,24 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
     : [];
   const arcRad = 0.75 * S;
   const th = thm;                                              // the drawn arm is the measured angle
-  // keep labels inside the frame for wide releases
+  // keep labels fully inside the frame whatever the slot or hand: clamp by the
+  // label's own width (≈6.2 px per character at 10 px) and keep clear of the top
   const inside = (x, pad = 70) => Math.max(pad, Math.min(width - pad, x));
+  const fitX = (x, text, anchor = "middle") => {
+    const w = String(text).length * 6.2 + 6;
+    const left = anchor === "start" ? w : anchor === "end" ? 0 : w / 2;
+    const right = anchor === "start" ? 0 : anchor === "end" ? w : w / 2;
+    return Math.max(2 + left, Math.min(width - 2 - right, x));
+  };
+  const fitY = y => Math.max(30, Math.min(height - 4, y));
+  const armLabel = isNum(r.angle) ? `${Math.round(r.angle)}° arm` : "";
 
   const extW = width, extS = Math.floor((width - 60) / 8.5), extPad = 24;
   const EX = e => extPad + e * extS;
 
   return (
     <div>
-      <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} style={{ display: "block" }}>
+      <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} style={{ display: "block", overflow: "visible" }}>
         <text x={width / 2} y={11} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: color, fontFamily: "inherit" }}>
           Release point · catcher's view{p?.hand ? ` · ${p.hand}HP` : ""}
         </text>
@@ -224,7 +233,7 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
             <path d={`M ${X(sh.x) + dir * arcRad} ${Y(sh.z)} A ${arcRad} ${arcRad} 0 0 ${(dir > 0) === (th >= 0) ? 0 : 1} ${X(sh.x) + dir * arcRad * Math.cos(th)} ${Y(sh.z) - arcRad * Math.sin(th)}`} fill="none" stroke={color} strokeWidth={1.2} />
             {/* label: above the reference line for normal slots, below it when the arm runs along or under the line */}
             {isNum(r.angle) && (
-              <text x={inside(X(sh.x) + dir * (arcRad + 10), 48)} y={Y(sh.z) + (th < 0.38 ? 14 : -5)} textAnchor="middle" style={{ ...num, fill: color }}>{Math.round(r.angle)}° arm</text>
+              <text x={fitX(X(sh.x) + dir * (arcRad + 10), armLabel)} y={fitY(Y(sh.z) + (th < 0.38 ? 14 : -5))} textAnchor="middle" style={{ ...num, fill: color }}>{armLabel}</text>
             )}
           </g>
         )}
@@ -236,15 +245,15 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
             {/* height label: above the ball normally; below it when the arm points down (the arm-angle
                 label then sits above), or beside it when the ball is near the top edge */}
             {Y(r.z) <= 44
-              ? <text x={inside(X(r.x) - dir * 12, 40)} y={Y(r.z) + 4} textAnchor={dir > 0 ? "end" : "start"} style={{ ...num, fill: color }}>{ft(r.z)} high</text>
+              ? <text x={fitX(X(r.x) - dir * 12, `${ft(r.z)} high`, dir > 0 ? "end" : "start")} y={fitY(Y(r.z) + 4)} textAnchor={dir > 0 ? "end" : "start"} style={{ ...num, fill: color }}>{ft(r.z)} high</text>
               : th < -0.4
-                ? <text x={inside(X(r.x), 40)} y={Y(r.z) + 18} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>
-                : <text x={inside(X(r.x), 40)} y={Y(r.z) - 11} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>}
+                ? <text x={fitX(X(r.x), `${ft(r.z)} high`)} y={fitY(Y(r.z) + 18)} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>
+                : <text x={fitX(X(r.x), `${ft(r.z)} high`)} y={fitY(Y(r.z) - 11)} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>}
             <line x1={X(r.x)} y1={Y(r.z)} x2={X(r.x)} y2={Y(0)} stroke={color} strokeWidth={0.8} strokeDasharray="3 3" />
             <line x1={X(0)} y1={Y(0.55)} x2={X(r.x)} y2={Y(0.55)} stroke={color} strokeWidth={0.8} />
             {Math.abs(r.x) < 1.2
-              ? <text x={X(r.x) + dir * 8} y={Y(0.55) - 3} textAnchor={dir > 0 ? "start" : "end"} style={{ ...num, fill: color }}>{ft(r.x)} side</text>
-              : <text x={inside(X(r.x / 2), 40)} y={Y(0.55) - 3} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.x)} side</text>}
+              ? <text x={fitX(X(r.x) + dir * 8, `${ft(r.x)} side`, dir > 0 ? "start" : "end")} y={Y(0.55) - 3} textAnchor={dir > 0 ? "start" : "end"} style={{ ...num, fill: color }}>{ft(r.x)} side</text>
+              : <text x={fitX(X(r.x / 2), `${ft(r.x)} side`)} y={Y(0.55) - 3} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.x)} side</text>}
           </g>
         )}
         {/* release balls per pitch type (or one ball at the average release) */}
