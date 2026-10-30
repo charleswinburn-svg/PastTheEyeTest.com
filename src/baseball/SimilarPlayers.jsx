@@ -21,7 +21,7 @@ const LIMIT = 10;
 export default function SimilarPlayers({ player, season, type = "hitter", onSelect = null }) {
   const { theme: t } = useTheme();
   const [pools, setPools] = useState(null);
-  const [weights, setWeights] = useState({});
+  const [isolate, setIsolate] = useState(null);     // component key, or null = overall
   const [sameHand, setSameHand] = useState(type === "pitcher");
   const [thisSeason, setThisSeason] = useState(false);
   const [hideSelf, setHideSelf] = useState(false);
@@ -35,30 +35,34 @@ export default function SimilarPlayers({ player, season, type = "hitter", onSele
   }, [type]);
   useEffect(() => { setExpanded(null); }, [player?.player_id, season]);
 
+  const components = pools?.[0]?.meta?.components || {};
+  // Isolating a component ranks on that component alone (weight 1 for it, 0 for
+  // the rest); otherwise every component counts equally.
+  const weights = useMemo(() => {
+    if (!isolate) return {};
+    const w = {};
+    for (const c of Object.keys(components)) w[c] = c === isolate ? 1 : 0;
+    return w;
+  }, [isolate, components]);
+
   const ranked = useMemo(() => {
     if (!pools || !pools.length || !player?.player_id) return null;
     return rankComps({ season, pid: player.player_id }, pools,
       { weights, sameHand, excludeSelf: hideSelf, currentSeasonOnly: thisSeason, limit: LIMIT });
   }, [pools, player?.player_id, season, weights, sameHand, hideSelf, thisSeason]);
 
-  const components = ranked?.target?.meta?.components || pools?.[0]?.meta?.components || {};
   const unitLabel = type === "pitcher" ? "pitches" : "PA";
-
-  const cycle = (c) => setWeights(w => {
-    const cur = w[c] ?? 1;
-    return { ...w, [c]: cur === 1 ? 2 : cur === 2 ? 0 : 1 };
-  });
+  const isolatedLabel = isolate ? (SHORT[isolate] || components[isolate]?.label || isolate) : null;
 
   const box = {
     background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 12,
     boxShadow: `0 4px 24px ${t.shadow}`, maxWidth: 1040, margin: "16px auto 0", overflow: "hidden",
   };
-  const chip = (active, strong) => ({
+  const chip = (selected) => ({
     padding: "4px 10px", fontSize: 11, fontWeight: 600, borderRadius: 999, cursor: "pointer",
-    border: `1px solid ${strong ? t.accent : active ? t.inputBorder : t.divider}`,
-    background: strong ? t.accent : active ? t.inputBg : "transparent",
-    color: strong ? "#111" : active ? t.text : t.textFaint,
-    textDecoration: active ? "none" : "line-through",
+    border: `1px solid ${selected ? t.accent : t.inputBorder}`,
+    background: selected ? t.accent : t.inputBg,
+    color: selected ? "#111" : t.textMuted,
     userSelect: "none", whiteSpace: "nowrap",
   });
   const toggle = (on) => ({
@@ -87,15 +91,13 @@ export default function SimilarPlayers({ player, season, type = "hitter", onSele
           </div>
         </div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginTop: 10 }}>
-          <span style={{ fontSize: 10, color: t.textFaint, marginRight: 2 }}>WEIGHT · click to cycle 1× → 2× → off</span>
-          {Object.entries(components).map(([c, cm]) => {
-            const w = weights[c] ?? 1;
-            return (
-              <span key={c} style={chip(w > 0, w === 2)} onClick={() => cycle(c)} title={cm.label}>
-                {cm.label}{w === 2 ? " ×2" : ""}
-              </span>
-            );
-          })}
+          <span style={{ fontSize: 10, color: t.textFaint, marginRight: 2 }}>ISOLATE · rank on one component</span>
+          <span style={chip(!isolate)} onClick={() => setIsolate(null)} title="Rank on the overall score (all components equal)">All</span>
+          {Object.entries(components).map(([c, cm]) => (
+            <span key={c} style={chip(isolate === c)} onClick={() => setIsolate(isolate === c ? null : c)} title={`Rank on ${cm.label} only`}>
+              {cm.label}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -134,10 +136,11 @@ export default function SimilarPlayers({ player, season, type = "hitter", onSele
                       {r.season}{r.team ? ` · ${r.team}` : ""}{r.hand ? ` · ${r.hand === "S" ? "S" : r.hand}H${type === "pitcher" ? "P" : "H"}` : ""} · {r.n?.toLocaleString?.() ?? r.n} {unitLabel}
                     </div>
                   </div>
-                  <OverallBubble sim={r.overall} />
+                  <OverallBubble sim={r.overall} label={isolatedLabel} />
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: "2 1 320px" }}>
                     {Object.keys(components).map(c => (
-                      <CompCell key={c} label={SHORT[c] || components[c].label} comp={r.comps[c]} weight={weights[c] ?? 1} t={t} />
+                      <CompCell key={c} label={SHORT[c] || components[c].label} comp={r.comps[c]}
+                                dim={!!isolate && isolate !== c} highlight={isolate === c} t={t} />
                     ))}
                   </div>
                   <span
@@ -151,7 +154,7 @@ export default function SimilarPlayers({ player, season, type = "hitter", onSele
             );
           })}
           <div style={{ padding: "6px 14px 8px", fontSize: 10, color: t.textFaint, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
-            <span>Overall = weighted mean of the component scores · a component is blank when too few of its stats exist for both players</span>
+            <span>{isolate ? `Ranked on ${isolatedLabel} only · other components shown for context` : "Overall = mean of the component scores"} · a component is blank when too few of its stats exist for both players</span>
             <span style={{ fontStyle: "italic" }}>PastTheEyeTest</span>
           </div>
         </div>
@@ -176,28 +179,29 @@ function Headshot({ pid, name, t }) {
   );
 }
 
-function OverallBubble({ sim }) {
+// Big score bubble: the overall similarity, or the isolated component's score
+// (they are the same number when one component is isolated).
+function OverallBubble({ sim, label = null }) {
   const v = sim == null ? null : Math.round(sim);
   return (
     <div style={{
-      width: 58, height: 44, borderRadius: 10, flexShrink: 0,
+      width: 64, height: 44, borderRadius: 10, flexShrink: 0,
       background: binColor(v), color: textOnBin(v),
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-    }} title="Overall similarity">
+    }} title={label ? `${label} similarity (isolated)` : "Overall similarity"}>
       <span style={{ fontSize: 18, lineHeight: 1, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{v == null ? "—" : `${v}%`}</span>
-      <span style={{ fontSize: 8, letterSpacing: 0.5, opacity: 0.85, marginTop: 2 }}>OVERALL</span>
+      <span style={{ fontSize: 8, letterSpacing: 0.5, opacity: 0.85, marginTop: 2, textTransform: "uppercase" }}>{label || "Overall"}</span>
     </div>
   );
 }
 
-function CompCell({ label, comp, weight, t }) {
+function CompCell({ label, comp, dim = false, highlight = false, t }) {
   const sim = comp?.sim;
   const v = sim == null ? null : Math.round(sim);
-  const off = weight === 0;
   return (
-    <div style={{ minWidth: 72, flex: "1 1 72px", opacity: off ? 0.4 : 1 }} title={comp?.d != null ? `distance ${comp.d.toFixed(2)} z · ${comp.shared} shared stats` : "not comparable"}>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textMuted }}>
-        <span>{label}{weight === 2 ? " ×2" : ""}</span>
+    <div style={{ minWidth: 72, flex: "1 1 72px", opacity: dim ? 0.45 : 1 }} title={comp?.d != null ? `distance ${comp.d.toFixed(2)} z · ${comp.shared} shared stats` : "not comparable"}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: highlight ? t.accent : t.textMuted, fontWeight: highlight ? 700 : 400 }}>
+        <span>{label}</span>
         <span style={{ fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, color: t.text }}>{v == null ? "—" : `${v}%`}</span>
       </div>
       <div style={{ height: 5, borderRadius: 3, background: t.divider, marginTop: 3, overflow: "hidden" }}>

@@ -154,4 +154,6 @@ Size estimate: hitters ~60 KB, pitchers ~250 KB per season. Four seasons load la
 - `src/baseball/similarity.js`, `src/baseball/SimilarPlayers.jsx` — ranking + panel, wired into
   `HitterCard.jsx` / `PitcherCard.jsx` below the rolling chart; `BaseballApp.jsx` handles comp clicks.
 - `scripts/test_similarity.mjs` (`npm run test:similarity`) — sanity checks.
+- Per-component weight chips were replaced by an **Isolate** control: "All" ranks on the overall
+  (equal-weight mean); picking one component ranks on that component alone.
 - CI workflow deliberately untouched (local-only for now).

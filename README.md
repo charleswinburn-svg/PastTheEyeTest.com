@@ -61,7 +61,7 @@ pitcher cards and ranks the most similar player-seasons (2023–2026). The model
 - Every stat is z-scored within its own season, clipped ±3. Component distance = weighted RMS
   of z-differences over the stats both players have (a component is blank below half shared).
 - Component % = `100 · max(0, 1 − d / D)` with `D` the pool's 95th-percentile pairwise distance
-  (`meta.calib`). Overall % = weighted mean of the component %s (chips cycle 1× → 2× → off).
+  (`meta.calib`). Overall % = mean of the component %s; the Isolate chips rank on one component alone.
 - Hitters: swing traits · contact quality · whiff · discipline. Pitchers: arsenal (pitch type to
   pitch type, usage-weighted, penalty for a pitch only one throws, plus pitch mix) · release ·
   whiff/stuff · command · contact allowed. Horizontal pitcher quantities are mirrored to an
