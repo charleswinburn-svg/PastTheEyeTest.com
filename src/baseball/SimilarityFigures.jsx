@@ -4,17 +4,20 @@ import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 // ═══════════════════════════════════════════════════════════
 // SIMILARITY FIGURES (pitcher comparison)
 // ═══════════════════════════════════════════════════════════
-// Two SVG figures for an expanded comp on the pitcher card's Similar Players
-// panel. Both use the files' arm-side convention (positive x = toward the
-// pitcher's arm side), so a LHP and a RHP overlay directly.
+// Figures for an expanded comp on the pitcher card's Similar Players panel,
+// one column per pitcher (card's pitcher on the left, the comp on the right)
+// so the two can be read side by side on identical scales. Everything uses the
+// files' arm-side convention (positive x = toward the pitcher's arm side), so
+// a LHP and a RHP line up directly.
 //
-//   MovementPlot   — per-pitch-type average movement (arm-side HB vs IVB) for
-//                    the target (filled) and the comp (hollow), matched types
-//                    joined by a line.
-//   ReleaseDiagram — catcher's-view pitcher figure with the throwing arm drawn
-//                    at the measured arm angle, per-pitch-type release points,
-//                    release height / horizontal release callouts, and a
-//                    side-view strip for extension.
+//   MovementPlot   — per-pitch-type average movement (arm-side HB vs IVB),
+//                    dot size = usage.
+//   ReleaseDiagram — catcher's-view pitcher at the instant of release: lead leg
+//                    striding at the plate, back leg bent with the toe on the
+//                    rubber, throwing arm at the measured arm angle ending at
+//                    the release point, per-pitch-type release balls, release
+//                    height / horizontal release callouts, and a side-view
+//                    strip for extension.
 
 export const PITCH_COLORS = {
   FF: "#D22D49", SI: "#FE9D00", FC: "#933F2C",
@@ -33,8 +36,8 @@ const isNum = v => typeof v === "number" && Number.isFinite(v);
 const ft = v => (isNum(v) ? `${v.toFixed(1)} ft` : "—");
 const lastName = n => (n || "").split(" ").slice(-1)[0];
 
-// ── Movement plot ───────────────────────────────────────────
-export function MovementPlot({ a, b, nameA, nameB, size = 300 }) {
+// ── Movement plot (one pitcher) ─────────────────────────────
+export function MovementPlot({ p, accent, size = 280 }) {
   const { theme: t } = useTheme();
   const R = 25;                         // ± inches shown
   const pad = 30;
@@ -42,18 +45,19 @@ export function MovementPlot({ a, b, nameA, nameB, size = 300 }) {
   const s = (size - 2 * pad) / (2 * R); // px per inch
   const X = hb => c + hb * s;
   const Y = ivb => c - ivb * s;
-  const arsA = a?.arsenal || {}, arsB = b?.arsenal || {};
-  const types = [...new Set([...Object.keys(arsA), ...Object.keys(arsB)])].sort();
-  const grid = [];
-  for (let g = -20; g <= 20; g += 10) if (g !== 0) grid.push(g);
+  const ars = p?.arsenal || {};
+  const types = Object.keys(ars).sort((a, b) => (ars[b].usage ?? 0) - (ars[a].usage ?? 0));
+  const grid = [-20, -10, 10, 20];
   const txt = { fontSize: 9, fill: t.textFaint, fontFamily: "inherit" };
-  const pt = (ars, pt) => {
-    const p = ars[pt];
-    return p && isNum(p.hb) && isNum(p.ivb) ? { x: X(Math.max(-R, Math.min(R, p.hb))), y: Y(Math.max(-R, Math.min(R, p.ivb))), usage: p.usage ?? 0 } : null;
+  const pt = k => {
+    const a = ars[k];
+    return a && isNum(a.hb) && isNum(a.ivb)
+      ? { x: X(Math.max(-R, Math.min(R, a.hb))), y: Y(Math.max(-R, Math.min(R, a.ivb))), usage: a.usage ?? 0 }
+      : null;
   };
   return (
-    <svg viewBox={`0 0 ${size} ${size + 30}`} width={size} height={size + 30} style={{ display: "block" }}>
-      <text x={c} y={11} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: t.textMuted, fontFamily: "inherit" }}>
+    <svg viewBox={`0 0 ${size} ${size + 14}`} width={size} height={size + 14} style={{ display: "block" }}>
+      <text x={c} y={11} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: accent || t.textMuted, fontFamily: "inherit" }}>
         Movement · arm-side corrected
       </text>
       <g transform="translate(0,14)">
@@ -70,43 +74,25 @@ export function MovementPlot({ a, b, nameA, nameB, size = 300 }) {
         <line x1={pad} y1={Y(0)} x2={size - pad} y2={Y(0)} stroke={t.textFaint} strokeWidth={0.8} />
         <text x={c} y={size - 4} textAnchor="middle" style={txt}>← glove side · HB (in) · arm side →</text>
         <text x={10} y={c} textAnchor="middle" transform={`rotate(-90 10 ${c})`} style={txt}>IVB (in)</text>
-        {/* connectors first so the dots sit on top */}
         {types.map(k => {
-          const pa = pt(arsA, k), pb = pt(arsB, k);
-          return pa && pb ? <line key={`l${k}`} x1={pa.x} y1={pa.y} x2={pb.x} y2={pb.y} stroke={colorOf(k)} strokeWidth={1} strokeDasharray="3 2" opacity={0.7} /> : null;
-        })}
-        {types.map(k => {
-          const pb = pt(arsB, k);
-          return pb ? <circle key={`b${k}`} cx={pb.x} cy={pb.y} r={4 + pb.usage * 10} fill="none" stroke={colorOf(k)} strokeWidth={2} /> : null;
-        })}
-        {types.map(k => {
-          const pa = pt(arsA, k);
-          return pa ? (
-            <g key={`a${k}`}>
-              <circle cx={pa.x} cy={pa.y} r={4 + pa.usage * 10} fill={colorOf(k)} stroke={t.cardBg} strokeWidth={1} />
-              <text x={pa.x + 6 + pa.usage * 10} y={pa.y + 3} style={{ fontSize: 9, fontWeight: 700, fill: t.text, fontFamily: "inherit" }}>{k}</text>
+          const q = pt(k);
+          if (!q) return null;
+          const r = 4 + q.usage * 12;
+          return (
+            <g key={k}>
+              <circle cx={q.x} cy={q.y} r={r} fill={colorOf(k)} stroke={t.cardBg} strokeWidth={1}>
+                <title>{`${PITCH_NAMES[k] || k} · ${Math.round(q.usage * 100)}% · ${ars[k].hb.toFixed(1)}" HB, ${ars[k].ivb.toFixed(1)}" IVB`}</title>
+              </circle>
+              <text x={q.x + r + 2} y={q.y + 3} style={{ fontSize: 9, fontWeight: 700, fill: t.text, fontFamily: "inherit" }}>{k}</text>
             </g>
-          ) : null;
+          );
         })}
       </g>
-      <Legend x={pad} y={size + 27} t={t} nameA={nameA} nameB={nameB} />
     </svg>
   );
 }
 
-function Legend({ x, y, t, nameA, nameB }) {
-  const txt = { fontSize: 9, fill: t.textMuted, fontFamily: "inherit" };
-  return (
-    <g transform={`translate(${x},${y})`}>
-      <circle cx={4} cy={-3} r={4} fill={t.textMuted} />
-      <text x={12} y={0} style={txt}>{nameA}</text>
-      <circle cx={104} cy={-3} r={4} fill="none" stroke={t.textMuted} strokeWidth={2} />
-      <text x={112} y={0} style={txt}>{nameB}</text>
-    </g>
-  );
-}
-
-// ── Release diagram (catcher's view) ────────────────────────
+// ── Release diagram (one pitcher, catcher's view) ───────────
 const ARM_LEN = 2.0;   // ft, shoulder → ball at release (upper arm + forearm + hand)
 
 function releaseOf(p) {
@@ -121,184 +107,171 @@ function shoulderOf(r) {
   return { x: r.x - ARM_LEN * Math.cos(th), z: r.z - ARM_LEN * Math.sin(th) };
 }
 
-export function ReleaseDiagram({ a, b, nameA, nameB, width = 300 }) {
+export function ReleaseDiagram({ p, accent, width = 280 }) {
   const { theme: t } = useTheme();
-  const S = 34;                     // px per ft
+  const S = 32;                     // px per ft
   const X0 = -2.8, Z0 = -1.1;       // ft at the left / bottom edge (room for the slope)
   const H = 9.2;                    // ft of height shown
-  const height = width / S * 0 + Math.round(H * S);
+  const height = Math.round(H * S);
   const X = x => (x - X0) * S;
   const Y = z => height - 10 - (z - Z0) * S;
-  const ra = releaseOf(a), rb = releaseOf(b);
-  const sa = shoulderOf(ra), sb = shoulderOf(rb);
-  const hA = isNum(a?.height) ? a.height / 12 : 6.2;
+  const r = releaseOf(p);
+  const sh = shoulderOf(r);
+  const hFt = isNum(p?.height) ? p.height / 12 : 6.2;
   const txt = { fontSize: 9, fill: t.textFaint, fontFamily: "inherit" };
   const num = { fontSize: 10, fill: t.text, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT };
-  const accentA = t.accent, accentB = t.accentSecondary;
+  const color = accent || t.accent;
 
-  // Body anchored on the target's shoulder (catcher's view: throwing arm on the
-  // arm side, i.e. to the right in this corrected frame).
-  const bodyX = sa ? sa.x - 0.55 : -0.6;
-  const shoulderZ = sa ? sa.z : hA * 0.7;
+  // Body anchored on the shoulder (catcher's view: throwing arm on the arm
+  // side, i.e. to the right in this corrected frame). The stride goes straight
+  // at the catcher, so the lead leg is nearly under the body (slightly glove
+  // side), its foot planted ~0.5 ft below rubber level on the front slope; the
+  // back leg is bent with the toe still on the rubber.
+  const bodyX = sh ? sh.x - 0.55 : -0.6;
+  const shoulderZ = sh ? sh.z : hFt * 0.7;
   const headR = 0.42;
-  // Delivery pose at release, seen from the catcher: the lead leg has landed
-  // down the front slope on the glove side, the back leg trails off the
-  // rubber on the arm side, the torso tilts toward the glove side and the
-  // glove is tucked. Heights are relative to the rubber (z = 0); the mound
-  // falls away in front of it, which is why the lead foot sits below 0.
-  // The stride goes straight at the catcher, so in this projection the lead leg
-  // is nearly under the body (slightly glove side), its foot pointing at us and
-  // landing ~0.5 ft below rubber level on the front slope, while the back leg
-  // trails behind with the foot off the ground on the arm side.
   const gsX = bodyX - 0.55;                               // glove-side shoulder
   const head = { x: bodyX - 0.05, z: shoulderZ + 0.92 };
   const hip = { x: bodyX - 0.1, z: Math.max(1.9, shoulderZ - 1.6) };
   const leadKnee = { x: hip.x - 0.35, z: hip.z - 0.95 };
-  const leadFoot = { x: hip.x - 0.45, z: -0.5 };          // on the front slope, toward the plate
-  const backKnee = { x: hip.x + 0.55, z: hip.z - 1.05 };  // bent, dropping toward the rubber
-  const backFoot = { x: 0.4, z: 0.08 };                  // toe still on the rubber
+  const leadFoot = { x: hip.x - 0.45, z: -0.5 };
+  const backKnee = { x: hip.x + 0.55, z: hip.z - 1.05 };
+  const backFoot = { x: 0.4, z: 0.08 };
   const gloveElbow = { x: gsX - 0.25, z: shoulderZ - 0.7 };
   const glove = { x: bodyX - 0.05, z: shoulderZ - 0.45 };
   const skin = t.id === "dark" ? "#9fb3c8" : "#b7c7d6";
   const skinBack = t.id === "dark" ? "#6f8299" : "#93a3b3";
-  const limb = (p, q, w, color = skin) => <line x1={X(p.x)} y1={Y(p.z)} x2={X(q.x)} y2={Y(q.z)} stroke={color} strokeWidth={w} strokeLinecap="round" />;
-  // Mound seen from the plate: the rubber is the crest, the front slope is the
-  // face below it (lower on screen = closer to the catcher).
+  const limb = (a, b, w, col = skin) => <line x1={X(a.x)} y1={Y(a.z)} x2={X(b.x)} y2={Y(b.z)} stroke={col} strokeWidth={w} strokeLinecap="round" />;
   const moundPath = `M 0 ${Y(-0.35)} Q ${X(0)} ${Y(0.25)} ${width} ${Y(-0.35)} L ${width} ${height} L 0 ${height} Z`;
   const contour = z => `M ${X(X0 + 0.3)} ${Y(z - 0.12)} Q ${X(0)} ${Y(z + 0.14)} ${X(X0 + width / S - 0.3)} ${Y(z - 0.12)}`;
 
-  const perType = (p, hollow, stroke) => Object.entries(p?.arsenal || {}).map(([k, ar]) => (
-    isNum(ar.rel_x) && isNum(ar.rel_z) ? (
-      <circle key={k} cx={X(ar.rel_x)} cy={Y(ar.rel_z)} r={5} fill={hollow ? "none" : colorOf(k)}
-              stroke={hollow ? colorOf(k) : stroke} strokeWidth={hollow ? 2 : 1}>
-        <title>{`${PITCH_NAMES[k] || k}: ${ar.rel_x.toFixed(2)} ft side, ${ar.rel_z.toFixed(2)} ft high`}</title>
-      </circle>
-    ) : null
-  ));
-  const hasTypeDots = Object.values(a?.arsenal || {}).some(ar => isNum(ar.rel_x));
+  const typeDots = Object.entries(p?.arsenal || {}).filter(([, a]) => isNum(a.rel_x) && isNum(a.rel_z));
+  const arcRad = 0.75 * S;
+  const th = isNum(r.angle) ? (r.angle * Math.PI) / 180 : 0;
 
-  const arm = (s, r, color, dashed) => s && (
-    <g>
-      <line x1={X(s.x)} y1={Y(s.z)} x2={X(r.x)} y2={Y(r.z)} stroke={color} strokeWidth={dashed ? 3 : 9} strokeLinecap="round" strokeDasharray={dashed ? "5 4" : undefined} opacity={dashed ? 0.9 : 0.85} />
-      <circle cx={X(s.x)} cy={Y(s.z)} r={dashed ? 3.5 : 6} fill={dashed ? t.cardBg : color} stroke={color} strokeWidth={2} />
-    </g>
-  );
-  const arc = (s, r, color, label, offset) => {
-    if (!s || !isNum(r.angle)) return null;
-    const rad = 0.75 * S;
-    const th = (r.angle * Math.PI) / 180;
-    const ex = X(s.x) + rad * Math.cos(th), ey = Y(s.z) - rad * Math.sin(th);
-    const large = Math.abs(r.angle) > 180 ? 1 : 0, sweep = r.angle >= 0 ? 0 : 1;
-    return (
-      <g>
-        <line x1={X(s.x)} y1={Y(s.z)} x2={X(s.x) + rad + 8} y2={Y(s.z)} stroke={color} strokeWidth={0.8} strokeDasharray="2 2" />
-        <path d={`M ${X(s.x) + rad} ${Y(s.z)} A ${rad} ${rad} 0 ${large} ${sweep} ${ex} ${ey}`} fill="none" stroke={color} strokeWidth={1.2} />
-        <text x={X(s.x) + rad + 10} y={Y(s.z) - 4 - offset} style={{ ...num, fill: color }}>{label}</text>
-      </g>
-    );
-  };
-
-  const extW = width, extS = 30, extPad = 24;
+  const extW = width, extS = 28, extPad = 24;
   const EX = e => extPad + e * extS;
 
   return (
     <div>
       <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} style={{ display: "block" }}>
-        <text x={width / 2} y={11} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: t.textMuted, fontFamily: "inherit" }}>
+        <text x={width / 2} y={11} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: color, fontFamily: "inherit" }}>
           Release point · catcher's view
         </text>
         <text x={width / 2} y={22} textAnchor="middle" style={txt}>← glove side · arm side →</text>
-        {/* mound + rubber */}
+        {/* mound: rubber on the crest, front slope below it */}
         <path d={moundPath} fill={t.id === "dark" ? "#3b2a1a" : "#c8a97e"} />
         {[-0.45, -0.8].map(z => <path key={z} d={contour(z)} fill="none" stroke={t.id === "dark" ? "#5a4530" : "#a88a62"} strokeWidth={0.8} />)}
         <rect x={X(-1)} y={Y(0) - 4} width={2 * S} height={4} fill="#e5e7eb" stroke="#9ca3af" strokeWidth={0.5} />
         <line x1={X(0)} y1={Y(0)} x2={X(0)} y2={Y(1.3)} stroke={t.textFaint} strokeWidth={0.6} strokeDasharray="2 3" />
         <text x={X(1.1)} y={Y(0) - 1} style={{ ...txt, fill: "#d6c6b0" }}>rubber</text>
-        <text x={X(X0 + width / S) - 4} y={Y(-0.95)} textAnchor="end" style={{ ...txt, fill: "#d6c6b0" }}>front slope → plate</text>
+        <text x={width - 4} y={Y(-0.95)} textAnchor="end" style={{ ...txt, fill: "#d6c6b0" }}>front slope → plate</text>
         {/* height axis */}
         {[2, 4, 6].map(z => (
           <g key={z}>
-            <line x1={X(X0) + 2} y1={Y(z)} x2={X(X0) + 8} y2={Y(z)} stroke={t.textFaint} strokeWidth={0.8} />
-            <text x={X(X0) + 10} y={Y(z) + 3} style={txt}>{z} ft</text>
+            <line x1={2} y1={Y(z)} x2={8} y2={Y(z)} stroke={t.textFaint} strokeWidth={0.8} />
+            <text x={10} y={Y(z) + 3} style={txt}>{z} ft</text>
           </g>
         ))}
-        {/* body (target) */}
+        {/* body */}
         <g fill={skin} opacity={0.85}>
-          {/* back leg (behind the body): knee bent, toe still on the rubber */}
           <g opacity={0.85}>
             {limb({ x: hip.x + 0.25, z: hip.z }, backKnee, 10, skinBack)}
             {limb(backKnee, backFoot, 9, skinBack)}
             <ellipse cx={X(backFoot.x)} cy={Y(backFoot.z)} rx={0.26 * S} ry={0.11 * S} fill={skinBack} />
           </g>
-          {/* lead leg: striding straight at the plate, planted on the front slope */}
           <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z) + 6} rx={0.42 * S} ry={0.1 * S} fill="#000" opacity={0.25} />
           {limb({ x: hip.x - 0.25, z: hip.z }, leadKnee, 13)}
           {limb(leadKnee, leadFoot, 12)}
           <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z)} rx={0.3 * S} ry={0.17 * S} />
-          {/* torso square to the plate, leaning in */}
           <polygon
             points={[[gsX, shoulderZ + 0.12], [bodyX + 0.58, shoulderZ + 0.12], [hip.x + 0.4, hip.z], [hip.x - 0.4, hip.z]].map(([x, z]) => `${X(x)},${Y(z)}`).join(" ")}
             stroke={skin} strokeWidth={10} strokeLinejoin="round" />
-          {/* glove arm tucked at the chest */}
           {limb({ x: gsX, z: shoulderZ }, gloveElbow, 8)}
           {limb(gloveElbow, glove, 7)}
           <circle cx={X(glove.x)} cy={Y(glove.z)} r={0.25 * S} />
           <circle cx={X(head.x)} cy={Y(head.z)} r={headR * S} />
         </g>
-        {/* comp arm (dashed), then target arm */}
-        {arm(sb, rb, accentB, true)}
-        {arm(sa, ra, accentA, false)}
-        {/* callouts for the target */}
-        {isNum(ra.z) && isNum(ra.x) && (
+        {/* throwing arm at the measured slot */}
+        {sh && (
           <g>
-            <line x1={X(X0) + 40} y1={Y(ra.z)} x2={X(ra.x)} y2={Y(ra.z)} stroke={accentA} strokeWidth={0.8} strokeDasharray="3 3" />
-            <text x={X(X0) + 42} y={Y(ra.z) - 3} style={{ ...num, fill: accentA }}>{ft(ra.z)} high</text>
-            <line x1={X(ra.x)} y1={Y(ra.z)} x2={X(ra.x)} y2={Y(0)} stroke={accentA} strokeWidth={0.8} strokeDasharray="3 3" />
-            <line x1={X(0)} y1={Y(0.55)} x2={X(ra.x)} y2={Y(0.55)} stroke={accentA} strokeWidth={0.8} />
-            <text x={X(ra.x / 2)} y={Y(0.55) - 3} textAnchor="middle" style={{ ...num, fill: accentA }}>{ft(ra.x)} side</text>
+            <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(r.x)} y2={Y(r.z)} stroke={color} strokeWidth={9} strokeLinecap="round" opacity={0.9} />
+            <circle cx={X(sh.x)} cy={Y(sh.z)} r={6} fill={color} stroke={color} strokeWidth={2} />
+            {/* arm-angle arc */}
+            <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(sh.x) + arcRad + 8} y2={Y(sh.z)} stroke={color} strokeWidth={0.8} strokeDasharray="2 2" />
+            <path d={`M ${X(sh.x) + arcRad} ${Y(sh.z)} A ${arcRad} ${arcRad} 0 0 ${r.angle >= 0 ? 0 : 1} ${X(sh.x) + arcRad * Math.cos(th)} ${Y(sh.z) - arcRad * Math.sin(th)}`} fill="none" stroke={color} strokeWidth={1.2} />
+            <text x={X(sh.x) + arcRad + 10} y={Y(sh.z) - 4} style={{ ...num, fill: color }}>{Math.round(r.angle)}° arm</text>
           </g>
         )}
-        {arc(sa, ra, accentA, `${Math.round(ra.angle)}°`, 0)}
-        {arc(sb, rb, accentB, `${isNum(rb.angle) ? Math.round(rb.angle) : "—"}°`, 12)}
-        {/* release points */}
-        {perType(b, true)}
-        {hasTypeDots ? perType(a, false, t.cardBg) : (isNum(ra.x) && isNum(ra.z) && <circle cx={X(ra.x)} cy={Y(ra.z)} r={6} fill={accentA} stroke={t.cardBg} />)}
-        {!hasTypeDots && isNum(rb.x) && isNum(rb.z) && <circle cx={X(rb.x)} cy={Y(rb.z)} r={6} fill="none" stroke={accentB} strokeWidth={2} />}
+        {/* callouts */}
+        {isNum(r.z) && isNum(r.x) && (
+          <g>
+            <line x1={40} y1={Y(r.z)} x2={X(r.x)} y2={Y(r.z)} stroke={color} strokeWidth={0.8} strokeDasharray="3 3" />
+            <text x={42} y={Y(r.z) - 3} style={{ ...num, fill: color }}>{ft(r.z)} high</text>
+            <line x1={X(r.x)} y1={Y(r.z)} x2={X(r.x)} y2={Y(0)} stroke={color} strokeWidth={0.8} strokeDasharray="3 3" />
+            <line x1={X(0)} y1={Y(0.55)} x2={X(r.x)} y2={Y(0.55)} stroke={color} strokeWidth={0.8} />
+            <text x={X(r.x / 2)} y={Y(0.55) - 3} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.x)} side</text>
+          </g>
+        )}
+        {/* release balls per pitch type (or one ball at the average release) */}
+        {typeDots.length ? typeDots.map(([k, a]) => (
+          <circle key={k} cx={X(a.rel_x)} cy={Y(a.rel_z)} r={5} fill={colorOf(k)} stroke={t.cardBg} strokeWidth={1}>
+            <title>{`${PITCH_NAMES[k] || k}: ${a.rel_x.toFixed(2)} ft side, ${a.rel_z.toFixed(2)} ft high`}</title>
+          </circle>
+        )) : (isNum(r.x) && isNum(r.z) && <circle cx={X(r.x)} cy={Y(r.z)} r={6} fill={color} stroke={t.cardBg} />)}
       </svg>
       {/* Extension strip (side view) */}
-      <svg viewBox={`0 0 ${extW} 70`} width={extW} height={70} style={{ display: "block", marginTop: 4 }}>
+      <svg viewBox={`0 0 ${extW} 62`} width={extW} height={62} style={{ display: "block", marginTop: 4 }}>
         <text x={extW / 2} y={10} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: t.textMuted, fontFamily: "inherit" }}>Extension · side view (rubber → release)</text>
-        <line x1={extPad} y1={50} x2={extW - 8} y2={50} stroke={t.textFaint} strokeWidth={1} />
-        <rect x={extPad - 3} y={40} width={6} height={10} fill="#e5e7eb" stroke="#9ca3af" strokeWidth={0.5} />
+        <line x1={extPad} y1={44} x2={extW - 8} y2={44} stroke={t.textFaint} strokeWidth={1} />
+        <rect x={extPad - 3} y={34} width={6} height={10} fill="#e5e7eb" stroke="#9ca3af" strokeWidth={0.5} />
         {[2, 4, 6, 8].map(e => (
           <g key={e}>
-            <line x1={EX(e)} y1={48} x2={EX(e)} y2={52} stroke={t.textFaint} />
-            <text x={EX(e)} y={63} textAnchor="middle" style={txt}>{e} ft</text>
+            <line x1={EX(e)} y1={42} x2={EX(e)} y2={46} stroke={t.textFaint} />
+            <text x={EX(e)} y={57} textAnchor="middle" style={txt}>{e} ft</text>
           </g>
         ))}
-        <text x={extW - 8} y={63} textAnchor="end" style={txt}>→ plate</text>
-        {isNum(rb.ext) && <circle cx={EX(rb.ext)} cy={50} r={6} fill="none" stroke={accentB} strokeWidth={2} />}
-        {isNum(ra.ext) && <circle cx={EX(ra.ext)} cy={50} r={6} fill={accentA} stroke={t.cardBg} />}
-        {isNum(ra.ext) && <text x={EX(ra.ext)} y={36} textAnchor="middle" style={{ ...num, fill: accentA }}>{ft(ra.ext)}</text>}
-        {isNum(rb.ext) && <text x={EX(rb.ext)} y={isNum(ra.ext) && Math.abs(ra.ext - rb.ext) < 0.9 ? 23 : 36} textAnchor="middle" style={{ ...num, fill: accentB }}>{ft(rb.ext)}</text>}
+        <text x={extW - 8} y={57} textAnchor="end" style={txt}>→ plate</text>
+        {isNum(r.ext) && (
+          <g>
+            <line x1={extPad} y1={44} x2={EX(r.ext)} y2={44} stroke={color} strokeWidth={3} />
+            <circle cx={EX(r.ext)} cy={44} r={6} fill={color} stroke={t.cardBg} />
+            <text x={EX(r.ext)} y={30} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.ext)}</text>
+          </g>
+        )}
       </svg>
-      {/* key */}
-      <div style={{ display: "flex", gap: 14, fontSize: 10, color: t.textMuted, marginTop: 4, flexWrap: "wrap" }}>
-        <span><span style={{ display: "inline-block", width: 18, height: 4, background: accentA, borderRadius: 2, verticalAlign: "middle", marginRight: 4 }} />{nameA} · arm {isNum(ra.angle) ? `${Math.round(ra.angle)}°` : "—"} · {ft(ra.z)} high · {ft(ra.x)} side · ext {ft(ra.ext)}</span>
-        <span><span style={{ display: "inline-block", width: 18, height: 0, borderTop: `2px dashed ${accentB}`, verticalAlign: "middle", marginRight: 4 }} />{nameB} · arm {isNum(rb.angle) ? `${Math.round(rb.angle)}°` : "—"} · {ft(rb.z)} high · {ft(rb.x)} side · ext {ft(rb.ext)}</span>
-      </div>
     </div>
   );
 }
 
-// Both figures side by side for a comp row.
-export function PitcherCompareFigures({ target, other }) {
-  const nameA = `${lastName(target.name)} ${target.season}`;
-  const nameB = `${lastName(other.name)} ${other.season}`;
+// One column per pitcher: movement plot over release diagram.
+function PitcherColumn({ p, label, sub, accent }) {
+  const { theme: t } = useTheme();
   return (
-    <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start", marginBottom: 10 }}>
-      <MovementPlot a={target} b={other.player} nameA={nameA} nameB={nameB} />
-      <ReleaseDiagram a={target} b={other.player} nameA={nameA} nameB={nameB} />
+    <div style={{ flex: "0 1 300px", minWidth: 280 }}>
+      <div style={{ padding: "0 0 6px", borderBottom: `2px solid ${accent}`, marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: t.text }}>{label}</div>
+        <div style={{ fontSize: 10, color: t.textMuted }}>{sub}</div>
+      </div>
+      <MovementPlot p={p} accent={accent} />
+      <div style={{ height: 10 }} />
+      <ReleaseDiagram p={p} accent={accent} />
     </div>
   );
 }
+
+export function PitcherCompareFigures({ target, other }) {
+  const { theme: t } = useTheme();
+  const sub = (p, season) => {
+    const v = p?.v || {};
+    return `${season}${p?.team ? ` · ${p.team}` : ""}${p?.hand ? ` · ${p.hand}HP` : ""} · arm ${isNum(v.arm_angle) ? `${Math.round(v.arm_angle)}°` : "—"} · ${ft(v.release_z)} high · ${ft(v.release_x)} side · ext ${ft(v.extension)}`;
+  };
+  return (
+    <div style={{ display: "flex", gap: 28, flexWrap: "wrap", alignItems: "flex-start", marginBottom: 14 }}>
+      <PitcherColumn p={target} label={`${target.name} ${target.season}`} sub={sub(target, target.season)} accent={t.accent} />
+      <PitcherColumn p={other.player} label={`${other.name} ${other.season}`} sub={sub(other.player, other.season)} accent={t.accentSecondary} />
+    </div>
+  );
+}
+
+export { lastName };
