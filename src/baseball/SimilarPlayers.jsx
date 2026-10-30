@@ -227,6 +227,9 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
   const akeys = Object.keys(target.meta.arsenal_features || {});
   const cell = { padding: "2px 8px", fontSize: 11, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, textAlign: "right", whiteSpace: "nowrap" };
   const head = { padding: "3px 8px", fontSize: 10, color: t.textFaint, textAlign: "right", fontWeight: 600, whiteSpace: "nowrap" };
+  // compact variants for the side-by-side pitch tables of an isolated Arsenal
+  const tight = { ...head, padding: "2px 5px", fontSize: 9 };
+  const tcell = { ...cell, padding: "1px 5px", fontSize: 10 };
   const captureRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const saveComparison = useCallback(async () => {
@@ -270,6 +273,69 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
         ))}
       </div>
     {arsenalA && arsenalB && figureShow && <PitcherCompareFigures target={target} other={other} show={figureShow} />}
+    {isolate ? (
+      /* Isolated view: mirrored — the card's player's numbers on the left, the
+         comp's on the right, stat label and Δz down the middle. */
+      <div>
+        {Object.entries(comps).map(([c, cm]) => {
+          const rs = rows.filter(r => r.component === c);
+          if (!rs.length) return null;
+          const big = { ...cell, fontSize: 14, padding: "4px 10px" };
+          const side = (name, season, color, align) => (
+            <div style={{ fontSize: 11, fontWeight: 700, color, textAlign: align, padding: "0 10px 4px", borderBottom: `2px solid ${color}` }}>{name} {season}</div>
+          );
+          return (
+            <div key={c} style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", columnGap: 12, alignItems: "stretch", maxWidth: 760, margin: "0 auto" }}>
+              {side(target.name, target.season, t.accent, "right")}
+              <div style={{ ...head, textAlign: "center", color: t.textMuted, alignSelf: "end" }}>{cm.label}</div>
+              {side(other.name, other.season, t.accentSecondary, "left")}
+              {rs.map((r, i) => {
+                const dz = r.za != null && r.zb != null ? r.za - r.zb : null;
+                const bg = i % 2 ? t.tableRowB : "transparent";
+                return [
+                  <div key={`${r.key}a`} style={{ ...big, textAlign: "right", color: t.text, background: bg }}>{fmtValue(r.a, r.fmt)}</div>,
+                  <div key={`${r.key}m`} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2px 8px", background: bg, minWidth: 150 }}>
+                    <span style={{ fontSize: 11, color: t.textMuted, whiteSpace: "nowrap" }}>{r.label}</span>
+                    <span style={{ fontSize: 10, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, color: dz == null ? t.textFaint : Math.abs(dz) < 0.5 ? t.textFaint : Math.abs(dz) < 1.25 ? t.accent : "#CB181D" }}>
+                      Δz {dz == null ? "—" : (dz > 0 ? "+" : "") + dz.toFixed(1)}
+                    </span>
+                  </div>,
+                  <div key={`${r.key}b`} style={{ ...big, textAlign: "left", color: t.text, background: bg }}>{fmtValue(r.b, r.fmt)}</div>,
+                ];
+              })}
+            </div>
+          );
+        })}
+        {arsenalA && arsenalB && showArsenalTable && (
+          <div style={{ display: "flex", gap: 28, flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", marginTop: 14 }}>
+            {[[target, arsenalA, t.accent], [other, arsenalB, t.accentSecondary]].map(([p, ars, color], idx) => (
+              <table key={idx} style={{ borderCollapse: "collapse", flex: "1 1 300px", minWidth: 0 }}>
+                <thead>
+                  <tr>
+                    <th style={{ ...tight, textAlign: "left", color, borderBottom: `2px solid ${color}`, fontWeight: 700 }}>{p.name} {p.season}</th>
+                    <th style={tight}>Usage</th>
+                    {akeys.filter(k => !["axis_sin", "axis_cos", "rel_x", "rel_z"].includes(k)).map(k => (
+                      <th key={k} style={tight}>{target.meta.arsenal_features[k]?.label || k}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.keys(ars).sort((x, y) => (ars[y].usage ?? 0) - (ars[x].usage ?? 0)).map(pt => (
+                    <tr key={pt}>
+                      <td style={{ ...tcell, textAlign: "left", fontFamily: "inherit", fontWeight: 600, color: t.textMuted }}>{pt}</td>
+                      <td style={{ ...tcell, color: t.text }}>{`${Math.round(ars[pt].usage * 100)}%`}</td>
+                      {akeys.filter(k => !["axis_sin", "axis_cos", "rel_x", "rel_z"].includes(k)).map(k => (
+                        <td key={k} style={{ ...tcell, color: t.text }}>{fmtValue(ars[pt][k], target.meta.arsenal_features[k]?.fmt)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ))}
+          </div>
+        )}
+      </div>
+    ) : (
     <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
       {Object.entries(comps).map(([c, cm]) => {
         const rs = rows.filter(r => r.component === c);
@@ -331,6 +397,7 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
         </table>
       )}
     </div>
+    )}
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 9, color: t.textFaint }}>
         <span>Similar Players{isolate ? ` · ${isolatedLabel} only` : ""} · {SIMILARITY_SEASONS[0]}–{SIMILARITY_SEASONS[SIMILARITY_SEASONS.length - 1]} player-seasons, each stat scaled within its own season · 100% = identical</span>
         <span style={{ fontStyle: "italic" }}>PastTheEyeTest</span>
