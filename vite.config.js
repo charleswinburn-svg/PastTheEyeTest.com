@@ -5,6 +5,16 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    // The dev server watches the whole project by default. On the droplet that
+    // includes the Python venvs, parquet/CSV data and build output, which blows
+    // past the inotify watcher limit (ENOSPC). Only the app sources need watching.
+    watch: {
+      ignored: [
+        '**/.venv*/**', '**/venv/**', '**/__pycache__/**',
+        '**/dist/**', '**/tmp/**', '**/notebooks/**', '**/data/**',
+        '**/*.parquet', '**/*.csv', '**/*.pkl', '**/*.ipynb', '**/*.png',
+      ],
+    },
     proxy: {
       // ── NHL proxies (existing) ──
       '/nhl-api': {
