@@ -85,23 +85,14 @@ export function MovementPlot({ p, accent, size = 360 }) {
 }
 
 // ── Release diagram (one pitcher, catcher's view) ───────────
-const ARM_LEN = 2.0;   // ft, shoulder → ball at release (upper arm + forearm + hand)
-
 function releaseOf(p) {
   const v = p?.v || {};
   return { x: v.release_x, z: v.release_z, ext: v.extension, angle: v.arm_angle };
 }
-// Shoulder placed so the arm from shoulder to the release point sits at the
-// measured arm angle (what Savant reports), with a fixed arm length.
-function shoulderOf(r) {
-  if (!isNum(r.x) || !isNum(r.z) || !isNum(r.angle)) return null;
-  const th = (r.angle * Math.PI) / 180;
-  return { x: r.x - ARM_LEN * Math.cos(th), z: r.z - ARM_LEN * Math.sin(th) };
-}
 
 export function ReleaseDiagram({ p, accent, width = 360 }) {
   const { theme: t } = useTheme();
-  const S = 38;                     // px per ft
+  const S = 34;                     // px per ft (±5.3 ft across: room for 4.5 ft release sides)
   const Z0 = -1.1;                  // ft at the bottom edge (room for the slope)
   const H = 10.0;                   // ft of height shown (headroom for over-the-top releases)
   const height = Math.round(H * S);
@@ -113,32 +104,34 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
   const X = x => (dir * x - X0) * S;
   const Y = z => height - 10 - (z - Z0) * S;
   const r = releaseOf(p);
-  const sh = shoulderOf(r);
-  const hFt = isNum(p?.height) ? p.height / 12 : 6.2;
+  const hasRel = isNum(r.x) && isNum(r.z);
+  const angle = isNum(r.angle) ? r.angle : 45;
   const txt = { fontSize: 9, fill: t.textFaint, fontFamily: "inherit" };
   const num = { fontSize: 10, fill: t.text, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT };
   const color = accent || t.accent;
 
-  // Body anchored on the shoulder (catcher's view: throwing arm on the arm
-  // side, i.e. to the right in this corrected frame). The stride goes straight
-  // at the catcher, so the lead leg is nearly under the body (slightly glove
-  // side), its foot planted ~0.5 ft below rubber level on the front slope; the
-  // back leg is bent with the toe still on the rubber.
+  // Body anchored at the hips near the rubber (catcher's view, arm-side
+  // coordinates; flipped at draw time). The stride goes straight at the plate,
+  // so the lead leg is nearly under the body with its foot ~0.5 ft below
+  // rubber level on the front slope, and the back leg is bent with the toe on
+  // the rubber.
   //
-  // The trunk tilts toward the glove side as the slot drops: an over-the-top
-  // arm (60°+) comes from an upright trunk, a sidearmer leans ~35° so the
-  // throwing shoulder sits low and wide. The trunk is rotated about the hip by
-  // that tilt, and the hip is placed so the throwing shoulder lands where the
-  // arm geometry needs it.
-  const TRUNK = 1.7, HALF_SH = 0.55;                      // ft: hip→shoulder line, half shoulder width
-  const tilt = (Math.max(0, Math.min(40, (60 - (isNum(r.angle) ? r.angle : 45)) * 0.6)) * Math.PI) / 180;
-  const u = { x: -Math.sin(tilt), z: Math.cos(tilt) };      // trunk direction (leans to glove side)
-  const v = { x: Math.cos(tilt), z: Math.sin(tilt) };       // shoulder line, toward the arm side
-  const tsX = sh ? sh.x : -0.05, tsZ = sh ? sh.z : hFt * 0.7;   // throwing shoulder
-  const hip = { x: tsX - TRUNK * u.x - HALF_SH * v.x, z: tsZ - TRUNK * u.z - HALF_SH * v.z };
-  const shC = { x: hip.x + TRUNK * u.x, z: hip.z + TRUNK * u.z };           // shoulder centre
-  const gs = { x: shC.x - HALF_SH * v.x, z: shC.z - HALF_SH * v.z };          // glove-side shoulder
-  const ts = { x: shC.x + HALF_SH * v.x, z: shC.z + HALF_SH * v.z };
+  // The shoulder line is tilted by the slot: an over-the-top arm comes from
+  // shoulders tipped toward the glove side (throwing shoulder high), a sidearm
+  // slot from roughly level shoulders, and a submariner drops the throwing
+  // shoulder toward the ground (shoulders tipped toward the arm side). The
+  // hips also drift a little toward the arm side and sink as the slot drops.
+  // The arm is then drawn from that shoulder to the actual release point.
+  const TRUNK = 1.7, HALF_SH = 0.55;                                   // ft
+  const low = Math.max(0, Math.min(1, (30 - angle) / 90));             // 0 = conventional, 1 = deep submarine
+  const phi = (Math.max(-60, Math.min(45, angle - 25)) * Math.PI) / 180; // shoulder-line tilt (+ = throwing shoulder up)
+  const u = { x: -Math.sin(phi), z: Math.cos(phi) };                   // trunk direction (hip → shoulders)
+  const v = { x: Math.cos(phi), z: Math.sin(phi) };                    // shoulder line, toward the arm side
+  const hip = { x: 0.5 + 0.4 * low, z: 2.6 - 0.3 * low };
+  const shC = { x: hip.x + TRUNK * u.x, z: hip.z + TRUNK * u.z };      // shoulder centre
+  const gs = { x: shC.x - HALF_SH * v.x, z: shC.z - HALF_SH * v.z };   // glove-side shoulder
+  const ts = { x: shC.x + HALF_SH * v.x, z: shC.z + HALF_SH * v.z };   // throwing shoulder
+  const sh = hasRel ? ts : null;
   const headR = 0.42;
   const head = { x: shC.x + 0.95 * u.x, z: shC.z + 0.95 * u.z };
   const leadKnee = { x: hip.x - 0.35, z: hip.z - 0.95 };
@@ -153,9 +146,15 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
   const moundPath = `M 0 ${Y(-0.35)} Q ${X(0)} ${Y(0.25)} ${width} ${Y(-0.35)} L ${width} ${height} L 0 ${height} Z`;
   const contour = z => `M ${X(X0 + 0.3)} ${Y(z - 0.12)} Q ${X(0)} ${Y(z + 0.14)} ${X(X0 + width / S - 0.3)} ${Y(z - 0.12)}`;
 
-  const typeDots = Object.entries(p?.arsenal || {}).filter(([, a]) => isNum(a.rel_x) && isNum(a.rel_z));
+  // Per-pitch-type release balls only for 2026+; earlier seasons get one ball at
+  // the average release point.
+  const typeDots = Number(p?.season) >= 2026
+    ? Object.entries(p?.arsenal || {}).filter(([, a]) => isNum(a.rel_x) && isNum(a.rel_z))
+    : [];
   const arcRad = 0.75 * S;
-  const th = isNum(r.angle) ? (r.angle * Math.PI) / 180 : 0;
+  const th = sh ? Math.atan2(r.z - sh.z, r.x - sh.x) : 0;       // angle of the arm as drawn
+  // keep labels inside the frame for wide releases
+  const inside = (x, pad = 70) => Math.max(pad, Math.min(width - pad, x));
 
   const extW = width, extS = Math.floor((width - 60) / 8.5), extPad = 24;
   const EX = e => extPad + e * extS;
@@ -207,9 +206,11 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
             <circle cx={X(sh.x)} cy={Y(sh.z)} r={6} fill={color} stroke={color} strokeWidth={2} />
             {/* arm-angle arc, opening toward the arm side (screen left for RHP, right for LHP) */}
             <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(sh.x) + dir * (arcRad + 8)} y2={Y(sh.z)} stroke={color} strokeWidth={0.8} strokeDasharray="2 2" />
-            <path d={`M ${X(sh.x) + dir * arcRad} ${Y(sh.z)} A ${arcRad} ${arcRad} 0 0 ${(dir > 0) === (r.angle >= 0) ? 0 : 1} ${X(sh.x) + dir * arcRad * Math.cos(th)} ${Y(sh.z) - arcRad * Math.sin(th)}`} fill="none" stroke={color} strokeWidth={1.2} />
-            {/* label above the reference line for normal slots, below it when the arm itself runs along the line */}
-            <text x={X(sh.x) + dir * (arcRad + 10)} y={Y(sh.z) + (r.angle < 22 ? 13 : -4)} textAnchor={dir > 0 ? "start" : "end"} style={{ ...num, fill: color }}>{Math.round(r.angle)}° arm</text>
+            <path d={`M ${X(sh.x) + dir * arcRad} ${Y(sh.z)} A ${arcRad} ${arcRad} 0 0 ${(dir > 0) === (th >= 0) ? 0 : 1} ${X(sh.x) + dir * arcRad * Math.cos(th)} ${Y(sh.z) - arcRad * Math.sin(th)}`} fill="none" stroke={color} strokeWidth={1.2} />
+            {/* label: above the reference line for normal slots, below it when the arm runs along or under the line */}
+            {isNum(r.angle) && (
+              <text x={inside(X(sh.x) + dir * (arcRad + 10), 48)} y={Y(sh.z) + (th < 0.38 ? 14 : -5)} textAnchor="middle" style={{ ...num, fill: color }}>{Math.round(r.angle)}° arm</text>
+            )}
           </g>
         )}
         {/* callouts */}
@@ -217,12 +218,16 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
           <g>
             <line x1={40} y1={Y(r.z)} x2={X(r.x)} y2={Y(r.z)} stroke={color} strokeWidth={0.8} strokeDasharray="3 3" />
             {/* height label: above the ball, or beside it on the side away from the body when the ball is near the top */}
-            {Y(r.z) > 44
-              ? <text x={X(r.x)} y={Y(r.z) - 11} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>
-              : <text x={X(r.x) + dir * 12} y={Y(r.z) + 4} textAnchor={dir > 0 ? "start" : "end"} style={{ ...num, fill: color }}>{ft(r.z)} high</text>}
+            {/* height label: above the ball normally; below it when the arm points down (the arm-angle
+                label then sits above), or beside it when the ball is near the top edge */}
+            {Y(r.z) <= 44
+              ? <text x={inside(X(r.x) - dir * 12, 40)} y={Y(r.z) + 4} textAnchor={dir > 0 ? "end" : "start"} style={{ ...num, fill: color }}>{ft(r.z)} high</text>
+              : th < -0.4
+                ? <text x={inside(X(r.x), 40)} y={Y(r.z) + 18} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>
+                : <text x={inside(X(r.x), 40)} y={Y(r.z) - 11} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>}
             <line x1={X(r.x)} y1={Y(r.z)} x2={X(r.x)} y2={Y(0)} stroke={color} strokeWidth={0.8} strokeDasharray="3 3" />
             <line x1={X(0)} y1={Y(0.55)} x2={X(r.x)} y2={Y(0.55)} stroke={color} strokeWidth={0.8} />
-            <text x={X(r.x / 2)} y={Y(0.55) - 3} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.x)} side</text>
+            <text x={inside(X(r.x / 2), 40)} y={Y(0.55) - 3} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.x)} side</text>
           </g>
         )}
         {/* release balls per pitch type (or one ball at the average release) */}
