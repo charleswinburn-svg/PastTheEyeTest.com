@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
-import { binColor, textOnBin, getHeadshotUrl, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { binColor, textOnBin, getHeadshotUrl, saveCardAsPng, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import { loadSimilarityPool, rankComps, featureRows, fmtValue, SIMILARITY_SEASONS } from "./similarity.js";
 import { PitcherCompareFigures } from "./SimilarityFigures.jsx";
 
@@ -150,7 +150,7 @@ export default function SimilarPlayers({ player, season, type = "hitter", onSele
                     title="Show the numbers behind this comp"
                   >{open ? "▲" : "▼"}</span>
                 </div>
-                {open && <FeatureTable target={ranked.target} other={r} t={t} />}
+                {open && <FeatureTable target={ranked.target} other={r} t={t} isolate={isolate} isolatedLabel={isolatedLabel} components={components} unitLabel={unitLabel} type={type} />}
               </div>
             );
           })}
@@ -168,11 +168,11 @@ function Note({ t, children }) {
   return <div style={{ padding: "18px 16px", fontSize: 12, color: t.textMuted, textAlign: "center" }}>{children}</div>;
 }
 
-function Headshot({ pid, name, t }) {
+function Headshot({ pid, name, t, size = 34 }) {
   const url = getHeadshotUrl(pid);
   return (
-    <div style={{ width: 34, height: 34, borderRadius: "50%", overflow: "hidden", background: t.inputBg, border: `1px solid ${t.divider}`, flexShrink: 0, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontSize: 11, fontWeight: 700, color: t.textFaint, position: "absolute" }}>
+    <div style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden", background: t.inputBg, border: `1px solid ${t.divider}`, flexShrink: 0, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontSize: Math.round(size / 3), fontWeight: 700, color: t.textFaint, position: "absolute" }}>
         {name ? name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : ""}
       </span>
       {url && <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 1 }} onError={e => { e.target.style.display = "none"; }} />}
@@ -212,15 +212,57 @@ function CompCell({ label, comp, dim = false, highlight = false, t }) {
   );
 }
 
-function FeatureTable({ target, other, t }) {
+// Expanded comparison: a self-contained block (names and headshots at the top,
+// the similarity scores, then the figures and stat tables) that can be saved
+// as a PNG on its own.
+function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, components = {}, unitLabel = "PA", type = "hitter" }) {
   const rows = featureRows(target, target.meta, other.player, other.meta);
   const comps = target.meta.components || {};
   const arsenalA = target.arsenal, arsenalB = other.player.arsenal;
   const akeys = Object.keys(target.meta.arsenal_features || {});
   const cell = { padding: "2px 8px", fontSize: 11, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, textAlign: "right", whiteSpace: "nowrap" };
   const head = { padding: "3px 8px", fontSize: 10, color: t.textFaint, textAlign: "right", fontWeight: 600, whiteSpace: "nowrap" };
+  const captureRef = useRef(null);
+  const [saving, setSaving] = useState(false);
+  const saveComparison = useCallback(async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const safe = s => String(s || "").replace(/\s+/g, "_");
+      await saveCardAsPng(captureRef, `${safe(target.name)}_${target.season}_vs_${safe(other.name)}_${other.season}.png`);
+    } finally { setSaving(false); }
+  }, [saving, target.name, target.season, other.name, other.season]);
+
+  const meta = (p, season) => [season, p?.team, p?.hand ? `${p.hand}H${type === "pitcher" ? "P" : "H"}` : null, p?.n != null ? `${p.n.toLocaleString?.() ?? p.n} ${unitLabel}` : null].filter(Boolean).join(" · ");
+  const Who = ({ p, season, name, color, align }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, flexDirection: align === "right" ? "row-reverse" : "row", textAlign: align, minWidth: 0 }}>
+      <Headshot pid={p.pid} name={name} t={t} size={48} />
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: t.text, lineHeight: 1.15 }}>{name}</div>
+        <div style={{ fontSize: 11, color: t.textMuted }}>{meta(p, season)}</div>
+        <div style={{ height: 3, width: 44, background: color, borderRadius: 2, marginTop: 4, marginLeft: align === "right" ? "auto" : 0 }} />
+      </div>
+    </div>
+  );
+
   return (
     <div style={{ padding: "4px 14px 12px 64px" }}>
+    <div ref={captureRef} style={{ background: t.cardBg, borderRadius: 10, border: `1px solid ${t.divider}`, padding: "12px 14px 10px" }}>
+      {/* header: who vs whom, with the scores */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <Who p={target} season={target.season} name={target.name} color={t.accent} align="left" />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flex: "1 1 220px" }}>
+          <div style={{ fontSize: 9, letterSpacing: 1, color: t.textFaint, fontWeight: 700 }}>SIMILARITY</div>
+          <OverallBubble sim={other.overall} label={isolatedLabel} />
+        </div>
+        <Who p={other.player} season={other.season} name={other.name} color={t.accentSecondary} align="right" />
+      </div>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", margin: "10px 0 12px", padding: "8px 10px", background: t.inputBg, borderRadius: 8 }}>
+        {Object.keys(components).map(c => (
+          <CompCell key={c} label={SHORT[c] || components[c].label} comp={other.comps[c]}
+                    dim={!!isolate && isolate !== c} highlight={isolate === c} t={t} />
+        ))}
+      </div>
     {arsenalA && arsenalB && <PitcherCompareFigures target={target} other={other} />}
     <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
       {Object.entries(comps).map(([c, cm]) => {
@@ -282,6 +324,27 @@ function FeatureTable({ target, other, t }) {
           </tbody>
         </table>
       )}
+    </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 9, color: t.textFaint }}>
+        <span>Similar Players · {SIMILARITY_SEASONS[0]}–{SIMILARITY_SEASONS[SIMILARITY_SEASONS.length - 1]} player-seasons, each stat scaled within its own season · 100% = identical</span>
+        <span style={{ fontStyle: "italic" }}>PastTheEyeTest</span>
+      </div>
+    </div>
+    <div style={{ textAlign: "center", marginTop: 10 }}>
+      <button
+        onClick={saveComparison}
+        disabled={saving}
+        style={{
+          padding: "6px 16px", fontSize: 11, fontWeight: 600,
+          background: t.inputBg, color: t.textMuted,
+          border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+          cursor: saving ? "wait" : "pointer", transition: "all 0.15s",
+        }}
+        onMouseEnter={e => { e.target.style.background = t.divider; e.target.style.color = t.text; }}
+        onMouseLeave={e => { e.target.style.background = t.inputBg; e.target.style.color = t.textMuted; }}
+      >
+        {saving ? "Saving…" : "📥 Save comparison as PNG"}
+      </button>
     </div>
     </div>
   );
