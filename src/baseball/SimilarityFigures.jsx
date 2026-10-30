@@ -110,28 +110,43 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
   const num = { fontSize: 10, fill: t.text, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT };
   const color = accent || t.accent;
 
-  // Body anchored at the hips near the rubber (catcher's view, arm-side
-  // coordinates; flipped at draw time). The stride goes straight at the plate,
-  // so the lead leg is nearly under the body with its foot ~0.5 ft below
-  // rubber level on the front slope, and the back leg is bent with the toe on
-  // the rubber.
-  //
-  // The shoulder line is tilted by the slot: an over-the-top arm comes from
-  // shoulders tipped toward the glove side (throwing shoulder high), a sidearm
-  // slot from roughly level shoulders, and a submariner drops the throwing
-  // shoulder toward the ground (shoulders tipped toward the arm side). The
-  // hips also drift a little toward the arm side and sink as the slot drops.
-  // The arm is then drawn from that shoulder to the actual release point.
-  const TRUNK = 1.7, HALF_SH = 0.55;                                   // ft
-  const low = Math.max(0, Math.min(1, (30 - angle) / 90));             // 0 = conventional, 1 = deep submarine
-  const phi = (Math.max(-60, Math.min(45, angle - 25)) * Math.PI) / 180; // shoulder-line tilt (+ = throwing shoulder up)
-  const u = { x: -Math.sin(phi), z: Math.cos(phi) };                   // trunk direction (hip → shoulders)
-  const v = { x: Math.cos(phi), z: Math.sin(phi) };                    // shoulder line, toward the arm side
-  const hip = { x: 0.5 + 0.4 * low, z: 2.6 - 0.3 * low };
-  const shC = { x: hip.x + TRUNK * u.x, z: hip.z + TRUNK * u.z };      // shoulder centre
-  const gs = { x: shC.x - HALF_SH * v.x, z: shC.z - HALF_SH * v.z };   // glove-side shoulder
-  const ts = { x: shC.x + HALF_SH * v.x, z: shC.z + HALF_SH * v.z };   // throwing shoulder
+  // Body geometry (arm-side coordinates, flipped at draw time):
+  //  1. The throwing shoulder sits on the measured arm-angle ray behind the
+  //     release point, one arm length back — so the drawn arm IS the measured
+  //     angle (Savant's definition: shoulder → release).
+  //  2. The hips stay near the rubber (drifting a little to the arm side and
+  //     sinking for low slots).
+  //  3. The trunk is solved to connect hip and shoulder with the shoulder line
+  //     perpendicular to it: hip + T·u + ½w·v = shoulder, v ⟂ u. That makes an
+  //     over-the-top arm lean the trunk toward the glove side and a submariner
+  //     bend toward the arm side, by exactly as much as the numbers demand.
+  //     The trunk length is clamped to a human range by sliding the hips.
+  const hFt = isNum(p?.height) ? p.height / 12 : 6.2;
+  const ARM = 0.33 * hFt;                                 // shoulder → ball at release, ft
+  const HALF_SH = 0.55, T_MIN = 1.15, T_MAX = 1.95;         // ft
+  const low = Math.max(0, Math.min(1, (30 - angle) / 90)); // 0 conventional … 1 deep submarine
+  const thm = (angle * Math.PI) / 180;
+  const ts = hasRel ? { x: r.x - ARM * Math.cos(thm), z: r.z - ARM * Math.sin(thm) }
+                    : { x: 0.5, z: 0.7 * hFt };            // throwing shoulder
   const sh = hasRel ? ts : null;
+  let hip = { x: 0.45 + 0.4 * low, z: 2.55 - 0.3 * low };
+  const rot = (x, z, a) => ({ x: x * Math.cos(a) - z * Math.sin(a), z: x * Math.sin(a) + z * Math.cos(a) });
+  // solve trunk tilt α and length T from d = hip→shoulder = R(α)·(½w, T)
+  let d = { x: ts.x - hip.x, z: ts.z - hip.z };
+  let T = Math.sqrt(Math.max(0.01, d.x * d.x + d.z * d.z - HALF_SH * HALF_SH));
+  let alpha = Math.atan2(d.z, d.x) - Math.atan2(T, HALF_SH);
+  if (T > T_MAX || T < T_MIN) {                            // slide the hips along to keep the trunk human-sized
+    T = Math.max(T_MIN, Math.min(T_MAX, T));
+    const off = rot(HALF_SH, T, alpha);
+    hip = { x: ts.x - off.x, z: Math.max(2.1, Math.min(3.2, ts.z - off.z)) };
+    d = { x: ts.x - hip.x, z: ts.z - hip.z };
+    T = Math.sqrt(Math.max(0.01, d.x * d.x + d.z * d.z - HALF_SH * HALF_SH));
+    alpha = Math.atan2(d.z, d.x) - Math.atan2(T, HALF_SH);
+  }
+  const u = { x: -Math.sin(alpha), z: Math.cos(alpha) };  // trunk direction (hip → shoulders)
+  const v = { x: Math.cos(alpha), z: Math.sin(alpha) };   // shoulder line, toward the arm side
+  const shC = { x: hip.x + T * u.x, z: hip.z + T * u.z }; // shoulder centre
+  const gs = { x: shC.x - HALF_SH * v.x, z: shC.z - HALF_SH * v.z };
   const headR = 0.42;
   const head = { x: shC.x + 0.95 * u.x, z: shC.z + 0.95 * u.z };
   const leadKnee = { x: hip.x - 0.35, z: hip.z - 0.95 };
@@ -152,7 +167,7 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
     ? Object.entries(p?.arsenal || {}).filter(([, a]) => isNum(a.rel_x) && isNum(a.rel_z))
     : [];
   const arcRad = 0.75 * S;
-  const th = sh ? Math.atan2(r.z - sh.z, r.x - sh.x) : 0;       // angle of the arm as drawn
+  const th = thm;                                              // the drawn arm is the measured angle
   // keep labels inside the frame for wide releases
   const inside = (x, pad = 70) => Math.max(pad, Math.min(width - pad, x));
 
@@ -227,7 +242,9 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
                 : <text x={inside(X(r.x), 40)} y={Y(r.z) - 11} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>}
             <line x1={X(r.x)} y1={Y(r.z)} x2={X(r.x)} y2={Y(0)} stroke={color} strokeWidth={0.8} strokeDasharray="3 3" />
             <line x1={X(0)} y1={Y(0.55)} x2={X(r.x)} y2={Y(0.55)} stroke={color} strokeWidth={0.8} />
-            <text x={inside(X(r.x / 2), 40)} y={Y(0.55) - 3} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.x)} side</text>
+            {Math.abs(r.x) < 1.2
+              ? <text x={X(r.x) + dir * 8} y={Y(0.55) - 3} textAnchor={dir > 0 ? "start" : "end"} style={{ ...num, fill: color }}>{ft(r.x)} side</text>
+              : <text x={inside(X(r.x / 2), 40)} y={Y(0.55) - 3} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.x)} side</text>}
           </g>
         )}
         {/* release balls per pitch type (or one ball at the average release) */}
