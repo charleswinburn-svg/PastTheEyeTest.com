@@ -155,8 +155,8 @@ export function ReleaseDiagram({ a, b, nameA, nameB, width = 300 }) {
   const hip = { x: bodyX - 0.1, z: Math.max(1.9, shoulderZ - 1.6) };
   const leadKnee = { x: hip.x - 0.35, z: hip.z - 0.95 };
   const leadFoot = { x: hip.x - 0.45, z: -0.5 };          // on the front slope, toward the plate
-  const backKnee = { x: hip.x + 0.6, z: hip.z - 0.55 };
-  const backFoot = { x: hip.x + 1.2, z: hip.z - 0.9 };    // in the air, trailing
+  const backKnee = { x: hip.x + 0.55, z: hip.z - 1.05 };  // bent, dropping toward the rubber
+  const backFoot = { x: 0.4, z: 0.08 };                  // toe still on the rubber
   const gloveElbow = { x: gsX - 0.25, z: shoulderZ - 0.7 };
   const glove = { x: bodyX - 0.05, z: shoulderZ - 0.45 };
   const skin = t.id === "dark" ? "#9fb3c8" : "#b7c7d6";
@@ -224,11 +224,11 @@ export function ReleaseDiagram({ a, b, nameA, nameB, width = 300 }) {
         ))}
         {/* body (target) */}
         <g fill={skin} opacity={0.85}>
-          {/* back leg (behind the body): trailing, foot in the air on the arm side */}
-          <g opacity={0.8}>
+          {/* back leg (behind the body): knee bent, toe still on the rubber */}
+          <g opacity={0.85}>
             {limb({ x: hip.x + 0.25, z: hip.z }, backKnee, 10, skinBack)}
             {limb(backKnee, backFoot, 9, skinBack)}
-            <ellipse cx={X(backFoot.x + 0.1)} cy={Y(backFoot.z - 0.05)} rx={0.22 * S} ry={0.13 * S} fill={skinBack} transform={`rotate(-25 ${X(backFoot.x + 0.1)} ${Y(backFoot.z - 0.05)})`} />
+            <ellipse cx={X(backFoot.x)} cy={Y(backFoot.z)} rx={0.26 * S} ry={0.11 * S} fill={skinBack} />
           </g>
           {/* lead leg: striding straight at the plate, planted on the front slope */}
           <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z) + 6} rx={0.42 * S} ry={0.1 * S} fill="#000" opacity={0.25} />
