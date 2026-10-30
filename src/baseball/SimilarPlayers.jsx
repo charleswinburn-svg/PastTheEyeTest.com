@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import { binColor, textOnBin, getHeadshotUrl, saveCardAsPng, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import { loadSimilarityPool, rankComps, featureRows, fmtValue, SIMILARITY_SEASONS } from "./similarity.js";
-import { PitcherCompareFigures } from "./SimilarityFigures.jsx";
+import { PitcherCompareFigures, FIGURE_FOR_COMPONENT } from "./SimilarityFigures.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // SIMILAR PLAYERS
@@ -217,7 +217,12 @@ function CompCell({ label, comp, dim = false, highlight = false, t }) {
 // as a PNG on its own.
 function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, components = {}, unitLabel = "PA", type = "hitter" }) {
   const rows = featureRows(target, target.meta, other.player, other.meta);
-  const comps = target.meta.components || {};
+  // With a component isolated, the block (and the PNG) covers only that component.
+  const allComps = target.meta.components || {};
+  const comps = isolate && allComps[isolate] ? { [isolate]: allComps[isolate] } : allComps;
+  const shownComponents = isolate && components[isolate] ? { [isolate]: components[isolate] } : components;
+  const figureShow = isolate ? (FIGURE_FOR_COMPONENT[isolate] || null) : "both";
+  const showArsenalTable = !isolate || isolate === "arsenal";
   const arsenalA = target.arsenal, arsenalB = other.player.arsenal;
   const akeys = Object.keys(target.meta.arsenal_features || {});
   const cell = { padding: "2px 8px", fontSize: 11, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, textAlign: "right", whiteSpace: "nowrap" };
@@ -229,9 +234,10 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
     setSaving(true);
     try {
       const safe = s => String(s || "").replace(/\s+/g, "_");
-      await saveCardAsPng(captureRef, `${safe(target.name)}_${target.season}_vs_${safe(other.name)}_${other.season}.png`);
+      const suffix = isolate ? `_${safe(isolatedLabel || isolate).toLowerCase()}` : "";
+      await saveCardAsPng(captureRef, `${safe(target.name)}_${target.season}_vs_${safe(other.name)}_${other.season}${suffix}.png`);
     } finally { setSaving(false); }
-  }, [saving, target.name, target.season, other.name, other.season]);
+  }, [saving, target.name, target.season, other.name, other.season, isolate, isolatedLabel]);
 
   const meta = (p, season) => [season, p?.team, p?.hand ? `${p.hand}H${type === "pitcher" ? "P" : "H"}` : null, p?.n != null ? `${p.n.toLocaleString?.() ?? p.n} ${unitLabel}` : null].filter(Boolean).join(" · ");
   const Who = ({ p, season, name, color, align }) => (
@@ -258,12 +264,12 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
         <Who p={other.player} season={other.season} name={other.name} color={t.accentSecondary} align="right" />
       </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", margin: "10px 0 12px", padding: "8px 10px", background: t.inputBg, borderRadius: 8 }}>
-        {Object.keys(components).map(c => (
-          <CompCell key={c} label={SHORT[c] || components[c].label} comp={other.comps[c]}
-                    dim={!!isolate && isolate !== c} highlight={isolate === c} t={t} />
+        {Object.keys(shownComponents).map(c => (
+          <CompCell key={c} label={SHORT[c] || shownComponents[c].label} comp={other.comps[c]}
+                    highlight={isolate === c} t={t} />
         ))}
       </div>
-    {arsenalA && arsenalB && <PitcherCompareFigures target={target} other={other} />}
+    {arsenalA && arsenalB && figureShow && <PitcherCompareFigures target={target} other={other} show={figureShow} />}
     <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
       {Object.entries(comps).map(([c, cm]) => {
         const rs = rows.filter(r => r.component === c);
@@ -296,7 +302,7 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
           </table>
         );
       })}
-      {arsenalA && arsenalB && (
+      {arsenalA && arsenalB && showArsenalTable && (
         <table style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr>
@@ -326,7 +332,7 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
       )}
     </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 9, color: t.textFaint }}>
-        <span>Similar Players · {SIMILARITY_SEASONS[0]}–{SIMILARITY_SEASONS[SIMILARITY_SEASONS.length - 1]} player-seasons, each stat scaled within its own season · 100% = identical</span>
+        <span>Similar Players{isolate ? ` · ${isolatedLabel} only` : ""} · {SIMILARITY_SEASONS[0]}–{SIMILARITY_SEASONS[SIMILARITY_SEASONS.length - 1]} player-seasons, each stat scaled within its own season · 100% = identical</span>
         <span style={{ fontStyle: "italic" }}>PastTheEyeTest</span>
       </div>
     </div>

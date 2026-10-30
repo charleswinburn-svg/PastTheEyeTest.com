@@ -265,7 +265,8 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
 }
 
 // One column per pitcher: movement plot over release diagram.
-function PitcherColumn({ p, label, sub, accent }) {
+// show: "both" | "movement" | "release"
+function PitcherColumn({ p, label, sub, accent, show = "both" }) {
   const { theme: t } = useTheme();
   return (
     <div style={{ flex: "1 1 360px", minWidth: 300, maxWidth: 440 }}>
@@ -273,23 +274,27 @@ function PitcherColumn({ p, label, sub, accent }) {
         <div style={{ fontSize: 12, fontWeight: 700, color: t.text }}>{label}</div>
         <div style={{ fontSize: 10, color: t.textMuted }}>{sub}</div>
       </div>
-      <MovementPlot p={p} accent={accent} />
-      <div style={{ height: 10 }} />
-      <ReleaseDiagram p={p} accent={accent} />
+      {show !== "release" && <MovementPlot p={p} accent={accent} />}
+      {show === "both" && <div style={{ height: 10 }} />}
+      {show !== "movement" && <ReleaseDiagram p={p} accent={accent} />}
     </div>
   );
 }
 
-export function PitcherCompareFigures({ target, other }) {
+// Which figure belongs to an isolated component (null = no figure for it).
+export const FIGURE_FOR_COMPONENT = { arsenal: "movement", release: "release" };
+
+export function PitcherCompareFigures({ target, other, show = "both" }) {
   const { theme: t } = useTheme();
   const sub = (p, season) => {
     const v = p?.v || {};
-    return `${season}${p?.team ? ` · ${p.team}` : ""}${p?.hand ? ` · ${p.hand}HP` : ""} · arm ${isNum(v.arm_angle) ? `${Math.round(v.arm_angle)}°` : "—"} · ${ft(v.release_z)} high · ${ft(v.release_x)} side · ext ${ft(v.extension)}`;
+    const rel = show === "movement" ? "" : ` · arm ${isNum(v.arm_angle) ? `${Math.round(v.arm_angle)}°` : "—"} · ${ft(v.release_z)} high · ${ft(v.release_x)} side · ext ${ft(v.extension)}`;
+    return `${season}${p?.team ? ` · ${p.team}` : ""}${p?.hand ? ` · ${p.hand}HP` : ""}${rel}`;
   };
   return (
     <div style={{ display: "flex", gap: 28, flexWrap: "wrap", alignItems: "flex-start", marginBottom: 14 }}>
-      <PitcherColumn p={target} label={`${target.name} ${target.season}`} sub={sub(target, target.season)} accent={t.accent} />
-      <PitcherColumn p={other.player} label={`${other.name} ${other.season}`} sub={sub(other.player, other.season)} accent={t.accentSecondary} />
+      <PitcherColumn p={target} label={`${target.name} ${target.season}`} sub={sub(target, target.season)} accent={t.accent} show={show} />
+      <PitcherColumn p={other.player} label={`${other.name} ${other.season}`} sub={sub(other.player, other.season)} accent={t.accentSecondary} show={show} />
     </div>
   );
 }
