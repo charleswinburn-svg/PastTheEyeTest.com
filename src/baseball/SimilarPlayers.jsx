@@ -274,19 +274,19 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
         ))}
       </div>
     {arsenalA && arsenalB && figureShow && <PitcherCompareFigures target={target} other={other} show={figureShow} />}
-    {isolate ? (
-      /* Isolated view: mirrored — the card's player's numbers on the left, the
-         comp's on the right, stat label and Δz down the middle. */
+    {/* Mirrored stats: the card's player on the left, the comp on the right,
+        stat label and Δz down the middle; one block per component. */}
       <div>
-        {Object.entries(comps).map(([c, cm]) => {
+        {Object.entries(comps).map(([c, cm], ci) => {
           const rs = rows.filter(r => r.component === c);
           if (!rs.length) return null;
           const big = { ...cell, fontSize: 14, padding: "4px 10px" };
+          // names on the first block only; later blocks keep just the coloured rule
           const side = (name, season, color, align) => (
-            <div style={{ fontSize: 11, fontWeight: 700, color, textAlign: align, padding: "0 10px 4px", borderBottom: `2px solid ${color}` }}>{name} {season}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color, textAlign: align, padding: "0 10px 4px", borderBottom: `2px solid ${color}`, alignSelf: "end" }}>{ci === 0 ? `${name} ${season}` : "\u00a0"}</div>
           );
           return (
-            <div key={c} style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", columnGap: 12, alignItems: "stretch", maxWidth: 760, margin: "0 auto" }}>
+            <div key={c} style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", columnGap: 12, alignItems: "stretch", maxWidth: 820, margin: "0 auto 14px" }}>
               {side(target.name, target.season, t.accent, "right")}
               <div style={{ ...head, textAlign: "center", color: t.textMuted, alignSelf: "end" }}>{cm.label}</div>
               {side(other.name, other.season, t.accentSecondary, "left")}
@@ -336,69 +336,6 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
           </div>
         )}
       </div>
-    ) : (
-    <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
-      {Object.entries(comps).map(([c, cm]) => {
-        const rs = rows.filter(r => r.component === c);
-        if (!rs.length) return null;
-        return (
-          <table key={c} style={{ borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={{ ...head, textAlign: "left", color: t.textMuted }}>{cm.label}</th>
-                <th style={head}>{target.name?.split(" ").slice(-1)[0]} {target.season}</th>
-                <th style={head}>{other.name?.split(" ").slice(-1)[0]} {other.season}</th>
-                <th style={head}>Δz</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rs.map(r => {
-                const dz = r.za != null && r.zb != null ? r.za - r.zb : null;
-                return (
-                  <tr key={r.key}>
-                    <td style={{ ...cell, textAlign: "left", fontFamily: "inherit", fontWeight: 500, color: t.textMuted }}>{r.label}</td>
-                    <td style={{ ...cell, color: t.text }}>{fmtValue(r.a, r.fmt)}</td>
-                    <td style={{ ...cell, color: t.text }}>{fmtValue(r.b, r.fmt)}</td>
-                    <td style={{ ...cell, color: dz == null ? t.textFaint : Math.abs(dz) < 0.5 ? t.textFaint : Math.abs(dz) < 1.25 ? t.accent : "#CB181D" }}>
-                      {dz == null ? "—" : (dz > 0 ? "+" : "") + dz.toFixed(1)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        );
-      })}
-      {arsenalA && arsenalB && showArsenalTable && (
-        <table style={{ borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={{ ...head, textAlign: "left", color: t.textMuted }}>Pitch</th>
-              <th style={head}>Usage</th>
-              {akeys.filter(k => !["axis_sin", "axis_cos", "rel_x", "rel_z"].includes(k)).map(k => (
-                <th key={k} style={head}>{target.meta.arsenal_features[k]?.label || k}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[...new Set([...Object.keys(arsenalA), ...Object.keys(arsenalB)])].sort().map(pt => (
-              [["a", arsenalA[pt], target], ["b", arsenalB[pt], other]].map(([who, a, p]) => (
-                <tr key={`${pt}:${who}`} style={{ opacity: a ? 1 : 0.45 }}>
-                  <td style={{ ...cell, textAlign: "left", fontFamily: "inherit", fontWeight: 600, color: t.textMuted }}>
-                    <span style={{ color: PITCH_COLORS[pt] || t.textMuted, fontWeight: 700 }}>{PITCH_NAMES[pt] || pt}</span> · {p.name?.split(" ").slice(-1)[0]} {p.season}
-                  </td>
-                  <td style={{ ...cell, color: t.text }}>{a ? `${Math.round(a.usage * 100)}%` : "—"}</td>
-                  {akeys.filter(k => !["axis_sin", "axis_cos", "rel_x", "rel_z"].includes(k)).map(k => (
-                    <td key={k} style={{ ...cell, color: t.text }}>{a ? fmtValue(a[k], target.meta.arsenal_features[k]?.fmt) : "—"}</td>
-                  ))}
-                </tr>
-              ))
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-    )}
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 9, color: t.textFaint }}>
         <span>Similar Players{isolate ? ` · ${isolatedLabel} only` : ""} · {SIMILARITY_SEASONS[0]}–{SIMILARITY_SEASONS[SIMILARITY_SEASONS.length - 1]} player-seasons, each stat scaled within its own season · 100% = identical</span>
         <span style={{ fontStyle: "italic" }}>PastTheEyeTest</span>
