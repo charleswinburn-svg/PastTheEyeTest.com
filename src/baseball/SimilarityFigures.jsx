@@ -231,9 +231,10 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
             {/* arm-angle arc, opening toward the arm side (screen left for RHP, right for LHP) */}
             <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(sh.x) + dir * (arcRad + 8)} y2={Y(sh.z)} stroke={color} strokeWidth={0.8} strokeDasharray="2 2" />
             <path d={`M ${X(sh.x) + dir * arcRad} ${Y(sh.z)} A ${arcRad} ${arcRad} 0 0 ${(dir > 0) === (th >= 0) ? 0 : 1} ${X(sh.x) + dir * arcRad * Math.cos(th)} ${Y(sh.z) - arcRad * Math.sin(th)}`} fill="none" stroke={color} strokeWidth={1.2} />
-            {/* label: above the reference line for normal slots, below it when the arm runs along or under the line */}
+            {/* label on the opposite side of the reference line from the arm, so the arm never covers it:
+                below the line when the arm goes up, above it when the arm goes down */}
             {isNum(r.angle) && (
-              <text x={fitX(X(sh.x) + dir * (arcRad + 10), armLabel)} y={fitY(Y(sh.z) + (th < 0.38 ? 14 : -5))} textAnchor="middle" style={{ ...num, fill: color }}>{armLabel}</text>
+              <text x={fitX(X(sh.x) + dir * (arcRad + 12), armLabel)} y={fitY(Y(sh.z) + (th > 0 ? 14 : -6))} textAnchor="middle" style={{ ...num, fill: color }}>{armLabel}</text>
             )}
           </g>
         )}
@@ -246,7 +247,7 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
                 label then sits above), or beside it when the ball is near the top edge */}
             {Y(r.z) <= 44
               ? <text x={fitX(X(r.x) - dir * 12, `${ft(r.z)} high`, dir > 0 ? "end" : "start")} y={fitY(Y(r.z) + 4)} textAnchor={dir > 0 ? "end" : "start"} style={{ ...num, fill: color }}>{ft(r.z)} high</text>
-              : th < -0.4
+              : th < 0
                 ? <text x={fitX(X(r.x), `${ft(r.z)} high`)} y={fitY(Y(r.z) + 18)} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>
                 : <text x={fitX(X(r.x), `${ft(r.z)} high`)} y={fitY(Y(r.z) - 11)} textAnchor="middle" style={{ ...num, fill: color }}>{ft(r.z)} high</text>}
             <line x1={X(r.x)} y1={Y(r.z)} x2={X(r.x)} y2={Y(0)} stroke={color} strokeWidth={0.8} strokeDasharray="3 3" />
