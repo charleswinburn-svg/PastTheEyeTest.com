@@ -231,6 +231,7 @@ def build(df, grades, heights):
         n=("pt", "size"), velo=("velo", "mean"), ivb=("ivb", "mean"), hb=("hb", "mean"),
         spin=("spin", "mean"), axis_sin=("axis_sin", "mean"), axis_cos=("axis_cos", "mean"),
         extension=("extension", "mean"), vaa=("vaa", "mean"), haa=("haa", "mean"),
+        rel_x=("release_x", "mean"), rel_z=("release_z", "mean"),
     ).reset_index()
 
     p_agg = df.groupby("pitcher", observed=True).agg(
@@ -306,6 +307,7 @@ def build(df, grades, heights):
             "team": r["team"],
             "hand": r["throws"],
             "n": total,
+            "height": heights.get(pid_s),   # inches, for the release diagram
             "grades": {k: g.get(k) for k in ("stuff_plus", "loc_plus", "tun_plus", "pitch_plus") if g.get(k) is not None},
             "v": {k: clean_value(val) for k, val in v.items()},
             "arsenal": arsenal,

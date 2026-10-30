@@ -141,6 +141,11 @@ ARSENAL_FEATURES = [
     ("axis_cos",     "Axis (cos)",   0.5, ".2f"),
     ("velo_minus_fb","Velo − FB",    0.75, ".1f"),
     ("extension",    "Extension",    0.25, ".2f"),
+    # Per-type release point (arm-side x, height) — drawn on the release
+    # diagram only; weight 0 keeps them out of the distance (the pitcher-level
+    # release_x / release_z already cover it).
+    ("rel_x",        "Release side", 0.0, ".2f"),
+    ("rel_z",        "Release height", 0.0, ".2f"),
 ]
 # Pitch-type aliases for matching (same aliasing the scoring models use).
 PITCH_ALIAS = {"KC": "CU", "CS": "CU", "FO": "FS"}

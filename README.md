@@ -66,6 +66,10 @@ pitcher cards and ranks the most similar player-seasons (2023–2026). The model
   pitch type, usage-weighted, penalty for a pitch only one throws, plus pitch mix) · release ·
   whiff/stuff · command · contact allowed. Horizontal pitcher quantities are mirrored to an
   arm-side convention so LHP/RHP compare directly.
+- Expanding a pitcher comp shows `src/baseball/SimilarityFigures.jsx`: a side-corrected movement
+  plot (both arsenals overlaid) and a catcher's-view release diagram (arm angle, release height,
+  horizontal release, per-pitch-type release points) with a side-view extension strip. The
+  per-type release points come from the builder (`rel_x` / `rel_z`, weight 0 in the distance).
 
 Build (hitters need only committed files; pitchers need the season Statcast parquet and the
 season grade files from `score_pitches.py`):

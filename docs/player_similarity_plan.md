@@ -156,4 +156,8 @@ Size estimate: hitters ~60 KB, pitchers ~250 KB per season. Four seasons load la
 - `scripts/test_similarity.mjs` (`npm run test:similarity`) — sanity checks.
 - Per-component weight chips were replaced by an **Isolate** control: "All" ranks on the overall
   (equal-weight mean); picking one component ranks on that component alone.
+- `src/baseball/SimilarityFigures.jsx` — pitcher comp figures: side-corrected movement plot and
+  catcher's-view release diagram (arm angle, release height, horizontal release, per-type release
+  points) plus an extension side-view strip. Needs pitcher files built with the current builder
+  (adds per-type `rel_x`/`rel_z` and player `height`).
 - CI workflow deliberately untouched (local-only for now).

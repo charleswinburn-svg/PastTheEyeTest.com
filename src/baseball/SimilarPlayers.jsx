@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import { binColor, textOnBin, getHeadshotUrl, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import { loadSimilarityPool, rankComps, featureRows, fmtValue, SIMILARITY_SEASONS } from "./similarity.js";
+import { PitcherCompareFigures } from "./SimilarityFigures.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // SIMILAR PLAYERS
@@ -219,7 +220,9 @@ function FeatureTable({ target, other, t }) {
   const cell = { padding: "2px 8px", fontSize: 11, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, textAlign: "right", whiteSpace: "nowrap" };
   const head = { padding: "3px 8px", fontSize: 10, color: t.textFaint, textAlign: "right", fontWeight: 600, whiteSpace: "nowrap" };
   return (
-    <div style={{ padding: "4px 14px 12px 64px", display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
+    <div style={{ padding: "4px 14px 12px 64px" }}>
+    {arsenalA && arsenalB && <PitcherCompareFigures target={target} other={other} />}
+    <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
       {Object.entries(comps).map(([c, cm]) => {
         const rs = rows.filter(r => r.component === c);
         if (!rs.length) return null;
@@ -257,7 +260,7 @@ function FeatureTable({ target, other, t }) {
             <tr>
               <th style={{ ...head, textAlign: "left", color: t.textMuted }}>Pitch</th>
               <th style={head}>Usage</th>
-              {akeys.filter(k => k !== "axis_sin" && k !== "axis_cos").map(k => (
+              {akeys.filter(k => !["axis_sin", "axis_cos", "rel_x", "rel_z"].includes(k)).map(k => (
                 <th key={k} style={head}>{target.meta.arsenal_features[k]?.label || k}</th>
               ))}
             </tr>
@@ -270,7 +273,7 @@ function FeatureTable({ target, other, t }) {
                     {pt} · {p.name?.split(" ").slice(-1)[0]} {p.season}
                   </td>
                   <td style={{ ...cell, color: t.text }}>{a ? `${Math.round(a.usage * 100)}%` : "—"}</td>
-                  {akeys.filter(k => k !== "axis_sin" && k !== "axis_cos").map(k => (
+                  {akeys.filter(k => !["axis_sin", "axis_cos", "rel_x", "rel_z"].includes(k)).map(k => (
                     <td key={k} style={{ ...cell, color: t.text }}>{a ? fmtValue(a[k], target.meta.arsenal_features[k]?.fmt) : "—"}</td>
                   ))}
                 </tr>
@@ -279,6 +282,7 @@ function FeatureTable({ target, other, t }) {
           </tbody>
         </table>
       )}
+    </div>
     </div>
   );
 }
