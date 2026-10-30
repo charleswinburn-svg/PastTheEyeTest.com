@@ -75,11 +75,38 @@ def _num(v):
     return f if f == f else None
 
 
+FAST_SWING_MPH = 75.0
+
+
+def name_key(s):
+    """Same fuzzy key as fuzzyLookup() in SharedComponents.jsx: strip accents,
+    punctuation and Jr/Sr suffixes, lower-case, collapse spaces."""
+    import re
+    import unicodedata
+    s = unicodedata.normalize("NFD", str(s or ""))
+    s = "".join(ch for ch in s if not unicodedata.combining(ch)).lower()
+    s = re.sub(r"[.\-,]", "", s)
+    s = re.sub(r"\b(jr|sr|ii|iii|iv)\b", "", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def load_iswing(public):
+    """iSwing+ per season from iswing.json (re-scored daily for every season by
+    iswing_update.py — the canonical value) keyed by fuzzy name → {yr: value}."""
+    p = Path(public) / "iswing.json"
+    if not p.exists():
+        return {}
+    return {name_key(n): v for n, v in _load(p).items()}
+
+
 def load_swings(paths, year):
-    """Per-batter means of the swing-path columns for `year`, plus batter side.
+    """Per-batter means over the COMPETITIVE swings of `year` (the CSVs written
+    by iswing_update.py already exclude each hitter's slowest 10%), plus batter
+    side. Bat speed / swing length / fast-swing % computed here take priority
+    over the Savant leaderboard values so every season is derived the same way.
     Returns ({pid: {...}}, {pid: hand}) — hand is 'L', 'R' or 'S' (switch)."""
-    cols = ["game_date", "batter", "stand", "attack_angle", "attack_direction",
-            "swing_path_tilt", "intercept_ball_minus_batter_pos_x_inches"]
+    cols = ["game_date", "batter", "stand", "bat_speed", "swing_length", "attack_angle",
+            "attack_direction", "swing_path_tilt", "intercept_ball_minus_batter_pos_x_inches"]
     frames = []
     for p in paths:
         if not os.path.exists(p):
@@ -106,15 +133,24 @@ def load_swings(paths, year):
     out = {}
     if len(df):
         agg = {"n": ("batter", "size")}
-        for src, key in [("attack_angle", "attack_angle"), ("attack_direction", "attack_direction"),
+        for src, key in [("bat_speed", "bat_speed"), ("swing_length", "swing_length"),
+                         ("attack_angle", "attack_angle"), ("attack_direction", "attack_direction"),
                          ("swing_path_tilt", "swing_path_tilt"),
                          ("intercept_ball_minus_batter_pos_x_inches", "intercept_x")]:
             if src in df.columns:
+                df[src] = pd.to_numeric(df[src], errors="coerce")
                 agg[key] = (src, "mean")
+        if "bat_speed" in df.columns:
+            df["_fast"] = (df["bat_speed"] >= FAST_SWING_MPH).where(df["bat_speed"].notna())
+            agg["fast_swing_pct"] = ("_fast", "mean")
         g = df.groupby("batter").agg(**agg)
         g = g[g["n"] >= MIN_SWINGS]
         for pid, row in g.iterrows():
-            out[str(int(pid))] = {k: _num(row[k]) for k in g.columns if k != "n"}
+            rec = {k: _num(row[k]) for k in g.columns if k != "n"}
+            if rec.get("fast_swing_pct") is not None:
+                rec["fast_swing_pct"] *= 100.0
+            rec["_n"] = int(row["n"])
+            out[str(int(pid))] = rec
     return out, hands
 
 
@@ -161,13 +197,27 @@ def build(year, public, swings_paths, merged_path, parquet):
     p = Path(public) / f"hitter_xrv_{year}.json"
     if p.exists():
         xrv = _load(p)
+    # iSwing+ feature contributions come from the waterfall file only when it was
+    # written by the model that scores iswing.json (iswing_meta.json), so stale
+    # per-season waterfalls can't leak old-model numbers in.
     waterfall = {}
+    current_model = None
+    p = Path(public) / "iswing_meta.json"
+    if p.exists():
+        current_model = _load(p).get("model")
     p = Path(public) / f"iswing_waterfall_{year}.json"
     if p.exists():
-        waterfall = {k: v for k, v in _load(p).items() if k != "meta"}
+        wf = _load(p)
+        wf_model = (wf.get("meta") or {}).get("model")
+        if current_model is None or wf_model == current_model:
+            waterfall = {k: v for k, v in wf.items() if k != "meta"}
+        else:
+            print(f"  iswing_waterfall_{year}.json is model {wf_model}, current is {current_model} — contributions skipped")
+    iswing = load_iswing(public)
     swings, hands = load_swings(swings_paths, year)
     merged = load_merged(merged_path, year)
     xslgcon = load_xslgcon(parquet)
+    n_per_swing = n_leaderboard = 0
 
     players = {}
     for h in data.get("hitters", []):
@@ -183,12 +233,22 @@ def build(year, public, swings_paths, merged_path, parquet):
         for label, key in XRV_MAP.items():
             m = ((xrv.get(pid) or {}).get("metrics") or {}).get(label)
             v[key] = _num(m.get("value")) if m else None
+        # iSwing+: canonical per-season value from iswing.json; waterfall as fallback
         w = waterfall.get(pid)
-        v["iswing_plus"] = _num(w.get("iswing")) if w else None
+        iw = iswing.get(name_key(h.get("name")))
+        v["iswing_plus"] = _num(iw.get(str(year))) if iw and iw.get(str(year)) is not None else (_num(w.get("iswing")) if w else None)
         for key in ISWING_CONTRIB:
             v[key] = _num((w.get("c") or {}).get(key)) if w else None
+        # Swing traits: competitive swings first, Savant leaderboard values as fallback
         sw = swings.get(pid, {})
         mg = merged.get(pid, {})
+        if sw:
+            n_per_swing += 1
+        else:
+            n_leaderboard += 1
+        for key in ("bat_speed", "swing_length", "fast_swing_pct"):
+            if sw.get(key) is not None:
+                v[key] = sw[key]
         for key in ("attack_angle", "swing_path_tilt"):
             v[key] = sw.get(key) if sw.get(key) is not None else mg.get(key)
         v["attack_direction"] = sw.get("attack_direction")
@@ -214,6 +274,14 @@ def build(year, public, swings_paths, merged_path, parquet):
     for c in meta["components"].values():
         c["features"] = [k for k in c["features"] if k in meta["stats"]]
     meta["calib"] = pairwise_calibration(players, meta, "hitter")
+    meta["sources"] = {
+        "swing_traits": {"competitive_swings": n_per_swing, "savant_leaderboard": n_leaderboard},
+        "iswing_model": current_model,
+    }
+    if n_leaderboard and not n_per_swing:
+        print(f"  WARNING: no per-swing CSV for {year} — swing traits are Savant leaderboard values "
+              f"(bat speed / swing length / fast swing % include Savant's swing filter, not ours). "
+              f"Provide competitive_swings_{year}.csv (iswing_update.py --backfill {year}) and rebuild.")
     return players, meta
 
 

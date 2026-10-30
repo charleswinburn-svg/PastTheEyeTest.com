@@ -80,8 +80,14 @@ python3 build_similarity_pitchers.py --year 2026 --parquet tmp/pitch_xrv_2026.pa
 node scripts/test_similarity.mjs                            # sanity checks against the built files
 ```
 
-For 2023–2025 hitters, attack angle / tilt come from `public/merged_stats.csv`; attack direction and
-intercept need that season's `competitive_swings_{year}.csv` (gitignored) via `--swings`.
+Hitter swing traits (bat speed, swing length, fast-swing %, attack angle, tilt, direction, intercept)
+are computed from that season's competitive swings — `competitive_swings_{year}.csv` (gitignored,
+written by `iswing_update.py --backfill`) plus the daily CSV — so every season uses our swing filter.
+Without the CSV the builder prints a WARNING and falls back to the Savant leaderboard values
+(bat speed / swing length / fast swing %) and `public/merged_stats.csv` (attack angle / tilt), which use
+Savant's own filter. iSwing+ comes from `iswing.json` (re-scored daily for every season); the waterfall
+contributions are used only when `iswing_waterfall_{year}.json` reports the model in `iswing_meta.json`.
+Rebuild the similarity files after `iswing_update.py` or `baseball_pipeline.py` run — they are snapshots.
 Not yet in CI: add both builders to `score-pitches.yml` after the scoring step when ready to ship.
 
 ### iSwing+ (v9.1)
