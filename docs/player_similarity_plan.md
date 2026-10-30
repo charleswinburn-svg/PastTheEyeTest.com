@@ -141,3 +141,17 @@ Size estimate: hitters ~60 KB, pitchers ~250 KB per season. Four seasons load la
 - JS unit tests from step 4.
 - `npm run build` clean; `npm run dev`, open hitter and pitcher cards, confirm panel renders below the rolling chart, weights/toggles re-rank live, clicking a comp switches season + player, PNG export unaffected.
 - Run the modified `score-pitches.yml` via `workflow_dispatch` once and confirm the two JSON files commit.
+
+---
+
+## Status (implemented on branch `claude/brave-euler-ny3eic`)
+
+- `similarity_common.py`, `build_similarity_hitters.py`, `build_similarity_pitchers.py` — builders.
+- `public/similarity_hitters_{2023..2026}.json` — built from committed data (no xSLGcon; 2023–25 lack
+  attack direction / intercept until the per-swing CSVs are supplied with `--swings`).
+- `public/similarity_pitchers_{year}.json` — **not committed**: needs the season Statcast parquet.
+  Run the pitcher builder locally (see README "Player similarity").
+- `src/baseball/similarity.js`, `src/baseball/SimilarPlayers.jsx` — ranking + panel, wired into
+  `HitterCard.jsx` / `PitcherCard.jsx` below the rolling chart; `BaseballApp.jsx` handles comp clicks.
+- `scripts/test_similarity.mjs` (`npm run test:similarity`) — sanity checks.
+- CI workflow deliberately untouched (local-only for now).

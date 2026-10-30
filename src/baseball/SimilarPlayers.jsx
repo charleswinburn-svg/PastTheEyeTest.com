@@ -1,0 +1,280 @@
+import { useEffect, useMemo, useState } from "react";
+import { useTheme } from "./ThemeContext.jsx";
+import { binColor, textOnBin, getHeadshotUrl, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { loadSimilarityPool, rankComps, featureRows, fmtValue, SIMILARITY_SEASONS } from "./similarity.js";
+
+// ═══════════════════════════════════════════════════════════
+// SIMILAR PLAYERS
+// ═══════════════════════════════════════════════════════════
+// Ranks the player-seasons (2023–2026) most like the card's player from the
+// precomputed similarity files (see similarity.js for the model). Shows one
+// overall similarity % plus a % per component, with chips to re-weight the
+// components. Clicking a comp hands {playerId, season, name} to onSelect so
+// the app can jump to that player's card.
+
+const SHORT = {
+  swing: "Swing", contact: "Contact", whiff: "Whiff", discipline: "Discipline",
+  arsenal: "Arsenal", release: "Release", command: "Command",
+};
+const LIMIT = 10;
+
+export default function SimilarPlayers({ player, season, type = "hitter", onSelect = null }) {
+  const { theme: t } = useTheme();
+  const [pools, setPools] = useState(null);
+  const [weights, setWeights] = useState({});
+  const [sameHand, setSameHand] = useState(type === "pitcher");
+  const [thisSeason, setThisSeason] = useState(false);
+  const [hideSelf, setHideSelf] = useState(false);
+  const [expanded, setExpanded] = useState(null);   // `${pid}:${season}`
+
+  useEffect(() => {
+    let cancelled = false;
+    setPools(null);
+    loadSimilarityPool(type, SIMILARITY_SEASONS).then(p => { if (!cancelled) setPools(p); });
+    return () => { cancelled = true; };
+  }, [type]);
+  useEffect(() => { setExpanded(null); }, [player?.player_id, season]);
+
+  const ranked = useMemo(() => {
+    if (!pools || !pools.length || !player?.player_id) return null;
+    return rankComps({ season, pid: player.player_id }, pools,
+      { weights, sameHand, excludeSelf: hideSelf, currentSeasonOnly: thisSeason, limit: LIMIT });
+  }, [pools, player?.player_id, season, weights, sameHand, hideSelf, thisSeason]);
+
+  const components = ranked?.target?.meta?.components || pools?.[0]?.meta?.components || {};
+  const unitLabel = type === "pitcher" ? "pitches" : "PA";
+
+  const cycle = (c) => setWeights(w => {
+    const cur = w[c] ?? 1;
+    return { ...w, [c]: cur === 1 ? 2 : cur === 2 ? 0 : 1 };
+  });
+
+  const box = {
+    background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 12,
+    boxShadow: `0 4px 24px ${t.shadow}`, maxWidth: 1040, margin: "16px auto 0", overflow: "hidden",
+  };
+  const chip = (active, strong) => ({
+    padding: "4px 10px", fontSize: 11, fontWeight: 600, borderRadius: 999, cursor: "pointer",
+    border: `1px solid ${strong ? t.accent : active ? t.inputBorder : t.divider}`,
+    background: strong ? t.accent : active ? t.inputBg : "transparent",
+    color: strong ? "#111" : active ? t.text : t.textFaint,
+    textDecoration: active ? "none" : "line-through",
+    userSelect: "none", whiteSpace: "nowrap",
+  });
+  const toggle = (on) => ({
+    padding: "4px 10px", fontSize: 11, fontWeight: 600, borderRadius: 6, cursor: "pointer",
+    border: `1px solid ${on ? t.accentSecondary : t.inputBorder}`,
+    background: on ? t.accentSecondary : t.inputBg, color: on ? "#fff" : t.textMuted,
+    userSelect: "none", whiteSpace: "nowrap",
+  });
+
+  return (
+    <div style={box}>
+      {/* Header + controls */}
+      <div style={{ padding: "14px 18px 10px", borderBottom: `1px solid ${t.divider}` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: t.text }}>Similar Players</div>
+            <div style={{ fontSize: 11, color: t.textFaint, marginTop: 2 }}>
+              Closest player-seasons {SIMILARITY_SEASONS[0]}–{SIMILARITY_SEASONS[SIMILARITY_SEASONS.length - 1]} · every stat scaled within its own season ·
+              100% = identical profile
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <span style={toggle(sameHand)} onClick={() => setSameHand(v => !v)}>Same hand</span>
+            <span style={toggle(thisSeason)} onClick={() => setThisSeason(v => !v)}>{season} only</span>
+            <span style={toggle(hideSelf)} onClick={() => setHideSelf(v => !v)}>Hide own seasons</span>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginTop: 10 }}>
+          <span style={{ fontSize: 10, color: t.textFaint, marginRight: 2 }}>WEIGHT · click to cycle 1× → 2× → off</span>
+          {Object.entries(components).map(([c, cm]) => {
+            const w = weights[c] ?? 1;
+            return (
+              <span key={c} style={chip(w > 0, w === 2)} onClick={() => cycle(c)} title={cm.label}>
+                {cm.label}{w === 2 ? " ×2" : ""}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Body */}
+      {!pools ? (
+        <Note t={t}>Loading similarity data…</Note>
+      ) : !pools.length ? (
+        <Note t={t}>No similarity files found. Run <code>build_similarity_{type === "pitcher" ? "pitchers" : "hitters"}.py</code>.</Note>
+      ) : !ranked?.target ? (
+        <Note t={t}>{player?.name || "This player"} isn't in the {season} similarity pool
+          {type === "pitcher" ? " (fewer than 200 regular-season pitches)" : " (below the PA minimum)"}.</Note>
+      ) : !ranked.results.length ? (
+        <Note t={t}>No comparable player-seasons with the current filters.</Note>
+      ) : (
+        <div>
+          {ranked.results.map((r, i) => {
+            const key = `${r.pid}:${r.season}`;
+            const open = expanded === key;
+            return (
+              <div key={key} style={{ borderBottom: `1px solid ${t.divider}`, background: i % 2 ? t.tableRowB : t.tableRowA }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 14px", flexWrap: "wrap" }}>
+                  <span style={{ width: 18, textAlign: "right", fontSize: 11, color: t.textFaint, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{i + 1}</span>
+                  <Headshot pid={r.pid} name={r.name} t={t} />
+                  <div style={{ flex: "1 1 180px", minWidth: 150 }}>
+                    <div
+                      onClick={() => onSelect && onSelect({ playerId: Number(r.pid), season: String(r.season), name: r.name })}
+                      style={{ fontSize: 13, fontWeight: 700, color: t.text, cursor: onSelect ? "pointer" : "default", display: "inline-flex", gap: 6, alignItems: "center" }}
+                      title={onSelect ? "Open this player's card" : undefined}
+                    >
+                      {r.name}
+                      {r.self && (
+                        <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4, background: t.accent, color: "#111" }}>SELF</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 11, color: t.textMuted }}>
+                      {r.season}{r.team ? ` · ${r.team}` : ""}{r.hand ? ` · ${r.hand === "S" ? "S" : r.hand}H${type === "pitcher" ? "P" : "H"}` : ""} · {r.n?.toLocaleString?.() ?? r.n} {unitLabel}
+                    </div>
+                  </div>
+                  <OverallBubble sim={r.overall} />
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: "2 1 320px" }}>
+                    {Object.keys(components).map(c => (
+                      <CompCell key={c} label={SHORT[c] || components[c].label} comp={r.comps[c]} weight={weights[c] ?? 1} t={t} />
+                    ))}
+                  </div>
+                  <span
+                    onClick={() => setExpanded(open ? null : key)}
+                    style={{ fontSize: 11, color: t.textFaint, cursor: "pointer", padding: "2px 6px", userSelect: "none" }}
+                    title="Show the numbers behind this comp"
+                  >{open ? "▲" : "▼"}</span>
+                </div>
+                {open && <FeatureTable target={ranked.target} other={r} t={t} />}
+              </div>
+            );
+          })}
+          <div style={{ padding: "6px 14px 8px", fontSize: 10, color: t.textFaint, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
+            <span>Overall = weighted mean of the component scores · a component is blank when too few of its stats exist for both players</span>
+            <span style={{ fontStyle: "italic" }}>PastTheEyeTest</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Note({ t, children }) {
+  return <div style={{ padding: "18px 16px", fontSize: 12, color: t.textMuted, textAlign: "center" }}>{children}</div>;
+}
+
+function Headshot({ pid, name, t }) {
+  const url = getHeadshotUrl(pid);
+  return (
+    <div style={{ width: 34, height: 34, borderRadius: "50%", overflow: "hidden", background: t.inputBg, border: `1px solid ${t.divider}`, flexShrink: 0, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontSize: 11, fontWeight: 700, color: t.textFaint, position: "absolute" }}>
+        {name ? name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : ""}
+      </span>
+      {url && <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 1 }} onError={e => { e.target.style.display = "none"; }} />}
+    </div>
+  );
+}
+
+function OverallBubble({ sim }) {
+  const v = sim == null ? null : Math.round(sim);
+  return (
+    <div style={{
+      width: 58, height: 44, borderRadius: 10, flexShrink: 0,
+      background: binColor(v), color: textOnBin(v),
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+    }} title="Overall similarity">
+      <span style={{ fontSize: 18, lineHeight: 1, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{v == null ? "—" : `${v}%`}</span>
+      <span style={{ fontSize: 8, letterSpacing: 0.5, opacity: 0.85, marginTop: 2 }}>OVERALL</span>
+    </div>
+  );
+}
+
+function CompCell({ label, comp, weight, t }) {
+  const sim = comp?.sim;
+  const v = sim == null ? null : Math.round(sim);
+  const off = weight === 0;
+  return (
+    <div style={{ minWidth: 72, flex: "1 1 72px", opacity: off ? 0.4 : 1 }} title={comp?.d != null ? `distance ${comp.d.toFixed(2)} z · ${comp.shared} shared stats` : "not comparable"}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: t.textMuted }}>
+        <span>{label}{weight === 2 ? " ×2" : ""}</span>
+        <span style={{ fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, color: t.text }}>{v == null ? "—" : `${v}%`}</span>
+      </div>
+      <div style={{ height: 5, borderRadius: 3, background: t.divider, marginTop: 3, overflow: "hidden" }}>
+        <div style={{ width: `${v ?? 0}%`, height: "100%", background: binColor(v), transition: "width 0.2s" }} />
+      </div>
+    </div>
+  );
+}
+
+function FeatureTable({ target, other, t }) {
+  const rows = featureRows(target, target.meta, other.player, other.meta);
+  const comps = target.meta.components || {};
+  const arsenalA = target.arsenal, arsenalB = other.player.arsenal;
+  const akeys = Object.keys(target.meta.arsenal_features || {});
+  const cell = { padding: "2px 8px", fontSize: 11, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, textAlign: "right", whiteSpace: "nowrap" };
+  const head = { padding: "3px 8px", fontSize: 10, color: t.textFaint, textAlign: "right", fontWeight: 600, whiteSpace: "nowrap" };
+  return (
+    <div style={{ padding: "4px 14px 12px 64px", display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
+      {Object.entries(comps).map(([c, cm]) => {
+        const rs = rows.filter(r => r.component === c);
+        if (!rs.length) return null;
+        return (
+          <table key={c} style={{ borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ ...head, textAlign: "left", color: t.textMuted }}>{cm.label}</th>
+                <th style={head}>{target.name?.split(" ").slice(-1)[0]} {target.season}</th>
+                <th style={head}>{other.name?.split(" ").slice(-1)[0]} {other.season}</th>
+                <th style={head}>Δz</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rs.map(r => {
+                const dz = r.za != null && r.zb != null ? r.za - r.zb : null;
+                return (
+                  <tr key={r.key}>
+                    <td style={{ ...cell, textAlign: "left", fontFamily: "inherit", fontWeight: 500, color: t.textMuted }}>{r.label}</td>
+                    <td style={{ ...cell, color: t.text }}>{fmtValue(r.a, r.fmt)}</td>
+                    <td style={{ ...cell, color: t.text }}>{fmtValue(r.b, r.fmt)}</td>
+                    <td style={{ ...cell, color: dz == null ? t.textFaint : Math.abs(dz) < 0.5 ? t.textFaint : Math.abs(dz) < 1.25 ? t.accent : "#CB181D" }}>
+                      {dz == null ? "—" : (dz > 0 ? "+" : "") + dz.toFixed(1)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        );
+      })}
+      {arsenalA && arsenalB && (
+        <table style={{ borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={{ ...head, textAlign: "left", color: t.textMuted }}>Pitch</th>
+              <th style={head}>Usage</th>
+              {akeys.filter(k => k !== "axis_sin" && k !== "axis_cos").map(k => (
+                <th key={k} style={head}>{target.meta.arsenal_features[k]?.label || k}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[...new Set([...Object.keys(arsenalA), ...Object.keys(arsenalB)])].sort().map(pt => (
+              [["a", arsenalA[pt], target], ["b", arsenalB[pt], other]].map(([who, a, p]) => (
+                <tr key={`${pt}:${who}`} style={{ opacity: a ? 1 : 0.45 }}>
+                  <td style={{ ...cell, textAlign: "left", fontFamily: "inherit", fontWeight: 600, color: t.textMuted }}>
+                    {pt} · {p.name?.split(" ").slice(-1)[0]} {p.season}
+                  </td>
+                  <td style={{ ...cell, color: t.text }}>{a ? `${Math.round(a.usage * 100)}%` : "—"}</td>
+                  {akeys.filter(k => k !== "axis_sin" && k !== "axis_cos").map(k => (
+                    <td key={k} style={{ ...cell, color: t.text }}>{a ? fmtValue(a[k], target.meta.arsenal_features[k]?.fmt) : "—"}</td>
+                  ))}
+                </tr>
+              ))
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}

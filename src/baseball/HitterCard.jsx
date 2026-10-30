@@ -3,6 +3,7 @@ import { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
+import SimilarPlayers from "./SimilarPlayers.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { useDateRangeStats, computeXrvDateRange, buildXrvPctileLookup, buildPctileLookup, interpolatePctile } from "./statsCompute.js";
 import { mmddFromDate } from "./kde.js";
@@ -17,7 +18,7 @@ const XRV_LABELS = [
   "Chase",
 ];
 
-export default function HitterCard({ player, season, isAAA = false, dateFrom = "", dateTo = "", allHitters = [], xrvAll = null, xrvGames = null, xrvGamesLoading = false }) {
+export default function HitterCard({ player, season, isAAA = false, dateFrom = "", dateTo = "", allHitters = [], xrvAll = null, xrvGames = null, xrvGamesLoading = false, onSelectPlayer = null }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
@@ -297,6 +298,11 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
         type="hitter"
         cardMetrics={Object.keys(player.categories || {})}
       />
+
+      {/* === SIMILAR PLAYERS (MLB, non-projection seasons only) === */}
+      {!isAAA && !isProjection && (
+        <SimilarPlayers player={player} season={season} type="hitter" onSelect={onSelectPlayer} />
+      )}
 
     </div>
   );

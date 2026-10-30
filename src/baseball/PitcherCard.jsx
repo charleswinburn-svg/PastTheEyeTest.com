@@ -4,6 +4,7 @@ import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, 
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import PitcherDistributions from "./PitcherDistributions.jsx";
+import SimilarPlayers from "./SimilarPlayers.jsx";
 import PitchModelingCard from "./PitchModelingCard.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { useDateRangeStats } from "./statsCompute.js";
@@ -11,7 +12,7 @@ import { fetchSavantPlayerDateRange, scorePitchCode } from "./mlbApi.js";
 
 const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 
-export default function PitcherCard({ player, season, allPitchers, isAAA = false, dateFrom = "", dateTo = "" }) {
+export default function PitcherCard({ player, season, allPitchers, isAAA = false, dateFrom = "", dateTo = "", onSelectPlayer = null }) {
   const { theme: t } = useTheme();
   const [pitchPlusData, setPitchPlusData] = useState(null);
   const [view, setView] = useState("results");   // "results" | "modeling"
@@ -345,6 +346,11 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
         type="pitcher"
         cardMetrics={Object.keys(player.categories || {})}
       />}
+
+      {/* === SIMILAR PLAYERS (MLB, non-projection seasons only) === */}
+      {!isAAA && !isProjection && (
+        <SimilarPlayers player={player} season={season} type="pitcher" onSelect={onSelectPlayer} />
+      )}
       </>
       )}
     </div>

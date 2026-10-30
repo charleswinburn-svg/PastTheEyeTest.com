@@ -49,6 +49,36 @@ Comprehensive reference for the project across both repos. Use this when startin
 | `iswing.json` | `iswing_update.py` (iSwing+ v9) | Daily |
 | `iswing_waterfall_{year}.json` | `iswing_update.py` — per-hitter iSwing+ breakdown (Summaries → Hitter iSwing+) | Daily |
 | `iswing_meta.json` | `iswing_update.py` — seasons scored by the current model (drives the *new* labels) | Daily |
+| `similarity_hitters_{year}.json` | `build_similarity_hitters.py` — hitter similarity vectors (Similar Players panel) | After data updates |
+| `similarity_pitchers_{year}.json` | `build_similarity_pitchers.py` — pitcher similarity vectors + per-type arsenal shapes | After scoring |
+
+### Player similarity (Similar Players panel)
+
+`src/baseball/SimilarPlayers.jsx` sits below the rolling chart on the MLB hitter and
+pitcher cards and ranks the most similar player-seasons (2023–2026). The model lives in
+`similarity_common.py` (Python) and `src/baseball/similarity.js` (browser) — keep them in step:
+
+- Every stat is z-scored within its own season, clipped ±3. Component distance = weighted RMS
+  of z-differences over the stats both players have (a component is blank below half shared).
+- Component % = `100 · max(0, 1 − d / D)` with `D` the pool's 95th-percentile pairwise distance
+  (`meta.calib`). Overall % = weighted mean of the component %s (chips cycle 1× → 2× → off).
+- Hitters: swing traits · contact quality · whiff · discipline. Pitchers: arsenal (pitch type to
+  pitch type, usage-weighted, penalty for a pitch only one throws, plus pitch mix) · release ·
+  whiff/stuff · command · contact allowed. Horizontal pitcher quantities are mirrored to an
+  arm-side convention so LHP/RHP compare directly.
+
+Build (hitters need only committed files; pitchers need the season Statcast parquet and the
+season grade files from `score_pitches.py`):
+
+```bash
+python3 build_similarity_hitters.py --year 2026            # + --parquet tmp/pitch_xrv_2026.parquet for xSLGcon
+python3 build_similarity_pitchers.py --year 2026 --parquet tmp/pitch_xrv_2026.parquet --season-dir tmp/output/season
+node scripts/test_similarity.mjs                            # sanity checks against the built files
+```
+
+For 2023–2025 hitters, attack angle / tilt come from `public/merged_stats.csv`; attack direction and
+intercept need that season's `competitive_swings_{year}.csv` (gitignored) via `--swings`.
+Not yet in CI: add both builders to `score-pitches.yml` after the scoring step when ready to ship.
 
 ### iSwing+ (v9.1)
 

@@ -325,6 +325,30 @@ function BaseballApp() {
       setSelectedPitcher(pitcherNames[0]);
   }, [pitcherNames]);
 
+  // Jump to a comp from the Similar Players panel: switch season if needed, then
+  // select the player by id once that season's list is loaded (declared after the
+  // default-selection effects above so it wins when both fire on the same load).
+  const pendingSelect = useRef(null);
+  const applyPendingSelect = (list, setter) => {
+    const p = pendingSelect.current;
+    if (!p) return;
+    const found = list.find(x => Number(x.player_id) === Number(p.playerId));
+    if (found) { setter(found.displayName); pendingSelect.current = null; }
+  };
+  const selectPlayerFromComp = ({ playerId, season: targetSeason }) => {
+    const type = isPitcherTab(tab) ? "pitcher" : "hitter";
+    pendingSelect.current = { playerId, type };
+    if (String(targetSeason) !== String(season)) setSeason(String(targetSeason));
+    else applyPendingSelect(type === "pitcher" ? pitchersFull : hittersFull, type === "pitcher" ? setSelectedPitcher : setSelectedHitter);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  useEffect(() => {
+    if (pendingSelect.current?.type === "hitter") applyPendingSelect(hittersFull, setSelectedHitter);
+  }, [hittersFull]);  // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (pendingSelect.current?.type === "pitcher") applyPendingSelect(pitchersFull, setSelectedPitcher);
+  }, [pitchersFull]);  // eslint-disable-line react-hooks/exhaustive-deps
+
   const curHitter = useMemo(() => hittersFull.find(h => h.displayName === selectedHitter), [hittersFull, selectedHitter]);
   const curPitcher = useMemo(() => pitchersFull.find(p => p.displayName === selectedPitcher), [pitchersFull, selectedPitcher]);
 
@@ -768,6 +792,7 @@ function BaseballApp() {
               xrvAll={xrvData}
               xrvGames={curHitter?.player_id != null ? xrvGamesData?.[String(curHitter.player_id)] : null}
               xrvGamesLoading={xrvGamesLoading}
+              onSelectPlayer={selectPlayerFromComp}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
@@ -784,6 +809,7 @@ function BaseballApp() {
               allPitchers={pitchersFull}
               dateFrom={cardDateFrom}
               dateTo={cardDateTo}
+              onSelectPlayer={selectPlayerFromComp}
             />
           ) : (
             <div style={{ color: t.textMuted, textAlign: "center", padding: 60, fontSize: 13 }}>
