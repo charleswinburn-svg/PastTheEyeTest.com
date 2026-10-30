@@ -124,8 +124,8 @@ function shoulderOf(r) {
 export function ReleaseDiagram({ a, b, nameA, nameB, width = 300 }) {
   const { theme: t } = useTheme();
   const S = 34;                     // px per ft
-  const X0 = -2.6, Z0 = -0.4;       // ft at the left / bottom edge
-  const H = 8.6;                    // ft of height shown
+  const X0 = -2.8, Z0 = -1.1;       // ft at the left / bottom edge (room for the slope)
+  const H = 9.2;                    // ft of height shown
   const height = width / S * 0 + Math.round(H * S);
   const X = x => (x - X0) * S;
   const Y = z => height - 10 - (z - Z0) * S;
@@ -141,8 +141,31 @@ export function ReleaseDiagram({ a, b, nameA, nameB, width = 300 }) {
   const bodyX = sa ? sa.x - 0.55 : -0.6;
   const shoulderZ = sa ? sa.z : hA * 0.7;
   const headR = 0.42;
-  const headZ = shoulderZ + 0.95;
-  const torsoTop = shoulderZ + 0.25, torsoBot = Math.max(1.6, shoulderZ - 1.9);
+  // Delivery pose at release, seen from the catcher: the lead leg has landed
+  // down the front slope on the glove side, the back leg trails off the
+  // rubber on the arm side, the torso tilts toward the glove side and the
+  // glove is tucked. Heights are relative to the rubber (z = 0); the mound
+  // falls away in front of it, which is why the lead foot sits below 0.
+  // The stride goes straight at the catcher, so in this projection the lead leg
+  // is nearly under the body (slightly glove side), its foot pointing at us and
+  // landing ~0.5 ft below rubber level on the front slope, while the back leg
+  // trails behind with the foot off the ground on the arm side.
+  const gsX = bodyX - 0.55;                               // glove-side shoulder
+  const head = { x: bodyX - 0.05, z: shoulderZ + 0.92 };
+  const hip = { x: bodyX - 0.1, z: Math.max(1.9, shoulderZ - 1.6) };
+  const leadKnee = { x: hip.x - 0.35, z: hip.z - 0.95 };
+  const leadFoot = { x: hip.x - 0.45, z: -0.5 };          // on the front slope, toward the plate
+  const backKnee = { x: hip.x + 0.6, z: hip.z - 0.55 };
+  const backFoot = { x: hip.x + 1.2, z: hip.z - 0.9 };    // in the air, trailing
+  const gloveElbow = { x: gsX - 0.25, z: shoulderZ - 0.7 };
+  const glove = { x: bodyX - 0.05, z: shoulderZ - 0.45 };
+  const skin = t.id === "dark" ? "#9fb3c8" : "#b7c7d6";
+  const skinBack = t.id === "dark" ? "#6f8299" : "#93a3b3";
+  const limb = (p, q, w, color = skin) => <line x1={X(p.x)} y1={Y(p.z)} x2={X(q.x)} y2={Y(q.z)} stroke={color} strokeWidth={w} strokeLinecap="round" />;
+  // Mound seen from the plate: the rubber is the crest, the front slope is the
+  // face below it (lower on screen = closer to the catcher).
+  const moundPath = `M 0 ${Y(-0.35)} Q ${X(0)} ${Y(0.25)} ${width} ${Y(-0.35)} L ${width} ${height} L 0 ${height} Z`;
+  const contour = z => `M ${X(X0 + 0.3)} ${Y(z - 0.12)} Q ${X(0)} ${Y(z + 0.14)} ${X(X0 + width / S - 0.3)} ${Y(z - 0.12)}`;
 
   const perType = (p, hollow, stroke) => Object.entries(p?.arsenal || {}).map(([k, ar]) => (
     isNum(ar.rel_x) && isNum(ar.rel_z) ? (
@@ -186,10 +209,12 @@ export function ReleaseDiagram({ a, b, nameA, nameB, width = 300 }) {
         </text>
         <text x={width / 2} y={22} textAnchor="middle" style={txt}>← glove side · arm side →</text>
         {/* mound + rubber */}
-        <path d={`M 0 ${Y(0) + 2} Q ${X(0)} ${Y(0) - 14} ${width} ${Y(0) + 2} L ${width} ${height} L 0 ${height} Z`} fill={t.id === "dark" ? "#3b2a1a" : "#c8a97e"} />
+        <path d={moundPath} fill={t.id === "dark" ? "#3b2a1a" : "#c8a97e"} />
+        {[-0.45, -0.8].map(z => <path key={z} d={contour(z)} fill="none" stroke={t.id === "dark" ? "#5a4530" : "#a88a62"} strokeWidth={0.8} />)}
         <rect x={X(-1)} y={Y(0) - 4} width={2 * S} height={4} fill="#e5e7eb" stroke="#9ca3af" strokeWidth={0.5} />
         <line x1={X(0)} y1={Y(0)} x2={X(0)} y2={Y(1.3)} stroke={t.textFaint} strokeWidth={0.6} strokeDasharray="2 3" />
-        <text x={X(0)} y={Y(0) + 13} textAnchor="middle" style={{ ...txt, fill: "#d6c6b0" }}>rubber</text>
+        <text x={X(1.1)} y={Y(0) - 1} style={{ ...txt, fill: "#d6c6b0" }}>rubber</text>
+        <text x={X(X0 + width / S) - 4} y={Y(-0.95)} textAnchor="end" style={{ ...txt, fill: "#d6c6b0" }}>front slope → plate</text>
         {/* height axis */}
         {[2, 4, 6].map(z => (
           <g key={z}>
@@ -198,12 +223,27 @@ export function ReleaseDiagram({ a, b, nameA, nameB, width = 300 }) {
           </g>
         ))}
         {/* body (target) */}
-        <g fill={t.id === "dark" ? "#9fb3c8" : "#b7c7d6"} opacity={0.75}>
-          <line x1={X(bodyX - 0.28)} y1={Y(torsoBot)} x2={X(bodyX - 0.38)} y2={Y(0)} stroke={t.id === "dark" ? "#9fb3c8" : "#b7c7d6"} strokeWidth={11} strokeLinecap="round" />
-          <line x1={X(bodyX + 0.28)} y1={Y(torsoBot)} x2={X(bodyX + 0.45)} y2={Y(0)} stroke={t.id === "dark" ? "#9fb3c8" : "#b7c7d6"} strokeWidth={11} strokeLinecap="round" />
-          <rect x={X(bodyX - 0.62)} y={Y(torsoTop)} width={1.24 * S} height={(torsoTop - torsoBot) * S} rx={14} />
-          <line x1={X(bodyX - 0.62)} y1={Y(shoulderZ)} x2={X(bodyX - 0.95)} y2={Y(shoulderZ - 1.9)} stroke={t.id === "dark" ? "#9fb3c8" : "#b7c7d6"} strokeWidth={8} strokeLinecap="round" />
-          <circle cx={X(bodyX)} cy={Y(headZ)} r={headR * S} />
+        <g fill={skin} opacity={0.85}>
+          {/* back leg (behind the body): trailing, foot in the air on the arm side */}
+          <g opacity={0.8}>
+            {limb({ x: hip.x + 0.25, z: hip.z }, backKnee, 10, skinBack)}
+            {limb(backKnee, backFoot, 9, skinBack)}
+            <ellipse cx={X(backFoot.x + 0.1)} cy={Y(backFoot.z - 0.05)} rx={0.22 * S} ry={0.13 * S} fill={skinBack} transform={`rotate(-25 ${X(backFoot.x + 0.1)} ${Y(backFoot.z - 0.05)})`} />
+          </g>
+          {/* lead leg: striding straight at the plate, planted on the front slope */}
+          <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z) + 6} rx={0.42 * S} ry={0.1 * S} fill="#000" opacity={0.25} />
+          {limb({ x: hip.x - 0.25, z: hip.z }, leadKnee, 13)}
+          {limb(leadKnee, leadFoot, 12)}
+          <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z)} rx={0.3 * S} ry={0.17 * S} />
+          {/* torso square to the plate, leaning in */}
+          <polygon
+            points={[[gsX, shoulderZ + 0.12], [bodyX + 0.58, shoulderZ + 0.12], [hip.x + 0.4, hip.z], [hip.x - 0.4, hip.z]].map(([x, z]) => `${X(x)},${Y(z)}`).join(" ")}
+            stroke={skin} strokeWidth={10} strokeLinejoin="round" />
+          {/* glove arm tucked at the chest */}
+          {limb({ x: gsX, z: shoulderZ }, gloveElbow, 8)}
+          {limb(gloveElbow, glove, 7)}
+          <circle cx={X(glove.x)} cy={Y(glove.z)} r={0.25 * S} />
+          <circle cx={X(head.x)} cy={Y(head.z)} r={headR * S} />
         </g>
         {/* comp arm (dashed), then target arm */}
         {arm(sb, rb, accentB, true)}
