@@ -3,6 +3,7 @@ import { useTheme } from "./ThemeContext.jsx";
 import { binColor, textOnBin, getHeadshotUrl, saveCardAsPng, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import { loadSimilarityPool, rankComps, featureRows, fmtValue, SIMILARITY_SEASONS } from "./similarity.js";
 import { PitcherCompareFigures, FIGURE_FOR_COMPONENT } from "./SimilarityFigures.jsx";
+import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
 
 // ═══════════════════════════════════════════════════════════
 // SIMILAR PLAYERS
@@ -322,7 +323,7 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
                 <tbody>
                   {Object.keys(ars).sort((x, y) => (ars[y].usage ?? 0) - (ars[x].usage ?? 0)).map(pt => (
                     <tr key={pt}>
-                      <td style={{ ...tcell, textAlign: "left", fontFamily: "inherit", fontWeight: 600, color: t.textMuted }}>{pt}</td>
+                      <td style={{ ...tcell, textAlign: "left", fontFamily: "inherit", fontWeight: 700, color: PITCH_COLORS[pt] || t.textMuted }}>{PITCH_NAMES[pt] || pt}</td>
                       <td style={{ ...tcell, color: t.text }}>{`${Math.round(ars[pt].usage * 100)}%`}</td>
                       {akeys.filter(k => !["axis_sin", "axis_cos", "rel_x", "rel_z"].includes(k)).map(k => (
                         <td key={k} style={{ ...tcell, color: t.text }}>{fmtValue(ars[pt][k], target.meta.arsenal_features[k]?.fmt)}</td>
@@ -384,7 +385,7 @@ function FeatureTable({ target, other, t, isolate = null, isolatedLabel = null, 
               [["a", arsenalA[pt], target], ["b", arsenalB[pt], other]].map(([who, a, p]) => (
                 <tr key={`${pt}:${who}`} style={{ opacity: a ? 1 : 0.45 }}>
                   <td style={{ ...cell, textAlign: "left", fontFamily: "inherit", fontWeight: 600, color: t.textMuted }}>
-                    {pt} · {p.name?.split(" ").slice(-1)[0]} {p.season}
+                    <span style={{ color: PITCH_COLORS[pt] || t.textMuted, fontWeight: 700 }}>{PITCH_NAMES[pt] || pt}</span> · {p.name?.split(" ").slice(-1)[0]} {p.season}
                   </td>
                   <td style={{ ...cell, color: t.text }}>{a ? `${Math.round(a.usage * 100)}%` : "—"}</td>
                   {akeys.filter(k => !["axis_sin", "axis_cos", "rel_x", "rel_z"].includes(k)).map(k => (

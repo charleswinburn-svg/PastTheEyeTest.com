@@ -1,5 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
 
 // ═══════════════════════════════════════════════════════════
 // SIMILARITY FIGURES (pitcher comparison)
@@ -19,19 +20,10 @@ import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 //                    height / horizontal release callouts, and a side-view
 //                    strip for extension.
 
-export const PITCH_COLORS = {
-  FF: "#D22D49", SI: "#FE9D00", FC: "#933F2C",
-  SL: "#EEE716", ST: "#DDB33A", SV: "#C9A227",
-  CU: "#00D1ED", KC: "#6236CD", CS: "#3B6CD1",
-  CH: "#1DBE3A", FS: "#3BACAC", FO: "#2E8B57", SC: "#7FBF7F",
-  KN: "#888888", EP: "#AAAAAA",
-};
-export const PITCH_NAMES = {
-  FF: "4-seam", SI: "Sinker", FC: "Cutter", SL: "Slider", ST: "Sweeper", SV: "Slurve",
-  CU: "Curve", KC: "Knuckle curve", CS: "Slow curve", CH: "Change", FS: "Splitter",
-  FO: "Fork", SC: "Screwball", KN: "Knuckle", EP: "Eephus",
-};
-const colorOf = pt => PITCH_COLORS[pt] || "#999";
+// Same pitch colours and names as the pitcher summaries / arsenal panel.
+export { PITCH_COLORS, PITCH_NAMES };
+const colorOf = pt => PITCH_COLORS[pt] || "#888";
+const nameOf = pt => PITCH_NAMES[pt] || pt;
 const isNum = v => typeof v === "number" && Number.isFinite(v);
 const ft = v => (isNum(v) ? `${v.toFixed(1)} ft` : "—");
 const lastName = n => (n || "").split(" ").slice(-1)[0];
@@ -83,7 +75,7 @@ export function MovementPlot({ p, accent, size = 360 }) {
               <circle cx={q.x} cy={q.y} r={r} fill={colorOf(k)} stroke={t.cardBg} strokeWidth={1}>
                 <title>{`${PITCH_NAMES[k] || k} · ${Math.round(q.usage * 100)}% · ${ars[k].hb.toFixed(1)}" HB, ${ars[k].ivb.toFixed(1)}" IVB`}</title>
               </circle>
-              <text x={q.x + r + 2} y={q.y + 3} style={{ fontSize: 9, fontWeight: 700, fill: t.text, fontFamily: "inherit" }}>{k}</text>
+              <text x={q.x + r + 3} y={q.y + 3} style={{ fontSize: 9, fontWeight: 700, fill: colorOf(k), fontFamily: "inherit", paintOrder: "stroke", stroke: t.cardBg, strokeWidth: 2 }}>{nameOf(k)}</text>
             </g>
           );
         })}
