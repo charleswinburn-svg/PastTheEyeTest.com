@@ -59,7 +59,10 @@ XRV_MAP = {
     "Chase":           "chase_xrv",
     "Decision":        "decision_xrv",
 }
-ISWING_CONTRIB = ["speed_vs_location", "aa_adjustment", "length_for_location", "effort_level"]
+# iSwing+ contributions kept as features (effort_level is NOT one of them: it is
+# the hitter's own 90th-percentile bat speed, computed from the swings below,
+# the same quantity iswing_update.py divides by for its effort term).
+ISWING_CONTRIB = ["speed_vs_location", "aa_adjustment", "length_for_location"]
 
 
 def _load(path):
@@ -143,6 +146,7 @@ def load_swings(paths, year):
         if "bat_speed" in df.columns:
             df["_fast"] = (df["bat_speed"] >= FAST_SWING_MPH).where(df["bat_speed"].notna())
             agg["fast_swing_pct"] = ("_fast", "mean")
+            agg["effort_level"] = ("bat_speed", lambda s: s.quantile(0.90))   # 90th-pct bat speed, mph
         g = df.groupby("batter").agg(**agg)
         g = g[g["n"] >= MIN_SWINGS]
         for pid, row in g.iterrows():
@@ -249,6 +253,7 @@ def build(year, public, swings_paths, merged_path, parquet):
         for key in ("bat_speed", "swing_length", "fast_swing_pct"):
             if sw.get(key) is not None:
                 v[key] = sw[key]
+        v["effort_level"] = sw.get("effort_level")
         for key in ("attack_angle", "swing_path_tilt"):
             v[key] = sw.get(key) if sw.get(key) is not None else mg.get(key)
         v["attack_direction"] = sw.get("attack_direction")

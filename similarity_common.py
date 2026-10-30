@@ -61,7 +61,7 @@ HITTER_FEATURES = [
     ("speed_vs_location",  "Speed vs location",    "swing",      0.5, ".1f"),
     ("aa_adjustment",      "AA adjustability",     "swing",      0.5, ".1f"),
     ("length_for_location","Length for location",  "swing",      0.5, ".1f"),
-    ("effort_level",       "Effort level",         "swing",      0.5, ".1f"),
+    ("effort_level",       "Effort (90th pct bat speed)", "swing", 1.0, ".1f"),
     # Contact quality
     ("contact_xrv",        "Contact xRV/600",      "contact",    1.0, "+.1f"),
     ("xslgcon",            "xSLGcon",              "contact",    1.0, ".3f"),
