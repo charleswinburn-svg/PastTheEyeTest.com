@@ -1598,7 +1598,7 @@ def fetch_fangraphs_counting(year, stats):
 # (output key, candidate FG column names, kind) — kind: 'i' int, 'f1'/'f2'/'f3' rounded
 # float, 'pct' decimal→percent, 's' string.
 _COUNTING_HITTER_COLS = [
-    ("team", ["Team", "TeamName"], "s"),
+    ("team", ["TeamName", "TeamNameAbb", "Team"], "s"),
     ("g", ["G"], "i"), ("pa", ["PA"], "i"), ("hr", ["HR"], "i"), ("rbi", ["RBI"], "i"),
     ("sb", ["SB"], "i"), ("r", ["R"], "i"),
     ("bb_pct", ["BB%"], "pct"), ("k_pct", ["K%"], "pct"),
@@ -1606,7 +1606,7 @@ _COUNTING_HITTER_COLS = [
     ("wpa", ["WPA"], "f2"), ("war", ["WAR"], "f1"),
 ]
 _COUNTING_PITCHER_COLS = [
-    ("team", ["Team", "TeamName"], "s"),
+    ("team", ["TeamName", "TeamNameAbb", "Team"], "s"),
     ("g", ["G"], "i"), ("gs", ["GS"], "i"), ("ip", ["IP"], "f1"),
     ("w", ["W"], "i"), ("l", ["L"], "i"), ("sv", ["SV"], "i"),
     ("k_pct", ["K%"], "pct"), ("bb_pct", ["BB%"], "pct"), ("k_bb_pct", ["K-BB%"], "pct"),
@@ -1643,7 +1643,12 @@ def _counting_records(df, spec):
             c = col(names)
             v = row.get(c) if c is not None else None
             if kind == "s":
-                rec[key] = None if v is None or (isinstance(v, float) and math.isnan(v)) else str(v)
+                if v is None or (isinstance(v, float) and math.isnan(v)):
+                    rec[key] = None
+                else:
+                    # FG's "Team" is an HTML link (<a href=…>CHC</a>); keep the text only
+                    txt = _re.sub(r"<[^>]+>", "", str(v)).strip()
+                    rec[key] = txt or None
                 continue
             n = pd.to_numeric(v, errors="coerce")
             if pd.isna(n):
@@ -1789,7 +1794,16 @@ def run_pipeline(seasons, output_dir):
 # ============================================================
 
 if __name__ == "__main__":
-    output = sys.argv[1] if len(sys.argv) > 1 else "./public"
-    seasons_arg = sys.argv[2] if len(sys.argv) > 2 else ",".join(str(s) for s in DEFAULT_SEASONS)
+    # python3 baseball_pipeline.py [output_dir] [seasons] [--counting-only]
+    #   --counting-only: only rebuild counting_stats_{year}.json (FanGraphs season lines)
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    output = args[0] if len(args) > 0 else "./public"
+    seasons_arg = args[1] if len(args) > 1 else ",".join(str(s) for s in DEFAULT_SEASONS)
     seasons = [int(s.strip()) for s in seasons_arg.split(",")]
-    run_pipeline(seasons, output)
+    if "--counting-only" in flags:
+        os.makedirs(output, exist_ok=True)
+        for year in seasons:
+            build_counting_stats(year, output)
+    else:
+        run_pipeline(seasons, output)
