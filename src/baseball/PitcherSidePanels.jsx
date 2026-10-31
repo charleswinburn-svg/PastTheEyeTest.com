@@ -14,7 +14,6 @@ import { loadSimilarityPool } from "./similarity.js";
 // PNG that carries the player header, via CapturePanel.
 
 const safeName = n => String(n || "player").replace(/\s+/g, "_");
-const ft = v => (typeof v === "number" && Number.isFinite(v) ? `${v.toFixed(1)} ft` : "—");
 
 // Release diagram for the card's pitcher, from the season's similarity file
 // (per-pitcher release traits; requires ≥200 regular-season pitches).
@@ -32,10 +31,7 @@ export function ReleasePanel({ player, season, subtitle }) {
     return () => { cancelled = true; };
   }, [player?.player_id, season]);
 
-  const v = rec?.v || {};
-  const sub = rec
-    ? `${season} · arm ${Number.isFinite(v.arm_angle) ? `${Math.round(v.arm_angle)}°` : "—"} · ${ft(v.release_z)} high · ${ft(v.release_x)} side · ext ${ft(v.extension)}`
-    : subtitle;
+  const sub = `${season} Release Point`;
 
   return (
     <CapturePanel
