@@ -5,6 +5,7 @@ import { fetchGameLog, fetchSavantPlayerSeasonCached } from "./mlbApi.js";
 import { saveCardAsPng, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import { mmddFromDate } from "./kde.js";
 import { loadISwingGames, iswingScore, ISWING_MIN_SWINGS } from "./iswingGames.js";
+import FitToWidth from "../FitToWidth.jsx";
 
 // ── Statcast counter aggregation ───────────────────────────────────────────
 // Aggregate per-pitch Savant rows into per-game counters that can be summed
@@ -510,11 +511,13 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
   const target = type === "pitcher" ? 10 : 50;
   const unitLbl = type === "pitcher" ? "IP" : "PA";
   return (
-    <div>
+    <div style={{ marginTop: 16 }}>
+    {/* Laid out at `maxWidth` and scaled to fit (phones), like the cards. */}
+    <FitToWidth designWidth={maxWidth}>
     {/* Metric selector lives OUTSIDE cardRef so the saved PNG only contains
         the title + chart and renders cleanly centered. */}
     <div style={{
-      maxWidth, margin: "16px auto 4px",
+      width: maxWidth, margin: "0 auto 4px", boxSizing: "border-box",
       padding: "0 16px",
       display: "flex", alignItems: "center", gap: 8,
     }}>
@@ -539,7 +542,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
 
     <div ref={cardRef} style={{
       background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
-      maxWidth, margin: "0 auto", padding: "14px 0 10px",
+      width: maxWidth, margin: "0 auto", padding: "14px 0 10px", boxSizing: "border-box",
     }}>
       <div style={{
         fontSize: 12, fontWeight: 700, color: t.text,
@@ -598,6 +601,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
         </div>
       )}
     </div>
+    </FitToWidth>
     {computeDef && series.length >= 2 && (
       <div style={{ textAlign: "center", marginTop: 10 }}>
         <button

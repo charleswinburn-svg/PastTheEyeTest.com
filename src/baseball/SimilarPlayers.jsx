@@ -4,6 +4,7 @@ import { binColor, textOnBin, getHeadshotUrl, saveCardAsPng, NUM_FONT, NUM_WEIGH
 import { loadSimilarityPool, rankComps, featureRows, fmtValue, SIMILARITY_SEASONS } from "./similarity.js";
 import { PitcherCompareFigures, FIGURE_FOR_COMPONENT } from "./SimilarityFigures.jsx";
 import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
+import FitToWidth from "../FitToWidth.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // SIMILAR PLAYERS
@@ -58,7 +59,7 @@ export default function SimilarPlayers({ player, season, type = "hitter", onSele
 
   const box = {
     background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 12,
-    boxShadow: `0 4px 24px ${t.shadow}`, maxWidth: 1040, margin: "16px auto 0", overflow: "hidden",
+    boxShadow: `0 4px 24px ${t.shadow}`, width: 1040, margin: "0 auto", overflow: "hidden",
   };
   const chip = (selected) => ({
     padding: "4px 10px", fontSize: 11, fontWeight: 600, borderRadius: 999, cursor: "pointer",
@@ -75,6 +76,9 @@ export default function SimilarPlayers({ player, season, type = "hitter", onSele
   });
 
   return (
+    <div style={{ marginTop: 16 }}>
+    {/* Laid out at desktop width and scaled to fit, like the cards (FitToWidth). */}
+    <FitToWidth designWidth={1040}>
     <div style={box}>
       {/* Header + controls */}
       <div style={{ padding: "14px 18px 10px", borderBottom: `1px solid ${t.divider}` }}>
@@ -161,6 +165,8 @@ export default function SimilarPlayers({ player, season, type = "hitter", onSele
           </div>
         </div>
       )}
+    </div>
+    </FitToWidth>
     </div>
   );
 }

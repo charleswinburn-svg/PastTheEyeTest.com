@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import { PlayerHeader, saveCardAsPng } from "./SharedComponents.jsx";
+import FitToWidth from "../FitToWidth.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // CAPTURE PANEL
@@ -27,12 +28,15 @@ export default function CapturePanel({
   return (
     <div>
       {controls}
+      {/* Rendered at its design width and scaled down to fit (phones), exactly like
+          the player cards; saveCardAsPng neutralises the scale for the capture. */}
+      <FitToWidth designWidth={maxWidth}>
       <div
         ref={ref}
         style={{
           background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
           overflow: "hidden", boxShadow: `0 4px 24px ${t.shadow}`,
-          maxWidth, margin: "0 auto", ...style,
+          width: maxWidth, margin: "0 auto", ...style,
         }}
       >
         {player && (
@@ -51,6 +55,7 @@ export default function CapturePanel({
           </div>
         </div>
       </div>
+      </FitToWidth>
       {saveable && (
         <div style={{ textAlign: "center", marginTop: 10 }}>
           <button

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import FitToWidth from "../FitToWidth.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // COUNTING STATS TABLE
@@ -68,9 +69,11 @@ export default function CountingStatsTable({ playerId, type = "hitter", season }
   const td = { padding: "5px 10px", fontSize: 12, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, textAlign: "right", whiteSpace: "nowrap", color: t.text };
 
   return (
+    <div style={{ marginTop: 16 }}>
+    <FitToWidth designWidth={1040}>
     <div style={{
       background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 12,
-      boxShadow: `0 4px 24px ${t.shadow}`, maxWidth: 1040, margin: "16px auto 0", overflow: "hidden",
+      boxShadow: `0 4px 24px ${t.shadow}`, width: 1040, margin: "0 auto", overflow: "hidden",
     }}>
       {rows === undefined ? (
         <div style={{ padding: "14px 16px", fontSize: 12, color: t.textMuted, textAlign: "center" }}>Loading season totals…</div>
@@ -103,6 +106,8 @@ export default function CountingStatsTable({ playerId, type = "hitter", season }
           </table>
         </div>
       )}
+    </div>
+    </FitToWidth>
     </div>
   );
 }
