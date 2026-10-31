@@ -388,7 +388,9 @@ function buildRolling(rows, windowSize, windowKey, keys, compute) {
   return out;
 }
 
-export default function RollingChart({ playerId, playerName, season, type, cardMetrics }) {
+// maxWidth / chartHeight let a card stretch the chart to its own width (the pitcher
+// card puts it under the card to fill the column beside the side panels).
+export default function RollingChart({ playerId, playerName, season, type, cardMetrics, maxWidth = 600, chartHeight = 160 }) {
   const { theme: t } = useTheme();
   const computeMap = type === "pitcher" ? PITCHER_COMPUTE : HITTER_COMPUTE;
 
@@ -512,7 +514,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
     {/* Metric selector lives OUTSIDE cardRef so the saved PNG only contains
         the title + chart and renders cleanly centered. */}
     <div style={{
-      maxWidth: 600, margin: "16px auto 4px",
+      maxWidth, margin: "16px auto 4px",
       padding: "0 16px",
       display: "flex", alignItems: "center", gap: 8,
     }}>
@@ -537,7 +539,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
 
     <div ref={cardRef} style={{
       background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
-      maxWidth: 600, margin: "0 auto", padding: "14px 0 10px",
+      maxWidth, margin: "0 auto", padding: "14px 0 10px",
     }}>
       <div style={{
         fontSize: 12, fontWeight: 700, color: t.text,
@@ -556,7 +558,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
           </div>
         ) : (
           <div style={{ padding: "0 12px" }}>
-            <ResponsiveContainer width="100%" height={160}>
+            <ResponsiveContainer width="100%" height={chartHeight}>
               <LineChart data={series} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={t.cardBorder} />
                 <XAxis

@@ -334,6 +334,18 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           📥 Save as PNG
         </button>
       </div>
+
+      {/* === ROLLING 10-IP CHART — under the card, card-wide, so the left column
+          fills the height of the side panels === */}
+      {!isProjection && <RollingChart
+        playerId={player.player_id}
+        playerName={player.name}
+        season={season}
+        type="pitcher"
+        cardMetrics={Object.keys(player.categories || {})}
+        maxWidth={1040}
+        chartHeight={230}
+      />}
       </div>
 
       {/* === SIDE PANELS: release point (MLB only) over grade distributions === */}
@@ -344,15 +356,6 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
         </div>
       )}
       </div>
-
-      {/* === ROLLING 10-IP CHART === */}
-      {!isProjection && <RollingChart
-        playerId={player.player_id}
-        playerName={player.name}
-        season={season}
-        type="pitcher"
-        cardMetrics={Object.keys(player.categories || {})}
-      />}
 
       {/* === SEASON TOTALS (FanGraphs, one row per season) === */}
       {!isAAA && !isProjection && (
