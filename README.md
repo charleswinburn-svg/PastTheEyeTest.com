@@ -51,6 +51,22 @@ Comprehensive reference for the project across both repos. Use this when startin
 | `iswing_meta.json` | `iswing_update.py` — seasons scored by the current model (drives the *new* labels) | Daily |
 | `similarity_hitters_{year}.json` | `build_similarity_hitters.py` — hitter similarity vectors (Similar Players panel) | After data updates |
 | `similarity_pitchers_{year}.json` | `build_similarity_pitchers.py` — pitcher similarity vectors + per-type arsenal shapes | After scoring |
+| `counting_stats_{year}.json` | `baseball_pipeline.py` (`build_counting_stats`) — FanGraphs season lines (G/PA/HR… Off/Def/WPA/WAR; G/GS/IP/W/L/SV… ERA/xERA/WAR) keyed by MLBAM id, for the season-totals table under the cards. Needs FG cookies; left untouched when FG is unreachable | With the pipeline |
+
+### Card layout (MLB cards)
+
+- **Pitcher card** = header · Pro+ bubbles · percentile bars · arsenal · footer (that's the card PNG).
+  Beside it on wide screens (under it when narrow): the **release-point diagram**
+  (`PitcherSidePanels.jsx` → `ReleaseDiagram`, from `similarity_pitchers_{year}.json`) over the
+  **modeling distributions** (`PitcherDistributions.jsx` in `compact` mode). Those panels show no
+  heading on the site; their Save-as-PNG adds the player header/footer (`CapturePanel.jsx`, which
+  reveals `[data-ptet-capture-only]` elements only inside the html2canvas clone).
+- **Hitter card**: under the rolling chart, `HitterBattedBallPanel.jsx` (spray chart with the All /
+  Hits-only toggle, 95+ EV and whiff zone plots) built from the player's Savant per-pitch rows
+  (`fetchSavantPlayerSeasonCached`, shared with the rolling chart). The Summaries "Hitter Game" /
+  "Hitter Season" tabs were removed in its favour.
+- Both cards: `CountingStatsTable.jsx` (one row per season 2023→, horizontally scrollable) above
+  Similar Players.
 
 ### Player similarity (Similar Players panel)
 

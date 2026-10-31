@@ -3,8 +3,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
-import PitcherDistributions from "./PitcherDistributions.jsx";
 import SimilarPlayers from "./SimilarPlayers.jsx";
+import { ReleasePanel, DistributionsPanel } from "./PitcherSidePanels.jsx";
+import CountingStatsTable from "./CountingStatsTable.jsx";
 import PitchModelingCard from "./PitchModelingCard.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { useDateRangeStats } from "./statsCompute.js";
@@ -229,6 +230,10 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
         <PitchModelingCard player={player} season={season} isAAA={isAAA} dateFrom={dateFrom} dateTo={dateTo} />
       ) : (
       <>
+      {/* Card on the left; release diagram + modeling distributions stacked on the
+          right at wide widths, wrapping under the card when there's no room. */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start", justifyContent: "center" }}>
+      <div style={{ flex: "1 1 720px", minWidth: 0, maxWidth: 1040 }}>
       {/* === SAVEABLE CARD (scaled to fit width so it's never clipped on mobile) === */}
       <FitToWidth designWidth={1040}>
       <div
@@ -296,14 +301,6 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
             />
           </div>}
         </div>
-        {/* === GRADE DISTRIBUTIONS (8 KDE figures) — inside cardRef so Save-as-PNG captures them === */}
-        {!isProjection && <PitcherDistributions
-          playerId={player.player_id}
-          season={season}
-          isAAA={isAAA}
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-        />}
         <div style={{
           padding: "8px 16px 10px",
           display: "flex", justifyContent: "space-between",
@@ -337,6 +334,16 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
           📥 Save as PNG
         </button>
       </div>
+      </div>
+
+      {/* === SIDE PANELS: release point (MLB only) over grade distributions === */}
+      {!isProjection && (
+        <div style={{ flex: "1 1 380px", maxWidth: 460, minWidth: 300, display: "flex", flexDirection: "column", gap: 16 }}>
+          {!isAAA && <ReleasePanel player={player} season={season} subtitle={subtitle} />}
+          <DistributionsPanel player={player} season={season} subtitle={subtitle} isAAA={isAAA} dateFrom={dateFrom} dateTo={dateTo} />
+        </div>
+      )}
+      </div>
 
       {/* === ROLLING 10-IP CHART === */}
       {!isProjection && <RollingChart
@@ -346,6 +353,11 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
         type="pitcher"
         cardMetrics={Object.keys(player.categories || {})}
       />}
+
+      {/* === SEASON TOTALS (FanGraphs, one row per season) === */}
+      {!isAAA && !isProjection && (
+        <CountingStatsTable playerId={player.player_id} type="pitcher" season={season} />
+      )}
 
       {/* === SIMILAR PLAYERS (MLB, non-projection seasons only) === */}
       {!isAAA && !isProjection && (

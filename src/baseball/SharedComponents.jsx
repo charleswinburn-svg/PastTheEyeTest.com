@@ -882,7 +882,12 @@ export async function saveCardAsPng(cardRef, filename) {
       // per-character rects, which iOS Safari reports unreliably (letters spread
       // apart, spaces dropped). Zero it in the capture clone so ordinary text is
       // drawn word by word; labels with their own tracking keep it.
-      onclone: (doc) => { doc.body.style.letterSpacing = "0px"; },
+      onclone: (doc) => {
+        doc.body.style.letterSpacing = "0px";
+        // Elements marked capture-only (e.g. a player header a side panel hides on
+        // the site) are revealed in the clone so they appear in the PNG only.
+        doc.querySelectorAll("[data-ptet-capture-only]").forEach(el => { el.style.display = ""; });
+      },
     });
   } catch (e) {
     console.error("Capture failed:", e);

@@ -1047,6 +1047,46 @@ export async function fetchSavantGameData(gamePk) {
 
 // Per-pitch Statcast CSV for a single player across a full season.
 // type = "batter" | "pitcher". Returns parsed rows (one per pitch) or [].
+// One fetch per (type, player, season) shared by every component on a card
+// (rolling chart, batted-ball panel, …). Failures and empty results aren't
+// cached so a retry can succeed later.
+const _savantSeasonCache = new Map();
+export function fetchSavantPlayerSeasonCached(playerId, season, type = "batter") {
+  const key = `${type}:${playerId}:${season}`;
+  if (!_savantSeasonCache.has(key)) {
+    const p = fetchSavantPlayerSeason(playerId, season, type).catch(() => []);
+    _savantSeasonCache.set(key, p);
+    p.then(rows => { if (!rows || !rows.length) _savantSeasonCache.delete(key); });
+  }
+  return _savantSeasonCache.get(key);
+}
+
+// Savant per-pitch rows → the per-pitch shape the summary figures (SprayChart,
+// ZonePlot) already consume from MLB play-by-play. Savant's hc_x/hc_y use the
+// same 0–250 field coordinates as hitData.coordinates.coordX/coordY.
+const SAVANT_WHIFF_DESCS = new Set(["swinging_strike", "swinging_strike_blocked", "foul_tip", "missed_bunt", "swinging_pitchout"]);
+const SAVANT_EVENT_LABEL = { single: "Single", double: "Double", triple: "Triple", home_run: "Home Run" };
+export function savantRowsToPlays(rows) {
+  const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : null; };
+  return (rows || []).map(r => {
+    const desc = r.description || "";
+    const inPlay = desc === "hit_into_play";
+    const hcX = num(r.hc_x), hcY = num(r.hc_y);
+    const ev = r.events || "";
+    return {
+      pitchType: r.pitch_type || "UN",
+      pX: num(r.plate_x), pZ: num(r.plate_z),
+      isInPlay: inPlay,
+      isWhiff: SAVANT_WHIFF_DESCS.has(desc),
+      hitData: inPlay && hcX != null && hcY != null
+        ? { coordinates: { coordX: hcX, coordY: hcY }, launchSpeed: num(r.launch_speed), launchAngle: num(r.launch_angle) }
+        : null,
+      result: SAVANT_EVENT_LABEL[ev] || (ev ? ev.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : ""),
+      gameDate: r.game_date, gameType: r.game_type,
+    };
+  });
+}
+
 export async function fetchSavantPlayerSeason(playerId, season, type = "batter") {
   const lookupParam = type === "pitcher" ? "pitchers_lookup%5B%5D" : "batters_lookup%5B%5D";
   const url =

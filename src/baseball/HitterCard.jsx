@@ -4,6 +4,8 @@ import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubti
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import SimilarPlayers from "./SimilarPlayers.jsx";
+import HitterBattedBallPanel from "./HitterBattedBallPanel.jsx";
+import CountingStatsTable from "./CountingStatsTable.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { useDateRangeStats, computeXrvDateRange, buildXrvPctileLookup, buildPctileLookup, interpolatePctile } from "./statsCompute.js";
 import { mmddFromDate } from "./kde.js";
@@ -298,6 +300,16 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
         type="hitter"
         cardMetrics={Object.keys(player.categories || {})}
       />
+
+      {/* === BATTED BALLS: spray chart + 95+ EV / whiff zone plots (MLB, non-projection) === */}
+      {!isAAA && !isProjection && (
+        <HitterBattedBallPanel player={player} season={season} subtitle={subtitle} dateFrom={dateFrom} dateTo={dateTo} />
+      )}
+
+      {/* === SEASON TOTALS (FanGraphs, one row per season) === */}
+      {!isAAA && !isProjection && (
+        <CountingStatsTable playerId={player.player_id} type="hitter" season={season} />
+      )}
 
       {/* === SIMILAR PLAYERS (MLB, non-projection seasons only) === */}
       {!isAAA && !isProjection && (

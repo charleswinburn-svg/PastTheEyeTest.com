@@ -1522,6 +1522,169 @@ def build_output(year, hitters, pitchers):
 
 
 # ============================================================
+# ============================================================
+# COUNTING STATS (FanGraphs season lines → counting_stats_{year}.json)
+# ============================================================
+# One FanGraphs Dashboard (type=8, qual=0) pull per side, keyed by MLBAM id, for
+# the season-totals table under the player cards. Written to its own file so
+# baseball_data keeps its shape and players below the card gates are included.
+
+_FG_COOKIE_PATHS = [
+    "fangraphs_cookies.txt",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "fangraphs_cookies.txt"),
+    os.path.expanduser("~/project/fangraphs_cookies.txt"),
+    "www.fangraphs.com_cookies.txt",
+]
+
+def _fg_fetch_rows(api_url, label):
+    """FanGraphs leaders API → list of row dicts, trying cookies, cloudscraper, then
+    a direct request (same chain as the other FG fetches). None when all fail."""
+    for cp in _FG_COOKIE_PATHS:
+        if not os.path.exists(cp):
+            continue
+        try:
+            from http.cookiejar import MozillaCookieJar
+            jar = MozillaCookieJar(cp)
+            jar.load(ignore_discard=True, ignore_expires=True)
+            sess = requests.Session(); sess.cookies = jar; sess.headers.update(HTTP_HEADERS)
+            r = sess.get(api_url, timeout=30)
+            if r.status_code == 200:
+                rows = r.json().get("data", [])
+                if rows:
+                    print(f"    ✓ {len(rows)} {label} rows via cookies")
+                    return rows
+        except Exception as e:
+            print(f"    Cookies failed ({os.path.basename(cp)}): {e}")
+    try:
+        import cloudscraper
+        r = cloudscraper.create_scraper().get(api_url, timeout=30)
+        if r.status_code == 200:
+            rows = r.json().get("data", [])
+            if rows:
+                print(f"    ✓ {len(rows)} {label} rows via cloudscraper")
+                return rows
+    except Exception as e:
+        print(f"    cloudscraper failed: {e}")
+    try:
+        r = requests.get(api_url, headers=HTTP_HEADERS, timeout=30)
+        if r.status_code == 200:
+            rows = r.json().get("data", [])
+            if rows:
+                print(f"    ✓ {len(rows)} {label} rows via direct API")
+                return rows
+    except Exception as e:
+        print(f"    Direct API failed: {e}")
+    return None
+
+
+def fetch_fangraphs_counting(year, stats):
+    """FanGraphs Dashboard leaderboard (type=8, qual=0) for `stats` = 'bat' | 'pit'.
+    Returns a DataFrame of the full response, or None."""
+    print(f"  Fetching FanGraphs {'batting' if stats == 'bat' else 'pitching'} season lines ({year})...")
+    api_url = (
+        "https://www.fangraphs.com/api/leaders/major-league/data"
+        f"?pos=all&stats={stats}&lg=all&qual=0&type=8"
+        f"&season={year}&month=0&season1={year}&ind=0"
+        f"&team=0&rost=0&age=0&filter=&players=0"
+        f"&startdate=&enddate=&pageitems=5000&page=1"
+    )
+    rows = _fg_fetch_rows(api_url, "batters" if stats == "bat" else "pitchers")
+    if not rows:
+        print("    ⚠ FanGraphs season lines unavailable — skipping")
+        return None
+    return pd.DataFrame(rows)
+
+
+# (output key, candidate FG column names, kind) — kind: 'i' int, 'f1'/'f2'/'f3' rounded
+# float, 'pct' decimal→percent, 's' string.
+_COUNTING_HITTER_COLS = [
+    ("team", ["Team", "TeamName"], "s"),
+    ("g", ["G"], "i"), ("pa", ["PA"], "i"), ("hr", ["HR"], "i"), ("rbi", ["RBI"], "i"),
+    ("sb", ["SB"], "i"), ("r", ["R"], "i"),
+    ("bb_pct", ["BB%"], "pct"), ("k_pct", ["K%"], "pct"),
+    ("off", ["Off", "Offense"], "f1"), ("def", ["Def", "Defense"], "f1"),
+    ("wpa", ["WPA"], "f2"), ("war", ["WAR"], "f1"),
+]
+_COUNTING_PITCHER_COLS = [
+    ("team", ["Team", "TeamName"], "s"),
+    ("g", ["G"], "i"), ("gs", ["GS"], "i"), ("ip", ["IP"], "f1"),
+    ("w", ["W"], "i"), ("l", ["L"], "i"), ("sv", ["SV"], "i"),
+    ("k_pct", ["K%"], "pct"), ("bb_pct", ["BB%"], "pct"), ("k_bb_pct", ["K-BB%"], "pct"),
+    ("gb_pct", ["GB%"], "pct"), ("hr_fb", ["HR/FB", "HR/FB%"], "pct"),
+    ("siera", ["SIERA"], "f2"), ("fip", ["FIP"], "f2"), ("era", ["ERA"], "f2"), ("xera", ["xERA"], "f2"),
+    ("war", ["WAR"], "f1"),
+]
+
+def _counting_records(df, spec):
+    """{mlbam_id: {key: value}} from a FanGraphs DataFrame with tolerant column lookup."""
+    if df is None or df.empty:
+        return {}
+    lower = {c.lower(): c for c in df.columns}
+    def col(names):
+        for n in names:
+            c = lower.get(n.lower())
+            if c is not None:
+                return c
+        return None
+    id_col = col(["xMLBAMID", "MLBAMID", "mlbamid", "key_mlbam"])
+    if id_col is None:
+        print(f"    ⚠ No MLBAM id column. Available: {sorted(df.columns)[:60]}")
+        return {}
+    missing = [k for k, names, _ in spec if col(names) is None]
+    if missing:
+        print(f"    ⚠ FG columns not found for {missing}; available: {sorted(df.columns)}")
+    out = {}
+    for _, row in df.iterrows():
+        pid = pd.to_numeric(row.get(id_col), errors="coerce")
+        if pd.isna(pid):
+            continue
+        rec = {}
+        for key, names, kind in spec:
+            c = col(names)
+            v = row.get(c) if c is not None else None
+            if kind == "s":
+                rec[key] = None if v is None or (isinstance(v, float) and math.isnan(v)) else str(v)
+                continue
+            n = pd.to_numeric(v, errors="coerce")
+            if pd.isna(n):
+                rec[key] = None
+            elif kind == "i":
+                rec[key] = int(round(float(n)))
+            elif kind == "pct":
+                x = float(n)
+                rec[key] = round(x * 100.0 if abs(x) <= 1.5 else x, 1)   # FG sends decimals; tolerate percents
+            elif kind == "f2":
+                rec[key] = round(float(n), 2)
+            elif kind == "f3":
+                rec[key] = round(float(n), 3)
+            else:
+                rec[key] = round(float(n), 1)
+        out[str(int(pid))] = rec
+    return out
+
+
+def build_counting_stats(year, output_dir):
+    """Write counting_stats_{year}.json; leaves an existing file alone when
+    FanGraphs returns nothing (e.g. CI without cookies)."""
+    hit = _counting_records(fetch_fangraphs_counting(year, "bat"), _COUNTING_HITTER_COLS)
+    time.sleep(FETCH_DELAY)
+    pit = _counting_records(fetch_fangraphs_counting(year, "pit"), _COUNTING_PITCHER_COLS)
+    if not hit and not pit:
+        print("  ⚠ No FanGraphs season lines — counting_stats file not written")
+        return None
+    out = {
+        "season": year,
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "hitters": hit,
+        "pitchers": pit,
+    }
+    path = os.path.join(output_dir, f"counting_stats_{year}.json")
+    with open(path, "w") as f:
+        json.dump(out, f, separators=(",", ":"), default=str)
+    print(f"  → Wrote {path} ({len(hit)} hitters, {len(pit)} pitchers)")
+    return out
+
+
 # MAIN PIPELINE
 # ============================================================
 
@@ -1553,6 +1716,12 @@ def run_pipeline(seasons, output_dir):
         with open(fpath, "w") as f:
             json.dump(output, f, indent=2, default=str)
         print(f"\n  → Wrote {fpath} ({len(hitters)} hitters, {len(pitchers)} pitchers)")
+
+        # ── Season totals (FanGraphs) for the counting-stats table ──
+        try:
+            build_counting_stats(year, output_dir)
+        except Exception as e:
+            print(f"  ⚠ Counting stats failed: {e}")
 
         # ── Fielding sub-pipeline ──
         try:

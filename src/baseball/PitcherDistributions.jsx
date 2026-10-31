@@ -96,7 +96,10 @@ async function scoreWindow(playerId, season, dateFrom, dateTo, xLo, xHi, nPts) {
 // curve per pitch type (colored by PITCH_COLORS), all on a shared x-scale. A date
 // range recomputes the curves for that window; otherwise the precomputed season
 // file is used. MLB only (no AAA grades).
-export default function PitcherDistributions({ playerId, season, isAAA = false, dateFrom = "", dateTo = "" }) {
+// `showTitle=false` drops the panel heading (the side panel on the pitcher card
+// shows none on the site); `compact` lays the four curves per hand out 2×2 at a
+// smaller size so the block fits a ~400px column.
+export default function PitcherDistributions({ playerId, season, isAAA = false, dateFrom = "", dateTo = "", showTitle = true, compact = false }) {
   const { theme: t } = useTheme();
   const [state, setState] = useState({ loading: true, entry: null, meta: null });
   const [win, setWin] = useState({ loading: false, entry: null });
@@ -159,7 +162,7 @@ export default function PitcherDistributions({ playerId, season, isAAA = false, 
       <KdeCurve
         curves={curves}
         xLo={xLo} xHi={xHi}
-        width={240} height={124}
+        width={compact ? 190 : 240} height={compact ? 110 : 124}
         fill
         refLines={[{ x: 100, dashed: true, color: t.textFaint }]}
         title={mLabel}
@@ -168,18 +171,20 @@ export default function PitcherDistributions({ playerId, season, isAAA = false, 
   };
 
   return (
-    <div style={{ maxWidth: 1040, margin: "16px auto 0", padding: "0 12px" }}>
-      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: t.textMuted, textAlign: "center", marginBottom: 6 }}>
-        Grade Distributions by Pitch Type{windowed ? "  ·  date range" : ranged && isAAA ? "  ·  season" : ""}
-      </div>
+    <div style={compact ? { padding: "10px 8px 6px" } : { maxWidth: 1040, margin: "16px auto 0", padding: "0 12px" }}>
+      {showTitle && (
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: t.textMuted, textAlign: "center", marginBottom: 6 }}>
+          Grade Distributions by Pitch Type{windowed ? "  ·  date range" : ranged && isAAA ? "  ·  season" : ""}
+        </div>
+      )}
       <PitchTypeLegend types={types} />
-      {/* 4 metrics across × 2 rows: vs LHH on top, vs RHH below */}
+      {/* 4 metrics across × 2 rows (2×2 per hand when compact): vs LHH on top, vs RHH below */}
       {HANDS.map(([h, hLabel]) => (
         <div key={h} style={{ marginTop: 10 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", color: t.textSecondary, textAlign: "center", margin: "2px 0 4px" }}>
-            {hLabel}
+            {hLabel}{compact && (windowed ? " · date range" : ranged && isAAA ? " · season" : "")}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "8px 14px", justifyItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: compact ? "repeat(2, minmax(0, 1fr))" : "repeat(auto-fit, minmax(190px, 1fr))", gap: compact ? "6px 8px" : "8px 14px", justifyItems: "center" }}>
             {METRICS.map(([m, mLabel]) => (
               <div key={m} style={{ width: "100%", display: "flex", justifyContent: "center" }}>
                 {fig(m, mLabel, h)}

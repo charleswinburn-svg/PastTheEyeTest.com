@@ -90,8 +90,6 @@ const TABS = [
       { id: "pitcher_game", label: "Pitcher Game" },
       { id: "pitcher_season", label: "Pitcher Season" },
       { id: "pitcher_plinko", label: "Pitcher Plinko" },
-      { id: "hitter_game", label: "Hitter Game" },
-      { id: "hitter_season", label: "Hitter Season" },
       { id: "hitter_plinko", label: "Hitter Plinko" },
       { id: "hitter_iswing", label: "Hitter iSwing+", isNew: true },
       { id: "pitcher_stuff_wf", label: "Pitcher Stuff+", isNew: true },
@@ -383,7 +381,8 @@ function BaseballApp() {
   const aaaReady = !!aaaData;
 
   // Helper to check if tab is active (handles dropdown sub-items)
-  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_plinko", "hitter_game", "hitter_season", "hitter_plinko", "hitter_iswing", "pitcher_stuff_wf"].includes(id);
+  // (Hitter Game / Hitter Season summaries were folded into the hitter card's batted-ball panel.)
+  const isSummaryTab = (id) => ["pitcher_game", "pitcher_season", "pitcher_plinko", "hitter_plinko", "hitter_iswing", "pitcher_stuff_wf"].includes(id);
   const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
   const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
   const isLeaderboardTab = (id) => ["hitter_lb", "hitter_xrv_lb", "pitcher_lb", "pitch_modeling_lb", "proj_movers"].includes(id);
@@ -777,7 +776,8 @@ function BaseballApp() {
       {/* ── Content ── */}
       <div style={{
         padding: isSummaryTab(tab) ? 0 : isMobile ? "12px 24px" : 24,
-        maxWidth: tab.includes("lb") || tab.startsWith("proj_") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : (tab === "hitter" || tab === "pitcher" || tab === "pitcher_aaa") ? 1100 : 640,
+        // The MLB pitcher card gets room for its side panels (release diagram + distributions) beside the card.
+        maxWidth: tab.includes("lb") || tab.startsWith("proj_") || tab === "race2k" || tab === "team_plots" ? 1200 : isSummaryTab(tab) ? 1200 : tab === "evla" ? 780 : tab === "pitcher" ? 1540 : (tab === "hitter" || tab === "pitcher_aaa") ? 1100 : 640,
         margin: "0 auto",
       }}>
         {tab === "hitter" && (

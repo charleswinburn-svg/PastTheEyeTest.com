@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
-import { fetchGameLog, fetchSavantPlayerSeason } from "./mlbApi.js";
+import { fetchGameLog, fetchSavantPlayerSeasonCached } from "./mlbApi.js";
 import { saveCardAsPng, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import { mmddFromDate } from "./kde.js";
 import { loadISwingGames, iswingScore, ISWING_MIN_SWINGS } from "./iswingGames.js";
@@ -454,7 +454,7 @@ export default function RollingChart({ playerId, playerName, season, type, cardM
         for (let s = yr; s > yr - 5 && regTotal < target; s--) {
           const [log, savantRows, iswGames] = await Promise.all([
             fetchGameLog(playerId, s, group, 1, "R"),
-            fetchSavantPlayerSeason(playerId, s, savantType).catch(() => []),
+            fetchSavantPlayerSeasonCached(playerId, s, savantType),
             type === "pitcher" ? null : loadISwingGames(s),
           ]);
           if (cancelled) return;
