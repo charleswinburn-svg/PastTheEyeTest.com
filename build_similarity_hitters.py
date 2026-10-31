@@ -299,6 +299,8 @@ def main():
     ap.add_argument("--merged", default="public/merged_stats.csv")
     ap.add_argument("--parquet", default=None, help="season Statcast parquet (adds xSLGcon)")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--allow-fallback", action="store_true",
+                    help="overwrite a file built from competitive swings with a Savant-leaderboard fallback build")
     args = ap.parse_args()
 
     swings = args.swings
@@ -306,6 +308,18 @@ def main():
         swings = [f"competitive_swings_{args.year}.csv"] + sorted(glob.glob("competitive_swings_20*_20*.csv"))
     players, meta = build(args.year, args.public, swings, args.merged, args.parquet)
     out = args.out or str(Path(args.public) / f"similarity_hitters_{args.year}.json")
+    # Never downgrade: if the existing file was built from competitive swings and this
+    # build had no per-swing CSV (leaderboard fallback), keep the existing file.
+    if os.path.exists(out) and not args.allow_fallback:
+        try:
+            prev = json.load(open(out)).get("meta", {}).get("sources", {}).get("swing_traits", {})
+        except Exception:
+            prev = {}
+        if prev.get("competitive_swings", 0) > 0 and meta["sources"]["swing_traits"]["competitive_swings"] == 0:
+            print(f"  REFUSING to overwrite {out}: it was built from competitive swings "
+                  f"({prev['competitive_swings']} hitters) and this build has no per-swing CSV for {args.year}. "
+                  f"Run where competitive_swings_{args.year}.csv exists, or pass --allow-fallback.")
+            return
     write_similarity_json(out, season=args.year, kind="hitter", players=players, meta=meta)
     present = {c: len(m["features"]) for c, m in meta["components"].items()}
     print(f"Wrote {out}: {len(players)} hitters, features per component {present}, calib {meta['calib']}")
