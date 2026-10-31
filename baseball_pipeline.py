@@ -1643,12 +1643,18 @@ def _counting_records(df, spec):
             c = col(names)
             v = row.get(c) if c is not None else None
             if kind == "s":
-                if v is None or (isinstance(v, float) and math.isnan(v)):
-                    rec[key] = None
-                else:
-                    # FG's "Team" is an HTML link (<a href=…>CHC</a>); keep the text only
-                    txt = _re.sub(r"<[^>]+>", "", str(v)).strip()
-                    rec[key] = txt or None
+                # Try each candidate column per row (TeamName, then Team …) and keep the
+                # first non-empty value; FG's "Team" is an HTML link, so strip the tags.
+                rec[key] = None
+                for n in names:
+                    cn = lower.get(n.lower())
+                    val = row.get(cn) if cn is not None else None
+                    if val is None or (isinstance(val, float) and math.isnan(val)):
+                        continue
+                    txt = _re.sub(r"<[^>]+>", "", str(val)).strip()
+                    if txt:
+                        rec[key] = txt
+                        break
                 continue
             n = pd.to_numeric(v, errors="coerce")
             if pd.isna(n):
