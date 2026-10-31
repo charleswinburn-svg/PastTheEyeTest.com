@@ -68,7 +68,7 @@ const DEFAULT_PLAYER = "Shohei Ohtani";
 const TABS = [
   {
     id: "hitter",
-    label: "HITTER CARD",
+    label: "HITTERS",
     dropdown: [
       { id: "hitter",     label: "MLB" },
       { id: "hitter_aaa", label: "AAA" },
@@ -76,7 +76,7 @@ const TABS = [
   },
   {
     id: "pitcher",
-    label: "PITCHER CARD",
+    label: "PITCHERS",
     dropdown: [
       { id: "pitcher",     label: "MLB" },
       { id: "pitcher_aaa", label: "AAA" },
