@@ -275,8 +275,6 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
         {sh && (
           <g>
             <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(r.x)} y2={Y(r.z)} stroke={color} strokeWidth={9} strokeLinecap="round" opacity={0.9} />
-            {/* short jersey sleeve at the throwing shoulder */}
-            <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(sh.x + 0.32 * Math.cos(thm))} y2={Y(sh.z + 0.32 * Math.sin(thm))} stroke={uni} strokeWidth={12} strokeLinecap="round" />
             <circle cx={X(sh.x)} cy={Y(sh.z)} r={6} fill={color} stroke={color} strokeWidth={2} />
             {/* arm-angle arc, opening toward the arm side (screen left for RHP, right for LHP) */}
             <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(sh.x) + dir * (arcRad + 8)} y2={Y(sh.z)} stroke={color} strokeWidth={0.8} strokeDasharray="2 2" />
