@@ -48,6 +48,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/mlb-logos/, ''),
       },
+      '/mlb-static': {
+        target: 'https://www.mlbstatic.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/mlb-static/, ''),
+      },
       '/savant-api': {
         target: 'https://baseballsavant.mlb.com',
         changeOrigin: true,

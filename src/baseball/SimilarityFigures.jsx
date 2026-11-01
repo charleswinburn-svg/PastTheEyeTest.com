@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
-import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { NUM_FONT, NUM_WEIGHT, MLB_TEAM_PRIMARY, MLB_TEAM_SECONDARY } from "./SharedComponents.jsx";
+import { loadCapLogo, teamIdFor } from "./teamAssets.js";
 import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
 
 // ═══════════════════════════════════════════════════════════
@@ -92,6 +94,20 @@ function releaseOf(p) {
 
 export function ReleaseDiagram({ p, accent, width = 360 }) {
   const { theme: t } = useTheme();
+  // Uniform: the pitcher's team colors, cap logo from MLB's CDN (as a data URL so
+  // PNG exports include it); neutral navy/grey when there's no MLB team.
+  const teamKey = String(p?.team || "").trim().toUpperCase();
+  const hasTeam = !!teamIdFor(teamKey);
+  const [capLogo, setCapLogo] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    setCapLogo(null);
+    if (hasTeam) loadCapLogo(teamKey).then(u => { if (!cancelled) setCapLogo(u); });
+    return () => { cancelled = true; };
+  }, [teamKey, hasTeam]);
+  const uni = (hasTeam && MLB_TEAM_PRIMARY[teamKey]) || "#1f2a44";
+  let trim = (hasTeam && MLB_TEAM_SECONDARY[teamKey]) || "#c8ced8";
+  if (trim.toLowerCase() === uni.toLowerCase()) trim = "#e5e7eb";
   const S = 34;                     // px per ft (±5.3 ft across: room for 4.5 ft release sides)
   const Z0 = -1.1;                  // ft at the bottom edge (room for the slope)
   const H = 10.0;                   // ft of height shown (headroom for over-the-top releases)
@@ -204,29 +220,63 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
             <text x={10} y={Y(z) + 3} style={txt}>{z} ft</text>
           </g>
         ))}
-        {/* body */}
-        <g fill={skin} opacity={0.85}>
-          <g opacity={0.85}>
-            {limb({ x: hip.x + 0.25, z: hip.z }, backKnee, 10, skinBack)}
-            {limb(backKnee, backFoot, 9, skinBack)}
-            <ellipse cx={X(backFoot.x)} cy={Y(backFoot.z)} rx={0.26 * S} ry={0.11 * S} fill={skinBack} />
-          </g>
-          <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z) + 6} rx={0.42 * S} ry={0.1 * S} fill="#000" opacity={0.25} />
-          {limb({ x: hip.x - 0.25, z: hip.z }, leadKnee, 13)}
-          {limb(leadKnee, leadFoot, 12)}
-          <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z)} rx={0.3 * S} ry={0.17 * S} />
-          <polygon
-            points={[[gs.x + 0.12 * u.x, gs.z + 0.12 * u.z], [ts.x + 0.12 * u.x, ts.z + 0.12 * u.z], [hip.x + 0.4 * v.x, hip.z + 0.4 * v.z], [hip.x - 0.4 * v.x, hip.z - 0.4 * v.z]].map(([x, z]) => `${X(x)},${Y(z)}`).join(" ")}
-            stroke={skin} strokeWidth={10} strokeLinejoin="round" />
-          {limb(gs, gloveElbow, 8)}
-          {limb(gloveElbow, glove, 7)}
-          <circle cx={X(glove.x)} cy={Y(glove.z)} r={0.25 * S} />
-          <circle cx={X(head.x)} cy={Y(head.z)} r={headR * S} />
-        </g>
+        {/* body: team cap, jersey and glove (front view: cap brim, placket and chest logo face the catcher) */}
+        {(() => {
+          const P = (q) => `${X(q.x)},${Y(q.z)}`;
+          const leather = "#7a4a24";
+          const along = (a2, b2, f) => ({ x: a2.x + (b2.x - a2.x) * f, z: a2.z + (b2.z - a2.z) * f });
+          const edge = t.id === "dark" ? "rgba(255,255,255,0.35)" : "rgba(15,23,42,0.35)";
+          const hipL = { x: hip.x - 0.25, z: hip.z }, hipR = { x: hip.x + 0.25, z: hip.z };
+          // trunk outline (shoulders → hips); same geometry as before
+          const tr = [[gs.x + 0.12 * u.x, gs.z + 0.12 * u.z], [ts.x + 0.12 * u.x, ts.z + 0.12 * u.z], [hip.x + 0.4 * v.x, hip.z + 0.4 * v.z], [hip.x - 0.4 * v.x, hip.z - 0.4 * v.z]];
+          const placketTop = { x: shC.x + 0.05 * u.x, z: shC.z + 0.05 * u.z };
+          const buttons = [0.2, 0.42, 0.64, 0.86].map(f => along(placketTop, hip, f));
+          const logoC = { x: shC.x - 0.27 * v.x - 0.42 * u.x, z: shC.z - 0.27 * v.z - 0.42 * u.z };
+          const logoS = 0.42 * S;
+          const hr = headR * S, hx = X(head.x), hy = Y(head.z);
+          return (
+            <g>
+              {/* back leg (behind the body): bent, toe on the rubber; shaded for depth */}
+              <g opacity={0.85}>
+                {limb(hipR, backKnee, 10, skinBack)}
+                {limb(backKnee, backFoot, 9, skinBack)}
+                <ellipse cx={X(backFoot.x)} cy={Y(backFoot.z)} rx={0.26 * S} ry={0.11 * S} fill={skinBack} />
+              </g>
+              {/* lead leg: striding at the plate onto the front slope */}
+              <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z) + 6} rx={0.42 * S} ry={0.1 * S} fill="#000" opacity={0.25} />
+              {limb(hipL, leadKnee, 13)}
+              {limb(leadKnee, leadFoot, 12)}
+              <ellipse cx={X(leadFoot.x)} cy={Y(leadFoot.z)} rx={0.3 * S} ry={0.17 * S} fill={skin} />
+              {/* jersey */}
+              <polygon points={tr.map(([x, z]) => `${X(x)},${Y(z)}`).join(" ")} fill={uni} stroke={uni} strokeWidth={10} strokeLinejoin="round" />
+              <polygon points={tr.map(([x, z]) => `${X(x)},${Y(z)}`).join(" ")} fill="none" stroke={edge} strokeWidth={1} strokeLinejoin="round" />
+              {/* button placket + piping in the trim color */}
+              <line x1={X(placketTop.x)} y1={Y(placketTop.z)} x2={X(hip.x)} y2={Y(hip.z)} stroke={trim} strokeWidth={2.2} />
+              {buttons.map((q, i) => <circle key={i} cx={X(q.x)} cy={Y(q.z)} r={1.6} fill={trim} />)}
+              {/* chest logo (glove side, as the catcher sees it) */}
+              {capLogo && <image href={capLogo} x={X(logoC.x) - logoS / 2} y={Y(logoC.z) - logoS / 2} width={logoS} height={logoS} preserveAspectRatio="xMidYMid meet" />}
+              {/* glove arm: short jersey sleeve, then the arm; leather glove */}
+              {limb(gs, gloveElbow, 8)}
+              {limb(gloveElbow, glove, 7)}
+              {limb(gs, along(gs, gloveElbow, 0.45), 11, uni)}
+              <circle cx={X(glove.x)} cy={Y(glove.z)} r={0.25 * S} fill={leather} stroke="#4a2c14" strokeWidth={1} />
+              {/* head + cap (front view: brim faces the catcher) */}
+              <circle cx={hx} cy={hy} r={hr} fill={skin} />
+              <path d={`M ${hx - hr * 1.02} ${hy - hr * 0.05} A ${hr * 1.02} ${hr * 1.05} 0 0 1 ${hx + hr * 1.02} ${hy - hr * 0.05} Z`} fill={uni} stroke={edge} strokeWidth={0.8} />
+              <ellipse cx={hx} cy={hy - hr * 0.02} rx={hr * 1.18} ry={hr * 0.26} fill={uni} stroke={edge} strokeWidth={0.8} />
+              <circle cx={hx} cy={hy - hr * 1.06} r={hr * 0.1} fill={trim} />
+              {capLogo
+                ? <image href={capLogo} x={hx - hr * 0.42} y={hy - hr * 0.92} width={hr * 0.84} height={hr * 0.8} preserveAspectRatio="xMidYMid meet" />
+                : hasTeam && <text x={hx} y={hy - hr * 0.32} textAnchor="middle" style={{ fontSize: Math.max(7, hr * 0.5), fontWeight: 800, fill: trim, fontFamily: "inherit" }}>{teamKey}</text>}
+            </g>
+          );
+        })()}
         {/* throwing arm at the measured slot */}
         {sh && (
           <g>
             <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(r.x)} y2={Y(r.z)} stroke={color} strokeWidth={9} strokeLinecap="round" opacity={0.9} />
+            {/* short jersey sleeve at the throwing shoulder */}
+            <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(sh.x + 0.32 * Math.cos(thm))} y2={Y(sh.z + 0.32 * Math.sin(thm))} stroke={uni} strokeWidth={12} strokeLinecap="round" />
             <circle cx={X(sh.x)} cy={Y(sh.z)} r={6} fill={color} stroke={color} strokeWidth={2} />
             {/* arm-angle arc, opening toward the arm side (screen left for RHP, right for LHP) */}
             <line x1={X(sh.x)} y1={Y(sh.z)} x2={X(sh.x) + dir * (arcRad + 8)} y2={Y(sh.z)} stroke={color} strokeWidth={0.8} strokeDasharray="2 2" />
