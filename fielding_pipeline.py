@@ -189,7 +189,10 @@ def _drs_defs(section):
 
 
 def _frv_defs(section):
-    return [_m(k, lbl, k, sec, scope="player", positions=pos)
+    # FRV abs_runs is the same number as the ABS leaderboard's runs above
+    # average, so it only stands in when that leaderboard is missing.
+    fb = {"frv_abs": "abs_raa"}
+    return [_m(k, lbl, k, sec, scope="player", positions=pos, fallback_for=fb.get(k))
             for k, lbl, _c, pos, sec in FRV_COMPONENTS if sec == section]
 
 
@@ -222,6 +225,14 @@ CATCHER_METRICS = [m for m in _OVERALL if m["key"] != "oaa"] + [
     _m("blocks",        "Blocks Above Average", "blocks_above_average", "Blocking"),
     _m("bp_blk",        "BP Blocking Runs",    "bp_blk", "Blocking"),
     *_drs_defs("Blocking"),
+    # ABS challenge system (2026+), Savant abs-challenges leaderboard, catcher view.
+    _m("abs_raa",    "ABS Challenge Runs",    "abs_raa",    "ABS"),
+    _m("abs_ovr",    "Overturn%",             "abs_ovr",    "ABS", mult=100),
+    _m("abs_ovr_x",  "Overturn% vs Expected", "abs_ovr_x",  "ABS", mult=100),
+    _m("abs_k",      "Strikeouts Flipped",    "abs_k",      "ABS"),
+    _m("abs_bb",     "Walks Flipped",         "abs_bb",     "ABS"),
+    _m("abs_raa_vs", "Opp. Challenge Runs",   "abs_raa_vs", "ABS", lower_better=True),
+    _m("abs_ovr_vs", "Opp. Overturn%",        "abs_ovr_vs", "ABS", lower_better=True, mult=100),
     *_frv_defs("ABS"),
     *_drs_defs("Other DRS"),
 ]
@@ -613,6 +624,52 @@ def fetch_savant_csaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]
     )
     df = _safe_fetch_csv(url, "Savant catcher CSAA", fetch_url, csv_to_df)
     return _apply_aliases(_ensure_id_name(df))
+
+
+def fetch_savant_abs_catchers(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
+    """ABS challenge leaderboard, catcher view (the system started in 2026).
+    Columns are per catcher: their own challenges (runs_above_average,
+    n_challenges, rate_overturns, exp_rate_overturns, n_strikeouts_flip, …)
+    and the same set *_against for challenges made against them. The CSV has
+    no player id — rows are matched to catchers by name (see _match_abs)."""
+    url = _env_url("SAVANT_ABS_URL", year) or (
+        f"https://baseballsavant.mlb.com/leaderboard/abs-challenges"
+        f"?year={year}&challengeType=catcher&csv=true"
+    )
+    df = _safe_fetch_csv(url, "Savant ABS challenges (catchers)", fetch_url, csv_to_df)
+    if df is None:
+        return None
+    df.columns = [str(c).lstrip("\ufeff") for c in df.columns]
+    if "level" in df.columns:
+        df = df[df["level"].astype(str).str.upper() == "MLB"]
+    if "year" in df.columns:
+        df = df[pd.to_numeric(df["year"], errors="coerce") == year]
+    return df.reset_index(drop=True) if len(df) else None
+
+
+def _name_key(s) -> str:
+    import unicodedata
+    s = unicodedata.normalize("NFD", _flip_name(str(s or "")))
+    s = "".join(ch for ch in s if not unicodedata.combining(ch)).lower()
+    s = re.sub(r"[.\-',]", " ", s)
+    s = re.sub(r"\b(jr|sr|ii|iii|iv)\b", " ", s)
+    return " ".join(s.split())
+
+
+# ABS leaderboard column → our src col (rates are fractions; mult=100 on display)
+_ABS_COLS = {
+    "abs_raa":    "runs_above_average",
+    "abs_ovr":    "rate_overturns",
+    "abs_k":      "n_strikeouts_flip",
+    "abs_bb":     "n_walks_flip",
+    "abs_raa_vs": "runs_above_average_against",
+    "abs_ovr_vs": "rate_overturns_against",
+}
+_ABS_SUMMARY = {   # counts / runs shown under the ABS diagram, not ranked
+    "challenges": "n_challenges", "overturns": "n_overturns", "confirms": "n_confirms",
+    "runs_gained": "runs_gained", "runs_cost": "runs_cost",
+    "challenges_against": "n_challenges_against", "overturns_against": "n_overturns_against",
+}
 
 
 def fetch_savant_catcher_blocks(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
@@ -1093,7 +1150,8 @@ def _metric_meta(ms: List[dict]) -> List[dict]:
 
 def _assemble(year: int, cells: Dict[tuple, dict], pvals: Dict[int, dict],
               inn_map: Dict[int, Dict[str, float]], team_map: Optional[Dict[int, str]] = None,
-              zones: Optional[Dict[int, dict]] = None, sources: Optional[List[str]] = None) -> dict:
+              zones: Optional[Dict[int, dict]] = None, sources: Optional[List[str]] = None,
+              extras: Optional[Dict[tuple, dict]] = None) -> dict:
     team_map = team_map or {}
     zones = zones or {}
 
@@ -1178,7 +1236,8 @@ def _assemble(year: int, cells: Dict[tuple, dict], pvals: Dict[int, dict],
                 if v is None:
                     continue
                 cats[m["key"]] = _cat(v, pools[m["key"]], m)
-            entry(pid)["positions"][pos] = {"innings": _r1(qual[pid][pos]), "categories": cats}
+            entry(pid)["positions"][pos] = {"innings": _r1(qual[pid][pos]), "categories": cats,
+                                            **((extras or {}).get((pid, pos)) or {})}
 
         # Framing zones: rate per shadow zone, percentile within qualified C.
         if pos == "C" and zones:
@@ -1276,6 +1335,7 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
     arms    = fetch_savant_arm_strength(year, fetch_url, csv_to_df)
     csaa    = fetch_savant_csaa(year, fetch_url, csv_to_df)
     blocks  = fetch_savant_catcher_blocks(year, fetch_url, csv_to_df)
+    abs_c   = fetch_savant_abs_catchers(year, fetch_url, csv_to_df)
     jump    = fetch_savant_of_jump(year, fetch_url, csv_to_df)
     catchp  = fetch_savant_of_catch_prob(year, fetch_url, csv_to_df)
     ofarm   = fetch_savant_of_arm(year, fetch_url, csv_to_df)
@@ -1451,7 +1511,42 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
 
     merge_bp(year, stamp, pvals)
 
-    return _assemble(year, cells, pvals, inn_map, team_map, zones)
+    # ABS: no ids in the CSV — match by name among players with a C cell,
+    # breaking ties (two Will Smiths) by team.
+    extras: Dict[tuple, dict] = {}
+    if abs_c is not None and "entity_name" in abs_c.columns:
+        by_name: Dict[str, List[int]] = {}
+        for (pid, pos), c in cells.items():
+            if pos == "C" and c.get("name"):
+                by_name.setdefault(_name_key(c["name"]), [])
+                if pid not in by_name[_name_key(c["name"])]:
+                    by_name[_name_key(c["name"])].append(pid)
+        matched, unmatched = 0, []
+        for _, r in abs_c.iterrows():
+            cands = by_name.get(_name_key(r.get("entity_name")), [])
+            if len(cands) > 1:
+                team = str(r.get("team_abbr") or "")
+                cands = [p for p in cands if (team_map or {}).get(p) == team
+                         or cells[(p, "C")].get("team") == team] or cands[:0]
+            if len(cands) != 1:
+                unmatched.append(str(r.get("entity_name")))
+                continue
+            cell = cells[(cands[0], "C")]
+            for src, col in _ABS_COLS.items():
+                v = _coerce(r.get(col))
+                if v is not None:
+                    cell[src] = v
+            o, x = _coerce(r.get("rate_overturns")), _coerce(r.get("exp_rate_overturns"))
+            if o is not None and x is not None:
+                cell["abs_ovr_x"] = o - x
+            extras.setdefault((cands[0], "C"), {})["abs"] = {
+                k: _r1(v) if k.startswith("runs") else int(v)
+                for k, col in _ABS_SUMMARY.items() if (v := _coerce(r.get(col))) is not None}
+            matched += 1
+        print(f"  ABS challenges matched to {matched} catchers"
+              f"{'  · unmatched: ' + str(unmatched[:12]) if unmatched else ''}")
+
+    return _assemble(year, cells, pvals, inn_map, team_map, zones, extras=extras)
 
 
 # ────────────────────────────────────────────────────────────────────────────

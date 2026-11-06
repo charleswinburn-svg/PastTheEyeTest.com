@@ -3,6 +3,7 @@ import { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import FramingZoneDiagram from "./FramingZoneDiagram.jsx";
+import ABSChallengeDiagram from "./ABSChallengeDiagram.jsx";
 
 const CATCHER_POS  = new Set(["C"]);
 const INFIELD_POS  = new Set(["1B", "2B", "3B", "SS"]);
@@ -141,15 +142,19 @@ export default function FielderCard({ player, season, fieldingData }) {
 
   const sections = buildSections(metricList, cats);
   const zones = !isAll && pos === "C" ? posData.framing_zones : null;
-  if (zones && !sections.some(s => s.name === "Framing")) {
-    sections.splice(Math.min(1, sections.length), 0, { name: "Framing", rows: [] });
-  }
+  const absChallenges = !isAll && pos === "C" ? posData.abs_challenges : null;
+  const absSummary = !isAll && pos === "C" ? posData.abs : null;
 
-  // Catcher tabs carry the most rows (framing diagram, BP, DRS, Savant), so
-  // they lay out two columns wide like the hitter / pitcher cards.
+  // Catcher tabs carry the most rows (framing, ABS, BP, DRS, Savant), so they
+  // lay out 1040px wide like the hitter / pitcher cards: every percentile bar
+  // in two balanced columns on top, the diagrams side by side underneath.
   const wide = !isAll && pos === "C";
   const cardWidth = wide ? 1040 : 600;
-  const columns = wide ? splitColumns(sections, zones) : [sections];
+  const columns = wide ? splitColumns(sections, null) : [sections];
+  const diagrams = wide ? [
+    zones && <FramingZoneDiagram key="frm" zones={zones} />,
+    (absChallenges?.length || absSummary) && <ABSChallengeDiagram key="abs" challenges={absChallenges} summary={absSummary} />,
+  ].filter(Boolean) : [];
 
   const renderSections = (secs) => secs.map((sec, i) => (
     <div key={sec.name}>
@@ -163,7 +168,6 @@ export default function FielderCard({ player, season, fieldingData }) {
           display={cat.display}
         />
       ))}
-      {sec.name === "Framing" && zones && <FramingZoneDiagram zones={zones} />}
     </div>
   ));
 
@@ -222,6 +226,17 @@ export default function FielderCard({ player, season, fieldingData }) {
         }}>
           {columns.map((col, i) => <div key={i}>{renderSections(col)}</div>)}
         </div>
+        {diagrams.length > 0 && (
+          <div style={{ padding: "4px 12px 0" }}>
+            <SectionHeader name={diagrams.length > 1 ? "Framing & ABS" : "Framing by zone"} />
+            <div style={{
+              display: "grid", gridTemplateColumns: `repeat(${diagrams.length}, minmax(0, 1fr))`,
+              columnGap: 28, alignItems: "start", justifyItems: "center",
+            }}>
+              {diagrams}
+            </div>
+          </div>
+        )}
         <div style={{
           padding: "8px 16px 10px",
           display: "flex", justifyContent: "space-between", gap: 12,
