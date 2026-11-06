@@ -153,7 +153,8 @@ export default function FielderCard({ player, season, fieldingData }) {
   const columns = wide ? splitColumns(sections, null) : [sections];
   const diagrams = wide ? [
     zones && <FramingZoneDiagram key="frm" zones={zones} />,
-    (absChallenges?.length || absSummary) && <ABSChallengeDiagram key="abs" challenges={absChallenges} summary={absSummary} />,
+    (absChallenges?.length || absSummary) && <ABSChallengeDiagram key="abs" challenges={absChallenges} summary={absSummary}
+      aboveAvg={(cats.abs_raa ?? cats.frv_abs)?.value} />,
   ].filter(Boolean) : [];
 
   const renderSections = (secs) => secs.map((sec, i) => (

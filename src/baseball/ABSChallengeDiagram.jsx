@@ -24,7 +24,10 @@ function toPx(c) {
 
 const signed = (v) => (v == null ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(2)}`);
 
-export default function ABSChallengeDiagram({ challenges, summary }) {
+// aboveAvg: Savant's runs_above_average (the card's "ABS Challenge Runs" row) —
+// results vs. what an average challenger earns on the same pitches. It can
+// differ in sign from the raw net (runs gained − runs lost), so both are shown.
+export default function ABSChallengeDiagram({ challenges, summary, aboveAvg }) {
   const { theme: t } = useTheme();
   const [active, setActive] = useState(null);
   const list = challenges || [];
@@ -32,9 +35,10 @@ export default function ABSChallengeDiagram({ challenges, summary }) {
 
   const over = summary?.overturns ?? list.filter(c => c.overturned).length;
   const total = summary?.challenges ?? list.length;
-  const net = summary?.runs_gained != null && summary?.runs_cost != null
-    ? summary.runs_gained - summary.runs_cost
-    : list.reduce((s, c) => s + (c.runs || 0), 0);
+  const gained = summary?.runs_gained ?? list.filter(c => c.overturned).reduce((s, c) => s + (c.runs || 0), 0);
+  const lost = summary?.runs_cost ?? -list.filter(c => !c.overturned).reduce((s, c) => s + (c.runs || 0), 0);
+  const net = gained - lost;
+  const num = { fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT };
   const a = active != null ? list[active] : null;
 
   return (
@@ -87,13 +91,20 @@ export default function ABSChallengeDiagram({ challenges, summary }) {
           </>
         ) : (
           <>
-            <span style={{ fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{total}</span> challenges ·{" "}
+            <span style={num}>{total}</span> challenges ·{" "}
             <span style={{ color: BLUE, fontWeight: 700 }}>● {over} overturned</span>{" "}
-            <span style={{ color: RED, fontWeight: 700 }}>● {total - over} upheld</span> · net{" "}
-            <span style={{ fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{signed(net)}</span> runs
+            <span style={{ color: RED, fontWeight: 700 }}>● {total - over} upheld</span>
+            <div>
+              Runs: <span style={num}>{signed(gained)}</span> gained,{" "}
+              <span style={num}>{signed(-lost)}</span> lost ={" "}
+              <span style={num}>{signed(net)}</span> net
+              {aboveAvg != null && (
+                <> · <span style={num}>{signed(aboveAvg)}</span> vs. an average challenger</>
+              )}
+            </div>
             {list.length > 0 && (
               <div style={{ fontSize: 10, color: t.textFaint }}>
-                hover or tap a ball for its run value (estimated by count; totals match Savant)
+                hover or tap a ball for its run value (estimated by count; adds up to the gained / lost totals)
               </div>
             )}
           </>
