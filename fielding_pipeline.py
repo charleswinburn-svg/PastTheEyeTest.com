@@ -167,10 +167,6 @@ _OVERALL = [
     _m("frv",       "FRV",  "frv_pos", "Overall"),
     _m("frv_total", "FRV",  "frv",     "Overall", scope="player"),
     _m("drp",       "DRP (BP)",                    "bp_drp", "Overall", scope="player"),
-    # BP gives catchers no range / throwing credit (always 0 / blank) — their
-    # defense is CDA, shown on the C tab — so these stay off the C card.
-    _m("rda",       "BP Range Defense Added",      "bp_rda", "Overall", scope="player", positions=NON_C),
-    _m("thr",       "BP Throwing Runs",            "bp_thr", "Overall", scope="player", positions=NON_C),
     _m("bp_cda",    "BP Catcher Defense (CDA)",    "bp_cda", "Overall", positions=CATCHER_POS),
 ]
 
@@ -182,6 +178,12 @@ def _drs_defs(section):
 def _frv_defs(section):
     return [_m(k, lbl, k, sec, positions=pos) for k, lbl, _c, pos, sec in FRV_COMPONENTS if sec == section]
 
+
+# BP's whole-player range and throwing pieces of DRP. BP gives catchers no
+# range / throwing credit (always 0 / blank) — their defense is CDA, on the C
+# tab — so these stay off the C card.
+_BP_RDA = _m("rda", "BP Range Defense Added", "bp_rda", "Range",          scope="player", positions=NON_C)
+_BP_THR = _m("thr", "BP Throwing Runs",       "bp_thr", "Arm & Throwing", scope="player", positions=NON_C)
 
 CATCHER_METRICS = [m for m in _OVERALL if m["key"] != "oaa"] + [
     _m("framing",       "Savant Framing Runs", "framing_runs", "Framing"),
@@ -209,6 +211,7 @@ INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Range"),
     *_frv_defs("Range"),
     *_drs_defs("Range"),
+    _BP_RDA,
     *_frv_defs("Receiving"),
     *_drs_defs("Receiving"),
     _m("scoops",        "Scoops",    "fg_scp", "Receiving", positions={"1B"}),
@@ -216,6 +219,7 @@ INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     _m("arm_overall",   "Arm Strength (All Throws)", "arm_strength_mph", "Arm & Throwing", scope="player"),
     *_frv_defs("Arm & Throwing"),
     *_drs_defs("Arm & Throwing"),
+    _BP_THR,
     *_drs_defs("Other DRS"),
 ]
 INFIELDER_METRICS = [m for m in INFIELDER_METRICS if not m["positions"] or m["positions"] & INFIELD_POS]
@@ -228,11 +232,13 @@ OUTFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     _m("three_star",    "3 Star Catch%",        "three_star_catch_rate",  "Range", scope="of_wide"),
     *_frv_defs("Range"),
     *_drs_defs("Range"),
+    _BP_RDA,
     _m("arm_value",     "Savant OF Arm Value",  "of_arm_value", "Arm & Throwing", scope="of_wide"),
     _m("arm_strength",  "Arm Strength",         "arm_strength_pos", "Arm & Throwing"),
     _m("arm_overall",   "Arm Strength (All Throws)", "arm_strength_mph", "Arm & Throwing", scope="player"),
     *_frv_defs("Arm & Throwing"),
     *_drs_defs("Arm & Throwing"),
+    _BP_THR,
     *_drs_defs("Other DRS"),
 ]
 OUTFIELDER_METRICS = [m for m in OUTFIELDER_METRICS if not m["positions"] or m["positions"] & OUTFIELD_POS]
@@ -256,10 +262,11 @@ ALL_METRICS = [
     _sum_def(_by_key["oaa"]),
     _sum_def(_by_key["frv"]),
     _by_key["frv_total"],
-    _by_key["drp"], _by_key["rda"], _by_key["thr"],
+    _by_key["drp"],
     _by_key["jump"], _by_key["five_star"], _by_key["four_star"], _by_key["three_star"],
     *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Range"],
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Range"],
+    _by_key["rda"],
     *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Receiving"],
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Receiving"],
     _sum_def(_by_key["scoops"]),
@@ -267,6 +274,7 @@ ALL_METRICS = [
     _by_key["arm_value"],
     *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Arm & Throwing"],
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Arm & Throwing"],
+    _by_key["thr"],
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Other DRS"],
 ]
 
