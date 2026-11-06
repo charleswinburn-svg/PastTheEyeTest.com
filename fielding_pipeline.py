@@ -243,7 +243,7 @@ INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     *_drs_defs("Receiving"),
     _m("scoops",        "Scoops",    "fg_scp", "Receiving", positions={"1B"}),
     _m("arm_strength",  "Arm Strength", "arm_strength_pos", "Arm & Throwing"),
-    _m("arm_overall",   "Arm Strength (All Throws)", "arm_strength_mph", "Arm & Throwing", scope="player"),
+    _m("arm_overall",   "Arm Strength", "arm_strength_mph", "Arm & Throwing", scope="player"),
     *_frv_defs("Arm & Throwing"),
     *_drs_defs("Arm & Throwing"),
     _BP_THR,
@@ -263,7 +263,7 @@ OUTFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     _BP_RDA,
     _m("arm_value",     "Savant OF Arm Value",  "of_arm_value", "Arm & Throwing", scope="of_wide"),
     _m("arm_strength",  "Arm Strength",         "arm_strength_pos", "Arm & Throwing"),
-    _m("arm_overall",   "Arm Strength (All Throws)", "arm_strength_mph", "Arm & Throwing", scope="player"),
+    _m("arm_overall",   "Arm Strength", "arm_strength_mph", "Arm & Throwing", scope="player"),
     *_frv_defs("Arm & Throwing"),
     *_drs_defs("Arm & Throwing"),
     _BP_THR,
@@ -1113,6 +1113,10 @@ def _assemble(year: int, cells: Dict[tuple, dict], pvals: Dict[int, dict],
         return _coerce(pvals.get(pid, {}).get(src))
 
     def on_pos_card(m, pid, pos) -> bool:
+        if m["key"] == "arm_overall":
+            # Overall arm strength only stands in when the position's own
+            # value is missing — never both rows on one card.
+            return len(qual[pid]) == 1 and _coerce(cells[(pid, pos)].get("arm_strength_pos")) is None
         if m["scope"] == "player":
             return len(qual[pid]) == 1
         if m["scope"] == "of_wide":

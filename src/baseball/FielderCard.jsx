@@ -17,13 +17,21 @@ function positionGroup(pos) {
   return null;
 }
 
+// A metric that only stands in when another row on the same card is missing
+// (overall arm strength vs the position's own arm strength).
+const FALLBACK_FOR = { arm_overall: "arm_strength" };
+const LABEL_OVERRIDE = { arm_overall: "Arm Strength" };
+
 // Rows that have a value, grouped into their sections in metric-list order.
 // Categories are keyed by metric key (older files keyed them by label).
 function buildSections(metricList, cats) {
   const sections = [];
-  for (const m of metricList) {
-    const cat = cats[m.key] ?? cats[m.label];
+  for (const raw of metricList) {
+    const cat = cats[raw.key] ?? cats[raw.label];
     if (!cat || cat.value == null) continue;
+    const primary = FALLBACK_FOR[raw.key];
+    if (primary && cats[primary]?.value != null) continue;
+    const m = LABEL_OVERRIDE[raw.key] ? { ...raw, label: LABEL_OVERRIDE[raw.key] } : raw;
     const name = m.section || "Overall";
     let sec = sections.find(s => s.name === name);
     if (!sec) { sec = { name, rows: [] }; sections.push(sec); }
