@@ -81,8 +81,8 @@ export default function ABSChallengeDiagram({ challenges, summary }) {
               {a.overturned ? "Overturned" : "Upheld"}
             </span>
             {" · "}
-            <span style={{ fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{signed(a.runs)} runs</span>
-            {a.call && ` · called ${a.call}`}{a.count && ` · ${a.count} count`}
+            <span style={{ fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>≈ {signed(a.runs)} runs</span>
+            {a.call && ` · called ${a.call}`}{a.count && ` · ${a.count} count`}{a.inning && ` · inn ${a.inning}`}
             {a.date && ` · ${a.date}`}{a.opp && ` vs ${a.opp}`}
           </>
         ) : (
@@ -91,7 +91,11 @@ export default function ABSChallengeDiagram({ challenges, summary }) {
             <span style={{ color: BLUE, fontWeight: 700 }}>● {over} overturned</span>{" "}
             <span style={{ color: RED, fontWeight: 700 }}>● {total - over} upheld</span> · net{" "}
             <span style={{ fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{signed(net)}</span> runs
-            {list.length > 0 && <div style={{ fontSize: 10, color: t.textFaint }}>hover or tap a ball for its run value</div>}
+            {list.length > 0 && (
+              <div style={{ fontSize: 10, color: t.textFaint }}>
+                hover or tap a ball for its run value (estimated by count; totals match Savant)
+              </div>
+            )}
           </>
         )}
       </div>

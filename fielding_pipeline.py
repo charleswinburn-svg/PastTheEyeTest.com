@@ -647,6 +647,148 @@ def fetch_savant_abs_catchers(year: int, fetch_url, csv_to_df) -> Optional[pd.Da
     return df.reset_index(drop=True) if len(df) else None
 
 
+# ── Per-challenge ABS data (Savant game feed) ────────────────────────────────
+# Savant's /gf feed marks each challenged pitch (is_abs_challenge) with an
+# abs_challenge block: challenging_player_type ("catcher" / "batter" /
+# "pitcher"), challenging_player_id, is_overturned, plus plate_x / plate_z,
+# sz_top / sz_bot, the count and the catcher's MLBAM id. Fetched once per
+# final regular-season game and cached in data/abs/abs_challenges_<year>.json,
+# so later runs only fetch new games.
+
+ABS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "abs")
+ABS_FIRST_YEAR = 2026     # the MLB challenge system started in 2026
+
+# Run value of each count relative to 0-0 (standard count run-expectancy
+# values), with a walk / strikeout as the terminal states. Only the relative
+# size matters: per-challenge values are scaled to Savant's season totals.
+_COUNT_RV = {(0, 0): 0.000, (1, 0): 0.038, (2, 0): 0.104, (3, 0): 0.200,
+             (0, 1): -0.043, (1, 1): -0.015, (2, 1): 0.035, (3, 1): 0.130,
+             (0, 2): -0.103, (1, 2): -0.080, (2, 2): -0.044, (3, 2): 0.053}
+_RV_WALK, _RV_K = 0.330, -0.270
+
+
+def _ball_strike_swing(balls: int, strikes: int) -> float:
+    """Runs between a ball and a strike on a pitch thrown at this count."""
+    after_ball = _RV_WALK if balls >= 3 else _COUNT_RV.get((balls + 1, strikes), 0.0)
+    after_strike = _RV_K if strikes >= 2 else _COUNT_RV.get((balls, strikes + 1), 0.0)
+    return after_ball - after_strike
+
+
+def _abs_row(r: dict, game_date: str) -> Optional[dict]:
+    a = r.get("abs_challenge") or {}
+    if a.get("is_in_progress") or r.get("plate_x") is None or r.get("plate_z") is None:
+        return None
+    final = str(r.get("call") or "")
+    over = bool(a.get("is_overturned"))
+    called = ({"B": "S", "S": "B"}.get(final, final) if over else final)
+    return {
+        "game_pk": r.get("game_pk"), "date": game_date,
+        "catcher": r.get("catcher"), "challenger": a.get("challenging_player_id"),
+        "type": a.get("challenging_player_type") or ("batter" if a.get("is_batter") else None),
+        "overturned": over, "called": called,
+        "balls": r.get("pre_balls"), "strikes": r.get("pre_strikes"),
+        "x": round(float(r["plate_x"]), 3), "z": round(float(r["plate_z"]), 3),
+        "sz_top": r.get("sz_top"), "sz_bot": r.get("sz_bot"),
+        "edge": a.get("edge_distance"), "inning": r.get("inning"),
+        "batting": r.get("team_batting"), "fielding": r.get("team_fielding"),
+    }
+
+
+def fetch_abs_challenges(year: int, http_headers: dict, workers: int = 4) -> List[dict]:
+    """Every ABS challenge of the season (all challenger types), from Savant's
+    per-game feed, cached by game."""
+    if year < ABS_FIRST_YEAR:
+        return []
+    os.makedirs(ABS_DIR, exist_ok=True)
+    path = os.path.join(ABS_DIR, f"abs_challenges_{year}.json")
+    cache = {"games": {}}
+    if os.path.exists(path):
+        try:
+            with open(path) as f:
+                cache = json.load(f)
+        except Exception as e:
+            print(f"  ⚠ ABS cache unreadable ({e}) — refetching")
+    games: Dict[str, list] = cache.setdefault("games", {})
+
+    try:
+        sched = requests.get(
+            f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&season={year}&gameType=R",
+            headers=http_headers, timeout=60).json()
+    except Exception as e:
+        print(f"  ⚠ ABS schedule fetch failed: {e} — using cached games only")
+        sched = {"dates": []}
+    final = [(str(g["gamePk"]), d.get("date"))
+             for d in sched.get("dates", []) for g in d.get("games", [])
+             if (g.get("status") or {}).get("abstractGameState") == "Final"]
+    todo = [(pk, dt) for pk, dt in dict(final).items() if pk not in games]
+    print(f"  ABS challenges: {len(final)} final games, {len(games)} cached, fetching {len(todo)}")
+
+    def one(item):
+        pk, dt = item
+        try:
+            gf = requests.get(f"https://baseballsavant.mlb.com/gf?game_pk={pk}",
+                              headers=http_headers, timeout=60).json()
+        except Exception:
+            return pk, None
+        rows = [_abs_row(r, dt) for side in ("team_home", "team_away")
+                for r in (gf.get(side) or []) if r.get("is_abs_challenge")]
+        return pk, [x for x in rows if x]
+
+    if todo:
+        from concurrent.futures import ThreadPoolExecutor
+        done = failed = 0
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            for pk, rows in ex.map(one, todo):
+                if rows is None:
+                    failed += 1
+                    continue
+                games[pk] = rows
+                done += 1
+                if done % 200 == 0:
+                    print(f"    … {done}/{len(todo)} games")
+                    with open(path, "w") as f:
+                        json.dump(cache, f, separators=(",", ":"))
+        with open(path, "w") as f:
+            json.dump(cache, f, separators=(",", ":"))
+        print(f"  ABS challenges: fetched {done} games{f', {failed} failed (retried next run)' if failed else ''}")
+    out = [r for rows in games.values() for r in rows]
+    print(f"  ABS challenges in season: {len(out)} "
+          f"({sum(1 for r in out if r.get('type') == 'catcher')} by catchers)")
+    return out
+
+
+def catcher_challenge_lists(challenges: List[dict], summaries: Dict[int, dict]) -> Dict[int, list]:
+    """Per catcher, his own challenges for the card's plot, each with a run
+    value. Overturned: weighted by the count's ball/strike swing and scaled
+    so they sum to Savant's runs_gained. Upheld: an equal share of Savant's
+    runs_cost. Without a Savant summary the unscaled count swing is used."""
+    by_c: Dict[int, list] = {}
+    for r in challenges:
+        if r.get("type") == "catcher" and r.get("challenger"):
+            by_c.setdefault(int(r["challenger"]), []).append(r)
+    out = {}
+    for pid, rows in by_c.items():
+        summ = summaries.get(pid) or {}
+        swing = [_ball_strike_swing(int(r.get("balls") or 0), int(r.get("strikes") or 0)) for r in rows]
+        won = [i for i, r in enumerate(rows) if r["overturned"]]
+        lost = [i for i, r in enumerate(rows) if not r["overturned"]]
+        raw_won = sum(swing[i] for i in won)
+        scale = (summ["runs_gained"] / raw_won) if summ.get("runs_gained") is not None and raw_won > 0 else 1.0
+        cost_each = (summ["runs_cost"] / len(lost)) if summ.get("runs_cost") is not None and lost else None
+        lst = []
+        for i, r in enumerate(rows):
+            runs = swing[i] * scale if r["overturned"] else -(cost_each if cost_each is not None else 0.0)
+            item = {"x": r["x"], "z": r["z"], "overturned": r["overturned"], "runs": round(runs, 3),
+                    "call": {"B": "Ball", "S": "Strike"}.get(r.get("called"), r.get("called")),
+                    "count": f"{r.get('balls')}-{r.get('strikes')}", "date": r.get("date"),
+                    "opp": r.get("batting"), "inning": r.get("inning")}
+            if r.get("sz_top") and r.get("sz_bot"):
+                item["sz_top"], item["sz_bot"] = round(float(r["sz_top"]), 3), round(float(r["sz_bot"]), 3)
+            lst.append(item)
+        out[pid] = sorted(lst, key=lambda c: (str(c["date"]), c["inning"] or 0))
+    return out
+
+
 def _name_key(s) -> str:
     import unicodedata
     s = unicodedata.normalize("NFD", _flip_name(str(s or "")))
@@ -1545,6 +1687,18 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
             matched += 1
         print(f"  ABS challenges matched to {matched} catchers"
               f"{'  · unmatched: ' + str(unmatched[:12]) if unmatched else ''}")
+
+    # Per-challenge plot data (catcher's own challenges), keyed by MLBAM id.
+    challenges = fetch_abs_challenges(year, http_headers)
+    if challenges:
+        summaries = {pid: (ex.get("abs") or {}) for (pid, pos), ex in extras.items() if pos == "C"}
+        lists = catcher_challenge_lists(challenges, summaries)
+        n = 0
+        for pid, lst in lists.items():
+            if (pid, "C") in cells:
+                extras.setdefault((pid, "C"), {})["abs_challenges"] = lst
+                n += 1
+        print(f"  ABS challenge plots for {n} catchers")
 
     return _assemble(year, cells, pvals, inn_map, team_map, zones, extras=extras)
 
