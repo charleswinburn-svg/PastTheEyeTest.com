@@ -40,6 +40,31 @@ function buildSections(metricList, cats) {
   return sections;
 }
 
+// Rough rendered height of a section in bar rows (header ≈ 1 row, the framing
+// diagram ≈ 9). Used to balance the two-column catcher card.
+function sectionWeight(sec, zones) {
+  return sec.rows.length + 1 + (sec.name === "Framing" && zones ? 9 : 0);
+}
+
+// Split sections into two columns with the most even heights, keeping each
+// column in the card's section order. Sections are few (< 10), so try them all.
+function splitColumns(sections, zones) {
+  const n = sections.length;
+  if (n < 2) return [sections, []];
+  const w = sections.map(s => sectionWeight(s, zones));
+  let best = null;
+  for (let mask = 1; mask < (1 << n) - 1; mask++) {
+    if (!(mask & 1)) continue;                       // Overall stays top-left
+    let l = 0, r = 0;
+    for (let i = 0; i < n; i++) (mask >> i) & 1 ? (l += w[i]) : (r += w[i]);
+    const score = Math.max(l, r);
+    if (!best || score < best.score) best = { score, mask };
+  }
+  const left = [], right = [];
+  sections.forEach((s, i) => ((best.mask >> i) & 1 ? left : right).push(s));
+  return [left, right];
+}
+
 function SectionHeader({ name, first }) {
   const { theme: t } = useTheme();
   return (
@@ -120,6 +145,28 @@ export default function FielderCard({ player, season, fieldingData }) {
     sections.splice(Math.min(1, sections.length), 0, { name: "Framing", rows: [] });
   }
 
+  // Catcher tabs carry the most rows (framing diagram, BP, DRS, Savant), so
+  // they lay out two columns wide like the hitter / pitcher cards.
+  const wide = !isAll && pos === "C";
+  const cardWidth = wide ? 1040 : 600;
+  const columns = wide ? splitColumns(sections, zones) : [sections];
+
+  const renderSections = (secs) => secs.map((sec, i) => (
+    <div key={sec.name}>
+      <SectionHeader name={sec.name} first={i === 0} />
+      {sec.rows.map(({ m, cat }) => (
+        <BubblePercentileBar
+          key={m.key}
+          label={m.label}
+          labelWidth={150}
+          pctile={cat.pctile}
+          display={cat.display}
+        />
+      ))}
+      {sec.name === "Framing" && zones && <FramingZoneDiagram zones={zones} />}
+    </div>
+  ));
+
   const posSummary = isAll
     ? Object.entries(player.combined.positions || {}).map(([p, inn]) => `${p} ${Math.round(inn)}`).join(" · ")
     : null;
@@ -151,14 +198,14 @@ export default function FielderCard({ player, season, fieldingData }) {
         </div>
       )}
 
-      <FitToWidth designWidth={600}>
+      <FitToWidth designWidth={cardWidth}>
       <div
         ref={cardRef}
         style={{
           background: t.cardBg, borderRadius: 12,
           border: `1px solid ${t.cardBorder}`, overflow: "hidden",
           boxShadow: `0 4px 24px ${t.shadow}`,
-          maxWidth: 600, margin: "0 auto",
+          maxWidth: cardWidth, margin: "0 auto",
         }}
       >
         <PlayerHeader
@@ -168,22 +215,12 @@ export default function FielderCard({ player, season, fieldingData }) {
           playerId={player.player_id}
           subtitle={buildBioSubtitle(bio, null) || `${season} | ${tabLabel} | ${innings.toFixed(0)} Innings`}
         />
-        <div style={{ padding: "8px 12px 4px" }}>
-          {sections.map((sec, i) => (
-            <div key={sec.name}>
-              <SectionHeader name={sec.name} first={i === 0} />
-              {sec.rows.map(({ m, cat }) => (
-                <BubblePercentileBar
-                  key={m.key}
-                  label={m.label}
-                  labelWidth={150}
-                  pctile={cat.pctile}
-                  display={cat.display}
-                />
-              ))}
-              {sec.name === "Framing" && zones && <FramingZoneDiagram zones={zones} />}
-            </div>
-          ))}
+        <div style={{
+          padding: "8px 12px 4px",
+          display: "grid", gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))`,
+          columnGap: 28, alignItems: "start",
+        }}>
+          {columns.map((col, i) => <div key={i}>{renderSections(col)}</div>)}
         </div>
         <div style={{
           padding: "8px 16px 10px",

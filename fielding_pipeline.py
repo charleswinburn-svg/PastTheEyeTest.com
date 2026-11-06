@@ -167,7 +167,7 @@ FG_COMPONENTS = DRS_COMPONENTS + FG_FRV_COMPONENTS
 # covered position-split elsewhere and skipped.
 #   (key, label, Savant candidates, positions, section)
 FRV_COMPONENTS = [
-    ("frv_abs",      "Savant ABS Challenge Runs", ["abs_runs"],                       CATCHER_POS, "Framing"),
+    ("frv_abs",      "Savant ABS Challenge Runs", ["abs_runs"],                       CATCHER_POS, "ABS"),
 ]
 _FRV_SKIPPED = {"total_runs", "inf_of_runs", "catching_runs", "framing_runs", "blocking_runs", "range_runs",
                 "arm_runs", "dp_runs", "throwing_runs"}
@@ -211,7 +211,6 @@ CATCHER_METRICS = [m for m in _OVERALL if m["key"] != "oaa"] + [
     _m("framing",       "Savant Framing Runs", "framing_runs", "Framing"),
     _m("shadow_strike", "Shadow Strike%",      "shadow_zone_called_strike_rate", "Framing", mult=100),
     *_drs_defs("Framing"),
-    *_frv_defs("Framing"),
     _m("bp_frm",        "BP Framing Runs",     "bp_frm", "Framing"),
     _m("arm_strength",  "Arm Strength",        "arm_strength_pos", "Arm & Throwing"),
     _m("pop_time",      "Pop Time",            "pop_time_2b_avg", "Arm & Throwing", lower_better=True),
@@ -223,6 +222,7 @@ CATCHER_METRICS = [m for m in _OVERALL if m["key"] != "oaa"] + [
     _m("blocks",        "Blocks Above Average", "blocks_above_average", "Blocking"),
     _m("bp_blk",        "BP Blocking Runs",    "bp_blk", "Blocking"),
     *_drs_defs("Blocking"),
+    *_frv_defs("ABS"),
     *_drs_defs("Other DRS"),
 ]
 CATCHER_METRICS = [m for m in CATCHER_METRICS if not m["positions"] or "C" in m["positions"]]
