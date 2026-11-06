@@ -135,6 +135,7 @@ def _m(key, label, src_col, section, scope="pos", lower_better=False,
 #   (key, label, FG candidates, positions, section, include in "All" sums)
 DRS_COMPONENTS = [
     ("drs_rpm",    "DRS Range/Positioning",   ["rPM"],                                  NON_C,                 "Range",          True),
+    ("drs_rfrp",   "DRS Positioning (rFRP)",  ["rFRP"],                                 NON_C,                 "Range",          True),
     ("drs_rrcv",   "DRS 1B Receiving",        ["rRCV", "rRec", "rRecv", "rReceiving"],  {"1B"},                "Receiving",      True),
     ("drs_rthrow", "DRS Throwing",            ["rTHR", "rThrow", "rThrowing", "rTS"],   INFIELD_POS,           "Arm & Throwing", True),
     ("drs_rgdp",   "DRS Double Plays",        ["rGDP"],                                 INFIELD_POS,           "Arm & Throwing", True),
@@ -146,25 +147,27 @@ DRS_COMPONENTS = [
     ("drs_rgfp",   "DRS Good Plays/Misplays", ["rGFP"],                                 ALL_POS,               "Other DRS",      True),
 ]
 
-# Savant Fielding Run Value components. Savant's framing and blocking runs
-# already come from their own leaderboards, so only the pieces not otherwise
-# covered are kept here. Range/arm/throwing are position-split only when the
-# per-position FRV fetch works; 1B receiving can only happen at 1B, so it is
-# attributed to the 1B cell either way.
+# Savant Fielding Run Value components. The FRV leaderboard is one row per
+# player (it ignores position filters), so these are whole-player values:
+# shown on a one-position player's card, otherwise on the "All" tab, each
+# gated to the positions it applies to. Range runs come position-split from
+# the OAA leaderboard instead (fielding_runs_prevented). Skipped FRV columns:
+# total_runs (= FRV), inf_of_runs / catching_runs (subtotals), framing_runs /
+# blocking_runs (Savant's own framing and blocking leaderboards), range_runs
+# (OAA, by position).
 #   (key, label, Savant candidates, positions, section)
 FRV_COMPONENTS = [
-    ("frv_range",     "Savant Range Runs",    ["range_runs", "runs_range", "fielding_runs_range", "oaa_runs"],               NON_C,      "Range"),
-    ("frv_receiving", "Savant 1B Receiving",  ["receiving_runs", "runs_receiving", "fielding_runs_receiving",
-                                               "first_base_receiving_runs", "receiving_run_value", "receiving"],           {"1B"},     "Receiving"),
-    ("frv_arm",       "Savant Arm Runs",      ["arm_runs", "runs_arm", "fielding_runs_arm"],                                 NON_C,      "Arm & Throwing"),
-    ("frv_throwing",  "Savant Throwing Runs", ["throwing_runs", "runs_throwing", "fielding_runs_throwing"],                   ALL_POS,    "Arm & Throwing"),
+    ("frv_arm",      "Savant Arm Runs",           ["arm_runs", "runs_arm"],           NON_C,       "Arm & Throwing"),
+    ("frv_dp",       "Savant Double Play Runs",   ["dp_runs", "double_play_runs"],    INFIELD_POS, "Arm & Throwing"),
+    ("frv_throwing", "Savant Throwing Runs",      ["throwing_runs", "runs_throwing"], CATCHER_POS, "Arm & Throwing"),
+    ("frv_abs",      "Savant ABS Challenge Runs", ["abs_runs"],                       CATCHER_POS, "Framing"),
 ]
+_FRV_SKIPPED = {"total_runs", "inf_of_runs", "catching_runs", "framing_runs", "blocking_runs", "range_runs"}
 
 _OVERALL = [
     _m("def",       "Def",  "fg_def",  "Overall"),
     _m("drs",       "DRS",  "fg_drs",  "Overall"),
     _m("oaa",       "OAA",  "outs_above_average", "Overall", positions=NON_C),
-    _m("frv",       "FRV",  "frv_pos", "Overall"),
     _m("frv_total", "FRV",  "frv",     "Overall", scope="player"),
     _m("drp",       "DRP (BP)",                    "bp_drp", "Overall", scope="player"),
     _m("bp_cda",    "BP Catcher Defense (CDA)",    "bp_cda", "Overall", positions=CATCHER_POS),
@@ -176,7 +179,12 @@ def _drs_defs(section):
 
 
 def _frv_defs(section):
-    return [_m(k, lbl, k, sec, positions=pos) for k, lbl, _c, pos, sec in FRV_COMPONENTS if sec == section]
+    return [_m(k, lbl, k, sec, scope="player", positions=pos)
+            for k, lbl, _c, pos, sec in FRV_COMPONENTS if sec == section]
+
+
+# Savant range runs: OAA converted to runs, from the per-position OAA pull.
+_SAV_RANGE = _m("frv_range", "Savant Range Runs", "frv_range", "Range", positions=NON_C)
 
 
 # BP's whole-player range and throwing pieces of DRP. BP gives catchers no
@@ -189,11 +197,12 @@ CATCHER_METRICS = [m for m in _OVERALL if m["key"] != "oaa"] + [
     _m("framing",       "Savant Framing Runs", "framing_runs", "Framing"),
     _m("shadow_strike", "Shadow Strike%",      "shadow_zone_called_strike_rate", "Framing", mult=100),
     *_drs_defs("Framing"),
+    *_frv_defs("Framing"),
     _m("bp_frm",        "BP Framing Runs",     "bp_frm", "Framing"),
     _m("arm_strength",  "Arm Strength",        "arm_strength_pos", "Arm & Throwing"),
     _m("pop_time",      "Pop Time",            "pop_time_2b_avg", "Arm & Throwing", lower_better=True),
     _m("csaa",          "Caught Stealing Above Average", "csaa", "Arm & Throwing"),
-    *[m for m in _frv_defs("Arm & Throwing") if m["key"] == "frv_throwing"],
+    *_frv_defs("Arm & Throwing"),
     *_drs_defs("Arm & Throwing"),
     _m("bp_tr",         "BP Takeoff Runs",     "bp_tr", "Arm & Throwing"),
     _m("bp_sr",         "BP Swipe Runs",       "bp_sr", "Arm & Throwing"),
@@ -208,11 +217,11 @@ INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     _m("oaa_back",      "OAA Back",  "oaa_back",  "Range"),
     _m("oaa_left",      "OAA Left",  "oaa_left",  "Range"),
     _m("oaa_right",     "OAA Right", "oaa_right", "Range"),
+    _m("oaa_success",   "OAA Success%",             "oaa_success_rate", "Range"),
     _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Range"),
-    *_frv_defs("Range"),
+    _SAV_RANGE,
     *_drs_defs("Range"),
     _BP_RDA,
-    *_frv_defs("Receiving"),
     *_drs_defs("Receiving"),
     _m("scoops",        "Scoops",    "fg_scp", "Receiving", positions={"1B"}),
     _m("arm_strength",  "Arm Strength", "arm_strength_pos", "Arm & Throwing"),
@@ -225,12 +234,13 @@ INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
 INFIELDER_METRICS = [m for m in INFIELDER_METRICS if not m["positions"] or m["positions"] & INFIELD_POS]
 
 OUTFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
+    _m("oaa_success",   "OAA Success%",             "oaa_success_rate", "Range"),
     _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Range"),
     _m("jump",          "Jump Feet vs Average", "jump_feet_vs_avg",       "Range", scope="of_wide"),
     _m("five_star",     "5 Star Catch%",        "five_star_catch_rate",   "Range", scope="of_wide"),
     _m("four_star",     "4 Star Catch%",        "four_star_catch_rate",   "Range", scope="of_wide"),
     _m("three_star",    "3 Star Catch%",        "three_star_catch_rate",  "Range", scope="of_wide"),
-    *_frv_defs("Range"),
+    _SAV_RANGE,
     *_drs_defs("Range"),
     _BP_RDA,
     _m("arm_value",     "Savant OF Arm Value",  "of_arm_value", "Arm & Throwing", scope="of_wide"),
@@ -260,19 +270,17 @@ ALL_METRICS = [
     _sum_def(_by_key["def"]),
     _sum_def(_by_key["drs"]),
     _sum_def(_by_key["oaa"]),
-    _sum_def(_by_key["frv"]),
     _by_key["frv_total"],
     _by_key["drp"],
     _by_key["jump"], _by_key["five_star"], _by_key["four_star"], _by_key["three_star"],
-    *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Range"],
+    _sum_def(_by_key["frv_range"]),
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Range"],
     _by_key["rda"],
-    *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Receiving"],
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Receiving"],
     _sum_def(_by_key["scoops"]),
     _by_key["arm_overall"],
     _by_key["arm_value"],
-    *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Arm & Throwing"],
+    *[_by_key[k] for k, *_r in FRV_COMPONENTS],
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Arm & Throwing"],
     _by_key["thr"],
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Other DRS"],
@@ -286,7 +294,10 @@ COLUMN_ALIASES = {
     "estimated_success_rate_added": ["estimated_success_rate_added", "est_success_rate_added",
                                        "estimated_success_added", "diff_success_rate",
                                        "estimated_success_rate_formatted_diff",
+                                       "diff_success_rate_formatted",
                                        "success_rate_added_estimated", "success_rate_added"],
+    # OAA leaderboard: actual catch/play success rate
+    "oaa_success_rate": ["actual_success_rate_formatted", "actual_success_rate", "success_rate"],
     "oaa_in":    ["outs_above_average_infront", "outs_above_average_in",   "oaa_in"],
     "oaa_back":  ["outs_above_average_behind",  "outs_above_average_back",  "oaa_back"],
     "oaa_left":  ["outs_above_average_lateral_toward3bline", "outs_above_average_left",  "oaa_left"],
@@ -432,6 +443,32 @@ def _env_url(env_key: str, year: int) -> Optional[str]:
     return raw.format(year=year) if "{year}" in raw else raw
 
 
+def _oaa_numeric(df: Optional[pd.DataFrame]) -> Optional[pd.DataFrame]:
+    """Savant's *_formatted columns on the OAA leaderboard are text ("85%",
+    "+3%"). Turn them into numbers in percentage points, and map
+    fielding_runs_prevented (OAA converted to runs) to Savant Range Runs —
+    position-split for free, since OAA is fetched one position at a time."""
+    if df is None:
+        return df
+    df = df.copy()
+    for c in df.columns:
+        if str(c).endswith("_formatted") and not pd.api.types.is_numeric_dtype(df[c]):
+            num = pd.to_numeric(df[c].astype(str).str.replace("%", "", regex=False)
+                                .str.replace("+", "", regex=False).str.strip(), errors="coerce")
+            if num.notna().any():
+                df[c] = num
+    for c in ("actual_success_rate_formatted", "adj_estimated_success_rate_formatted",
+              "diff_success_rate_formatted"):
+        if c in df.columns:
+            col = pd.to_numeric(df[c], errors="coerce")
+            # Fractions (0.85) → percentage points (85.0) so every rate reads the same.
+            if col.notna().any() and col.abs().max() <= 1.0:
+                df[c] = col * 100
+    if "fielding_runs_prevented" in df.columns and "frv_range" not in df.columns:
+        df["frv_range"] = pd.to_numeric(df["fielding_runs_prevented"], errors="coerce")
+    return df
+
+
 def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     """Outs Above Average leaderboard. `split=yes` does NOT actually return
     per-position rows in the CSV — every player gets one row at their
@@ -443,7 +480,7 @@ def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
         # per-position rows already.
         url = _env_url("SAVANT_OAA_URL", year)
         df = _safe_fetch_csv(url, "Savant OAA", fetch_url, csv_to_df)
-        return _apply_aliases(_ensure_id_name(df))
+        return _apply_aliases(_ensure_id_name(_oaa_numeric(df)))
 
     frames = []
     for pos_name, pos_code in POS_CODE.items():
@@ -465,7 +502,7 @@ def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
         return None
     combined = pd.concat(frames, ignore_index=True)
     print(f"    Savant OAA combined across positions: {len(combined)} rows")
-    return _apply_aliases(_ensure_id_name(combined))
+    return _apply_aliases(_ensure_id_name(_oaa_numeric(combined)))
 
 
 def _rename_frv_components(df: Optional[pd.DataFrame]) -> Optional[pd.DataFrame]:
@@ -482,7 +519,8 @@ def _rename_frv_components(df: Optional[pd.DataFrame]) -> Optional[pd.DataFrame]
                 ren[real] = key
                 break
     known = set(ren)
-    extra = [c for c in df.columns if c.lower().endswith("_runs") and c not in known]
+    extra = [c for c in df.columns if c.lower().endswith("_runs") and c not in known
+             and c.lower() not in _FRV_SKIPPED]
     print(f"    FRV components matched: {sorted(ren.values()) or 'none'}"
           f"{'  · unmatched *_runs columns: ' + str(extra) if extra else ''}")
     return df.rename(columns=ren)
@@ -513,38 +551,6 @@ def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
         print(f"    Filtered FRV to year={year}: {len(df)} rows")
     return df
 
-
-def fetch_savant_frv_by_pos(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    """FRV one position at a time, so utility players get FRV (and its
-    components) on the position that earned it. URL template comes from
-    SAVANT_FRV_POS_URL ({year} and {pos} placeholders, {pos} = Savant code
-    2–9) or a best-guess default. Returns None — caller falls back to the
-    per-player leaderboard — if any position fails, or if Savant ignored
-    the position filter (the same players come back for C and SS)."""
-    tmpl = os.environ.get("SAVANT_FRV_POS_URL", "").strip() or (
-        "https://baseballsavant.mlb.com/leaderboard/fielding-run-value"
-        "?year={year}&position={pos}&type=fielder&minInnings=0&csv=true"
-    )
-    frames, pid_sets = [], {}
-    for pos_name, pos_code in POS_CODE.items():
-        url = tmpl.format(year=year, pos=pos_code)
-        df = _safe_fetch_csv(url, f"Savant FRV pos={pos_name}", fetch_url, csv_to_df)
-        df = _frv_finish(df, year)
-        if df is None or df.empty or "player_id" not in df.columns or "frv" not in df.columns:
-            print(f"    ⚠ per-position FRV unavailable at {pos_name} — using per-player FRV")
-            return None
-        df = df.copy()
-        df["position"] = pos_name
-        df = df.rename(columns={"frv": "frv_pos"})
-        pid_sets[pos_name] = set(df["player_id"].dropna().astype(int))
-        frames.append(df)
-    c, ss = pid_sets.get("C", set()), pid_sets.get("SS", set())
-    if c and ss and len(c & ss) / max(1, min(len(c), len(ss))) > 0.3:
-        print("    ⚠ Savant ignored the FRV position filter (C and SS lists overlap) — using per-player FRV")
-        return None
-    combined = pd.concat(frames, ignore_index=True)
-    print(f"    Savant FRV by position: {len(combined)} rows")
-    return combined
 
 def fetch_savant_catcher_framing(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     url = (
@@ -1228,8 +1234,7 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
 
     # 1. Fetch all sources
     oaa     = fetch_savant_oaa(year, fetch_url, csv_to_df)
-    frv_pos = fetch_savant_frv_by_pos(year, fetch_url, csv_to_df)
-    frv     = None if frv_pos is not None else fetch_savant_frv(year, fetch_url, csv_to_df)
+    frv     = fetch_savant_frv(year, fetch_url, csv_to_df)
     framing = fetch_savant_catcher_framing(year, fetch_url, csv_to_df)
     poptime = fetch_savant_pop_time(year, fetch_url, csv_to_df)
     arms    = fetch_savant_arm_strength(year, fetch_url, csv_to_df)
@@ -1342,28 +1347,11 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
 
     # OAA: per (player, position) row directly
     merge_one(oaa, "position", [
-        "outs_above_average", "estimated_success_rate_added",
-        "oaa_in", "oaa_back", "oaa_left", "oaa_right",
+        "outs_above_average", "estimated_success_rate_added", "oaa_success_rate",
+        "oaa_in", "oaa_back", "oaa_left", "oaa_right", "frv_range",
     ])
-    # FRV: per position when Savant honoured the position filter, otherwise
-    # the per-player total goes to the whole-player slot. Components gated
-    # to a single position (1B receiving) can only have been earned there,
-    # so they land on that cell even from the per-player leaderboard.
-    if frv_pos is not None:
-        merge_one(frv_pos, "position", ["frv_pos"] + frv_comp_keys)
-    elif frv is not None:
-        merge_player(frv, ["frv"])
-        single = [(k, next(iter(pos))) for k, _l, _c, pos, _s in FRV_COMPONENTS if len(pos) == 1]
-        for _, r in frv.iterrows():
-            pid = r.get("player_id")
-            if pd.isna(pid):
-                continue
-            for k, pos in single:
-                if k in r and _coerce(r[k]) is not None and inn_map.get(int(pid), {}).get(pos, 0) > 0:
-                    _put(stamp(int(pid), pos, name=_nm(r)), r, [k])
-        dropped = [k for k, _l, _c, pos, _s in FRV_COMPONENTS if len(pos) > 1 and k in frv.columns]
-        if dropped:
-            print(f"    FRV components not position-split (skipped): {dropped}")
+    # FRV: one row per player → whole-player total and components.
+    merge_player(frv, ["frv"] + frv_comp_keys)
 
     # Catcher framing / pop / csaa / blocks → all default to C
     merge_one(framing, None, ["framing_runs", "shadow_zone_called_strike_rate"], default_pos="C")
