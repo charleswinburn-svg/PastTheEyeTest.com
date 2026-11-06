@@ -486,7 +486,7 @@ function BaseballApp() {
           // Mobile: the 8 tabs (+ their dropdown options) don't fit a phone row, so
           // collapse them into a top-right ≡ menu that lists every tab and option.
           <div style={{ position: "relative", width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }} onClick={e => e.stopPropagation()}>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", color: t.accent, whiteSpace: "nowrap", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <span style={{ flex: "1 1 auto", minWidth: 0, fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", color: t.accent, whiteSpace: "nowrap", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis" }}>
               {activeMenuLabel}
             </span>
             <button
@@ -495,15 +495,21 @@ function BaseballApp() {
               aria-expanded={menuOpen}
               style={{
                 marginLeft: "auto", flexShrink: 0,
-                display: "flex", flexDirection: "column", justifyContent: "center", gap: 4.5,
-                width: 42, height: 38, padding: "9px 8px",
+                // Plain block button + fixed-size SVG: Safari doesn't stretch flex
+                // children inside <button>, which collapsed the old span bars to 0px
+                // wide and made the menu button invisible on iPhone.
+                display: "block", WebkitAppearance: "none", appearance: "none",
+                width: 42, height: 38, minWidth: 42, padding: 0, lineHeight: 0,
                 background: menuOpen ? (t.id === "dark" ? "rgba(245,158,11,0.12)" : "rgba(234,88,12,0.1)") : "transparent",
                 border: `1px solid ${menuOpen ? t.accent : "transparent"}`, borderRadius: 8, cursor: "pointer",
+                WebkitTapHighlightColor: "transparent",
               }}
             >
-              {[0, 1, 2].map(i => (
-                <span key={i} style={{ display: "block", height: 2.5, borderRadius: 2, background: t.accent }} />
-              ))}
+              <svg width="26" height="20" viewBox="0 0 26 20" aria-hidden="true" style={{ display: "block", margin: "0 auto" }}>
+                {[2, 10, 18].map(y => (
+                  <line key={y} x1="1.5" y1={y} x2="24.5" y2={y} stroke={t.accent} strokeWidth="2.5" strokeLinecap="round" />
+                ))}
+              </svg>
             </button>
             {menuOpen && (
               <div style={{
