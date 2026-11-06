@@ -183,6 +183,11 @@ def _frv_defs(section):
             for k, lbl, _c, pos, sec in FRV_COMPONENTS if sec == section]
 
 
+# Savant 1B receiving (FRV fielding_runs_prevented_on_rec1b): per-player on
+# the FRV leaderboard, but only ever earned at 1B, so it goes on the 1B cell.
+_SAV_REC1B = _m("frv_receiving", "Savant 1B Receiving", "frv_receiving", "Receiving", positions={"1B"})
+_FRV_REC1B_COLS = ["fielding_runs_prevented_on_rec1b", "receiving_runs", "rec1b_runs"]
+
 # Savant range runs: OAA converted to runs, from the per-position OAA pull.
 _SAV_RANGE = _m("frv_range", "Savant Range Runs", "frv_range", "Range", positions=NON_C)
 
@@ -222,6 +227,7 @@ INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     _SAV_RANGE,
     *_drs_defs("Range"),
     _BP_RDA,
+    _SAV_REC1B,
     *_drs_defs("Receiving"),
     _m("scoops",        "Scoops",    "fg_scp", "Receiving", positions={"1B"}),
     _m("arm_strength",  "Arm Strength", "arm_strength_pos", "Arm & Throwing"),
@@ -276,6 +282,7 @@ ALL_METRICS = [
     _sum_def(_by_key["frv_range"]),
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Range"],
     _by_key["rda"],
+    _sum_def(_by_key["frv_receiving"]),
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Receiving"],
     _sum_def(_by_key["scoops"]),
     _by_key["arm_overall"],
@@ -518,6 +525,11 @@ def _rename_frv_components(df: Optional[pd.DataFrame]) -> Optional[pd.DataFrame]
             if real is not None and real not in ren:
                 ren[real] = key
                 break
+    for cand in _FRV_REC1B_COLS:
+        real = cols_lower.get(cand)
+        if real is not None:
+            ren[real] = "frv_receiving"
+            break
     known = set(ren)
     extra = [c for c in df.columns if c.lower().endswith("_runs") and c not in known
              and c.lower() not in _FRV_SKIPPED]
@@ -1352,6 +1364,16 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
     ])
     # FRV: one row per player → whole-player total and components.
     merge_player(frv, ["frv"] + frv_comp_keys)
+    if frv is not None and "frv_receiving" in frv.columns:
+        n_rec = 0
+        for _, r in frv.iterrows():
+            pid = r.get("player_id")
+            if pd.isna(pid) or _coerce(r.get("frv_receiving")) is None:
+                continue
+            if inn_map.get(int(pid), {}).get("1B", 0) > 0:
+                _put(stamp(int(pid), "1B", name=_nm(r)), r, ["frv_receiving"])
+                n_rec += 1
+        print(f"  Savant 1B receiving attached to {n_rec} first basemen")
 
     # Catcher framing / pop / csaa / blocks → all default to C
     merge_one(framing, None, ["framing_runs", "shadow_zone_called_strike_rate"], default_pos="C")
