@@ -128,24 +128,33 @@ def _m(key, label, src_col, section, scope="pos", lower_better=False,
             "positions": set(positions) if positions else None}
 
 
-# DRS components (SIS, via FanGraphs stats=fld). FanGraphs ships one row per
-# (player, position), so every component is position-split. Candidates are
-# the FG column names; the first one present wins. Unmatched r* columns are
-# logged on each run so new SIS component names can be added here.
+# SIS components, via FanGraphs stats=fld (one row per player-position, so
+# all position-split). Verified against the 2026 data: DRS = rPM + rGFP +
+# rGDP + rARM + rSB + rSZ + rCERA (rTS is all zero; FG ships no DRS receiving
+# or bunt column). The *FRP columns are a separate SIS total, FRP = rFRP +
+# aFRP + bFRP + cFRP + dFRP + fFRP + tFRP, with each letter's meaning read
+# from the positions it is non-zero at (c = 1B only, b/f/t = C only, …).
+# Unmatched r* / *FRP columns are logged on each run.
 #   (key, label, FG candidates, positions, section, include in "All" sums)
 DRS_COMPONENTS = [
-    ("drs_rpm",    "DRS Range/Positioning",   ["rPM"],                                  NON_C,                 "Range",          True),
-    ("drs_rfrp",   "DRS Positioning (rFRP)",  ["rFRP"],                                 NON_C,                 "Range",          True),
-    ("drs_rrcv",   "DRS 1B Receiving",        ["rRCV", "rRec", "rRecv", "rReceiving"],  {"1B"},                "Receiving",      True),
-    ("drs_rthrow", "DRS Throwing",            ["rTHR", "rThrow", "rThrowing", "rTS"],   INFIELD_POS,           "Arm & Throwing", True),
-    ("drs_rgdp",   "DRS Double Plays",        ["rGDP"],                                 INFIELD_POS,           "Arm & Throwing", True),
-    ("drs_rarm",   "DRS OF Arm",              ["rARM"],                                 OUTFIELD_POS,          "Arm & Throwing", True),
-    ("drs_rsb",    "DRS Stolen Bases",        ["rSB"],                                  CATCHER_POS,           "Arm & Throwing", False),
-    ("drs_rsz",    "DRS Framing",             ["rSZ"],                                  CATCHER_POS,           "Framing",        False),
-    ("drs_rcera",  "DRS Catcher ERA",         ["rCERA"],                                CATCHER_POS,           "Other DRS",      False),
-    ("drs_rbunt",  "DRS Bunts",               ["rBU", "rBunt", "rBunts"],               {"C", "1B", "3B"},     "Other DRS",      True),
-    ("drs_rgfp",   "DRS Good Plays/Misplays", ["rGFP"],                                 ALL_POS,               "Other DRS",      True),
+    ("drs_rpm",    "DRS Range/Positioning",   ["rPM"],   NON_C,        "Range",          True),
+    ("drs_rgdp",   "DRS Double Plays",        ["rGDP"],  INFIELD_POS,  "Arm & Throwing", True),
+    ("drs_rarm",   "DRS OF Arm",              ["rARM"],  OUTFIELD_POS, "Arm & Throwing", True),
+    ("drs_rsb",    "DRS Stolen Bases",        ["rSB"],   CATCHER_POS,  "Arm & Throwing", False),
+    ("drs_rsz",    "DRS Framing",             ["rSZ"],   CATCHER_POS,  "Framing",        False),
+    ("drs_rcera",  "DRS Catcher ERA",         ["rCERA"], CATCHER_POS,  "Other DRS",      False),
+    ("drs_rgfp",   "DRS Good Plays/Misplays", ["rGFP"],  ALL_POS,      "Other DRS",      True),
 ]
+SIS_FRP_COMPONENTS = [
+    ("frp_range",  "FRP Range",               ["rFRP"],  NON_C,        "Range",          True),
+    ("frp_rec",    "FRP 1B Receiving",        ["cFRP"],  {"1B"},       "Receiving",      True),
+    ("frp_arm",    "FRP Arm",                 ["aFRP"],  NON_C,        "Arm & Throwing", True),
+    ("frp_dp",     "FRP Double Plays",        ["dFRP"],  INFIELD_POS,  "Arm & Throwing", True),
+    ("frp_throw",  "FRP Throwing",            ["tFRP"],  CATCHER_POS,  "Arm & Throwing", False),
+    ("frp_frame",  "FRP Framing",             ["fFRP"],  CATCHER_POS,  "Framing",        False),
+    ("frp_block",  "FRP Blocking",            ["bFRP"],  CATCHER_POS,  "Blocking",       False),
+]
+SIS_COMPONENTS = DRS_COMPONENTS + SIS_FRP_COMPONENTS
 
 # Savant Fielding Run Value components. The FRV leaderboard is one row per
 # player (it ignores position filters), so these are whole-player values:
@@ -167,6 +176,7 @@ _FRV_SKIPPED = {"total_runs", "inf_of_runs", "catching_runs", "framing_runs", "b
 _OVERALL = [
     _m("def",       "Def",  "fg_def",  "Overall"),
     _m("drs",       "DRS",  "fg_drs",  "Overall"),
+    _m("sis_frp",   "SIS FRP", "fg_frp", "Overall"),
     _m("oaa",       "OAA",  "outs_above_average", "Overall", positions=NON_C),
     _m("frv_total", "FRV",  "frv",     "Overall", scope="player"),
     _m("drp",       "DRP (BP)",                    "bp_drp", "Overall", scope="player"),
@@ -175,7 +185,8 @@ _OVERALL = [
 
 
 def _drs_defs(section):
-    return [_m(k, lbl, k, sec, positions=pos) for k, lbl, _c, pos, sec, _s in DRS_COMPONENTS if sec == section]
+    """DRS then FRP components for a card section (both SIS, via FanGraphs)."""
+    return [_m(k, lbl, k, sec, positions=pos) for k, lbl, _c, pos, sec, _s in SIS_COMPONENTS if sec == section]
 
 
 def _frv_defs(section):
@@ -213,6 +224,7 @@ CATCHER_METRICS = [m for m in _OVERALL if m["key"] != "oaa"] + [
     _m("bp_sr",         "BP Swipe Runs",       "bp_sr", "Arm & Throwing"),
     _m("blocks",        "Blocks Above Average", "blocks_above_average", "Blocking"),
     _m("bp_blk",        "BP Blocking Runs",    "bp_blk", "Blocking"),
+    *_drs_defs("Blocking"),
     *_drs_defs("Other DRS"),
 ]
 CATCHER_METRICS = [m for m in CATCHER_METRICS if not m["positions"] or "C" in m["positions"]]
@@ -275,22 +287,23 @@ _by_key = {m["key"]: m for m in CATCHER_METRICS + INFIELDER_METRICS + OUTFIELDER
 ALL_METRICS = [
     _sum_def(_by_key["def"]),
     _sum_def(_by_key["drs"]),
+    _sum_def(_by_key["sis_frp"]),
     _sum_def(_by_key["oaa"]),
     _by_key["frv_total"],
     _by_key["drp"],
     _by_key["jump"], _by_key["five_star"], _by_key["four_star"], _by_key["three_star"],
     _sum_def(_by_key["frv_range"]),
-    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Range"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in SIS_COMPONENTS if s and sec == "Range"],
     _by_key["rda"],
     _sum_def(_by_key["frv_receiving"]),
-    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Receiving"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in SIS_COMPONENTS if s and sec == "Receiving"],
     _sum_def(_by_key["scoops"]),
     _by_key["arm_overall"],
     _by_key["arm_value"],
     *[_by_key[k] for k, *_r in FRV_COMPONENTS],
-    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Arm & Throwing"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in SIS_COMPONENTS if s and sec == "Arm & Throwing"],
     _by_key["thr"],
-    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Other DRS"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in SIS_COMPONENTS if s and sec == "Other DRS"],
 ]
 
 # Lower-case substring → canonical column name. Used as a fuzzy fallback if
@@ -734,18 +747,20 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
     df_drs = _to_df(drs_rows)
     df_std = _to_df(std_rows)
 
-    # DRS component columns actually present in this season's response.
+    # SIS (DRS + FRP) component columns present in this season's response.
     drs_comp_ren = {}
     if df_drs is not None:
-        for key, _lbl, cands, _pos, _sec, _s in DRS_COMPONENTS:
+        for key, _lbl, cands, _pos, _sec, _s in SIS_COMPONENTS:
             real = next((c for c in cands if c in df_drs.columns), None)
             if real:
                 drs_comp_ren[real] = key
-        r_cols = [c for c in df_drs.columns
-                  if len(c) > 1 and c[0] == "r" and c[1].isupper() and c not in drs_comp_ren]
-        print(f"    FG DRS components matched: {sorted(drs_comp_ren.values()) or 'none'}")
+        if "FRP" in df_drs.columns:
+            drs_comp_ren["FRP"] = "fg_frp"
+        r_cols = [c for c in df_drs.columns if c not in drs_comp_ren and c != "rTS"
+                  and ((len(c) > 1 and c[0] == "r" and c[1].isupper()) or c.endswith("FRP"))]
+        print(f"    FG DRS/FRP components matched: {sorted(drs_comp_ren.values()) or 'none'}")
         if r_cols:
-            print(f"    FG r* columns not mapped to a DRS component: {r_cols}")
+            print(f"    FG r* / *FRP columns not mapped: {r_cols}")
 
     # Merge on (player_id, position). FG's `position`/`Pos` column keys
     # per-row. We rename only the columns we need.
@@ -1412,7 +1427,7 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
                 stamp(int(pid), pos, name=_nm(r))["arm_strength_pos"] = v
 
     # FG fielding: one row per (player, position) — Def, DRS + components, scoops
-    fg_cols = ["fg_def", "fg_drs", "fg_scp"] + [k for k, *_r in DRS_COMPONENTS]
+    fg_cols = ["fg_def", "fg_drs", "fg_frp", "fg_scp"] + [k for k, *_r in SIS_COMPONENTS]
     if fg is not None and "position" in fg.columns:
         for _, r in fg.iterrows():
             pid = r.get("player_id")
