@@ -99,25 +99,18 @@
       "scope": "pos"
     },
     {
-      "key": "frv_throwing",
-      "label": "Savant Throwing Runs",
+      "key": "drs_rsb",
+      "label": "DRS Stolen Bases",
       "lower_better": false,
       "section": "Arm & Throwing",
       "scope": "pos",
       "positions": [
-        "C",
-        "1B",
-        "2B",
-        "3B",
-        "SS",
-        "LF",
-        "CF",
-        "RF"
+        "C"
       ]
     },
     {
-      "key": "drs_rsb",
-      "label": "DRS Stolen Bases",
+      "key": "frv_throwing",
+      "label": "Savant Throwing Runs",
       "lower_better": false,
       "section": "Arm & Throwing",
       "scope": "pos",
@@ -154,6 +147,65 @@
       "scope": "pos"
     },
     {
+      "key": "abs_raa",
+      "label": "ABS Challenge Runs",
+      "lower_better": false,
+      "section": "ABS",
+      "scope": "pos"
+    },
+    {
+      "key": "abs_ovr",
+      "label": "Overturn%",
+      "lower_better": false,
+      "section": "ABS",
+      "scope": "pos"
+    },
+    {
+      "key": "abs_ovr_x",
+      "label": "Overturn% vs Expected",
+      "lower_better": false,
+      "section": "ABS",
+      "scope": "pos"
+    },
+    {
+      "key": "abs_k",
+      "label": "Strikeouts Flipped",
+      "lower_better": false,
+      "section": "ABS",
+      "scope": "pos"
+    },
+    {
+      "key": "abs_bb",
+      "label": "Walks Flipped",
+      "lower_better": false,
+      "section": "ABS",
+      "scope": "pos"
+    },
+    {
+      "key": "abs_raa_vs",
+      "label": "Opp. Challenge Runs",
+      "lower_better": true,
+      "section": "ABS",
+      "scope": "pos"
+    },
+    {
+      "key": "abs_ovr_vs",
+      "label": "Opp. Overturn%",
+      "lower_better": true,
+      "section": "ABS",
+      "scope": "pos"
+    },
+    {
+      "key": "frv_abs",
+      "label": "Savant ABS Challenge Runs",
+      "lower_better": false,
+      "section": "ABS",
+      "scope": "player",
+      "positions": [
+        "C"
+      ]
+    },
+    {
       "key": "drs_rcera",
       "label": "DRS Catcher ERA",
       "lower_better": false,
@@ -161,18 +213,6 @@
       "scope": "pos",
       "positions": [
         "C"
-      ]
-    },
-    {
-      "key": "drs_rbunt",
-      "label": "DRS Bunts",
-      "lower_better": false,
-      "section": "Other DRS",
-      "scope": "pos",
-      "positions": [
-        "C",
-        "1B",
-        "3B"
       ]
     },
     {
@@ -209,22 +249,6 @@
       "scope": "pos"
     },
     {
-      "key": "oaa",
-      "label": "OAA",
-      "lower_better": false,
-      "section": "Overall",
-      "scope": "pos",
-      "positions": [
-        "1B",
-        "2B",
-        "3B",
-        "SS",
-        "LF",
-        "CF",
-        "RF"
-      ]
-    },
-    {
       "key": "frv",
       "label": "FRV",
       "lower_better": false,
@@ -246,39 +270,20 @@
       "scope": "player"
     },
     {
-      "key": "oaa_in",
-      "label": "OAA In",
+      "key": "oaa",
+      "label": "OAA",
       "lower_better": false,
       "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "oaa_back",
-      "label": "OAA Back",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "oaa_left",
-      "label": "OAA Left",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "oaa_right",
-      "label": "OAA Right",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "esra",
-      "label": "Estimated Success% Added",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
+      "scope": "pos",
+      "positions": [
+        "1B",
+        "2B",
+        "3B",
+        "SS",
+        "LF",
+        "CF",
+        "RF"
+      ]
     },
     {
       "key": "frv_range",
@@ -329,18 +334,50 @@
       ]
     },
     {
-      "key": "frv_receiving",
-      "label": "Savant 1B Receiving",
+      "key": "oaa_in",
+      "label": "OAA In",
       "lower_better": false,
-      "section": "Receiving",
-      "scope": "pos",
-      "positions": [
-        "1B"
-      ]
+      "section": "Detailed Range",
+      "scope": "pos"
     },
     {
-      "key": "drs_rrcv",
-      "label": "DRS 1B Receiving",
+      "key": "oaa_back",
+      "label": "OAA Back",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "oaa_left",
+      "label": "OAA Left",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "oaa_right",
+      "label": "OAA Right",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "oaa_success",
+      "label": "OAA Success%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "esra",
+      "label": "Estimated Success% Added",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "frv_receiving",
+      "label": "Savant 1B Receiving",
       "lower_better": false,
       "section": "Receiving",
       "scope": "pos",
@@ -367,10 +404,23 @@
     },
     {
       "key": "arm_overall",
-      "label": "Arm Strength (All Throws)",
+      "label": "Arm Strength",
       "lower_better": false,
       "section": "Arm & Throwing",
       "scope": "player"
+    },
+    {
+      "key": "drs_rgdp",
+      "label": "DRS Double Plays",
+      "lower_better": false,
+      "section": "Arm & Throwing",
+      "scope": "pos",
+      "positions": [
+        "1B",
+        "2B",
+        "3B",
+        "SS"
+      ]
     },
     {
       "key": "frv_arm",
@@ -389,38 +439,8 @@
       ]
     },
     {
-      "key": "frv_throwing",
-      "label": "Savant Throwing Runs",
-      "lower_better": false,
-      "section": "Arm & Throwing",
-      "scope": "pos",
-      "positions": [
-        "C",
-        "1B",
-        "2B",
-        "3B",
-        "SS",
-        "LF",
-        "CF",
-        "RF"
-      ]
-    },
-    {
-      "key": "drs_rthrow",
-      "label": "DRS Throwing",
-      "lower_better": false,
-      "section": "Arm & Throwing",
-      "scope": "pos",
-      "positions": [
-        "1B",
-        "2B",
-        "3B",
-        "SS"
-      ]
-    },
-    {
-      "key": "drs_rgdp",
-      "label": "DRS Double Plays",
+      "key": "frv_dp",
+      "label": "Savant Double Play Runs",
       "lower_better": false,
       "section": "Arm & Throwing",
       "scope": "pos",
@@ -445,18 +465,6 @@
         "LF",
         "CF",
         "RF"
-      ]
-    },
-    {
-      "key": "drs_rbunt",
-      "label": "DRS Bunts",
-      "lower_better": false,
-      "section": "Other DRS",
-      "scope": "pos",
-      "positions": [
-        "C",
-        "1B",
-        "3B"
       ]
     },
     {
@@ -493,22 +501,6 @@
       "scope": "pos"
     },
     {
-      "key": "oaa",
-      "label": "OAA",
-      "lower_better": false,
-      "section": "Overall",
-      "scope": "pos",
-      "positions": [
-        "1B",
-        "2B",
-        "3B",
-        "SS",
-        "LF",
-        "CF",
-        "RF"
-      ]
-    },
-    {
       "key": "frv",
       "label": "FRV",
       "lower_better": false,
@@ -530,39 +522,20 @@
       "scope": "player"
     },
     {
-      "key": "esra",
-      "label": "Estimated Success% Added",
+      "key": "oaa",
+      "label": "OAA",
       "lower_better": false,
       "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "jump",
-      "label": "Jump Feet vs Average",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "five_star",
-      "label": "5 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "four_star",
-      "label": "4 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "three_star",
-      "label": "3 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
+      "scope": "pos",
+      "positions": [
+        "1B",
+        "2B",
+        "3B",
+        "SS",
+        "LF",
+        "CF",
+        "RF"
+      ]
     },
     {
       "key": "frv_range",
@@ -613,6 +586,48 @@
       ]
     },
     {
+      "key": "oaa_success",
+      "label": "OAA Success%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "esra",
+      "label": "Estimated Success% Added",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "jump",
+      "label": "Jump Feet vs Average",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "five_star",
+      "label": "5 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "four_star",
+      "label": "4 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "three_star",
+      "label": "3 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
       "key": "arm_value",
       "label": "Savant OF Arm Value",
       "lower_better": false,
@@ -628,10 +643,22 @@
     },
     {
       "key": "arm_overall",
-      "label": "Arm Strength (All Throws)",
+      "label": "Arm Strength",
       "lower_better": false,
       "section": "Arm & Throwing",
       "scope": "player"
+    },
+    {
+      "key": "drs_rarm",
+      "label": "DRS OF Arm",
+      "lower_better": false,
+      "section": "Arm & Throwing",
+      "scope": "pos",
+      "positions": [
+        "LF",
+        "CF",
+        "RF"
+      ]
     },
     {
       "key": "frv_arm",
@@ -644,35 +671,6 @@
         "2B",
         "3B",
         "SS",
-        "LF",
-        "CF",
-        "RF"
-      ]
-    },
-    {
-      "key": "frv_throwing",
-      "label": "Savant Throwing Runs",
-      "lower_better": false,
-      "section": "Arm & Throwing",
-      "scope": "pos",
-      "positions": [
-        "C",
-        "1B",
-        "2B",
-        "3B",
-        "SS",
-        "LF",
-        "CF",
-        "RF"
-      ]
-    },
-    {
-      "key": "drs_rarm",
-      "label": "DRS OF Arm",
-      "lower_better": false,
-      "section": "Arm & Throwing",
-      "scope": "pos",
-      "positions": [
         "LF",
         "CF",
         "RF"
@@ -728,13 +726,6 @@
       "scope": "sum"
     },
     {
-      "key": "oaa",
-      "label": "OAA",
-      "lower_better": false,
-      "section": "Overall",
-      "scope": "sum"
-    },
-    {
       "key": "frv",
       "label": "FRV",
       "lower_better": false,
@@ -756,32 +747,11 @@
       "scope": "player"
     },
     {
-      "key": "jump",
-      "label": "Jump Feet vs Average",
+      "key": "oaa",
+      "label": "OAA",
       "lower_better": false,
       "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "five_star",
-      "label": "5 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "four_star",
-      "label": "4 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "three_star",
-      "label": "3 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
+      "scope": "sum"
     },
     {
       "key": "frv_range",
@@ -814,15 +784,36 @@
       ]
     },
     {
-      "key": "frv_receiving",
-      "label": "Savant 1B Receiving",
+      "key": "jump",
+      "label": "Jump Feet vs Average",
       "lower_better": false,
-      "section": "Receiving",
-      "scope": "sum"
+      "section": "Detailed Range",
+      "scope": "of_wide"
     },
     {
-      "key": "drs_rrcv",
-      "label": "DRS 1B Receiving",
+      "key": "five_star",
+      "label": "5 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "four_star",
+      "label": "4 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "three_star",
+      "label": "3 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "frv_receiving",
+      "label": "Savant 1B Receiving",
       "lower_better": false,
       "section": "Receiving",
       "scope": "sum"
@@ -836,7 +827,7 @@
     },
     {
       "key": "arm_overall",
-      "label": "Arm Strength (All Throws)",
+      "label": "Arm Strength",
       "lower_better": false,
       "section": "Arm & Throwing",
       "scope": "player"
@@ -849,25 +840,14 @@
       "scope": "of_wide"
     },
     {
-      "key": "frv_arm",
-      "label": "Savant Arm Runs",
+      "key": "frv_abs",
+      "label": "Savant ABS Challenge Runs",
       "lower_better": false,
-      "section": "Arm & Throwing",
-      "scope": "sum"
-    },
-    {
-      "key": "frv_throwing",
-      "label": "Savant Throwing Runs",
-      "lower_better": false,
-      "section": "Arm & Throwing",
-      "scope": "sum"
-    },
-    {
-      "key": "drs_rthrow",
-      "label": "DRS Throwing",
-      "lower_better": false,
-      "section": "Arm & Throwing",
-      "scope": "sum"
+      "section": "ABS",
+      "scope": "player",
+      "positions": [
+        "C"
+      ]
     },
     {
       "key": "drs_rgdp",
@@ -879,6 +859,20 @@
     {
       "key": "drs_rarm",
       "label": "DRS OF Arm",
+      "lower_better": false,
+      "section": "Arm & Throwing",
+      "scope": "sum"
+    },
+    {
+      "key": "frv_arm",
+      "label": "Savant Arm Runs",
+      "lower_better": false,
+      "section": "Arm & Throwing",
+      "scope": "sum"
+    },
+    {
+      "key": "frv_dp",
+      "label": "Savant Double Play Runs",
       "lower_better": false,
       "section": "Arm & Throwing",
       "scope": "sum"
@@ -898,13 +892,6 @@
         "CF",
         "RF"
       ]
-    },
-    {
-      "key": "drs_rbunt",
-      "label": "DRS Bunts",
-      "lower_better": false,
-      "section": "Other DRS",
-      "scope": "sum"
     },
     {
       "key": "drs_rgfp",

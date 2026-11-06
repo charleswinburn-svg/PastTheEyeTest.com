@@ -175,7 +175,6 @@ _FRV_SKIPPED = {"total_runs", "inf_of_runs", "catching_runs", "framing_runs", "b
 _OVERALL = [
     _m("def",       "Def",  "fg_def",  "Overall"),
     _m("drs",       "DRS",  "fg_drs",  "Overall"),
-    _m("oaa",       "OAA",  "outs_above_average", "Overall", positions=NON_C),
     _m("frv",       "FRV",  "frv_pos", "Overall"),
     _m("frv_total", "FRV",  "frv",     "Overall", scope="player", fallback_for="frv_pos"),
     _m("drp",       "DRP (BP)",                    "bp_drp", "Overall", scope="player"),
@@ -238,16 +237,19 @@ CATCHER_METRICS = [m for m in _OVERALL if m["key"] != "oaa"] + [
 ]
 CATCHER_METRICS = [m for m in CATCHER_METRICS if not m["positions"] or "C" in m["positions"]]
 
+# Range: the headline range number from each source, side by side.
+# Detailed Range: the Statcast breakdowns behind OAA.
+_OAA = _m("oaa", "OAA", "outs_above_average", "Range", positions=NON_C)
+_RANGE = [_OAA, _SAV_RANGE, *_drs_defs("Range"), _BP_RDA]
+
 INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
-    _m("oaa_in",        "OAA In",    "oaa_in",    "Range"),
-    _m("oaa_back",      "OAA Back",  "oaa_back",  "Range"),
-    _m("oaa_left",      "OAA Left",  "oaa_left",  "Range"),
-    _m("oaa_right",     "OAA Right", "oaa_right", "Range"),
-    _m("oaa_success",   "OAA Success%",             "oaa_success_rate", "Range"),
-    _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Range"),
-    _SAV_RANGE,
-    *_drs_defs("Range"),
-    _BP_RDA,
+    *_RANGE,
+    _m("oaa_in",        "OAA In",    "oaa_in",    "Detailed Range"),
+    _m("oaa_back",      "OAA Back",  "oaa_back",  "Detailed Range"),
+    _m("oaa_left",      "OAA Left",  "oaa_left",  "Detailed Range"),
+    _m("oaa_right",     "OAA Right", "oaa_right", "Detailed Range"),
+    _m("oaa_success",   "OAA Success%",             "oaa_success_rate", "Detailed Range"),
+    _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Detailed Range"),
     *_drs_defs("Receiving"),
     _m("scoops",        "Scoops",    "fg_scp", "Receiving", positions={"1B"}),
     _m("arm_strength",  "Arm Strength", "arm_strength_pos", "Arm & Throwing"),
@@ -261,15 +263,13 @@ INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
 INFIELDER_METRICS = [m for m in INFIELDER_METRICS if not m["positions"] or m["positions"] & INFIELD_POS]
 
 OUTFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
-    _m("oaa_success",   "OAA Success%",             "oaa_success_rate", "Range"),
-    _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Range"),
-    _m("jump",          "Jump Feet vs Average", "jump_feet_vs_avg",       "Range", scope="of_wide"),
-    _m("five_star",     "5 Star Catch%",        "five_star_catch_rate",   "Range", scope="of_wide"),
-    _m("four_star",     "4 Star Catch%",        "four_star_catch_rate",   "Range", scope="of_wide"),
-    _m("three_star",    "3 Star Catch%",        "three_star_catch_rate",  "Range", scope="of_wide"),
-    _SAV_RANGE,
-    *_drs_defs("Range"),
-    _BP_RDA,
+    *_RANGE,
+    _m("oaa_success",   "OAA Success%",             "oaa_success_rate", "Detailed Range"),
+    _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Detailed Range"),
+    _m("jump",          "Jump Feet vs Average", "jump_feet_vs_avg",       "Detailed Range", scope="of_wide"),
+    _m("five_star",     "5 Star Catch%",        "five_star_catch_rate",   "Detailed Range", scope="of_wide"),
+    _m("four_star",     "4 Star Catch%",        "four_star_catch_rate",   "Detailed Range", scope="of_wide"),
+    _m("three_star",    "3 Star Catch%",        "three_star_catch_rate",  "Detailed Range", scope="of_wide"),
     # Same number as FRV arm runs (r = 0.99) but not position-split: fallback only.
     _m("arm_value",     "Savant OF Arm Value",  "of_arm_value", "Arm & Throwing", scope="of_wide",
        fallback_for="frv_arm"),
@@ -299,14 +299,14 @@ _by_key = {m["key"]: m for m in CATCHER_METRICS + INFIELDER_METRICS + OUTFIELDER
 ALL_METRICS = [
     _sum_def(_by_key["def"]),
     _sum_def(_by_key["drs"]),
-    _sum_def(_by_key["oaa"]),
     _sum_def(_by_key["frv"]),
     _by_key["frv_total"],
     _by_key["drp"],
-    _by_key["jump"], _by_key["five_star"], _by_key["four_star"], _by_key["three_star"],
+    _sum_def(_by_key["oaa"]),
     _sum_def(_by_key["frv_range"]),
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in FG_COMPONENTS if s and sec == "Range"],
     _by_key["rda"],
+    _by_key["jump"], _by_key["five_star"], _by_key["four_star"], _by_key["three_star"],
     *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in FG_COMPONENTS if s and sec == "Receiving"],
     _sum_def(_by_key["scoops"]),
     _by_key["arm_overall"],

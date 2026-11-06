@@ -249,22 +249,6 @@
       "scope": "pos"
     },
     {
-      "key": "oaa",
-      "label": "OAA",
-      "lower_better": false,
-      "section": "Overall",
-      "scope": "pos",
-      "positions": [
-        "1B",
-        "2B",
-        "3B",
-        "SS",
-        "LF",
-        "CF",
-        "RF"
-      ]
-    },
-    {
       "key": "frv",
       "label": "FRV",
       "lower_better": false,
@@ -286,46 +270,20 @@
       "scope": "player"
     },
     {
-      "key": "oaa_in",
-      "label": "OAA In",
+      "key": "oaa",
+      "label": "OAA",
       "lower_better": false,
       "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "oaa_back",
-      "label": "OAA Back",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "oaa_left",
-      "label": "OAA Left",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "oaa_right",
-      "label": "OAA Right",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "oaa_success",
-      "label": "OAA Success%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "esra",
-      "label": "Estimated Success% Added",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
+      "scope": "pos",
+      "positions": [
+        "1B",
+        "2B",
+        "3B",
+        "SS",
+        "LF",
+        "CF",
+        "RF"
+      ]
     },
     {
       "key": "frv_range",
@@ -374,6 +332,48 @@
         "CF",
         "RF"
       ]
+    },
+    {
+      "key": "oaa_in",
+      "label": "OAA In",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "oaa_back",
+      "label": "OAA Back",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "oaa_left",
+      "label": "OAA Left",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "oaa_right",
+      "label": "OAA Right",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "oaa_success",
+      "label": "OAA Success%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "esra",
+      "label": "Estimated Success% Added",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
     },
     {
       "key": "frv_receiving",
@@ -501,22 +501,6 @@
       "scope": "pos"
     },
     {
-      "key": "oaa",
-      "label": "OAA",
-      "lower_better": false,
-      "section": "Overall",
-      "scope": "pos",
-      "positions": [
-        "1B",
-        "2B",
-        "3B",
-        "SS",
-        "LF",
-        "CF",
-        "RF"
-      ]
-    },
-    {
       "key": "frv",
       "label": "FRV",
       "lower_better": false,
@@ -538,46 +522,20 @@
       "scope": "player"
     },
     {
-      "key": "oaa_success",
-      "label": "OAA Success%",
+      "key": "oaa",
+      "label": "OAA",
       "lower_better": false,
       "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "esra",
-      "label": "Estimated Success% Added",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "pos"
-    },
-    {
-      "key": "jump",
-      "label": "Jump Feet vs Average",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "five_star",
-      "label": "5 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "four_star",
-      "label": "4 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "three_star",
-      "label": "3 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
+      "scope": "pos",
+      "positions": [
+        "1B",
+        "2B",
+        "3B",
+        "SS",
+        "LF",
+        "CF",
+        "RF"
+      ]
     },
     {
       "key": "frv_range",
@@ -626,6 +584,48 @@
         "CF",
         "RF"
       ]
+    },
+    {
+      "key": "oaa_success",
+      "label": "OAA Success%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "esra",
+      "label": "Estimated Success% Added",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "pos"
+    },
+    {
+      "key": "jump",
+      "label": "Jump Feet vs Average",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "five_star",
+      "label": "5 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "four_star",
+      "label": "4 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "three_star",
+      "label": "3 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
     },
     {
       "key": "arm_value",
@@ -726,13 +726,6 @@
       "scope": "sum"
     },
     {
-      "key": "oaa",
-      "label": "OAA",
-      "lower_better": false,
-      "section": "Overall",
-      "scope": "sum"
-    },
-    {
       "key": "frv",
       "label": "FRV",
       "lower_better": false,
@@ -754,32 +747,11 @@
       "scope": "player"
     },
     {
-      "key": "jump",
-      "label": "Jump Feet vs Average",
+      "key": "oaa",
+      "label": "OAA",
       "lower_better": false,
       "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "five_star",
-      "label": "5 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "four_star",
-      "label": "4 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
-    },
-    {
-      "key": "three_star",
-      "label": "3 Star Catch%",
-      "lower_better": false,
-      "section": "Range",
-      "scope": "of_wide"
+      "scope": "sum"
     },
     {
       "key": "frv_range",
@@ -810,6 +782,34 @@
         "CF",
         "RF"
       ]
+    },
+    {
+      "key": "jump",
+      "label": "Jump Feet vs Average",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "five_star",
+      "label": "5 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "four_star",
+      "label": "4 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
+    },
+    {
+      "key": "three_star",
+      "label": "3 Star Catch%",
+      "lower_better": false,
+      "section": "Detailed Range",
+      "scope": "of_wide"
     },
     {
       "key": "frv_receiving",
