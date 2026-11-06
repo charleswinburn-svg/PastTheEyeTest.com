@@ -19,7 +19,7 @@ function positionGroup(pos) {
 
 // A metric that only stands in when another row on the same card is missing
 // (overall arm strength vs the position's own arm strength).
-const FALLBACK_FOR = { arm_overall: "arm_strength" };
+const FALLBACK_FOR = { arm_overall: "arm_strength", frv_total: "frv", arm_value: "frv_arm" };
 const LABEL_OVERRIDE = { arm_overall: "Arm Strength" };
 
 // Rows that have a value, grouped into their sections in metric-list order.

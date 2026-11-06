@@ -122,18 +122,24 @@ MIN_POOL = 5  # below this many peers a percentile is meaningless → N/A bar
 
 
 def _m(key, label, src_col, section, scope="pos", lower_better=False,
-       mult=None, positions=None):
+       mult=None, positions=None, fallback_for=None):
+    # fallback_for: src_col of a position-split metric this one only stands in
+    # for — it is left off any card (or All tab) where that metric has a value.
     return {"key": key, "label": label, "src_col": src_col, "section": section,
             "scope": scope, "lower_better": lower_better, "mult": mult,
-            "positions": set(positions) if positions else None}
+            "positions": set(positions) if positions else None,
+            "fallback_for": fallback_for}
 
 
-# SIS components, via FanGraphs stats=fld (one row per player-position, so
-# all position-split). Verified against the 2026 data: DRS = rPM + rGFP +
-# rGDP + rARM + rSB + rSZ + rCERA (rTS is all zero; FG ships no DRS receiving
-# or bunt column). The *FRP columns are a separate SIS total, FRP = rFRP +
-# aFRP + bFRP + cFRP + dFRP + fFRP + tFRP, with each letter's meaning read
-# from the positions it is non-zero at (c = 1B only, b/f/t = C only, …).
+# Components from FanGraphs stats=fld (one row per player-position, so all
+# position-split). Checked against the 2026 data:
+#   DRS (SIS) = rPM + rGFP + rGDP + rARM + rSB + rSZ + rCERA. rTS is all zero;
+#   FG ships no DRS receiving or bunt column.
+#   FRP and its *FRP pieces are Statcast Fielding Run Value (FRV), not SIS —
+#   they match Savant's own numbers at r = 0.95–1.00. FanGraphs is still the
+#   better source because it splits them by position, which Savant's FRV
+#   leaderboard does not. rFRP (range, = OAA runs), fFRP (framing) and bFRP
+#   (blocking) duplicate Savant's own leaderboards and are skipped.
 # Unmatched r* / *FRP columns are logged on each run.
 #   (key, label, FG candidates, positions, section, include in "All" sums)
 DRS_COMPONENTS = [
@@ -145,48 +151,41 @@ DRS_COMPONENTS = [
     ("drs_rcera",  "DRS Catcher ERA",         ["rCERA"], CATCHER_POS,  "Other DRS",      False),
     ("drs_rgfp",   "DRS Good Plays/Misplays", ["rGFP"],  ALL_POS,      "Other DRS",      True),
 ]
-SIS_FRP_COMPONENTS = [
-    ("frp_range",  "FRP Range",               ["rFRP"],  NON_C,        "Range",          True),
-    ("frp_rec",    "FRP 1B Receiving",        ["cFRP"],  {"1B"},       "Receiving",      True),
-    ("frp_arm",    "FRP Arm",                 ["aFRP"],  NON_C,        "Arm & Throwing", True),
-    ("frp_dp",     "FRP Double Plays",        ["dFRP"],  INFIELD_POS,  "Arm & Throwing", True),
-    ("frp_throw",  "FRP Throwing",            ["tFRP"],  CATCHER_POS,  "Arm & Throwing", False),
-    ("frp_frame",  "FRP Framing",             ["fFRP"],  CATCHER_POS,  "Framing",        False),
-    ("frp_block",  "FRP Blocking",            ["bFRP"],  CATCHER_POS,  "Blocking",       False),
+FG_FRV_COMPONENTS = [
+    ("frv_receiving", "Savant 1B Receiving",     ["cFRP"], {"1B"},       "Receiving",      True),
+    ("frv_arm",       "Savant Arm Runs",         ["aFRP"], NON_C,        "Arm & Throwing", True),
+    ("frv_dp",        "Savant Double Play Runs", ["dFRP"], INFIELD_POS,  "Arm & Throwing", True),
+    ("frv_throwing",  "Savant Throwing Runs",    ["tFRP"], CATCHER_POS,  "Arm & Throwing", False),
 ]
-SIS_COMPONENTS = DRS_COMPONENTS + SIS_FRP_COMPONENTS
+FG_FRV_DUPLICATES = {"rFRP", "fFRP", "bFRP"}   # = OAA range runs / Savant framing / Savant blocking
+FG_COMPONENTS = DRS_COMPONENTS + FG_FRV_COMPONENTS
 
-# Savant Fielding Run Value components. The FRV leaderboard is one row per
-# player (it ignores position filters), so these are whole-player values:
-# shown on a one-position player's card, otherwise on the "All" tab, each
-# gated to the positions it applies to. Range runs come position-split from
-# the OAA leaderboard instead (fielding_runs_prevented). Skipped FRV columns:
-# total_runs (= FRV), inf_of_runs / catching_runs (subtotals), framing_runs /
-# blocking_runs (Savant's own framing and blocking leaderboards), range_runs
-# (OAA, by position).
+# Savant's own FRV leaderboard: one row per player (it ignores position
+# filters). Its total is the fallback FRV when FanGraphs has none, and ABS
+# challenge runs exist only here. Its 1B receiving column is also attached to
+# the 1B cell as a fallback for FanGraphs' cFRP. Everything else in it is
+# covered position-split elsewhere and skipped.
 #   (key, label, Savant candidates, positions, section)
 FRV_COMPONENTS = [
-    ("frv_arm",      "Savant Arm Runs",           ["arm_runs", "runs_arm"],           NON_C,       "Arm & Throwing"),
-    ("frv_dp",       "Savant Double Play Runs",   ["dp_runs", "double_play_runs"],    INFIELD_POS, "Arm & Throwing"),
-    ("frv_throwing", "Savant Throwing Runs",      ["throwing_runs", "runs_throwing"], CATCHER_POS, "Arm & Throwing"),
     ("frv_abs",      "Savant ABS Challenge Runs", ["abs_runs"],                       CATCHER_POS, "Framing"),
 ]
-_FRV_SKIPPED = {"total_runs", "inf_of_runs", "catching_runs", "framing_runs", "blocking_runs", "range_runs"}
+_FRV_SKIPPED = {"total_runs", "inf_of_runs", "catching_runs", "framing_runs", "blocking_runs", "range_runs",
+                "arm_runs", "dp_runs", "throwing_runs"}
 
 _OVERALL = [
     _m("def",       "Def",  "fg_def",  "Overall"),
     _m("drs",       "DRS",  "fg_drs",  "Overall"),
-    _m("sis_frp",   "SIS FRP", "fg_frp", "Overall"),
     _m("oaa",       "OAA",  "outs_above_average", "Overall", positions=NON_C),
-    _m("frv_total", "FRV",  "frv",     "Overall", scope="player"),
+    _m("frv",       "FRV",  "frv_pos", "Overall"),
+    _m("frv_total", "FRV",  "frv",     "Overall", scope="player", fallback_for="frv_pos"),
     _m("drp",       "DRP (BP)",                    "bp_drp", "Overall", scope="player"),
     _m("bp_cda",    "BP Catcher Defense (CDA)",    "bp_cda", "Overall", positions=CATCHER_POS),
 ]
 
 
 def _drs_defs(section):
-    """DRS then FRP components for a card section (both SIS, via FanGraphs)."""
-    return [_m(k, lbl, k, sec, positions=pos) for k, lbl, _c, pos, sec, _s in SIS_COMPONENTS if sec == section]
+    """DRS then (Statcast) FRV components for a card section, via FanGraphs."""
+    return [_m(k, lbl, k, sec, positions=pos) for k, lbl, _c, pos, sec, _s in FG_COMPONENTS if sec == section]
 
 
 def _frv_defs(section):
@@ -194,9 +193,8 @@ def _frv_defs(section):
             for k, lbl, _c, pos, sec in FRV_COMPONENTS if sec == section]
 
 
-# Savant 1B receiving (FRV fielding_runs_prevented_on_rec1b): per-player on
-# the FRV leaderboard, but only ever earned at 1B, so it goes on the 1B cell.
-_SAV_REC1B = _m("frv_receiving", "Savant 1B Receiving", "frv_receiving", "Receiving", positions={"1B"})
+# Savant 1B receiving on the FRV leaderboard (fallback for FanGraphs' cFRP):
+# per-player, but only ever earned at 1B, so it goes on the 1B cell.
 _FRV_REC1B_COLS = ["fielding_runs_prevented_on_rec1b", "receiving_runs", "rec1b_runs"]
 
 # Savant range runs: OAA converted to runs, from the per-position OAA pull.
@@ -239,11 +237,11 @@ INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     _SAV_RANGE,
     *_drs_defs("Range"),
     _BP_RDA,
-    _SAV_REC1B,
     *_drs_defs("Receiving"),
     _m("scoops",        "Scoops",    "fg_scp", "Receiving", positions={"1B"}),
     _m("arm_strength",  "Arm Strength", "arm_strength_pos", "Arm & Throwing"),
-    _m("arm_overall",   "Arm Strength", "arm_strength_mph", "Arm & Throwing", scope="player"),
+    _m("arm_overall",   "Arm Strength", "arm_strength_mph", "Arm & Throwing", scope="player",
+       fallback_for="arm_strength_pos"),
     *_frv_defs("Arm & Throwing"),
     *_drs_defs("Arm & Throwing"),
     _BP_THR,
@@ -261,9 +259,12 @@ OUTFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
     _SAV_RANGE,
     *_drs_defs("Range"),
     _BP_RDA,
-    _m("arm_value",     "Savant OF Arm Value",  "of_arm_value", "Arm & Throwing", scope="of_wide"),
+    # Same number as FRV arm runs (r = 0.99) but not position-split: fallback only.
+    _m("arm_value",     "Savant OF Arm Value",  "of_arm_value", "Arm & Throwing", scope="of_wide",
+       fallback_for="frv_arm"),
     _m("arm_strength",  "Arm Strength",         "arm_strength_pos", "Arm & Throwing"),
-    _m("arm_overall",   "Arm Strength", "arm_strength_mph", "Arm & Throwing", scope="player"),
+    _m("arm_overall",   "Arm Strength", "arm_strength_mph", "Arm & Throwing", scope="player",
+       fallback_for="arm_strength_pos"),
     *_frv_defs("Arm & Throwing"),
     *_drs_defs("Arm & Throwing"),
     _BP_THR,
@@ -287,23 +288,22 @@ _by_key = {m["key"]: m for m in CATCHER_METRICS + INFIELDER_METRICS + OUTFIELDER
 ALL_METRICS = [
     _sum_def(_by_key["def"]),
     _sum_def(_by_key["drs"]),
-    _sum_def(_by_key["sis_frp"]),
     _sum_def(_by_key["oaa"]),
+    _sum_def(_by_key["frv"]),
     _by_key["frv_total"],
     _by_key["drp"],
     _by_key["jump"], _by_key["five_star"], _by_key["four_star"], _by_key["three_star"],
     _sum_def(_by_key["frv_range"]),
-    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in SIS_COMPONENTS if s and sec == "Range"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in FG_COMPONENTS if s and sec == "Range"],
     _by_key["rda"],
-    _sum_def(_by_key["frv_receiving"]),
-    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in SIS_COMPONENTS if s and sec == "Receiving"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in FG_COMPONENTS if s and sec == "Receiving"],
     _sum_def(_by_key["scoops"]),
     _by_key["arm_overall"],
     _by_key["arm_value"],
     *[_by_key[k] for k, *_r in FRV_COMPONENTS],
-    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in SIS_COMPONENTS if s and sec == "Arm & Throwing"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in FG_COMPONENTS if s and sec == "Arm & Throwing"],
     _by_key["thr"],
-    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in SIS_COMPONENTS if s and sec == "Other DRS"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in FG_COMPONENTS if s and sec == "Other DRS"],
 ]
 
 # Lower-case substring → canonical column name. Used as a fuzzy fallback if
@@ -750,15 +750,16 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
     # SIS (DRS + FRP) component columns present in this season's response.
     drs_comp_ren = {}
     if df_drs is not None:
-        for key, _lbl, cands, _pos, _sec, _s in SIS_COMPONENTS:
+        for key, _lbl, cands, _pos, _sec, _s in FG_COMPONENTS:
             real = next((c for c in cands if c in df_drs.columns), None)
             if real:
                 drs_comp_ren[real] = key
         if "FRP" in df_drs.columns:
-            drs_comp_ren["FRP"] = "fg_frp"
+            drs_comp_ren["FRP"] = "frv_pos"     # Statcast FRV, by position
         r_cols = [c for c in df_drs.columns if c not in drs_comp_ren and c != "rTS"
+                  and c not in FG_FRV_DUPLICATES
                   and ((len(c) > 1 and c[0] == "r" and c[1].isupper()) or c.endswith("FRP"))]
-        print(f"    FG DRS/FRP components matched: {sorted(drs_comp_ren.values()) or 'none'}")
+        print(f"    FG DRS / FRV components matched: {sorted(drs_comp_ren.values()) or 'none'}")
         if r_cols:
             print(f"    FG r* / *FRP columns not mapped: {r_cols}")
 
@@ -1113,10 +1114,10 @@ def _assemble(year: int, cells: Dict[tuple, dict], pvals: Dict[int, dict],
         return _coerce(pvals.get(pid, {}).get(src))
 
     def on_pos_card(m, pid, pos) -> bool:
-        if m["key"] == "arm_overall":
-            # Overall arm strength only stands in when the position's own
-            # value is missing — never both rows on one card.
-            return len(qual[pid]) == 1 and _coerce(cells[(pid, pos)].get("arm_strength_pos")) is None
+        # A stand-in (overall arm strength, per-player FRV) never shows next to
+        # the position-split value it stands in for.
+        if m.get("fallback_for") and _coerce(cells[(pid, pos)].get(m["fallback_for"])) is not None:
+            return False
         if m["scope"] == "player":
             return len(qual[pid]) == 1
         if m["scope"] == "of_wide":
@@ -1211,6 +1212,10 @@ def _assemble(year: int, cells: Dict[tuple, dict], pvals: Dict[int, dict],
         cats = {}
         for m in ALL_METRICS:
             if m["scope"] == "of_wide" and len(of_spots[pid]) < 2:
+                continue
+            if m.get("fallback_for") and any(
+                    s2["scope"] == "sum" and s2["src_col"] == m["fallback_for"] and comb[pid][s2["key"]] is not None
+                    for s2 in ALL_METRICS):
                 continue
             # Ranked against same-primary-position peers, so skip metrics that
             # don't apply at the primary position (e.g. OAA / BP RDA for a
@@ -1431,7 +1436,7 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
                 stamp(int(pid), pos, name=_nm(r))["arm_strength_pos"] = v
 
     # FG fielding: one row per (player, position) — Def, DRS + components, scoops
-    fg_cols = ["fg_def", "fg_drs", "fg_frp", "fg_scp"] + [k for k, *_r in SIS_COMPONENTS]
+    fg_cols = ["fg_def", "fg_drs", "frv_pos", "fg_scp"] + [k for k, *_r in FG_COMPONENTS]
     if fg is not None and "position" in fg.columns:
         for _, r in fg.iterrows():
             pid = r.get("player_id")
