@@ -2,11 +2,13 @@ import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
+import FramingZoneDiagram from "./FramingZoneDiagram.jsx";
 
 const CATCHER_POS  = new Set(["C"]);
 const INFIELD_POS  = new Set(["1B", "2B", "3B", "SS"]);
 const OUTFIELD_POS = new Set(["LF", "CF", "RF"]);
 const POS_ORDER = ["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF"];
+const ALL_TAB = "All";
 
 function positionGroup(pos) {
   if (CATCHER_POS.has(pos))  return "catcher";
@@ -15,31 +17,65 @@ function positionGroup(pos) {
   return null;
 }
 
+// Rows that have a value, grouped into their sections in metric-list order.
+// Categories are keyed by metric key (older files keyed them by label).
+function buildSections(metricList, cats) {
+  const sections = [];
+  for (const m of metricList) {
+    const cat = cats[m.key] ?? cats[m.label];
+    if (!cat || cat.value == null) continue;
+    const name = m.section || "Overall";
+    let sec = sections.find(s => s.name === name);
+    if (!sec) { sec = { name, rows: [] }; sections.push(sec); }
+    sec.rows.push({ m, cat });
+  }
+  return sections;
+}
+
+function SectionHeader({ name, first }) {
+  const { theme: t } = useTheme();
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 8,
+      margin: first ? "2px 0 6px" : "10px 0 6px",
+      fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase",
+      color: t.textFaint,
+    }}>
+      <span>{name}</span>
+      <span style={{ flex: 1, height: 1, background: t.divider }} />
+    </div>
+  );
+}
+
 export default function FielderCard({ player, season, fieldingData }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const bio = useBio(player?.player_id);
 
-  // Available positions for the selected player (those with categories)
+  // Qualified positions, plus an "All" tab for players with 2+ of them.
   const positions = useMemo(() => {
     if (!player?.positions) return [];
     return Object.keys(player.positions).sort(
       (a, b) => POS_ORDER.indexOf(a) - POS_ORDER.indexOf(b),
     );
   }, [player]);
+  const tabs = useMemo(
+    () => (positions.length > 1 && player?.combined ? [ALL_TAB, ...positions] : positions),
+    [positions, player],
+  );
 
-  const [activePos, setActivePos] = useState(positions[0] || null);
+  const [activeTab, setActiveTab] = useState(tabs[0] || null);
   useEffect(() => {
-    if (positions.length && (!activePos || !positions.includes(activePos))) {
-      setActivePos(positions[0]);
+    if (tabs.length && (!activeTab || !tabs.includes(activeTab))) {
+      setActiveTab(tabs[0]);
     }
-  }, [positions, activePos]);
+  }, [tabs, activeTab]);
 
   const saveCard = useCallback(async () => {
-    if (!player || !activePos) return;
+    if (!player || !activeTab) return;
     const safeName = (player.name || "fielder").replace(/\s+/g, "_");
-    await saveCardAsPng(cardRef, `${safeName}_${activePos}_fielder_${season}.png`);
-  }, [player, activePos, season]);
+    await saveCardAsPng(cardRef, `${safeName}_${activeTab}_fielder_${season}.png`);
+  }, [player, activeTab, season]);
 
   if (!player) {
     return (
@@ -56,27 +92,47 @@ export default function FielderCard({ player, season, fieldingData }) {
     );
   }
 
-  const posData = player.positions[activePos] || {};
+  const isAll = activeTab === ALL_TAB && !!player.combined;
+  const pos = isAll ? null : (positions.includes(activeTab) ? activeTab : positions[0]);
+  const posData = isAll ? player.combined : (player.positions[pos] || {});
   const cats = posData.categories || {};
   const innings = posData.innings || 0;
-  const group = positionGroup(activePos);
-  const metricList = (group && fieldingData?.[`${group}_metrics`]) || [];
+  let metricList;
+  if (isAll) {
+    metricList = fieldingData?.all_metrics || [];
+  } else {
+    const group = positionGroup(pos);
+    metricList = ((group && fieldingData?.[`${group}_metrics`]) || [])
+      .filter(m => !m.positions || m.positions.includes(pos));
+  }
+
+  const sections = buildSections(metricList, cats);
+  const zones = !isAll && pos === "C" ? posData.framing_zones : null;
+  if (zones && !sections.some(s => s.name === "Framing")) {
+    sections.splice(Math.min(1, sections.length), 0, { name: "Framing", rows: [] });
+  }
+
+  const posSummary = isAll
+    ? Object.entries(player.combined.positions || {}).map(([p, inn]) => `${p} ${Math.round(inn)}`).join(" · ")
+    : null;
+  const tabLabel = isAll ? `All (${posSummary})` : pos;
+  const sources = (fieldingData?.meta?.sources || ["Savant", "FanGraphs", "BP"]).join(" + ");
 
   return (
     <div>
-      {/* Position selector (only shows if player has 2+ qualified positions) */}
-      {positions.length > 1 && (
+      {/* Tab selector (only shows for players with 2+ qualified positions) */}
+      {tabs.length > 1 && (
         <div style={{ display: "flex", gap: 6, justifyContent: "center", marginBottom: 12, flexWrap: "wrap" }}>
-          {positions.map(p => (
+          {tabs.map(p => (
             <button
               key={p}
-              onClick={() => setActivePos(p)}
+              onClick={() => setActiveTab(p)}
               style={{
                 padding: "6px 14px", fontSize: 12,
-                fontWeight: activePos === p ? 700 : 600,
-                color: activePos === p ? "#fff" : t.textSecondary,
-                background: activePos === p ? t.accent : t.inputBg,
-                border: `1px solid ${activePos === p ? t.accent : t.inputBorder}`,
+                fontWeight: activeTab === p ? 700 : 600,
+                color: activeTab === p ? "#fff" : t.textSecondary,
+                background: activeTab === p ? t.accent : t.inputBg,
+                border: `1px solid ${activeTab === p ? t.accent : t.inputBorder}`,
                 borderRadius: 6, cursor: "pointer", fontFamily: "inherit",
                 transition: "all 0.15s",
               }}
@@ -102,29 +158,35 @@ export default function FielderCard({ player, season, fieldingData }) {
           team={player.team}
           season={season}
           playerId={player.player_id}
-          subtitle={buildBioSubtitle(bio, null) || `${season} | ${activePos} | ${innings.toFixed(0)} Innings`}
+          subtitle={buildBioSubtitle(bio, null) || `${season} | ${tabLabel} | ${innings.toFixed(0)} Innings`}
         />
         <div style={{ padding: "8px 12px 4px" }}>
-          {metricList.map(m => {
-            const cat = cats[m.label];
-            if (!cat || cat.pctile == null) return null;
-            return (
-              <BubblePercentileBar
-                key={m.label}
-                label={m.label}
-                pctile={cat.pctile}
-                display={cat.display}
-              />
-            );
-          })}
+          {sections.map((sec, i) => (
+            <div key={sec.name}>
+              <SectionHeader name={sec.name} first={i === 0} />
+              {sec.rows.map(({ m, cat }) => (
+                <BubblePercentileBar
+                  key={m.key}
+                  label={m.label}
+                  labelWidth={150}
+                  pctile={cat.pctile}
+                  display={cat.display}
+                />
+              ))}
+              {sec.name === "Framing" && zones && <FramingZoneDiagram zones={zones} />}
+            </div>
+          ))}
         </div>
         <div style={{
           padding: "8px 16px 10px",
-          display: "flex", justifyContent: "space-between",
+          display: "flex", justifyContent: "space-between", gap: 12,
           fontSize: 10, color: t.textFaint,
         }}>
-          <span>{season} | {activePos} | {innings.toFixed(0)} Innings (min 50)</span>
-          <span style={{ fontStyle: "italic" }}>PastTheEyeTest | Savant + FanGraphs</span>
+          <span>
+            {season} | {tabLabel} | {innings.toFixed(0)} Innings (min 50)
+            {isAll && ` | pctiles vs primary ${player.combined.primary}`}
+          </span>
+          <span style={{ fontStyle: "italic", whiteSpace: "nowrap" }}>PastTheEyeTest | {sources}</span>
         </div>
       </div>
       </FitToWidth>

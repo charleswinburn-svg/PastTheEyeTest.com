@@ -10,15 +10,20 @@ OUTPUT SCHEMA
 ─────────────
 {
   "season": 2026,
-  "catcher_metrics":  [{"key":..., "label":..., "lower_better":bool}, ...],
-  "infielder_metrics":[...],
-  "outfielder_metrics":[...],
+  "catcher_metrics" / "infielder_metrics" / "outfielder_metrics" / "all_metrics":
+      [{"key", "label", "lower_better", "section", "scope", "positions"?}, ...],
   "fielders": [
     {
       "name": "...", "player_id": 12345, "team": "NYY",
       "positions": {
-        "C":  { "innings": 423, "categories": { "<label>": {"display":"...", "pctile":71, "value":4.2}, ... } },
+        "C":  { "innings": 423.0,
+                "categories": { "<key>": {"display": "4.2", "pctile": 71, "value": 4.2}, ... },
+                "framing_zones": { "11": {"rate": 48.1, "lg": 45.0, "pctile": 80}, ... } },
         "1B": { ... }
+      },
+      "combined": {            # only for players with 2+ qualified positions
+        "innings": 650.0, "primary": "C", "positions": {"C": 423.0, "1B": 227.0},
+        "categories": { "<key>": {...} }
       }
     },
     ...
@@ -26,8 +31,14 @@ OUTPUT SCHEMA
 }
 
 Players qualify at any position where they accumulated ≥ MIN_INN innings.
-Multiple positions per player are allowed — the React card renders one
-position at a time via an internal selector.
+Each metric's scope (see METRIC DEFINITIONS) decides whether it lands on a
+position tab or on the "All" tab; percentiles are always within the
+player's own position. Every value is rounded to tenths.
+
+BP's DRP and catcher defense come from exports committed under data/bp/
+(bp_drp_<year>.csv, bp_catcher_<year>.csv). For an offline re-placement of
+an existing JSON (no network), run:
+    python3 fielding_pipeline.py --restructure ./public 2023 2024 2025 2026
 
 Notes
 ─────
@@ -41,6 +52,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import re
 import time
 from typing import Dict, List, Optional
 
@@ -81,46 +93,181 @@ def _grp(pos: str) -> str:
     return "other"
 
 
-# Metric definitions — same shape used by HITTER_METRICS / PITCHER_METRICS in
-# baseball_pipeline.py. The `src_col` field is the column we expect after the
-# merge; lookups also fall back through COLUMN_ALIASES.
-CATCHER_METRICS = [
-    {"key": "def",          "label": "Def",                          "lower_better": False, "fmt": ".1f", "src_col": "fg_def"},
-    {"key": "drs",          "label": "DRS",                          "lower_better": False, "fmt": ".0f", "src_col": "fg_drs"},
-    {"key": "frv",          "label": "FRV",                          "lower_better": False, "fmt": ".0f", "src_col": "frv"},
-    {"key": "arm_strength", "label": "Arm Strength",                 "lower_better": False, "fmt": ".1f", "src_col": "arm_strength_mph"},
-    {"key": "pop_time",     "label": "Pop Time",                     "lower_better": True,  "fmt": ".2f", "src_col": "pop_time_2b_avg"},
-    {"key": "csaa",         "label": "Caught Stealing Above Average","lower_better": False, "fmt": ".1f", "src_col": "csaa"},
-    {"key": "framing",      "label": "Framing Runs",                 "lower_better": False, "fmt": ".1f", "src_col": "framing_runs"},
-    {"key": "shadow_strike","label": "Shadow Strike%",               "lower_better": False, "fmt": ".1f", "mult": 100, "src_col": "shadow_zone_called_strike_rate"},
-    {"key": "blocks",       "label": "Blocks Above Average",         "lower_better": False, "fmt": ".1f", "src_col": "blocks_above_average"},
+# ────────────────────────────────────────────────────────────────────────────
+# METRIC DEFINITIONS
+# ────────────────────────────────────────────────────────────────────────────
+#
+# Every metric has a `scope`, which decides which card(s) it lands on:
+#   pos      — split by position (one value per player-position). Shown on
+#              that position's tab, percentile within that position.
+#   of_wide  — one value per player covering all of LF/CF/RF (Savant jump,
+#              catch%, OF arm). Shown on the OF tab when the player qualified
+#              at exactly one OF spot, otherwise on the "All" tab.
+#   player   — one whole-player value (DRP, FRV when not split, overall arm).
+#              Shown on the single card of a one-position player, otherwise
+#              on the "All" tab.
+#   sum      — "All" tab only: a pos metric summed across positions.
+#
+# Percentiles are always computed within the player's own position: the
+# position's pool on a position tab, and players sharing the same primary
+# position (most innings) on the "All" tab.
+#
+# `section` groups rows on the card; `positions` (optional) gates a metric to
+# a subset of the group's positions. All values display to one decimal.
+
+ALL_POS = set(POSITIONS)
+NON_C = ALL_POS - CATCHER_POS
+
+MIN_POOL = 5  # below this many peers a percentile is meaningless → N/A bar
+
+
+def _m(key, label, src_col, section, scope="pos", lower_better=False,
+       mult=None, positions=None):
+    return {"key": key, "label": label, "src_col": src_col, "section": section,
+            "scope": scope, "lower_better": lower_better, "mult": mult,
+            "positions": set(positions) if positions else None}
+
+
+# DRS components (SIS, via FanGraphs stats=fld). FanGraphs ships one row per
+# (player, position), so every component is position-split. Candidates are
+# the FG column names; the first one present wins. Unmatched r* columns are
+# logged on each run so new SIS component names can be added here.
+#   (key, label, FG candidates, positions, section, include in "All" sums)
+DRS_COMPONENTS = [
+    ("drs_rpm",    "DRS Range/Positioning",   ["rPM"],                                  NON_C,                 "Range",          True),
+    ("drs_rrcv",   "DRS 1B Receiving",        ["rRCV", "rRec", "rRecv", "rReceiving"],  {"1B"},                "Receiving",      True),
+    ("drs_rthrow", "DRS Throwing",            ["rTHR", "rThrow", "rThrowing", "rTS"],   INFIELD_POS,           "Arm & Throwing", True),
+    ("drs_rgdp",   "DRS Double Plays",        ["rGDP"],                                 INFIELD_POS,           "Arm & Throwing", True),
+    ("drs_rarm",   "DRS OF Arm",              ["rARM"],                                 OUTFIELD_POS,          "Arm & Throwing", True),
+    ("drs_rsb",    "DRS Stolen Bases",        ["rSB"],                                  CATCHER_POS,           "Arm & Throwing", False),
+    ("drs_rsz",    "DRS Framing",             ["rSZ"],                                  CATCHER_POS,           "Framing",        False),
+    ("drs_rcera",  "DRS Catcher ERA",         ["rCERA"],                                CATCHER_POS,           "Other DRS",      False),
+    ("drs_rbunt",  "DRS Bunts",               ["rBU", "rBunt", "rBunts"],               {"C", "1B", "3B"},     "Other DRS",      True),
+    ("drs_rgfp",   "DRS Good Plays/Misplays", ["rGFP"],                                 ALL_POS,               "Other DRS",      True),
 ]
 
-INFIELDER_METRICS = [
-    {"key": "def",          "label": "Def",                       "lower_better": False, "fmt": ".1f", "src_col": "fg_def"},
-    {"key": "drs",          "label": "DRS",                       "lower_better": False, "fmt": ".0f", "src_col": "fg_drs"},
-    {"key": "oaa",          "label": "OAA",                       "lower_better": False, "fmt": ".1f", "src_col": "outs_above_average"},
-    {"key": "oaa_in",       "label": "OAA In",                    "lower_better": False, "fmt": ".1f", "src_col": "oaa_in"},
-    {"key": "oaa_back",     "label": "OAA Back",                  "lower_better": False, "fmt": ".1f", "src_col": "oaa_back"},
-    {"key": "oaa_left",     "label": "OAA Left",                  "lower_better": False, "fmt": ".1f", "src_col": "oaa_left"},
-    {"key": "oaa_right",    "label": "OAA Right",                 "lower_better": False, "fmt": ".1f", "src_col": "oaa_right"},
-    {"key": "frv",          "label": "FRV",                       "lower_better": False, "fmt": ".0f", "src_col": "frv"},
-    {"key": "esra",         "label": "Estimated Success% Added",  "lower_better": False, "fmt": ".1f", "src_col": "estimated_success_rate_added"},
-    {"key": "arm_strength", "label": "Arm Strength",              "lower_better": False, "fmt": ".1f", "src_col": "arm_strength_mph"},
+# Savant Fielding Run Value components. Savant's framing and blocking runs
+# already come from their own leaderboards, so only the pieces not otherwise
+# covered are kept here. Range/arm/throwing are position-split only when the
+# per-position FRV fetch works; 1B receiving can only happen at 1B, so it is
+# attributed to the 1B cell either way.
+#   (key, label, Savant candidates, positions, section)
+FRV_COMPONENTS = [
+    ("frv_range",     "Savant Range Runs",    ["range_runs", "runs_range", "fielding_runs_range", "oaa_runs"],               NON_C,      "Range"),
+    ("frv_receiving", "Savant 1B Receiving",  ["receiving_runs", "runs_receiving", "fielding_runs_receiving",
+                                               "first_base_receiving_runs", "receiving_run_value", "receiving"],           {"1B"},     "Receiving"),
+    ("frv_arm",       "Savant Arm Runs",      ["arm_runs", "runs_arm", "fielding_runs_arm"],                                 NON_C,      "Arm & Throwing"),
+    ("frv_throwing",  "Savant Throwing Runs", ["throwing_runs", "runs_throwing", "fielding_runs_throwing"],                   ALL_POS,    "Arm & Throwing"),
 ]
 
-OUTFIELDER_METRICS = [
-    {"key": "def",          "label": "Def",                       "lower_better": False, "fmt": ".1f", "src_col": "fg_def"},
-    {"key": "drs",          "label": "DRS",                       "lower_better": False, "fmt": ".0f", "src_col": "fg_drs"},
-    {"key": "oaa",          "label": "OAA",                       "lower_better": False, "fmt": ".1f", "src_col": "outs_above_average"},
-    {"key": "frv",          "label": "FRV",                       "lower_better": False, "fmt": ".0f", "src_col": "frv"},
-    {"key": "esra",         "label": "Estimated Success% Added",  "lower_better": False, "fmt": ".1f", "src_col": "estimated_success_rate_added"},
-    {"key": "five_star",    "label": "5 Star Catch%",             "lower_better": False, "fmt": ".1f", "src_col": "five_star_catch_rate"},
-    {"key": "four_star",    "label": "4 Star Catch%",             "lower_better": False, "fmt": ".1f", "src_col": "four_star_catch_rate"},
-    {"key": "three_star",   "label": "3 Star Catch%",             "lower_better": False, "fmt": ".1f", "src_col": "three_star_catch_rate"},
-    {"key": "jump",         "label": "Jump Feet vs Average",      "lower_better": False, "fmt": ".1f", "src_col": "jump_feet_vs_avg"},
-    {"key": "arm_value",    "label": "Arm Value",                 "lower_better": False, "fmt": ".1f", "src_col": "of_arm_value"},
-    {"key": "arm_strength", "label": "Arm Strength",              "lower_better": False, "fmt": ".1f", "src_col": "arm_strength_mph"},
+_OVERALL = [
+    _m("def",       "Def",  "fg_def",  "Overall"),
+    _m("drs",       "DRS",  "fg_drs",  "Overall"),
+    _m("oaa",       "OAA",  "outs_above_average", "Overall", positions=NON_C),
+    _m("frv",       "FRV",  "frv_pos", "Overall"),
+    _m("frv_total", "FRV",  "frv",     "Overall", scope="player"),
+    _m("drp",       "DRP (BP)",                    "bp_drp", "Overall", scope="player"),
+    # BP gives catchers no range / throwing credit (always 0 / blank) — their
+    # defense is CDA, shown on the C tab — so these stay off the C card.
+    _m("rda",       "BP Range Defense Added",      "bp_rda", "Overall", scope="player", positions=NON_C),
+    _m("thr",       "BP Throwing Runs",            "bp_thr", "Overall", scope="player", positions=NON_C),
+    _m("bp_cda",    "BP Catcher Defense (CDA)",    "bp_cda", "Overall", positions=CATCHER_POS),
+]
+
+
+def _drs_defs(section):
+    return [_m(k, lbl, k, sec, positions=pos) for k, lbl, _c, pos, sec, _s in DRS_COMPONENTS if sec == section]
+
+
+def _frv_defs(section):
+    return [_m(k, lbl, k, sec, positions=pos) for k, lbl, _c, pos, sec in FRV_COMPONENTS if sec == section]
+
+
+CATCHER_METRICS = [m for m in _OVERALL if m["key"] != "oaa"] + [
+    _m("framing",       "Savant Framing Runs", "framing_runs", "Framing"),
+    _m("shadow_strike", "Shadow Strike%",      "shadow_zone_called_strike_rate", "Framing", mult=100),
+    *_drs_defs("Framing"),
+    _m("bp_frm",        "BP Framing Runs",     "bp_frm", "Framing"),
+    _m("arm_strength",  "Arm Strength",        "arm_strength_pos", "Arm & Throwing"),
+    _m("pop_time",      "Pop Time",            "pop_time_2b_avg", "Arm & Throwing", lower_better=True),
+    _m("csaa",          "Caught Stealing Above Average", "csaa", "Arm & Throwing"),
+    *[m for m in _frv_defs("Arm & Throwing") if m["key"] == "frv_throwing"],
+    *_drs_defs("Arm & Throwing"),
+    _m("bp_tr",         "BP Takeoff Runs",     "bp_tr", "Arm & Throwing"),
+    _m("bp_sr",         "BP Swipe Runs",       "bp_sr", "Arm & Throwing"),
+    _m("blocks",        "Blocks Above Average", "blocks_above_average", "Blocking"),
+    _m("bp_blk",        "BP Blocking Runs",    "bp_blk", "Blocking"),
+    *_drs_defs("Other DRS"),
+]
+CATCHER_METRICS = [m for m in CATCHER_METRICS if not m["positions"] or "C" in m["positions"]]
+
+INFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
+    _m("oaa_in",        "OAA In",    "oaa_in",    "Range"),
+    _m("oaa_back",      "OAA Back",  "oaa_back",  "Range"),
+    _m("oaa_left",      "OAA Left",  "oaa_left",  "Range"),
+    _m("oaa_right",     "OAA Right", "oaa_right", "Range"),
+    _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Range"),
+    *_frv_defs("Range"),
+    *_drs_defs("Range"),
+    *_frv_defs("Receiving"),
+    *_drs_defs("Receiving"),
+    _m("scoops",        "Scoops",    "fg_scp", "Receiving", positions={"1B"}),
+    _m("arm_strength",  "Arm Strength", "arm_strength_pos", "Arm & Throwing"),
+    _m("arm_overall",   "Arm Strength (All Throws)", "arm_strength_mph", "Arm & Throwing", scope="player"),
+    *_frv_defs("Arm & Throwing"),
+    *_drs_defs("Arm & Throwing"),
+    *_drs_defs("Other DRS"),
+]
+INFIELDER_METRICS = [m for m in INFIELDER_METRICS if not m["positions"] or m["positions"] & INFIELD_POS]
+
+OUTFIELDER_METRICS = [m for m in _OVERALL if m["key"] != "bp_cda"] + [
+    _m("esra",          "Estimated Success% Added", "estimated_success_rate_added", "Range"),
+    _m("jump",          "Jump Feet vs Average", "jump_feet_vs_avg",       "Range", scope="of_wide"),
+    _m("five_star",     "5 Star Catch%",        "five_star_catch_rate",   "Range", scope="of_wide"),
+    _m("four_star",     "4 Star Catch%",        "four_star_catch_rate",   "Range", scope="of_wide"),
+    _m("three_star",    "3 Star Catch%",        "three_star_catch_rate",  "Range", scope="of_wide"),
+    *_frv_defs("Range"),
+    *_drs_defs("Range"),
+    _m("arm_value",     "Savant OF Arm Value",  "of_arm_value", "Arm & Throwing", scope="of_wide"),
+    _m("arm_strength",  "Arm Strength",         "arm_strength_pos", "Arm & Throwing"),
+    _m("arm_overall",   "Arm Strength (All Throws)", "arm_strength_mph", "Arm & Throwing", scope="player"),
+    *_frv_defs("Arm & Throwing"),
+    *_drs_defs("Arm & Throwing"),
+    *_drs_defs("Other DRS"),
+]
+OUTFIELDER_METRICS = [m for m in OUTFIELDER_METRICS if not m["positions"] or m["positions"] & OUTFIELD_POS]
+
+
+def _sum_def(m, label=None):
+    d = dict(m)
+    # `gate` keeps the base metric's positions: on the "All" tab the metric is
+    # only ranked when the player's primary position is one it applies to.
+    d.update(scope="sum", positions=None, gate=m["positions"], label=label or m["label"])
+    return d
+
+
+# "All" tab (players with 2+ qualified positions). Sums of position-split
+# metrics plus the whole-player and OF-wide numbers. Catcher-only components
+# (framing, pop time, BP catcher runs …) stay on the C tab.
+_by_key = {m["key"]: m for m in CATCHER_METRICS + INFIELDER_METRICS + OUTFIELDER_METRICS}
+ALL_METRICS = [
+    _sum_def(_by_key["def"]),
+    _sum_def(_by_key["drs"]),
+    _sum_def(_by_key["oaa"]),
+    _sum_def(_by_key["frv"]),
+    _by_key["frv_total"],
+    _by_key["drp"], _by_key["rda"], _by_key["thr"],
+    _by_key["jump"], _by_key["five_star"], _by_key["four_star"], _by_key["three_star"],
+    *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Range"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Range"],
+    *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Receiving"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Receiving"],
+    _sum_def(_by_key["scoops"]),
+    _by_key["arm_overall"],
+    _by_key["arm_value"],
+    *[_sum_def(_by_key[k]) for k, *_r in FRV_COMPONENTS if _by_key[k]["section"] == "Arm & Throwing"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Arm & Throwing"],
+    *[_sum_def(_by_key[k]) for k, _l, _c, _p, sec, s in DRS_COMPONENTS if s and sec == "Other DRS"],
 ]
 
 # Lower-case substring → canonical column name. Used as a fuzzy fallback if
@@ -313,8 +460,37 @@ def fetch_savant_oaa(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     return _apply_aliases(_ensure_id_name(combined))
 
 
+def _rename_frv_components(df: Optional[pd.DataFrame]) -> Optional[pd.DataFrame]:
+    """Map Savant FRV component columns to our frv_* keys BEFORE the global
+    alias pass (which would otherwise turn e.g. arm_runs into of_arm_value)."""
+    if df is None:
+        return df
+    cols_lower = {c.lower(): c for c in df.columns}
+    ren = {}
+    for key, _lbl, cands, _pos, _sec in FRV_COMPONENTS:
+        for cand in cands:
+            real = cols_lower.get(cand.lower())
+            if real is not None and real not in ren:
+                ren[real] = key
+                break
+    known = set(ren)
+    extra = [c for c in df.columns if c.lower().endswith("_runs") and c not in known]
+    print(f"    FRV components matched: {sorted(ren.values()) or 'none'}"
+          f"{'  · unmatched *_runs columns: ' + str(extra) if extra else ''}")
+    return df.rename(columns=ren)
+
+
+def _frv_finish(df: Optional[pd.DataFrame], year: int) -> Optional[pd.DataFrame]:
+    if df is None:
+        return None
+    if "year" in df.columns:
+        df = df[pd.to_numeric(df["year"], errors="coerce") == year].reset_index(drop=True)
+    df = _rename_frv_components(df)
+    return _apply_aliases(_ensure_id_name(df))
+
+
 def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
-    """Fielding Run Value leaderboard. Savant's CSV endpoint here is fragile —
+    """Fielding Run Value leaderboard, one row per player. Savant's CSV endpoint here is fragile —
     adding *any* extra query param (min=, type=, etc.) breaks it and returns
     the HTML page instead of CSV. Stick to the bare URL and live with the
     default ~qualified threshold; set SAVANT_FRV_URL to a UI-built URL
@@ -324,11 +500,43 @@ def fetch_savant_frv(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
         "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?csv=true"
     )
     df = _safe_fetch_csv(url, "Savant FRV", fetch_url, csv_to_df)
-    if df is not None and "year" in df.columns:
-        df = df[pd.to_numeric(df["year"], errors="coerce") == year].reset_index(drop=True)
+    df = _frv_finish(df, year)
+    if df is not None:
         print(f"    Filtered FRV to year={year}: {len(df)} rows")
-    return _apply_aliases(_ensure_id_name(df))
+    return df
 
+
+def fetch_savant_frv_by_pos(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
+    """FRV one position at a time, so utility players get FRV (and its
+    components) on the position that earned it. URL template comes from
+    SAVANT_FRV_POS_URL ({year} and {pos} placeholders, {pos} = Savant code
+    2–9) or a best-guess default. Returns None — caller falls back to the
+    per-player leaderboard — if any position fails, or if Savant ignored
+    the position filter (the same players come back for C and SS)."""
+    tmpl = os.environ.get("SAVANT_FRV_POS_URL", "").strip() or (
+        "https://baseballsavant.mlb.com/leaderboard/fielding-run-value"
+        "?year={year}&position={pos}&type=fielder&minInnings=0&csv=true"
+    )
+    frames, pid_sets = [], {}
+    for pos_name, pos_code in POS_CODE.items():
+        url = tmpl.format(year=year, pos=pos_code)
+        df = _safe_fetch_csv(url, f"Savant FRV pos={pos_name}", fetch_url, csv_to_df)
+        df = _frv_finish(df, year)
+        if df is None or df.empty or "player_id" not in df.columns or "frv" not in df.columns:
+            print(f"    ⚠ per-position FRV unavailable at {pos_name} — using per-player FRV")
+            return None
+        df = df.copy()
+        df["position"] = pos_name
+        df = df.rename(columns={"frv": "frv_pos"})
+        pid_sets[pos_name] = set(df["player_id"].dropna().astype(int))
+        frames.append(df)
+    c, ss = pid_sets.get("C", set()), pid_sets.get("SS", set())
+    if c and ss and len(c & ss) / max(1, min(len(c), len(ss))) > 0.3:
+        print("    ⚠ Savant ignored the FRV position filter (C and SS lists overlap) — using per-player FRV")
+        return None
+    combined = pd.concat(frames, ignore_index=True)
+    print(f"    Savant FRV by position: {len(combined)} rows")
+    return combined
 
 def fetch_savant_catcher_framing(year: int, fetch_url, csv_to_df) -> Optional[pd.DataFrame]:
     url = (
@@ -490,11 +698,28 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
         print("    ⚠ FG returned nothing usable — Def/DRS will be blank")
         return None
 
+    # Standard fielding (type=0) carries 1B scoops (Scp).
+    std_rows, _std_tc = _fetch_combo("fld", (0,))
+
     def _to_df(rows):
         return pd.DataFrame(rows) if rows else None
 
     df_def = _to_df(def_rows)
     df_drs = _to_df(drs_rows)
+    df_std = _to_df(std_rows)
+
+    # DRS component columns actually present in this season's response.
+    drs_comp_ren = {}
+    if df_drs is not None:
+        for key, _lbl, cands, _pos, _sec, _s in DRS_COMPONENTS:
+            real = next((c for c in cands if c in df_drs.columns), None)
+            if real:
+                drs_comp_ren[real] = key
+        r_cols = [c for c in df_drs.columns
+                  if len(c) > 1 and c[0] == "r" and c[1].isupper() and c not in drs_comp_ren]
+        print(f"    FG DRS components matched: {sorted(drs_comp_ren.values()) or 'none'}")
+        if r_cols:
+            print(f"    FG r* columns not mapped to a DRS component: {r_cols}")
 
     # Merge on (player_id, position). FG's `position`/`Pos` column keys
     # per-row. We rename only the columns we need.
@@ -514,36 +739,44 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
         df = df.rename(columns=ren)
         # Keep Inn too — per-(player, position) innings used to gate qualification.
         # The MLB Stats API league endpoint now 406s, so FG's Inn is the source.
-        keep = ["player_id", "player_name", "position"] + [c for c in list(value_cols) + ["Inn"] if c in df.columns]
+        keep = ["player_id", "player_name", "position"] + [c for c in list(value_cols) + ["Inn", "TeamName", "Team"] if c in df.columns]
+        keep = [c for c in dict.fromkeys(keep) if c in df.columns]
         return df[keep]
 
     # FG ships the field-value column as "Defense" (not "Def").
-    if df_def is not None and "Defense" in df_def.columns and "Def" not in df_def.columns:
-        df_def = df_def.rename(columns={"Defense": "Def"})
-    if df_drs is not None and "Defense" in df_drs.columns and "Def" not in df_drs.columns:
-        df_drs = df_drs.rename(columns={"Defense": "Def"})
-    df_def_slim = _slim(df_def, ["Def"])
-    df_drs_slim = _slim(df_drs, ["DRS"])
-    if df_def_slim is not None and df_drs_slim is not None:
-        df = df_def_slim.merge(df_drs_slim, on=["player_id", "player_name", "position"],
-                               how="outer", suffixes=("", "_drs"))
-        # both leaderboards carry Inn → coalesce the suffixed copies back to one
-        if "Inn_drs" in df.columns:
-            df["Inn"] = (df["Inn"].where(df["Inn"].notna(), df["Inn_drs"])
-                         if "Inn" in df.columns else df["Inn_drs"])
-            df = df.drop(columns=["Inn_drs"])
-    else:
-        df = df_def_slim if df_def_slim is not None else df_drs_slim
+    for d in (df_def, df_drs):
+        if d is not None and "Defense" in d.columns and "Def" not in d.columns:
+            d.rename(columns={"Defense": "Def"}, inplace=True)
+    parts = [
+        _slim(df_def, ["Def"]),
+        _slim(df_drs, ["DRS"] + list(drs_comp_ren)),
+        _slim(df_std, ["Scp"]),
+    ]
+    keys = ["player_id", "player_name", "position"]
+    df = None
+    for i, part in enumerate(parts):
+        if part is None or part.empty:
+            continue
+        if df is None:
+            df = part
+            continue
+        # Drop value columns the earlier frame already has (Inn / team / Def
+        # can appear in several pulls) — then coalesce Inn and team.
+        dup = [c for c in part.columns if c in df.columns and c not in keys]
+        df = df.merge(part, on=keys, how="outer", suffixes=("", f"_p{i}"))
+        for c in dup:
+            sc = f"{c}_p{i}"
+            if sc in df.columns:
+                df[c] = df[c].where(df[c].notna(), df[sc])
+                df = df.drop(columns=[sc])
     if df is None or df.empty:
         return None
     print(f"    → FG merged: {len(df)} rows  (Def from type={def_tc}, DRS from type={drs_tc})")
     ren = {}
     for canon, cands in {
-        "player_id":   ["xMLBAMID", "MLBAMID", "playerid"],
-        "player_name": ["PlayerName", "Name"],
-        "position":    ["Pos", "position"],
         "fg_def":      ["Def"],
         "fg_drs":      ["DRS"],
+        "fg_scp":      ["Scp"],
         "innings_pos": ["Inn"],
         "team_fg":     ["TeamName", "Team"],
     }.items():
@@ -551,10 +784,11 @@ def fetch_fangraphs_fielding(year: int, http_headers: dict) -> Optional[pd.DataF
             if c in df.columns and canon not in ren.values():
                 ren[c] = canon
                 break
+    ren.update(drs_comp_ren)
     df = df.rename(columns=ren)
     if "player_id" in df.columns:
         df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce").astype("Int64")
-    print(f"    FG fielding columns: {list(df.columns)[:30]}")
+    print(f"    FG fielding columns: {list(df.columns)[:40]}")
     return df
 
 
@@ -693,6 +927,292 @@ def _metrics_for(pos_group: str):
             "outfielder": OUTFIELDER_METRICS}.get(pos_group, [])
 
 
+def _coerce(x) -> Optional[float]:
+    try:
+        f = float(x)
+        return f if f == f else None  # drop NaN
+    except (TypeError, ValueError):
+        return None
+
+
+def _r1(x: float) -> float:
+    """Round to tenths; `+ 0.0` turns -0.0 into 0.0."""
+    return round(x, 1) + 0.0
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# BASEBALL PROSPECTUS  (DRP + catcher defense, from exports in data/bp/)
+# ────────────────────────────────────────────────────────────────────────────
+
+BP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "bp")
+
+
+def _read_bp(path: str) -> Optional[pd.DataFrame]:
+    if not os.path.exists(path):
+        print(f"  BP export not found: {path} — BP metrics skipped")
+        return None
+    df = pd.read_csv(path, encoding="utf-8-sig")
+    # BP repeats a "+/-" (standard error) header after each stat; pandas
+    # de-dupes them as "+/-", "+/-.1" … — name each after the stat before it.
+    cols = list(df.columns)
+    for i, c in enumerate(cols):
+        if str(c).startswith("+/-") and i > 0:
+            cols[i] = f"{cols[i - 1]}_sd"
+    df.columns = cols
+    df["player_id"] = pd.to_numeric(df.get("mlbid"), errors="coerce").astype("Int64")
+    df = df[df["player_id"].notna()]
+    print(f"  BP export {os.path.basename(path)}: {len(df)} rows")
+    return df
+
+
+def merge_bp(year: int, stamp, pvals: Dict[int, dict]) -> None:
+    """DRP / RDA / THR are whole-player (BP doesn't split by position) →
+    pvals. The catcher export is catching-only → the (pid, 'C') cell."""
+    drp = _read_bp(os.path.join(BP_DIR, f"bp_drp_{year}.csv"))
+    if drp is not None:
+        for _, r in drp.iterrows():
+            d = pvals.setdefault(int(r["player_id"]), {})
+            for src, col in (("bp_drp", "DRP"), ("bp_rda", "RDA"), ("bp_thr", "THR")):
+                v = _coerce(r.get(col))
+                if v is not None:
+                    d[src] = v
+            if r.get("Name") and not d.get("_name"):
+                d["_name"] = str(r["Name"])
+    cat = _read_bp(os.path.join(BP_DIR, f"bp_catcher_{year}.csv"))
+    if cat is not None:
+        for _, r in cat.iterrows():
+            cell = stamp(int(r["player_id"]), "C", name=str(r.get("Name") or "") or None)
+            for src, col in (("bp_frm", "FrmR"), ("bp_blk", "BlkR"), ("bp_tr", "TR"),
+                             ("bp_sr", "SR"), ("bp_cda", "CDA")):
+                v = _coerce(r.get(col))
+                if v is not None:
+                    cell[src] = v
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# FRAMING ZONES  (Savant catcher-framing shadow-zone strike rates)
+# ────────────────────────────────────────────────────────────────────────────
+
+_ZONE_RE = re.compile(r"^(?:pct|strike_rate|called_strike_rate|cs_rate)_?(1[1-46-9])$", re.I)
+_ZONE_RV_RE = re.compile(r"^(?:rv|runs|runs_extra_strikes)_?(1[1-46-9])$", re.I)
+
+
+def extract_framing_zones(framing: Optional[pd.DataFrame]) -> Dict[int, dict]:
+    """{pid: {"11": {"rate": .., "rv": ..}, ...}} for the 8 shadow zones
+    (Savant numbers them 11–19 around the heart, skipping 15)."""
+    if framing is None or "player_id" not in framing.columns:
+        return {}
+    rate_cols = {m.group(1): c for c in framing.columns if (m := _ZONE_RE.match(str(c)))}
+    rv_cols = {m.group(1): c for c in framing.columns if (m := _ZONE_RV_RE.match(str(c)))}
+    print(f"  Framing zone columns: rate={sorted(rate_cols)} rv={sorted(rv_cols)}")
+    if not rate_cols:
+        return {}
+    out: Dict[int, dict] = {}
+    for _, r in framing.iterrows():
+        pid = r.get("player_id")
+        if pd.isna(pid):
+            continue
+        zones = {}
+        for z, c in rate_cols.items():
+            v = _coerce(r.get(c))
+            if v is None:
+                continue
+            zones[z] = {"rate": v}
+            if z in rv_cols:
+                rv = _coerce(r.get(rv_cols[z]))
+                if rv is not None:
+                    zones[z]["rv"] = rv
+        if zones:
+            out[int(pid)] = zones
+    return out
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# ASSEMBLY  — gate, place metrics on tabs, percentiles, JSON
+# ────────────────────────────────────────────────────────────────────────────
+
+def _cat(v: float, pool: List[float], m: dict) -> dict:
+    pct = _pct(v, pool, m["lower_better"]) if len(pool) >= MIN_POOL else None
+    disp = v * m["mult"] if m.get("mult") else v
+    disp = _r1(disp)
+    return {"display": _fmt(disp, ".1f"), "pctile": pct, "value": disp}
+
+
+def _metric_meta(ms: List[dict]) -> List[dict]:
+    out = []
+    for m in ms:
+        d = {"key": m["key"], "label": m["label"], "lower_better": m["lower_better"],
+             "section": m["section"], "scope": m["scope"]}
+        if m.get("positions"):
+            d["positions"] = [p for p in POSITIONS if p in m["positions"]]
+        out.append(d)
+    return out
+
+
+def _assemble(year: int, cells: Dict[tuple, dict], pvals: Dict[int, dict],
+              inn_map: Dict[int, Dict[str, float]], team_map: Optional[Dict[int, str]] = None,
+              zones: Optional[Dict[int, dict]] = None, sources: Optional[List[str]] = None) -> dict:
+    team_map = team_map or {}
+    zones = zones or {}
+
+    # 1. Qualification: ≥ MIN_INN innings at the position.
+    qual: Dict[int, Dict[str, float]] = {}
+    for (pid, pos) in cells:
+        inn = inn_map.get(pid, {}).get(pos, 0.0)
+        if inn >= MIN_INN:
+            qual.setdefault(pid, {})[pos] = inn
+    print(f"  Qualified (player, position) rows ≥ {MIN_INN} inn: {sum(len(q) for q in qual.values())}")
+    primary = {pid: max(q, key=lambda p: (q[p], -POSITIONS.index(p))) for pid, q in qual.items()}
+    of_spots = {pid: [p for p in q if p in OUTFIELD_POS] for pid, q in qual.items()}
+    cells_by_pid: Dict[int, Dict[str, dict]] = {}
+    for (pid, pos), c in cells.items():
+        cells_by_pid.setdefault(pid, {})[pos] = c
+
+    def pv(pid, src):
+        return _coerce(pvals.get(pid, {}).get(src))
+
+    def on_pos_card(m, pid, pos) -> bool:
+        if m["scope"] == "player":
+            return len(qual[pid]) == 1
+        if m["scope"] == "of_wide":
+            return pos in OUTFIELD_POS and len(of_spots[pid]) == 1
+        return m["scope"] == "pos"
+
+    # 2. Whole-player values for the "All" tab (computed for every player so
+    #    single-position players still populate the primary-position pools).
+    comb: Dict[int, dict] = {}
+    for pid in qual:
+        d = {}
+        for m in ALL_METRICS:
+            if m["scope"] == "sum":
+                vals = [_coerce(c.get(m["src_col"])) for c in cells_by_pid.get(pid, {}).values()]
+                vals = [v for v in vals if v is not None]
+                d[m["key"]] = sum(vals) if vals else None
+            else:
+                d[m["key"]] = pv(pid, m["src_col"])
+        comb[pid] = d
+
+    def entry(pid):
+        if pid not in fielders:
+            c0 = next(iter(cells_by_pid.get(pid, {}).values()), {})
+            name = c0.get("name") or pvals.get(pid, {}).get("_name")
+            fielders[pid] = {
+                "player_id": pid,
+                "name": _flip_name(name) or "",
+                "team": team_map.get(pid) or c0.get("team") or "",
+                "positions": {},
+            }
+        return fielders[pid]
+
+    # 3. Position tabs — percentiles within the position.
+    fielders: Dict[int, dict] = {}
+    by_pos: Dict[str, List[int]] = {}
+    for pid, q in qual.items():
+        for pos in q:
+            by_pos.setdefault(pos, []).append(pid)
+    for pos in POSITIONS:
+        pids = by_pos.get(pos, [])
+        if not pids:
+            continue
+        mlist = [m for m in _metrics_for(_grp(pos)) if not m["positions"] or pos in m["positions"]]
+        pools = {}
+        for m in mlist:
+            if m["scope"] == "pos":
+                raw = [_coerce(cells[(p, pos)].get(m["src_col"])) for p in pids]
+            else:
+                raw = [pv(p, m["src_col"]) for p in pids]
+            pools[m["key"]] = [v for v in raw if v is not None]
+        for pid in pids:
+            cats = {}
+            for m in mlist:
+                if not on_pos_card(m, pid, pos):
+                    continue
+                v = (_coerce(cells[(pid, pos)].get(m["src_col"])) if m["scope"] == "pos"
+                     else pv(pid, m["src_col"]))
+                if v is None:
+                    continue
+                cats[m["key"]] = _cat(v, pools[m["key"]], m)
+            entry(pid)["positions"][pos] = {"innings": _r1(qual[pid][pos]), "categories": cats}
+
+        # Framing zones: rate per shadow zone, percentile within qualified C.
+        if pos == "C" and zones:
+            zpids = [p for p in pids if p in zones]
+            zkeys = sorted({z for p in zpids for z in zones[p]})
+            zpool = {z: [zones[p][z]["rate"] for p in zpids if z in zones[p]] for z in zkeys}
+            allr = [v for vs in zpool.values() for v in vs]
+            zmult = 100.0 if allr and max(allr) <= 1.0 else 1.0
+            for p in zpids:
+                zout = {}
+                for z, zd in zones[p].items():
+                    pool = zpool.get(z, [])
+                    zo = {"rate": _r1(zd["rate"] * zmult),
+                          "lg": _r1(float(np.mean(pool)) * zmult) if pool else None,
+                          "pctile": _pct(zd["rate"], pool, False) if len(pool) >= MIN_POOL else None}
+                    if "rv" in zd:
+                        zo["rv"] = _r1(zd["rv"])
+                    zout[z] = zo
+                fielders[p]["positions"]["C"]["framing_zones"] = zout
+
+    # 4. "All" tab for players with 2+ qualified positions — percentiles
+    #    among players sharing the same primary position.
+    by_primary: Dict[str, List[int]] = {}
+    for pid, p in primary.items():
+        by_primary.setdefault(p, []).append(pid)
+    n_all = 0
+    for pid, q in qual.items():
+        if len(q) < 2:
+            continue
+        peers = by_primary[primary[pid]]
+        cats = {}
+        for m in ALL_METRICS:
+            if m["scope"] == "of_wide" and len(of_spots[pid]) < 2:
+                continue
+            # Ranked against same-primary-position peers, so skip metrics that
+            # don't apply at the primary position (e.g. OAA / BP RDA for a
+            # primary catcher) — they're on the tab where they were earned.
+            gate = m.get("gate", m["positions"])
+            if gate and primary[pid] not in gate:
+                continue
+            v = comb[pid][m["key"]]
+            if v is None:
+                continue
+            pool = [comb[p][m["key"]] for p in peers if comb[p][m["key"]] is not None]
+            cats[m["key"]] = _cat(v, pool, m)
+        total_inn = sum(inn for pos, inn in inn_map.get(pid, {}).items() if pos in POSITIONS)
+        entry(pid)["combined"] = {
+            "innings": _r1(max(total_inn, sum(q.values()))),
+            "primary": primary[pid],
+            "positions": {p: _r1(q[p]) for p in POSITIONS if p in q},
+            "categories": cats,
+        }
+        n_all += 1
+
+    out = {
+        "season": year,
+        "catcher_metrics":    _metric_meta(CATCHER_METRICS),
+        "infielder_metrics":  _metric_meta(INFIELDER_METRICS),
+        "outfielder_metrics": _metric_meta(OUTFIELDER_METRICS),
+        "all_metrics":        _metric_meta(ALL_METRICS),
+        "fielders": sorted(fielders.values(), key=lambda f: f["name"] or ""),
+        "meta": {
+            "min_innings": MIN_INN,
+            "min_pool": MIN_POOL,
+            "sources": sources or ["Savant", "FanGraphs", "BP"],
+            "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        },
+    }
+    print(f"  Fielders with ≥1 qualified position: {len(out['fielders'])}  ({n_all} with an All tab)")
+    return out
+
+
+def _put(cell_or_dict: dict, r, cols: List[str]):
+    for c in cols:
+        if c in r:
+            v = _coerce(r[c])
+            if v is not None:
+                cell_or_dict[c] = v
+
+
 def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
                     team_map: Optional[Dict[int, str]] = None) -> dict:
     """End-to-end build. Returns the JSON-serializable dict."""
@@ -700,7 +1220,8 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
 
     # 1. Fetch all sources
     oaa     = fetch_savant_oaa(year, fetch_url, csv_to_df)
-    frv     = fetch_savant_frv(year, fetch_url, csv_to_df)
+    frv_pos = fetch_savant_frv_by_pos(year, fetch_url, csv_to_df)
+    frv     = None if frv_pos is not None else fetch_savant_frv(year, fetch_url, csv_to_df)
     framing = fetch_savant_catcher_framing(year, fetch_url, csv_to_df)
     poptime = fetch_savant_pop_time(year, fetch_url, csv_to_df)
     arms    = fetch_savant_arm_strength(year, fetch_url, csv_to_df)
@@ -727,11 +1248,9 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
         if inn_map:
             print(f"  Position innings from FanGraphs Inn: {len(inn_map)} players")
 
-    # Fallback: if the MLB Stats API returned nothing (e.g. endpoint changed),
-    # build a synthetic inn_map from OAA — which is already fetched per position
-    # with min=1. We credit MIN_INN innings to each (player, position) pair so
-    # they pass the qualification gate. The innings value shown on the card will
-    # be approximate (shows MIN_INN) but all metrics still percentile correctly.
+    # Fallback: if no innings source worked, build a synthetic inn_map from
+    # OAA — fetched per position with min=1 — crediting MIN_INN innings to
+    # each (player, position) pair so they pass the qualification gate.
     if not inn_map and oaa is not None:
         print(f"  Building synthetic inn_map from OAA position data (fallback)")
         for _, row in oaa.iterrows():
@@ -748,11 +1267,9 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
 
     # Savant OAA carries no catcher rows, so neither the Stats-API innings feed
     # (when it drops catchers) nor the OAA-based synthetic fallback ever lets a
-    # catcher clear the innings gate below — which is why catcher cards were
-    # empty. Backfill: credit MIN_INN at "C" to every player who shows up in a
-    # catcher leaderboard (framing / pop time / CSAA / blocks) and isn't already
-    # carrying real C innings. Runs on every path, so catchers populate whether
-    # or not the Stats-API innings feed succeeded.
+    # catcher clear the innings gate. Backfill: credit MIN_INN at "C" to every
+    # player who shows up in a catcher leaderboard and isn't already carrying
+    # real C innings.
     n_catch = 0
     for cdf in (framing, poptime, csaa, blocks):
         if cdf is None or "player_id" not in cdf.columns:
@@ -769,17 +1286,23 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
     if n_catch:
         print(f"  Credited synthetic C innings to {n_catch} catchers (catcher leaderboards)")
 
-    # 2. Build per-(player, position) row dict, keyed by (pid, pos)
-    rows: Dict[tuple, dict] = {}
+    # 2. Raw values: position-split cells keyed (pid, pos), whole-player /
+    #    OF-wide values keyed pid.
+    cells: Dict[tuple, dict] = {}
+    pvals: Dict[int, dict] = {}
 
     def stamp(pid: int, pos: str, name: str = None, team: str = None):
         key = (pid, pos)
-        if key not in rows:
-            rows[key] = {"player_id": pid, "position": pos, "name": name, "team": team}
+        if key not in cells:
+            cells[key] = {"player_id": pid, "position": pos, "name": name, "team": team}
         else:
-            if name and not rows[key].get("name"):    rows[key]["name"] = name
-            if team and not rows[key].get("team"):    rows[key]["team"] = team
-        return rows[key]
+            if name and not cells[key].get("name"):    cells[key]["name"] = name
+            if team and not cells[key].get("team"):    cells[key]["team"] = team
+        return cells[key]
+
+    def _nm(r):
+        n = r.get("player_name")
+        return str(n) if isinstance(n, str) else None
 
     def merge_one(df, pos_field: Optional[str], val_cols: List[str], default_pos: Optional[str] = None):
         if df is None:
@@ -788,200 +1311,202 @@ def build_fielding(year: int, fetch_url, csv_to_df, http_headers: dict,
             pid = r.get("player_id")
             if pd.isna(pid):
                 continue
-            pid = int(pid)
             pos = _normalise_pos(r.get(pos_field)) if pos_field else default_pos
             if not pos:
                 continue
-            name = r.get("player_name")
             team = r.get("team_abbr") or r.get("team") or r.get("team_id")
-            cell = stamp(pid, pos, name=str(name) if isinstance(name, str) else None,
-                         team=str(team) if isinstance(team, str) else None)
-            for c in val_cols:
-                if c in r and r[c] is not None and not (isinstance(r[c], float) and np.isnan(r[c])):
-                    cell[c] = r[c]
+            cell = stamp(int(pid), pos, name=_nm(r), team=str(team) if isinstance(team, str) else None)
+            _put(cell, r, val_cols)
+
+    def merge_player(df, val_cols: List[str]):
+        if df is None:
+            return
+        for _, r in df.iterrows():
+            pid = r.get("player_id")
+            if pd.isna(pid):
+                continue
+            d = pvals.setdefault(int(pid), {})
+            if _nm(r) and not d.get("_name"):
+                d["_name"] = _nm(r)
+            _put(d, r, val_cols)
+
+    frv_comp_keys = [k for k, *_r in FRV_COMPONENTS]
 
     # OAA: per (player, position) row directly
     merge_one(oaa, "position", [
         "outs_above_average", "estimated_success_rate_added",
         "oaa_in", "oaa_back", "oaa_left", "oaa_right",
     ])
-    # FRV: per-player totals (no position column on the leaderboard).
-    # Fan out to every position the player qualifies at — FRV is a season
-    # total, attributed to each position they actually played.
-    def fan_out_all_pos(df, val_cols):
-        if df is None:
-            return
-        for _, r in df.iterrows():
+    # FRV: per position when Savant honoured the position filter, otherwise
+    # the per-player total goes to the whole-player slot. Components gated
+    # to a single position (1B receiving) can only have been earned there,
+    # so they land on that cell even from the per-player leaderboard.
+    if frv_pos is not None:
+        merge_one(frv_pos, "position", ["frv_pos"] + frv_comp_keys)
+    elif frv is not None:
+        merge_player(frv, ["frv"])
+        single = [(k, next(iter(pos))) for k, _l, _c, pos, _s in FRV_COMPONENTS if len(pos) == 1]
+        for _, r in frv.iterrows():
             pid = r.get("player_id")
             if pd.isna(pid):
                 continue
-            pid = int(pid)
-            qualified_positions = [p for p, inn in inn_map.get(pid, {}).items()
-                                   if inn >= MIN_INN]
-            if not qualified_positions:
-                continue
-            name = r.get("player_name")
-            for pos in qualified_positions:
-                cell = stamp(pid, pos, name=str(name) if isinstance(name, str) else None)
-                for c in val_cols:
-                    if c in r and r[c] is not None and not (isinstance(r[c], float) and np.isnan(r[c])):
-                        cell[c] = r[c]
-    fan_out_all_pos(frv, ["frv"])
+            for k, pos in single:
+                if k in r and _coerce(r[k]) is not None and inn_map.get(int(pid), {}).get(pos, 0) > 0:
+                    _put(stamp(int(pid), pos, name=_nm(r)), r, [k])
+        dropped = [k for k, _l, _c, pos, _s in FRV_COMPONENTS if len(pos) > 1 and k in frv.columns]
+        if dropped:
+            print(f"    FRV components not position-split (skipped): {dropped}")
+
     # Catcher framing / pop / csaa / blocks → all default to C
     merge_one(framing, None, ["framing_runs", "shadow_zone_called_strike_rate"], default_pos="C")
+    zones = extract_framing_zones(framing)
     # Pop time also carries the catcher's max-effort arm strength on caught
     # stealing throws — Savant's arm-strength leaderboard does NOT include
-    # catchers, so use this column as the C arm_strength_mph.
+    # catchers, so this is the C arm strength.
     if poptime is not None and "maxeff_arm_2b_3b_sba" in poptime.columns:
         poptime = poptime.copy()
-        poptime["arm_strength_mph"] = pd.to_numeric(poptime["maxeff_arm_2b_3b_sba"], errors="coerce")
-    merge_one(poptime, None, ["pop_time_2b_avg", "arm_strength_mph"], default_pos="C")
+        poptime["arm_strength_pos"] = pd.to_numeric(poptime["maxeff_arm_2b_3b_sba"], errors="coerce")
+    merge_one(poptime, None, ["pop_time_2b_avg", "arm_strength_pos"], default_pos="C")
     merge_one(csaa, None, ["csaa"], default_pos="C")
     merge_one(blocks, None, ["blocks_above_average"], default_pos="C")
-    # OF jump / catch / arm → fan out to LF/CF/RF (we don't know the player's
-    # primary OF spot from the leaderboard alone; attach to every OF pos
-    # where the player has innings)
-    def fan_out_of(df, val_cols):
-        if df is None:
-            return
-        for _, r in df.iterrows():
-            pid = r.get("player_id")
-            if pd.isna(pid):
-                continue
-            pid = int(pid)
-            of_positions = [p for p, inn in inn_map.get(pid, {}).items()
-                            if p in OUTFIELD_POS and inn >= MIN_INN]
-            if not of_positions:
-                continue
-            name = r.get("player_name")
-            for pos in of_positions:
-                cell = stamp(pid, pos, name=str(name) if isinstance(name, str) else None)
-                for c in val_cols:
-                    if c in r and r[c] is not None and not (isinstance(r[c], float) and np.isnan(r[c])):
-                        cell[c] = r[c]
-    fan_out_of(jump,   ["jump_feet_vs_avg"])
-    fan_out_of(catchp, ["five_star_catch_rate", "four_star_catch_rate", "three_star_catch_rate"])
-    fan_out_of(ofarm,  ["of_arm_value"])
 
-    # Arm strength: applies to whichever positions the player accumulated
-    # innings at (each position pool is its own z-score group later).
+    # OF jump / catch prob / arm value: one row per player covering all OF
+    # spots → OF-wide values (placed by _assemble).
+    merge_player(jump,   ["jump_feet_vs_avg"])
+    merge_player(catchp, ["five_star_catch_rate", "four_star_catch_rate", "three_star_catch_rate"])
+    merge_player(ofarm,  ["of_arm_value"])
+
+    # Arm strength: overall (all throws) is whole-player; the leaderboard
+    # also ships per-position columns (arm_1b, arm_ss, arm_cf …).
     if arms is not None:
+        merge_player(arms, ["arm_strength_mph"])
+        cols_lower = {c.lower(): c for c in arms.columns}
+        pos_cols = {p: cols_lower[f"arm_{p.lower()}"] for p in NON_C if f"arm_{p.lower()}" in cols_lower}
+        print(f"  Arm strength per-position columns: {sorted(pos_cols)}")
         for _, r in arms.iterrows():
             pid = r.get("player_id")
             if pd.isna(pid):
                 continue
-            pid = int(pid)
-            name = r.get("player_name")
-            ams = r.get("arm_strength_mph")
-            if ams is None or (isinstance(ams, float) and np.isnan(ams)):
-                continue
-            for pos, inn in inn_map.get(pid, {}).items():
-                if inn < MIN_INN:
+            for pos, col in pos_cols.items():
+                v = _coerce(r.get(col))
+                if v is None or inn_map.get(int(pid), {}).get(pos, 0) <= 0:
                     continue
-                cell = stamp(pid, pos, name=str(name) if isinstance(name, str) else None)
-                cell["arm_strength_mph"] = float(ams)
+                stamp(int(pid), pos, name=_nm(r))["arm_strength_pos"] = v
 
-    # FG fielding: one row per (player, position)
+    # FG fielding: one row per (player, position) — Def, DRS + components, scoops
+    fg_cols = ["fg_def", "fg_drs", "fg_scp"] + [k for k, *_r in DRS_COMPONENTS]
     if fg is not None and "position" in fg.columns:
         for _, r in fg.iterrows():
             pid = r.get("player_id")
             if pd.isna(pid):
                 continue
-            pid = int(pid)
             pos = _normalise_pos(r.get("position"))
             if not pos:
                 continue
-            cell = stamp(pid, pos, name=str(r.get("player_name") or ""),
+            cell = stamp(int(pid), pos, name=str(r.get("player_name") or ""),
                          team=str(r.get("team_fg") or ""))
-            for c in ("fg_def", "fg_drs"):
-                if c in r and r[c] is not None and not (isinstance(r[c], float) and np.isnan(r[c])):
-                    cell[c] = r[c]
+            _put(cell, r, fg_cols)
 
-    # 3. Gate by innings ≥ MIN_INN at the position
-    qualified = []
-    for (pid, pos), cell in rows.items():
-        innings = inn_map.get(pid, {}).get(pos, 0.0)
-        if innings < MIN_INN:
-            continue
-        cell["innings"] = innings
-        qualified.append(cell)
-    print(f"  Qualified (player, position) rows ≥ {MIN_INN} inn: {len(qualified)}")
+    merge_bp(year, stamp, pvals)
 
-    # 4. Compute percentiles within each position
-    by_pos: Dict[str, List[dict]] = {}
-    for cell in qualified:
-        by_pos.setdefault(cell["position"], []).append(cell)
+    return _assemble(year, cells, pvals, inn_map, team_map, zones)
 
-    fielders: Dict[int, dict] = {}
-    for pos, cells in by_pos.items():
-        metric_list = _metrics_for(_grp(pos))
 
-        def _coerce(x):
-            try:
-                f = float(x)
-                return f if f == f else None  # drop NaN
-            except (TypeError, ValueError):
-                return None
+# ────────────────────────────────────────────────────────────────────────────
+# OFFLINE RESTRUCTURE  — re-place / re-rank an already-built JSON
+# ────────────────────────────────────────────────────────────────────────────
 
-        # Build pools per source column — coerce every entry to float so
-        # percentile comparisons never mix str vs float (object-dtype
-        # columns from pandas would otherwise misrank silently).
-        pools = {}
-        for m in metric_list:
-            raw = [_coerce(c.get(m["src_col"])) for c in cells]
-            pools[m["src_col"]] = [v for v in raw if v is not None]
+# Old (pre-"All" tab) labels → (src_col, scope, mult). In the old files FRV,
+# OF jump / catch% / arm value and overall arm strength were copied onto every
+# position; here they go back to a single per-player value.
+_OLD_LABELS = {
+    "Def":                           ("fg_def", "pos", None),
+    "DRS":                           ("fg_drs", "pos", None),
+    "OAA":                           ("outs_above_average", "pos", None),
+    "OAA In":                        ("oaa_in", "pos", None),
+    "OAA Back":                      ("oaa_back", "pos", None),
+    "OAA Left":                      ("oaa_left", "pos", None),
+    "OAA Right":                     ("oaa_right", "pos", None),
+    "Estimated Success% Added":      ("estimated_success_rate_added", "pos", None),
+    "FRV":                           ("frv", "player", None),
+    "Pop Time":                      ("pop_time_2b_avg", "pos", None),
+    "Caught Stealing Above Average": ("csaa", "pos", None),
+    "Framing Runs":                  ("framing_runs", "pos", None),
+    "Shadow Strike%":                ("shadow_zone_called_strike_rate", "pos", 100),
+    "Blocks Above Average":          ("blocks_above_average", "pos", None),
+    "5 Star Catch%":                 ("five_star_catch_rate", "player", None),
+    "4 Star Catch%":                 ("four_star_catch_rate", "player", None),
+    "3 Star Catch%":                 ("three_star_catch_rate", "player", None),
+    "Jump Feet vs Average":          ("jump_feet_vs_avg", "player", None),
+    "Arm Value":                     ("of_arm_value", "player", None),
+    # At C this was the pop-time max-effort arm (position-specific); anywhere
+    # else it was the overall arm copied to every position.
+    "Arm Strength":                  (None, None, None),
+}
 
-        for c in cells:
-            pid = c["player_id"]
-            cats = {}
-            for m in metric_list:
-                v = c.get(m["src_col"])
-                val_f = _coerce(v)
-                # Percentile ranks off the raw value (pools are raw too).
-                # The optional unit multiplier only affects the display
-                # value (e.g. shadow-strike fraction → percentage).
-                pctile = _pct(val_f, pools[m["src_col"]], m["lower_better"])
-                disp_f = val_f
-                if disp_f is not None and m.get("mult"):
-                    disp_f = disp_f * m["mult"]
-                cats[m["label"]] = {
-                    "display": _fmt(disp_f, m["fmt"]),
-                    "pctile":  pctile,
-                    "value":   disp_f,
-                }
-            fielders.setdefault(pid, {
-                "player_id": pid,
-                "name": _flip_name(c.get("name")) or "",
-                "team": (team_map or {}).get(pid) or c.get("team") or "",
-                "positions": {},
-            })
-            fielders[pid]["positions"][pos] = {
-                "innings": round(c.get("innings") or 0, 1),
-                "categories": cats,
-            }
 
-        # Debug: dump Shadow Strike% raw value → percentile for catchers so
-        # mis-ranking is easy to spot in the log.
-        if pos == "C":
-            ss_pool = pools.get("shadow_zone_called_strike_rate", [])
-            print(f"    Shadow Strike% pool (raw): n={len(ss_pool)} "
-                  f"min={min(ss_pool) if ss_pool else None} "
-                  f"max={max(ss_pool) if ss_pool else None}")
-            for c in cells[:5]:
-                raw = _coerce(c.get("shadow_zone_called_strike_rate"))
-                pc = _pct(raw, ss_pool, False)
-                print(f"      {_flip_name(c.get('name'))}: raw={raw} pctile={pc}")
+def restructure_json(path: str, year: int) -> Optional[dict]:
+    with open(path) as f:
+        old = json.load(f)
+    if old.get("all_metrics") is not None:
+        # Values in the new layout are rounded to tenths; re-ranking them
+        # would create ties and shift percentiles. Rebuild from source
+        # (baseball_pipeline.py) instead.
+        print(f"  {path} is already in the new layout — skipped")
+        return None
+    cells: Dict[tuple, dict] = {}
+    pvals: Dict[int, dict] = {}
+    inn_map: Dict[int, Dict[str, float]] = {}
+    team_map: Dict[int, str] = {}
 
-    out = {
-        "season": year,
-        "catcher_metrics":   [{"key": m["key"], "label": m["label"], "lower_better": m["lower_better"]} for m in CATCHER_METRICS],
-        "infielder_metrics": [{"key": m["key"], "label": m["label"], "lower_better": m["lower_better"]} for m in INFIELDER_METRICS],
-        "outfielder_metrics":[{"key": m["key"], "label": m["label"], "lower_better": m["lower_better"]} for m in OUTFIELDER_METRICS],
-        "fielders": sorted(fielders.values(), key=lambda f: f["name"] or ""),
-        "meta": {
-            "min_innings": MIN_INN,
-            "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
-        },
-    }
-    print(f"  Fielders with ≥1 qualified position: {len(out['fielders'])}")
-    return out
+    for fd in old.get("fielders", []):
+        pid = int(fd["player_id"])
+        if fd.get("team"):
+            team_map[pid] = fd["team"]
+        for pos, pdata in (fd.get("positions") or {}).items():
+            inn_map.setdefault(pid, {})[pos] = float(pdata.get("innings") or 0)
+            cell = cells.setdefault((pid, pos), {"player_id": pid, "position": pos,
+                                                 "name": fd.get("name"), "team": fd.get("team")})
+            for lbl, cat in (pdata.get("categories") or {}).items():
+                v = _coerce((cat or {}).get("value"))
+                if v is None:
+                    continue
+                src, scope, mult = _OLD_LABELS.get(lbl, (None, None, None))
+                if lbl == "Arm Strength":
+                    src, scope = ("arm_strength_pos", "pos") if pos == "C" else ("arm_strength_mph", "player")
+                if not src:
+                    continue
+                raw = v / mult if mult else v
+                (cell if scope == "pos" else pvals.setdefault(pid, {}))[src] = raw
+
+    def stamp(pid, pos, name=None, team=None):
+        key = (pid, pos)
+        if key not in cells:
+            cells[key] = {"player_id": pid, "position": pos, "name": name, "team": team}
+        elif name and not cells[key].get("name"):
+            cells[key]["name"] = name
+        return cells[key]
+
+    merge_bp(year, stamp, pvals)
+    # BP's catcher export lists catchers who never cleared the innings gate in
+    # the old file; keep them out (no innings → not qualified), as before.
+    return _assemble(year, cells, pvals, inn_map, team_map)
+
+
+if __name__ == "__main__":
+    import sys
+    args = sys.argv[1:]
+    if len(args) >= 2 and args[0] == "--restructure":
+        out_dir, years = args[1], [int(y) for y in args[2:]]
+        for y in years:
+            p = os.path.join(out_dir, f"fielding_data_{y}.json")
+            print(f"\n── Restructuring {p}")
+            data = restructure_json(p, y)
+            if data is None:
+                continue
+            with open(p, "w") as f:
+                json.dump(data, f, indent=2, default=str)
+            print(f"  → Wrote {p} ({len(data['fielders'])} fielders)")
+    else:
+        print("Usage: python3 fielding_pipeline.py --restructure <public_dir> <year> [<year> …]\n"
+              "(The full fetch runs from baseball_pipeline.py.)")
