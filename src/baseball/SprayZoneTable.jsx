@@ -100,7 +100,7 @@ export default function SprayZoneTable({ playerId, season, seasonOnlyNote = fals
       <table style={{ borderCollapse: "collapse", width: "100%" }}>
         <thead>
           <tr>
-            <th style={{ ...th, textAlign: "left" }}>Zone</th>
+            <th style={{ ...th, textAlign: "left" }}>Zone · BBE</th>
             {COLS.map(([k, label]) => <th key={k} style={th}>{label}</th>)}
           </tr>
         </thead>
