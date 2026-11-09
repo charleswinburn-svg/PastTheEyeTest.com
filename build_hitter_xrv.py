@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 build_hitter_xrv.py — Score a season of Statcast with the hitter xRV model and
-write two files:
+write three files:
 
   public/hitter_xrv_{season}.json       per-batter xRV/600 PA broken into 14
                                         metrics (overall, the three swing/take
@@ -13,6 +13,11 @@ write two files:
                                         for qualified hitters, so the frontend can
                                         aggregate any date range client-side and
                                         rank it against the season distribution.
+
+  public/hitter_spray_{season}.json     per-batter, per-side LF / CF / RF batted-ball
+                                        totals (RV vs model xRV, BBE %, barrels, EV,
+                                        EV90, LA), each percentiled within the
+                                        batter-side pool. Hitter card spray table.
 
 ────────────────────────────────────────────────────────────────────────────
 ⚠ RUNTIME REQUIREMENT — read before running
@@ -85,6 +90,24 @@ METRICS = [
     ("Lower",               "zv",    "low"),
     ("Chase",               "zh",    "chase"),
 ]
+
+# ── Spray zones (hitter card spray table) ──
+# Spray angle from the Statcast hit coordinates, with home plate at (125.42, 198.27)
+# (the same origin the model's own spray feature uses). Negative = left-field side.
+# Fair territory is ±45°, split into equal thirds. Zones are absolute LF/CF/RF
+# (not pull/oppo); percentiles are ranked within the batter-side pool instead.
+SPRAY_ORIGIN = (125.42, 198.27)
+SPRAY_BOUND = 15.0
+SPRAY_ZONES = ("LF", "CF", "RF")
+SPRAY_MIN_SIDE_BBE = 20   # a side needs this many BBE to be ranked / join the pool
+SPRAY_MIN_ZONE_BBE = 5    # rate stats (EV, EV90, LA) in a thinner zone are unranked
+SPRAY_STATS = ("rv", "xrv", "pct", "brl", "ev", "ev90", "la")
+SPRAY_RATE_STATS = {"ev", "ev90", "la"}
+SPRAY_DECIMALS = {"rv": 2, "xrv": 2, "pct": 1, "brl": 0, "ev": 1, "ev90": 1, "la": 1}
+# Columns re-attached from the source Statcast frame (model.score() drops them).
+SPRAY_SRC_COLS = ["stand", "description", "hc_x", "hc_y", "launch_speed", "launch_angle",
+                  "launch_speed_angle", "delta_run_exp"]
+PITCH_KEYS = ["game_pk", "at_bat_number", "pitch_number"]
 
 
 def log(msg):
@@ -227,6 +250,113 @@ def build_games_json(scored: pd.DataFrame, contrib: list, qualified_ids: set) ->
     return res
 
 
+def _pctile(values: pd.Series) -> pd.Series:
+    """Rank-based percentile, same formula as build_json() (higher value = higher pctile)."""
+    n = len(values)
+    return ((values.rank(method="average") - 1) / max(n - 1, 1) * 100).round(1)
+
+
+def build_spray_json(scored: pd.DataFrame, df: pd.DataFrame, qualified_ids: set, season: int) -> dict:
+    """Per-hitter LF / CF / RF batted-ball table, split by the side the hitter batted
+    from (switch hitters get both), each stat percentiled within that side's pool.
+
+      rv    Σ delta_run_exp on the zone's BBE (actual run value)
+      xrv   Σ model `xrv` on the same BBE — the model's expected run value of the
+            pitch outcome, on the same (uncentered) scale as delta_run_exp, so the
+            two compare directly. (`total` / `contact_spray` are the skill split
+            behind the card's xRV/600 and are not an outcome expectation.)
+      pct   zone BBE / side BBE × 100
+      brl   barrels (launch_speed_angle == 6)
+      ev, la, ev90   mean EV, mean LA, 90th-pct EV
+    Totals, not rates per PA. Only qualified hitters are emitted."""
+    src = df[PITCH_KEYS + [c for c in SPRAY_SRC_COLS if c in df.columns]].copy()
+    for c in SPRAY_SRC_COLS:
+        if c not in src.columns:
+            src[c] = np.nan
+    for c in PITCH_KEYS:
+        src[c] = pd.to_numeric(src[c], errors="coerce")
+    src = src.dropna(subset=PITCH_KEYS).astype({c: "int64" for c in PITCH_KEYS})
+    src = src.drop_duplicates(subset=PITCH_KEYS)
+
+    s = scored.loc[scored["batter"].isin(qualified_ids), ["batter"] + PITCH_KEYS + ["xrv"]].copy()
+    for c in PITCH_KEYS:
+        s[c] = pd.to_numeric(s[c], errors="coerce")
+    s = s.dropna(subset=PITCH_KEYS).astype({c: "int64" for c in PITCH_KEYS})
+    bb = s.merge(src, on=PITCH_KEYS, how="inner")
+    for c in ("hc_x", "hc_y", "launch_speed", "launch_angle", "launch_speed_angle", "delta_run_exp", "xrv"):
+        bb[c] = pd.to_numeric(bb[c], errors="coerce")
+    bb = bb[(bb["description"] == "hit_into_play") & bb["hc_x"].notna() & bb["hc_y"].notna()
+            & bb["stand"].isin(["L", "R"])].copy()
+    if bb.empty:
+        return {"meta": {"season": season, "bounds": [-SPRAY_BOUND, SPRAY_BOUND], "pool": {"L": 0, "R": 0}},
+                "players": {}}
+
+    ang = np.degrees(np.arctan2(bb["hc_x"] - SPRAY_ORIGIN[0], SPRAY_ORIGIN[1] - bb["hc_y"]))
+    bb["zone"] = np.select([ang < -SPRAY_BOUND, ang > SPRAY_BOUND], ["LF", "RF"], "CF")
+    bb["_brl"] = (bb["launch_speed_angle"] == 6).astype(float)
+
+    g = bb.groupby(["batter", "stand", "zone"])
+    z = pd.DataFrame({
+        "n":    g.size(),
+        "rv":   g["delta_run_exp"].sum(),
+        "xrv":  g["xrv"].sum(),
+        "brl":  g["_brl"].sum(),
+        "ev":   g["launch_speed"].mean(),
+        "la":   g["launch_angle"].mean(),
+        "ev90": g["launch_speed"].quantile(0.9),
+    })
+    side_bbe = bb.groupby(["batter", "stand"]).size().rename("bbe")
+    # Every (batter, side) gets all three zones; an empty zone is 0 BBE / 0 RV.
+    full = pd.MultiIndex.from_tuples(
+        [(b, st, zn) for (b, st) in side_bbe.index for zn in SPRAY_ZONES], names=["batter", "stand", "zone"])
+    z = z.reindex(full)
+    for c in ("n", "rv", "xrv", "brl"):
+        z[c] = z[c].fillna(0.0)
+    z = z.reset_index().merge(side_bbe.reset_index(), on=["batter", "stand"])
+    z["pct"] = z["n"] / z["bbe"] * 100.0
+
+    # Percentiles within (side, zone), over hitters with enough BBE from that side.
+    for stat in SPRAY_STATS:
+        z[f"{stat}_p"] = np.nan
+    pool = {}
+    for side in ("L", "R"):
+        in_pool = (z["stand"] == side) & (z["bbe"] >= SPRAY_MIN_SIDE_BBE)
+        pool[side] = int(z.loc[in_pool, "batter"].nunique())
+        for zn in SPRAY_ZONES:
+            m = in_pool & (z["zone"] == zn)
+            for stat in SPRAY_STATS:
+                mm = m & z[stat].notna()
+                if stat in SPRAY_RATE_STATS:
+                    mm &= z["n"] >= SPRAY_MIN_ZONE_BBE
+                if mm.any():
+                    z.loc[mm, f"{stat}_p"] = _pctile(z.loc[mm, stat])
+
+    def cell(row, stat):
+        v = row[stat]
+        p = row[f"{stat}_p"]
+        if pd.isna(v):
+            val = None
+        else:
+            d = SPRAY_DECIMALS[stat]
+            val = int(round(float(v))) if d == 0 else round(float(v), d)
+        return {"value": val, "pctile": None if pd.isna(p) else float(p)}
+
+    players: dict = {}
+    for row in z.itertuples(index=False):
+        r = row._asdict()
+        pid, side = str(int(r["batter"])), r["stand"]
+        entry = players.setdefault(pid, {}).setdefault(side, {"bbe": int(r["bbe"]), "zones": {}})
+        zc = {stat: cell(r, stat) for stat in SPRAY_STATS}
+        zc["n"] = int(r["n"])
+        entry["zones"][r["zone"]] = zc
+
+    log(f"  Spray zones: {len(players)} hitters · pool L={pool['L']} R={pool['R']} "
+        f"(min {SPRAY_MIN_SIDE_BBE} BBE/side) · {len(bb):,} BBE")
+    return {"meta": {"season": season, "bounds": [-SPRAY_BOUND, SPRAY_BOUND], "pool": pool,
+                     "min_side_bbe": SPRAY_MIN_SIDE_BBE, "min_zone_bbe": SPRAY_MIN_ZONE_BBE},
+            "players": players}
+
+
 def build_json(agg: pd.DataFrame, season: int) -> dict:
     """Filter to qualified hitters, percentile each metric, and shape the JSON."""
     thr = qualify_threshold(season)
@@ -278,6 +408,13 @@ def run_season(model, season: int, parquet: str | None, out_dir: Path):
         json.dump(games, f)
     n_games = sum(len(v) for v in games.values())
     log(f"  Wrote {n_games} player-games ({len(games)} hitters) → {games_path}")
+
+    # LF / CF / RF spray table, percentiled within batter side (qualified hitters only).
+    spray = build_spray_json(scored, df, qualified_ids, season)
+    spray_path = out_dir / f"hitter_spray_{season}.json"
+    with open(spray_path, "w") as f:
+        json.dump(spray, f, separators=(",", ":"))
+    log(f"  Wrote {len(spray['players'])} hitters → {spray_path}")
 
 
 def main():
