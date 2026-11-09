@@ -139,7 +139,7 @@ export default function SprayZonePanel({ player, season, subtitle, seasonOnlyNot
           <table style={{ borderCollapse: "collapse", width: "100%", marginTop: 6 }}>
             <thead>
               <tr>
-                <th style={{ ...th, textAlign: "left" }}>Zone · BBE</th>
+                <th style={{ ...th, textAlign: "left" }}>Zone</th>
                 {COLS.map(([k, label]) => <th key={k} style={{ ...th, color: k === stat ? t.accent : th.color }}>{label}</th>)}
               </tr>
             </thead>
@@ -149,7 +149,7 @@ export default function SprayZonePanel({ player, season, subtitle, seasonOnlyNot
                 return (
                   <tr key={zn} style={{ background: i % 2 ? t.tableRowB : "transparent" }}>
                     <td style={{ ...td, textAlign: "left", fontFamily: "inherit", fontWeight: 800, color: t.textSecondary }}>
-                      {zn}<span style={{ fontSize: 10, fontWeight: 600, color: t.textFaint }}> {z.n ?? 0}</span>
+                      {zn}
                     </td>
                     {COLS.map(([k, , dec, signed, colored]) => (
                       <td key={k} style={td}>
