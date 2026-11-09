@@ -63,7 +63,8 @@ Comprehensive reference for the project across both repos. Use this when startin
   heading on the site; their Save-as-PNG adds the player header/footer (`CapturePanel.jsx`, which
   reveals `[data-ptet-capture-only]` elements only inside the html2canvas clone).
 - **Hitter card**: under the rolling chart, `HitterBattedBallPanel.jsx` (spray chart with the All /
-  Hits-only toggle, the LF/CF/RF spray-zone table `SprayZoneTable.jsx`, 95+ EV and whiff zone plots)
+  Hits-only toggle, 95+ EV and whiff zone plots) and, as its own card/PNG below it, the LF/CF/RF spray-zone field + table
+  (`SprayZonePanel.jsx`, from `hitter_spray_{year}.json`). The batted-ball panel is
   built from the player's Savant per-pitch rows
   (`fetchSavantPlayerSeasonCached`, shared with the rolling chart). The Summaries "Hitter Game" /
   "Hitter Season" tabs were removed in its favour.

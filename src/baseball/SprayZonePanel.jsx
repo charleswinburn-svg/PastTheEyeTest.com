@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import { binColor, textOnBin, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import CapturePanel from "./CapturePanel.jsx";
 
 // ═══════════════════════════════════════════════════════════
-// SPRAY ZONE TABLE (hitter card, under the spray chart)
+// SPRAY ZONE PANEL (hitter card, its own PNG under the batted-ball panel)
 // ═══════════════════════════════════════════════════════════
 // LF / CF / RF season totals from public/hitter_spray_{season}.json
 // (build_hitter_xrv.py): actual RV vs model xRV, share of BBE, barrel rate, EV,
@@ -53,8 +54,9 @@ function fmt(v, dec, signed) {
   return Number(s) > 0 ? `+${s}` : Number(s) < 0 ? `−${s.replace("-", "")}` : s.replace("-", "");
 }
 
-export default function SprayZoneTable({ playerId, season, seasonOnlyNote = false }) {
+export default function SprayZonePanel({ player, season, subtitle, seasonOnlyNote = false }) {
   const { theme: t } = useTheme();
+  const playerId = player?.player_id;
   const [file, setFile] = useState(undefined);   // undefined = loading, null = missing
   const [side, setSide] = useState(null);
   const [stat, setStat] = useState("xrv");   // which stat colors the field wedges
@@ -73,9 +75,9 @@ export default function SprayZoneTable({ playerId, season, seasonOnlyNote = fals
   );
   useEffect(() => { setSide(sides[0] || null); }, [sides]);
 
+  if (!playerId || file === null) return null;   // no file for this season (e.g. not built yet)
   if (file === undefined) return <Muted t={t}>Loading spray zones…</Muted>;
-  if (!file) return null;   // no file for this season (e.g. not built yet)
-  if (!rec || !side || !rec[side]) return <Muted t={t}>No spray-zone table — not a qualified hitter in {season}.</Muted>;
+  if (!rec || !side || !rec[side]) return <Muted t={t}>No spray zones — not a qualified hitter in {season}.</Muted>;
 
   const data = rec[side];
   const pool = file.meta?.pool?.[side];
@@ -85,70 +87,85 @@ export default function SprayZoneTable({ playerId, season, seasonOnlyNote = fals
                whiteSpace: "nowrap", borderBottom: `1px solid ${t.divider}`, letterSpacing: "0.03em" };
   const td = { padding: "6px 8px", fontSize: 12, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT, textAlign: "right",
                whiteSpace: "nowrap", color: t.text };
+  const chip = (active) => ({
+    padding: "4px 11px", fontSize: 11, fontWeight: 700, borderRadius: 12, cursor: "pointer", fontFamily: "inherit",
+    border: `1px solid ${active ? t.accent : t.inputBorder}`,
+    background: active ? t.accent : t.inputBg, color: active ? "#fff" : t.textMuted,
+  });
 
-  return (
-    <div style={{ margin: "6px 16px 2px" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: t.text, letterSpacing: "0.02em" }}>
-          Spray Zones
-          <span style={{ fontWeight: 600, color: t.textFaint }}>
-            {" "}· {season} season totals · {data.bbe} BBE as {HAND_LABEL[side]}
-            {ranked && pool ? ` · pctile vs ${pool} ${HAND_LABEL[side]}` : " · too few BBE to rank"}
-          </span>
-          {seasonOnlyNote && (
-            <span style={{ fontWeight: 600, color: t.accent }}> · full season (not the date range)</span>
-          )}
+  // Selectors live outside the captured area (CapturePanel `controls`); the PNG shows
+  // the chosen stat in the field title and the side in the summary line.
+  const controls = (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+      {sides.length > 1 && (
+        <div style={{ display: "inline-flex", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 8, padding: 2, marginRight: 6 }}>
+          {sides.map(s => (
+            <button key={s} onClick={() => setSide(s)} style={{
+              padding: "4px 12px", fontSize: 11, fontWeight: 700, borderRadius: 6, cursor: "pointer",
+              border: "none", fontFamily: "inherit",
+              background: s === side ? t.accent : "transparent", color: s === side ? "#fff" : t.textMuted,
+            }}>as {HAND_LABEL[s]}</button>
+          ))}
         </div>
-        {sides.length > 1 && (
-          <div style={{ display: "inline-flex", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 7, padding: 2, flexShrink: 0 }}>
-            {sides.map(s => (
-              <button key={s} onClick={() => setSide(s)} style={{
-                padding: "3px 10px", fontSize: 10, fontWeight: 700, borderRadius: 5, cursor: "pointer",
-                border: "none", fontFamily: "inherit",
-                background: s === side ? t.accent : "transparent", color: s === side ? "#fff" : t.textMuted,
-              }}>as {HAND_LABEL[s]}</button>
-            ))}
+      )}
+      {COLS.map(([k, label]) => (
+        <button key={k} onClick={() => setStat(k)} style={chip(k === stat)}>{label}</button>
+      ))}
+    </div>
+  );
+
+  const safeName = String(player?.name || "player").replace(/\s+/g, "_");
+  return (
+    <div style={{ marginTop: 16 }}>
+      <CapturePanel
+        player={player} season={season} subtitle={subtitle}
+        filename={`${safeName}_spray_zones_${stat}${sides.length > 1 ? `_${HAND_LABEL[side]}` : ""}_${season}.png`}
+        footerLeft={`${season} regular season · spray zones (LF/CF/RF split at ±15°) · percentiles vs same-side hitters`}
+        footerRight="PastTheEyeTest | Baseball Savant"
+        controls={controls} maxWidth={760}
+      >
+        <div style={{ padding: "10px 16px 6px" }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: t.text, letterSpacing: "0.02em", marginBottom: 6, textAlign: "center" }}>
+            Spray Zones
+            <span style={{ fontWeight: 600, color: t.textFaint }}>
+              {" "}· {season} season totals · {data.bbe} BBE as {HAND_LABEL[side]}
+              {ranked && pool ? ` · pctile vs ${pool} ${HAND_LABEL[side]}` : " · too few BBE to rank"}
+            </span>
+            {seasonOnlyNote && (
+              <span style={{ fontWeight: 600, color: t.accent }}> · full season (not the date range)</span>
+            )}
           </div>
-        )}
-      </div>
-      <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 4, margin: "4px 0 6px" }}>
-        {COLS.map(([k, label]) => (
-          <button key={k} onClick={() => setStat(k)} style={{
-            padding: "3px 10px", fontSize: 10, fontWeight: 700, borderRadius: 12, cursor: "pointer",
-            fontFamily: "inherit", border: `1px solid ${k === stat ? t.accent : t.inputBorder}`,
-            background: k === stat ? t.accent : t.inputBg, color: k === stat ? "#fff" : t.textMuted,
-          }}>{label}</button>
-        ))}
-      </div>
-      <ZoneField t={t} zones={data.zones || {}} stat={stat} />
-      <table style={{ borderCollapse: "collapse", width: "100%", marginTop: 6 }}>
-        <thead>
-          <tr>
-            <th style={{ ...th, textAlign: "left" }}>Zone · BBE</th>
-            {COLS.map(([k, label]) => <th key={k} style={th}>{label}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {ZONES.map((zn, i) => {
-            const z = data.zones?.[zn] || {};
-            return (
-              <tr key={zn} style={{ background: i % 2 ? t.tableRowB : "transparent" }}>
-                <td style={{ ...td, textAlign: "left", fontFamily: "inherit", fontWeight: 800, color: t.textSecondary }}>
-                  {zn}<span style={{ fontSize: 10, fontWeight: 600, color: t.textFaint }}> {z.n ?? 0}</span>
-                </td>
-                {COLS.map(([k, , dec, signed, colored]) => (
-                  <td key={k} style={td}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
-                      <span>{fmt(z[k]?.value, dec, signed)}</span>
-                      <Pill t={t} p={z[k]?.pctile} colored={colored} />
-                    </span>
-                  </td>
-                ))}
+          <ZoneField t={t} zones={data.zones || {}} stat={stat} />
+          <table style={{ borderCollapse: "collapse", width: "100%", marginTop: 6 }}>
+            <thead>
+              <tr>
+                <th style={{ ...th, textAlign: "left" }}>Zone · BBE</th>
+                {COLS.map(([k, label]) => <th key={k} style={{ ...th, color: k === stat ? t.accent : th.color }}>{label}</th>)}
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {ZONES.map((zn, i) => {
+                const z = data.zones?.[zn] || {};
+                return (
+                  <tr key={zn} style={{ background: i % 2 ? t.tableRowB : "transparent" }}>
+                    <td style={{ ...td, textAlign: "left", fontFamily: "inherit", fontWeight: 800, color: t.textSecondary }}>
+                      {zn}<span style={{ fontSize: 10, fontWeight: 600, color: t.textFaint }}> {z.n ?? 0}</span>
+                    </td>
+                    {COLS.map(([k, , dec, signed, colored]) => (
+                      <td key={k} style={td}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
+                          <span>{fmt(z[k]?.value, dec, signed)}</span>
+                          <Pill t={t} p={z[k]?.pctile} colored={colored} />
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </CapturePanel>
     </div>
   );
 }
@@ -210,13 +227,27 @@ function ZoneField({ t, zones, stat, width = 700, height = 420 }) {
           const fg = has ? textOnBin(p) : t.textMuted;
           const [a, b] = ZONE_EDGES[zn];
           const mid = (a + b) / 2;
-          const [x, y] = pt(mid, fenceR(mid) * 0.66);
-          const val = cell.value == null ? "—" : `${fmt(cell.value, dec, signed)}${STAT_UNIT[stat]}`;
+          // Text is horizontal but the wedge is slanted, so the label is centered between the
+          // wedge's edges (not on the radial midline) and each line shrinks to fit the room
+          // it has there — e.g. "104.7 mph" never touches an edge.
+          const yVal = pt(mid, fenceR(mid) * 0.68)[1];
+          const y = yVal - 2;
+          const x = cx + (base - (y + 6)) * (Math.tan(rad(a)) + Math.tan(rad(b))) / 2;
+          const room = (yy) => 2 * (Math.min(x - (cx + (base - yy) * Math.tan(rad(a))),
+                                             (cx + (base - yy) * Math.tan(rad(b))) - x) - 9);
+          const avail = room(y + 2);
+          const num = cell.value == null ? "—" : fmt(cell.value, dec, signed);
+          const unit = cell.value == null ? "" : STAT_UNIT[stat];
+          const UNIT_SCALE = 0.55;
+          const em = num.length * 0.6 + unit.length * 0.6 * UNIT_SCALE;   // bold-digit width estimate
+          const valSize = Math.max(14, Math.min(24, avail / em));
           return (
             <g key={`l-${zn}`} fill={fg} textAnchor="middle" style={{ pointerEvents: "none" }}>
               <text x={x} y={y - 26} fontSize={13} fontWeight={800} opacity={0.9}>{zn}</text>
-              <text x={x} y={y + 2} fontSize={24} fontWeight={NUM_WEIGHT} fontFamily={NUM_FONT}>{val}</text>
-              <text x={x} y={y + 22} fontSize={12} fontWeight={700}>{has ? `${ordinal(p)} percentile` : "not ranked"}</text>
+              <text x={x} y={y + 2} fontSize={valSize} fontWeight={NUM_WEIGHT} fontFamily={NUM_FONT}>
+                {num}{unit && <tspan fontSize={valSize * UNIT_SCALE} fontWeight={700}>{unit}</tspan>}
+              </text>
+              <text x={x} y={y + 22} fontSize={Math.min(12, room(y + 22) / 8.6)} fontWeight={700}>{has ? `${ordinal(p)} percentile` : "not ranked"}</text>
               <text x={x} y={y + 38} fontSize={10} fontWeight={600} opacity={0.8}>{z.n ?? 0} BBE</text>
             </g>
           );

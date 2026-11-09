@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "./ThemeContext.jsx";
 import CapturePanel from "./CapturePanel.jsx";
 import { SprayChart, ZonePlot, PitchTypeLegend } from "./SummaryComponents.jsx";
-import SprayZoneTable from "./SprayZoneTable.jsx";
+import SprayZonePanel from "./SprayZonePanel.jsx";
 import { fetchSavantPlayerSeasonCached, fetchSavantPlayerDateRange, savantRowsToPlays } from "./mlbApi.js";
 
 // ═══════════════════════════════════════════════════════════
@@ -74,7 +74,7 @@ export default function HitterBattedBallPanel({ player, season, subtitle, dateFr
       <CapturePanel
         player={player} season={season} subtitle={subtitle}
         filename={`${safeName(player?.name)}_batted_balls_${season}.png`}
-        footerLeft={`${scope} · spray chart · spray zones (season) · 95+ EV contact · whiffs`}
+        footerLeft={`${scope} · spray chart · 95+ EV contact · whiffs`}
         footerRight="PastTheEyeTest | Baseball Savant"
         controls={controls} saveable={!!plays?.length} maxWidth={760}
       >
@@ -87,7 +87,6 @@ export default function HitterBattedBallPanel({ player, season, subtitle, dateFr
             <div style={{ display: "flex", justifyContent: "center" }}>
               <SprayChart battedBalls={shown} width={660} height={380} />
             </div>
-            <SprayZoneTable playerId={player?.player_id} season={season} seasonOnlyNote={ranged} />
             <div style={{ display: "flex", justifyContent: "center", gap: 12, padding: "8px 16px", flexWrap: "wrap" }}>
               <ZonePlot pitches={hardContact} title="95+ EV Contact" width={310} height={242} />
               <ZonePlot pitches={whiffs} title="Whiffs" width={310} height={242} />
@@ -96,6 +95,8 @@ export default function HitterBattedBallPanel({ player, season, subtitle, dateFr
           </div>
         )}
       </CapturePanel>
+      {/* LF / CF / RF spray zones — a separate card + PNG (season totals from hitter_spray_{season}.json) */}
+      <SprayZonePanel player={player} season={season} subtitle={subtitle} seasonOnlyNote={ranged} />
     </div>
   );
 }
