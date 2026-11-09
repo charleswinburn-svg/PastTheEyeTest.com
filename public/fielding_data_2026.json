@@ -1087,9 +1087,9 @@
             "value": 5.5
           },
           "jump": {
-            "display": "1.9",
+            "display": "1.1",
             "pctile": 81,
-            "value": 1.9
+            "value": 1.1
           },
           "five_star": {
             "display": "22.2",
@@ -1188,9 +1188,9 @@
               "value": -1.0
             },
             "jump": {
-              "display": "-0.1",
-              "pctile": 31,
-              "value": -0.1
+              "display": "-0.8",
+              "pctile": 33,
+              "value": -0.8
             },
             "five_star": {
               "display": "0.0",
@@ -1265,13 +1265,13 @@
               "value": 0.1
             },
             "oaa": {
-              "display": "-1.0",
-              "pctile": 38,
-              "value": -1.0
+              "display": "0.0",
+              "pctile": 54,
+              "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -1285,9 +1285,9 @@
               "value": 0.1
             },
             "oaa_in": {
-              "display": "0.0",
-              "pctile": 49,
-              "value": 0.0
+              "display": "1.0",
+              "pctile": 75,
+              "value": 1.0
             },
             "oaa_back": {
               "display": "0.0",
@@ -1305,14 +1305,14 @@
               "value": -1.0
             },
             "oaa_success": {
-              "display": "81.0",
-              "pctile": 91,
-              "value": 81.0
+              "display": "83.0",
+              "pctile": 95,
+              "value": 83.0
             },
             "esra": {
-              "display": "-1.0",
-              "pctile": 41,
-              "value": -1.0
+              "display": "0.0",
+              "pctile": 53,
+              "value": 0.0
             },
             "frv_receiving": {
               "display": "0.0",
@@ -2810,9 +2810,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "0.8",
-              "pctile": 62,
-              "value": 0.8
+              "display": "0.0",
+              "pctile": 61,
+              "value": 0.0
             },
             "five_star": {
               "display": "36.4",
@@ -3859,9 +3859,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "-0.6",
-              "pctile": 14,
-              "value": -0.6
+              "display": "-1.4",
+              "pctile": 13,
+              "value": -1.4
             },
             "five_star": {
               "display": "0.0",
@@ -3967,7 +3967,7 @@
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 26,
+              "pctile": 27,
               "value": -3.0
             },
             "frv_receiving": {
@@ -4209,12 +4209,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -4228,9 +4228,9 @@
               "value": 0.0
             },
             "oaa_in": {
-              "display": "-3.0",
-              "pctile": 2,
-              "value": -3.0
+              "display": "-2.0",
+              "pctile": 7,
+              "value": -2.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -4249,7 +4249,7 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 53,
+              "pctile": 52,
               "value": 73.0
             },
             "esra": {
@@ -6011,9 +6011,9 @@
             "value": 2.1
           },
           "jump": {
-            "display": "-0.3",
-            "pctile": 34,
-            "value": -0.3
+            "display": "-1.1",
+            "pctile": 32,
+            "value": -1.1
           },
           "five_star": {
             "display": "0.0",
@@ -6117,9 +6117,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "0.9",
-              "pctile": 45,
-              "value": 0.9
+              "display": "0.1",
+              "pctile": 44,
+              "value": 0.1
             },
             "five_star": {
               "display": "25.0",
@@ -6513,9 +6513,9 @@
             "value": -0.2
           },
           "jump": {
-            "display": "-0.8",
+            "display": "-1.6",
             "pctile": 20,
-            "value": -0.8
+            "value": -1.6
           },
           "five_star": {
             "display": "0.0",
@@ -8390,9 +8390,9 @@
               "value": -7.0
             },
             "jump": {
-              "display": "-2.4",
+              "display": "-3.1",
               "pctile": 4,
-              "value": -2.4
+              "value": -3.1
             },
             "five_star": {
               "display": "0.0",
@@ -9136,7 +9136,7 @@
             },
             "oaa": {
               "display": "-4.0",
-              "pctile": 14,
+              "pctile": 13,
               "value": -4.0
             },
             "frv_range": {
@@ -9176,7 +9176,7 @@
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 26,
+              "pctile": 27,
               "value": -3.0
             },
             "frv_receiving": {
@@ -9337,7 +9337,7 @@
           },
           "frv_range": {
             "display": "-3.0",
-            "pctile": 22,
+            "pctile": 23,
             "value": -3.0
           },
           "drs_rpm": {
@@ -9771,7 +9771,7 @@
             },
             "oaa": {
               "display": "-4.0",
-              "pctile": 14,
+              "pctile": 13,
               "value": -4.0
             },
             "frv_range": {
@@ -9791,7 +9791,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -10029,9 +10029,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "1.8",
-              "pctile": 78,
-              "value": 1.8
+              "display": "1.0",
+              "pctile": 77,
+              "value": 1.0
             },
             "five_star": {
               "display": "14.8",
@@ -10600,9 +10600,9 @@
             "value": -0.8
           },
           "jump": {
-            "display": "-0.7",
+            "display": "-1.5",
             "pctile": 22,
-            "value": -0.7
+            "value": -1.5
           },
           "five_star": {
             "display": "12.5",
@@ -11229,9 +11229,9 @@
               "value": -5.0
             },
             "jump": {
-              "display": "-1.0",
+              "display": "-1.8",
               "pctile": 11,
-              "value": -1.0
+              "value": -1.8
             },
             "five_star": {
               "display": "0.0",
@@ -12609,9 +12609,9 @@
             "value": -2.3
           },
           "jump": {
-            "display": "1.1",
-            "pctile": 66,
-            "value": 1.1
+            "display": "0.4",
+            "pctile": 67,
+            "value": 0.4
           },
           "five_star": {
             "display": "0.0",
@@ -12822,9 +12822,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "1.3",
-              "pctile": 76,
-              "value": 1.3
+              "display": "0.5",
+              "pctile": 74,
+              "value": 0.5
             },
             "five_star": {
               "display": "0.0",
@@ -15650,9 +15650,9 @@
             "value": 0.8
           },
           "jump": {
-            "display": "0.5",
+            "display": "-0.3",
             "pctile": 47,
-            "value": 0.5
+            "value": -0.3
           },
           "five_star": {
             "display": "25.0",
@@ -15721,14 +15721,14 @@
               "value": -0.8
             },
             "oaa": {
-              "display": "-7.0",
-              "pctile": 4,
-              "value": -7.0
+              "display": "-6.0",
+              "pctile": 5,
+              "value": -6.0
             },
             "frv_range": {
-              "display": "-5.0",
-              "pctile": 4,
-              "value": -5.0
+              "display": "-4.0",
+              "pctile": 8,
+              "value": -4.0
             },
             "drs_rpm": {
               "display": "-6.0",
@@ -15741,9 +15741,9 @@
               "value": -0.8
             },
             "oaa_in": {
-              "display": "-2.0",
-              "pctile": 9,
-              "value": -2.0
+              "display": "-1.0",
+              "pctile": 23,
+              "value": -1.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -15767,7 +15767,7 @@
             },
             "esra": {
               "display": "-4.0",
-              "pctile": 21,
+              "pctile": 22,
               "value": -4.0
             },
             "frv_receiving": {
@@ -16585,9 +16585,9 @@
             "value": 1.0
           },
           "jump": {
-            "display": "1.7",
-            "pctile": 68,
-            "value": 1.7
+            "display": "1.0",
+            "pctile": 74,
+            "value": 1.0
           },
           "five_star": {
             "display": "0.0",
@@ -16863,9 +16863,9 @@
             "value": 0.3
           },
           "jump": {
-            "display": "0.4",
+            "display": "-0.4",
             "pctile": 21,
-            "value": 0.4
+            "value": -0.4
           },
           "five_star": {
             "display": "0.0",
@@ -17278,12 +17278,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -17313,7 +17313,7 @@
             },
             "oaa_success": {
               "display": "82.0",
-              "pctile": 94,
+              "pctile": 92,
               "value": 82.0
             },
             "esra": {
@@ -18291,9 +18291,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "0.6",
-              "pctile": 52,
-              "value": 0.6
+              "display": "-0.1",
+              "pctile": 56,
+              "value": -0.1
             },
             "five_star": {
               "display": "0.0",
@@ -18838,9 +18838,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "-0.5",
+              "display": "-1.3",
               "pctile": 20,
-              "value": -0.5
+              "value": -1.3
             },
             "five_star": {
               "display": "0.0",
@@ -19239,9 +19239,9 @@
             "value": -0.1
           },
           "jump": {
-            "display": "0.0",
-            "pctile": 43,
-            "value": 0.0
+            "display": "-0.7",
+            "pctile": 45,
+            "value": -0.7
           },
           "five_star": {
             "display": "0.0",
@@ -19345,9 +19345,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-0.2",
-              "pctile": 27,
-              "value": -0.2
+              "display": "-1.0",
+              "pctile": 25,
+              "value": -1.0
             },
             "five_star": {
               "display": "0.0",
@@ -21150,9 +21150,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "1.0",
-              "pctile": 50,
-              "value": 1.0
+              "display": "0.3",
+              "pctile": 54,
+              "value": 0.3
             },
             "five_star": {
               "display": "0.0",
@@ -21378,9 +21378,9 @@
             "value": 2.8
           },
           "jump": {
-            "display": "2.9",
+            "display": "2.1",
             "pctile": 97,
-            "value": 2.9
+            "value": 2.1
           },
           "five_star": {
             "display": "40.0",
@@ -21480,12 +21480,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 25,
+              "pctile": 24,
               "value": 68.0
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 26,
+              "pctile": 27,
               "value": -3.0
             },
             "frv_receiving": {
@@ -21744,9 +21744,9 @@
               "value": -5.0
             },
             "jump": {
-              "display": "-0.5",
+              "display": "-1.3",
               "pctile": 15,
-              "value": -0.5
+              "value": -1.3
             },
             "five_star": {
               "display": "0.0",
@@ -21928,9 +21928,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "0.0",
-              "pctile": 35,
-              "value": 0.0
+              "display": "-0.8",
+              "pctile": 34,
+              "value": -0.8
             },
             "five_star": {
               "display": "0.0",
@@ -22016,7 +22016,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -22036,7 +22036,7 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 25,
+              "pctile": 24,
               "value": 68.0
             },
             "esra": {
@@ -23320,9 +23320,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "0.8",
-              "pctile": 62,
-              "value": 0.8
+              "display": "0.0",
+              "pctile": 61,
+              "value": 0.0
             },
             "five_star": {
               "display": "0.0",
@@ -24451,9 +24451,9 @@
             "value": -1.0
           },
           "jump": {
-            "display": "1.2",
+            "display": "0.4",
             "pctile": 52,
-            "value": 1.2
+            "value": 0.4
           },
           "five_star": {
             "display": "0.0",
@@ -25299,9 +25299,9 @@
             "value": -1.1
           },
           "jump": {
-            "display": "0.7",
-            "pctile": 56,
-            "value": 0.7
+            "display": "-0.1",
+            "pctile": 54,
+            "value": -0.1
           },
           "five_star": {
             "display": "0.0",
@@ -25521,9 +25521,9 @@
             "value": 0.0
           },
           "jump": {
-            "display": "-0.5",
+            "display": "-1.3",
             "pctile": 26,
-            "value": -0.5
+            "value": -1.3
           },
           "five_star": {
             "display": "6.7",
@@ -25702,9 +25702,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "-1.0",
+              "display": "-1.8",
               "pctile": 11,
-              "value": -1.0
+              "value": -1.8
             },
             "five_star": {
               "display": "0.0",
@@ -25840,12 +25840,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -25860,7 +25860,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 9,
+              "pctile": 7,
               "value": -2.0
             },
             "oaa_back": {
@@ -25879,14 +25879,14 @@
               "value": 1.0
             },
             "oaa_success": {
-              "display": "67.0",
-              "pctile": 18,
-              "value": 67.0
+              "display": "66.0",
+              "pctile": 15,
+              "value": 66.0
             },
             "esra": {
-              "display": "1.0",
-              "pctile": 68,
-              "value": 1.0
+              "display": "0.0",
+              "pctile": 53,
+              "value": 0.0
             },
             "frv_receiving": {
               "display": "1.0",
@@ -25952,7 +25952,7 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 10,
+              "pctile": 9,
               "value": -5.0
             },
             "frv_range": {
@@ -25967,7 +25967,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 89,
+              "pctile": 90,
               "value": 2.0
             },
             "oaa_back": {
@@ -25987,12 +25987,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 25,
+              "pctile": 24,
               "value": 68.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 34,
+              "pctile": 33,
               "value": -2.0
             },
             "frv_receiving": {
@@ -26076,9 +26076,9 @@
               "value": -6.0
             },
             "jump": {
-              "display": "-0.4",
-              "pctile": 18,
-              "value": -0.4
+              "display": "-1.2",
+              "pctile": 17,
+              "value": -1.2
             },
             "five_star": {
               "display": "0.0",
@@ -26476,9 +26476,9 @@
             "value": 1.2
           },
           "jump": {
-            "display": "3.6",
+            "display": "2.8",
             "pctile": 99,
-            "value": 3.6
+            "value": 2.8
           },
           "five_star": {
             "display": "37.5",
@@ -26941,9 +26941,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "0.4",
-              "pctile": 26,
-              "value": 0.4
+              "display": "-0.4",
+              "pctile": 25,
+              "value": -0.4
             },
             "five_star": {
               "display": "0.0",
@@ -28839,9 +28839,9 @@
               "value": -6.0
             },
             "jump": {
-              "display": "-3.7",
+              "display": "-4.6",
               "pctile": 0,
-              "value": -3.7
+              "value": -4.6
             },
             "five_star": {
               "display": "0.0",
@@ -28996,9 +28996,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "1.2",
+              "display": "0.4",
               "pctile": 71,
-              "value": 1.2
+              "value": 0.4
             },
             "five_star": {
               "display": "13.8",
@@ -29472,7 +29472,7 @@
           },
           "frv_range": {
             "display": "-8.0",
-            "pctile": 5,
+            "pctile": 4,
             "value": -8.0
           },
           "drs_rpm": {
@@ -29486,9 +29486,9 @@
             "value": -4.3
           },
           "jump": {
-            "display": "-0.9",
-            "pctile": 12,
-            "value": -0.9
+            "display": "-1.8",
+            "pctile": 11,
+            "value": -1.8
           },
           "five_star": {
             "display": "0.0",
@@ -29592,9 +29592,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "1.8",
-              "pctile": 78,
-              "value": 1.8
+              "display": "1.1",
+              "pctile": 82,
+              "value": 1.1
             },
             "five_star": {
               "display": "0.0",
@@ -30954,7 +30954,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -31262,9 +31262,9 @@
             "value": 1.0
           },
           "jump": {
-            "display": "1.0",
+            "display": "0.2",
             "pctile": 64,
-            "value": 1.0
+            "value": 0.2
           },
           "five_star": {
             "display": "9.8",
@@ -34270,12 +34270,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -34304,9 +34304,9 @@
               "value": 0.0
             },
             "oaa_success": {
-              "display": "68.0",
-              "pctile": 25,
-              "value": 68.0
+              "display": "70.0",
+              "pctile": 37,
+              "value": 70.0
             },
             "esra": {
               "display": "0.0",
@@ -34559,9 +34559,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "-1.9",
+              "display": "-2.7",
               "pctile": 5,
-              "value": -1.9
+              "value": -2.7
             },
             "five_star": {
               "display": "0.0",
@@ -34738,9 +34738,9 @@
               "value": 4.0
             },
             "jump": {
-              "display": "2.3",
-              "pctile": 91,
-              "value": 2.3
+              "display": "1.6",
+              "pctile": 92,
+              "value": 1.6
             },
             "five_star": {
               "display": "30.3",
@@ -34845,9 +34845,9 @@
               "value": 4.0
             },
             "jump": {
-              "display": "1.1",
+              "display": "0.3",
               "pctile": 54,
-              "value": 1.1
+              "value": 0.3
             },
             "five_star": {
               "display": "23.8",
@@ -35377,9 +35377,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "1.5",
+              "display": "0.7",
               "pctile": 80,
-              "value": 1.5
+              "value": 0.7
             },
             "five_star": {
               "display": "30.4",
@@ -35450,12 +35450,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -35485,7 +35485,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 60,
+              "pctile": 61,
               "value": 74.0
             },
             "esra": {
@@ -35746,9 +35746,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "1.3",
-              "pctile": 76,
-              "value": 1.3
+              "display": "0.5",
+              "pctile": 74,
+              "value": 0.5
             },
             "five_star": {
               "display": "0.0",
@@ -38011,7 +38011,7 @@
             },
             "oaa_in": {
               "display": "3.0",
-              "pctile": 95,
+              "pctile": 96,
               "value": 3.0
             },
             "oaa_back": {
@@ -38031,12 +38031,12 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 76.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -38108,7 +38108,7 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 10,
+              "pctile": 9,
               "value": -5.0
             },
             "frv_range": {
@@ -38128,7 +38128,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 9,
+              "pctile": 7,
               "value": -2.0
             },
             "oaa_back": {
@@ -38148,7 +38148,7 @@
             },
             "oaa_success": {
               "display": "61.0",
-              "pctile": 5,
+              "pctile": 4,
               "value": 61.0
             },
             "esra": {
@@ -38356,12 +38356,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -38391,12 +38391,12 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 67,
+              "pctile": 68,
               "value": 75.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -38778,9 +38778,9 @@
             "value": 8.9
           },
           "jump": {
-            "display": "2.0",
-            "pctile": 94,
-            "value": 2.0
+            "display": "1.2",
+            "pctile": 93,
+            "value": 1.2
           },
           "five_star": {
             "display": "0.0",
@@ -39257,9 +39257,9 @@
             "value": 0.5
           },
           "jump": {
-            "display": "0.0",
-            "pctile": 35,
-            "value": 0.0
+            "display": "-0.7",
+            "pctile": 36,
+            "value": -0.7
           },
           "five_star": {
             "display": "25.0",
@@ -39443,9 +39443,9 @@
               "value": -1.0
             },
             "jump": {
-              "display": "1.7",
+              "display": "0.9",
               "pctile": 73,
-              "value": 1.7
+              "value": 0.9
             },
             "five_star": {
               "display": "0.0",
@@ -40222,7 +40222,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -40700,9 +40700,9 @@
             "value": 0.7
           },
           "jump": {
-            "display": "1.8",
-            "pctile": 75,
-            "value": 1.8
+            "display": "1.0",
+            "pctile": 74,
+            "value": 1.0
           },
           "five_star": {
             "display": "25.0",
@@ -40864,12 +40864,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -40899,12 +40899,12 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 67,
+              "pctile": 68,
               "value": 75.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -42231,9 +42231,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "1.4",
-              "pctile": 79,
-              "value": 1.4
+              "display": "0.6",
+              "pctile": 78,
+              "value": 0.6
             },
             "five_star": {
               "display": "24.1",
@@ -42426,7 +42426,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -42446,7 +42446,7 @@
             },
             "oaa_success": {
               "display": "61.0",
-              "pctile": 5,
+              "pctile": 4,
               "value": 61.0
             },
             "esra": {
@@ -43748,9 +43748,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "1.0",
-              "pctile": 50,
-              "value": 1.0
+              "display": "0.2",
+              "pctile": 49,
+              "value": 0.2
             },
             "five_star": {
               "display": "5.9",
@@ -44015,9 +44015,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "0.0",
-              "pctile": 12,
-              "value": 0.0
+              "display": "-0.7",
+              "pctile": 13,
+              "value": -0.7
             },
             "five_star": {
               "display": "0.0",
@@ -45974,9 +45974,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "0.9",
-              "pctile": 45,
-              "value": 0.9
+              "display": "0.1",
+              "pctile": 44,
+              "value": 0.1
             },
             "five_star": {
               "display": "5.0",
@@ -46047,12 +46047,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -46082,7 +46082,7 @@
             },
             "oaa_success": {
               "display": "81.0",
-              "pctile": 91,
+              "pctile": 90,
               "value": 81.0
             },
             "esra": {
@@ -46293,9 +46293,9 @@
             "value": -2.5
           },
           "jump": {
-            "display": "-0.3",
-            "pctile": 34,
-            "value": -0.3
+            "display": "-1.1",
+            "pctile": 32,
+            "value": -1.1
           },
           "five_star": {
             "display": "0.0",
@@ -46817,9 +46817,9 @@
               "value": -5.0
             },
             "jump": {
-              "display": "-0.8",
+              "display": "-1.6",
               "pctile": 15,
-              "value": -0.8
+              "value": -1.6
             },
             "five_star": {
               "display": "0.0",
@@ -46994,9 +46994,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "0.5",
-              "pctile": 49,
-              "value": 0.5
+              "display": "-0.3",
+              "pctile": 48,
+              "value": -0.3
             },
             "five_star": {
               "display": "6.3",
@@ -47183,9 +47183,9 @@
               "value": 4.0
             },
             "jump": {
-              "display": "1.5",
+              "display": "0.7",
               "pctile": 66,
-              "value": 1.5
+              "value": 0.7
             },
             "five_star": {
               "display": "20.0",
@@ -47523,9 +47523,9 @@
             "value": 1.4
           },
           "jump": {
-            "display": "0.6",
+            "display": "-0.2",
             "pctile": 29,
-            "value": 0.6
+            "value": -0.2
           },
           "five_star": {
             "display": "12.5",
@@ -47600,12 +47600,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -49353,9 +49353,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "-0.3",
-              "pctile": 22,
-              "value": -0.3
+              "display": "-1.1",
+              "pctile": 20,
+              "value": -1.1
             },
             "five_star": {
               "display": "0.0",
@@ -51727,9 +51727,9 @@
             "value": -3.0
           },
           "jump": {
-            "display": "1.7",
+            "display": "0.9",
             "pctile": 68,
-            "value": 1.7
+            "value": 0.9
           },
           "five_star": {
             "display": "6.3",
@@ -54203,9 +54203,9 @@
             "value": 0.7
           },
           "jump": {
-            "display": "2.2",
+            "display": "1.4",
             "pctile": 95,
-            "value": 2.2
+            "value": 1.4
           },
           "five_star": {
             "display": "0.0",
@@ -54435,9 +54435,9 @@
             "value": 2.7
           },
           "jump": {
-            "display": "-0.3",
-            "pctile": 34,
-            "value": -0.3
+            "display": "-1.0",
+            "pctile": 37,
+            "value": -1.0
           },
           "five_star": {
             "display": "0.0",
@@ -54728,9 +54728,9 @@
             "value": 2.3
           },
           "jump": {
-            "display": "1.0",
+            "display": "0.2",
             "pctile": 64,
-            "value": 1.0
+            "value": 0.2
           },
           "five_star": {
             "display": "18.8",
@@ -56491,9 +56491,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "1.9",
+              "display": "1.1",
               "pctile": 89,
-              "value": 1.9
+              "value": 1.1
             },
             "five_star": {
               "display": "0.0",
@@ -57430,9 +57430,9 @@
             "value": 2.2
           },
           "jump": {
-            "display": "2.1",
+            "display": "1.4",
             "pctile": 89,
-            "value": 2.1
+            "value": 1.4
           },
           "five_star": {
             "display": "28.6",
@@ -58878,9 +58878,9 @@
               "value": 6.0
             },
             "jump": {
-              "display": "1.1",
-              "pctile": 71,
-              "value": 1.1
+              "display": "0.2",
+              "pctile": 68,
+              "value": 0.2
             },
             "five_star": {
               "display": "0.0",
@@ -59370,12 +59370,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -59385,7 +59385,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -59405,12 +59405,12 @@
             },
             "oaa_success": {
               "display": "83.0",
-              "pctile": 96,
+              "pctile": 95,
               "value": 83.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 34,
+              "pctile": 33,
               "value": -2.0
             },
             "frv_receiving": {
@@ -60040,12 +60040,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -60534,9 +60534,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "0.1",
-              "pctile": 36,
-              "value": 0.1
+              "display": "-0.6",
+              "pctile": 38,
+              "value": -0.6
             },
             "five_star": {
               "display": "0.0",
@@ -60823,9 +60823,9 @@
             "value": 0.2
           },
           "jump": {
-            "display": "1.8",
-            "pctile": 84,
-            "value": 1.8
+            "display": "1.0",
+            "pctile": 83,
+            "value": 1.0
           },
           "five_star": {
             "display": "0.0",
@@ -61359,9 +61359,9 @@
               "value": 4.0
             },
             "jump": {
-              "display": "1.4",
-              "pctile": 64,
-              "value": 1.4
+              "display": "0.6",
+              "pctile": 63,
+              "value": 0.6
             },
             "five_star": {
               "display": "14.3",
@@ -61582,9 +61582,9 @@
             "value": -0.2
           },
           "jump": {
-            "display": "1.3",
-            "pctile": 74,
-            "value": 1.3
+            "display": "0.5",
+            "pctile": 72,
+            "value": 0.5
           },
           "five_star": {
             "display": "0.0",
@@ -62138,9 +62138,9 @@
             "value": 1.8
           },
           "jump": {
-            "display": "0.2",
-            "pctile": 40,
-            "value": 0.2
+            "display": "-0.5",
+            "pctile": 50,
+            "value": -0.5
           },
           "five_star": {
             "display": "0.0",
@@ -62361,9 +62361,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-0.6",
-              "pctile": 19,
-              "value": -0.6
+              "display": "-1.4",
+              "pctile": 18,
+              "value": -1.4
             },
             "five_star": {
               "display": "0.0",
@@ -62538,9 +62538,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "1.6",
-              "pctile": 82,
-              "value": 1.6
+              "display": "0.8",
+              "pctile": 81,
+              "value": 0.8
             },
             "five_star": {
               "display": "6.7",
@@ -64171,12 +64171,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -67161,9 +67161,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "-1.8",
-              "pctile": 2,
-              "value": -1.8
+              "display": "-2.5",
+              "pctile": 3,
+              "value": -2.5
             },
             "five_star": {
               "display": "33.3",
@@ -67360,9 +67360,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "2.3",
-              "pctile": 91,
-              "value": 2.3
+              "display": "1.5",
+              "pctile": 90,
+              "value": 1.5
             },
             "five_star": {
               "display": "3.6",
@@ -68942,7 +68942,7 @@
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 34,
+              "pctile": 33,
               "value": -2.0
             },
             "frv_receiving": {
@@ -69026,9 +69026,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "-2.6",
+              "display": "-3.3",
               "pctile": 2,
-              "value": -2.6
+              "value": -3.3
             },
             "five_star": {
               "display": "0.0",
@@ -69103,7 +69103,7 @@
           },
           "frv_range": {
             "display": "-3.0",
-            "pctile": 22,
+            "pctile": 23,
             "value": -3.0
           },
           "drs_rpm": {
@@ -69828,9 +69828,9 @@
             "value": 1.2
           },
           "jump": {
-            "display": "0.7",
-            "pctile": 59,
-            "value": 0.7
+            "display": "-0.1",
+            "pctile": 57,
+            "value": -0.1
           },
           "five_star": {
             "display": "0.0",
@@ -69930,12 +69930,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 25,
+              "pctile": 24,
               "value": 68.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 34,
+              "pctile": 33,
               "value": -2.0
             },
             "frv_receiving": {
@@ -70146,9 +70146,9 @@
             "value": -0.7
           },
           "jump": {
-            "display": "0.5",
+            "display": "-0.3",
             "pctile": 47,
-            "value": 0.5
+            "value": -0.3
           },
           "five_star": {
             "display": "0.0",
@@ -70728,9 +70728,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "1.6",
-              "pctile": 69,
-              "value": 1.6
+              "display": "0.8",
+              "pctile": 70,
+              "value": 0.8
             },
             "five_star": {
               "display": "0.0",
@@ -71564,9 +71564,9 @@
             "value": -1.9
           },
           "jump": {
-            "display": "0.8",
+            "display": "0.0",
             "pctile": 64,
-            "value": 0.8
+            "value": 0.0
           },
           "five_star": {
             "display": "0.0",
@@ -71791,9 +71791,9 @@
             "value": 3.7
           },
           "jump": {
-            "display": "1.8",
-            "pctile": 75,
-            "value": 1.8
+            "display": "1.0",
+            "pctile": 74,
+            "value": 1.0
           },
           "five_star": {
             "display": "30.4",
@@ -73439,9 +73439,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "1.6",
+              "display": "0.8",
               "pctile": 82,
-              "value": 1.6
+              "value": 0.8
             },
             "five_star": {
               "display": "0.0",
@@ -76598,9 +76598,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "-0.1",
-              "pctile": 31,
-              "value": -0.1
+              "display": "-0.9",
+              "pctile": 30,
+              "value": -0.9
             },
             "five_star": {
               "display": "0.0",
@@ -76700,9 +76700,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "0.6",
-              "pctile": 54,
-              "value": 0.6
+              "display": "-0.1",
+              "pctile": 56,
+              "value": -0.1
             },
             "five_star": {
               "display": "8.3",
@@ -76778,7 +76778,7 @@
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -76813,7 +76813,7 @@
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -76979,7 +76979,7 @@
           },
           "frv_range": {
             "display": "1.0",
-            "pctile": 75,
+            "pctile": 78,
             "value": 1.0
           },
           "drs_rpm": {
@@ -77089,9 +77089,9 @@
               "value": -1.0
             },
             "jump": {
-              "display": "0.8",
+              "display": "0.0",
               "pctile": 62,
-              "value": 0.8
+              "value": 0.0
             },
             "five_star": {
               "display": "0.0",
@@ -77162,12 +77162,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -77202,7 +77202,7 @@
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -80825,9 +80825,9 @@
             "value": -5.0
           },
           "jump": {
-            "display": "0.8",
+            "display": "0.0",
             "pctile": 64,
-            "value": 0.8
+            "value": 0.0
           },
           "five_star": {
             "display": "0.0",
@@ -81158,9 +81158,9 @@
               "value": -1.0
             },
             "frv_range": {
-              "display": "-1.0",
-              "pctile": 35,
-              "value": -1.0
+              "display": "0.0",
+              "pctile": 56,
+              "value": 0.0
             },
             "drs_rpm": {
               "display": "1.0",
@@ -81168,9 +81168,9 @@
               "value": 1.0
             },
             "oaa_in": {
-              "display": "-1.0",
-              "pctile": 24,
-              "value": -1.0
+              "display": "0.0",
+              "pctile": 49,
+              "value": 0.0
             },
             "oaa_back": {
               "display": "-1.0",
@@ -81188,13 +81188,13 @@
               "value": -1.0
             },
             "oaa_success": {
-              "display": "73.0",
-              "pctile": 53,
-              "value": 73.0
+              "display": "74.0",
+              "pctile": 61,
+              "value": 74.0
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 41,
+              "pctile": 40,
               "value": -1.0
             },
             "frv_receiving": {
@@ -81278,9 +81278,9 @@
               "value": -4.0
             },
             "jump": {
-              "display": "-0.2",
-              "pctile": 27,
-              "value": -0.2
+              "display": "-1.0",
+              "pctile": 25,
+              "value": -1.0
             },
             "five_star": {
               "display": "0.0",
@@ -81349,9 +81349,9 @@
             "value": -10.0
           },
           "frv_range": {
-            "display": "-9.0",
-            "pctile": 2,
-            "value": -9.0
+            "display": "-8.0",
+            "pctile": 4,
+            "value": -8.0
           },
           "drs_rpm": {
             "display": "-7.0",
@@ -81571,9 +81571,9 @@
             "value": 4.9
           },
           "jump": {
-            "display": "1.1",
+            "display": "0.3",
             "pctile": 74,
-            "value": 1.1
+            "value": 0.3
           },
           "five_star": {
             "display": "12.5",
@@ -81779,9 +81779,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "1.1",
+              "display": "0.3",
               "pctile": 54,
-              "value": 1.1
+              "value": 0.3
             },
             "five_star": {
               "display": "0.0",
@@ -81887,7 +81887,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 60,
+              "pctile": 61,
               "value": 74.0
             },
             "esra": {
@@ -82356,9 +82356,9 @@
               "value": 4.0
             },
             "jump": {
-              "display": "1.8",
-              "pctile": 78,
-              "value": 1.8
+              "display": "1.0",
+              "pctile": 77,
+              "value": 1.0
             },
             "five_star": {
               "display": "28.0",
@@ -82428,9 +82428,9 @@
               "value": -4.0
             },
             "oaa": {
-              "display": "-5.0",
-              "pctile": 10,
-              "value": -5.0
+              "display": "-4.0",
+              "pctile": 13,
+              "value": -4.0
             },
             "frv_range": {
               "display": "-3.0",
@@ -82444,7 +82444,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 9,
+              "pctile": 7,
               "value": -2.0
             },
             "oaa_back": {
@@ -82463,14 +82463,14 @@
               "value": -1.0
             },
             "oaa_success": {
-              "display": "68.0",
-              "pctile": 25,
-              "value": 68.0
+              "display": "69.0",
+              "pctile": 31,
+              "value": 69.0
             },
             "esra": {
-              "display": "-2.0",
-              "pctile": 34,
-              "value": -2.0
+              "display": "-1.0",
+              "pctile": 40,
+              "value": -1.0
             },
             "frv_receiving": {
               "display": "0.0",
@@ -82665,9 +82665,9 @@
             "value": -1.7
           },
           "oaa": {
-            "display": "-8.0",
+            "display": "-7.0",
             "pctile": 8,
-            "value": -8.0
+            "value": -7.0
           },
           "frv_range": {
             "display": "-6.0",
@@ -82685,9 +82685,9 @@
             "value": -1.7
           },
           "jump": {
-            "display": "-0.8",
+            "display": "-1.5",
             "pctile": 21,
-            "value": -0.8
+            "value": -1.5
           },
           "five_star": {
             "display": "0.0",
@@ -82772,12 +82772,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -82792,7 +82792,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -82924,7 +82924,7 @@
             },
             "esra": {
               "display": "-4.0",
-              "pctile": 21,
+              "pctile": 22,
               "value": -4.0
             },
             "frv_receiving": {
@@ -83190,9 +83190,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "3.0",
+              "display": "2.4",
               "pctile": 99,
-              "value": 3.0
+              "value": 2.4
             },
             "five_star": {
               "display": "0.0",
@@ -83484,9 +83484,9 @@
             "value": 8.5
           },
           "jump": {
-            "display": "1.5",
+            "display": "0.7",
             "pctile": 58,
-            "value": 1.5
+            "value": 0.7
           },
           "five_star": {
             "display": "4.5",
@@ -83777,9 +83777,9 @@
             "value": 5.8
           },
           "jump": {
-            "display": "0.7",
-            "pctile": 59,
-            "value": 0.7
+            "display": "-0.1",
+            "pctile": 57,
+            "value": -0.1
           },
           "five_star": {
             "display": "3.1",
@@ -83883,9 +83883,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "2.0",
-              "pctile": 85,
-              "value": 2.0
+              "display": "1.1",
+              "pctile": 82,
+              "value": 1.1
             },
             "five_star": {
               "display": "0.0",
@@ -84705,9 +84705,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "0.9",
-              "pctile": 45,
-              "value": 0.9
+              "display": "0.1",
+              "pctile": 44,
+              "value": 0.1
             },
             "five_star": {
               "display": "14.3",
@@ -86025,9 +86025,9 @@
             "value": 0.4
           },
           "jump": {
-            "display": "1.9",
+            "display": "1.1",
             "pctile": 81,
-            "value": 1.9
+            "value": 1.1
           },
           "five_star": {
             "display": "0.0",
@@ -86252,9 +86252,9 @@
             "value": 2.0
           },
           "jump": {
-            "display": "-0.7",
-            "pctile": 15,
-            "value": -0.7
+            "display": "-1.4",
+            "pctile": 16,
+            "value": -1.4
           },
           "five_star": {
             "display": "14.3",
@@ -86688,12 +86688,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -86708,7 +86708,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 89,
+              "pctile": 90,
               "value": 2.0
             },
             "oaa_back": {
@@ -86728,7 +86728,7 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 76.0
             },
             "esra": {
@@ -86839,9 +86839,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "2.0",
+              "display": "1.2",
               "pctile": 88,
-              "value": 2.0
+              "value": 1.2
             },
             "five_star": {
               "display": "20.0",
@@ -87067,9 +87067,9 @@
             "value": 1.9
           },
           "jump": {
-            "display": "1.2",
+            "display": "0.4",
             "pctile": 78,
-            "value": 1.2
+            "value": 0.4
           },
           "five_star": {
             "display": "7.7",
@@ -87289,9 +87289,9 @@
             "value": 0.3
           },
           "jump": {
-            "display": "0.8",
+            "display": "0.0",
             "pctile": 64,
-            "value": 0.8
+            "value": 0.0
           },
           "five_star": {
             "display": "50.0",
@@ -87385,9 +87385,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "0.7",
-              "pctile": 57,
-              "value": 0.7
+              "display": "0.0",
+              "pctile": 61,
+              "value": 0.0
             },
             "five_star": {
               "display": "0.0",
@@ -87780,9 +87780,9 @@
             "value": -0.8
           },
           "jump": {
-            "display": "0.5",
-            "pctile": 80,
-            "value": 0.5
+            "display": "-0.2",
+            "pctile": 90,
+            "value": -0.2
           },
           "five_star": {
             "display": "0.0",
@@ -88275,9 +88275,9 @@
             "value": 2.8
           },
           "jump": {
-            "display": "2.6",
+            "display": "2.0",
             "pctile": 85,
-            "value": 2.6
+            "value": 2.0
           },
           "five_star": {
             "display": "0.0",
@@ -88469,7 +88469,7 @@
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -88479,7 +88479,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 89,
+              "pctile": 90,
               "value": 2.0
             },
             "oaa_back": {
@@ -88499,7 +88499,7 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 67,
+              "pctile": 68,
               "value": 75.0
             },
             "esra": {
@@ -89357,9 +89357,9 @@
             "value": -2.4
           },
           "jump": {
-            "display": "-0.4",
-            "pctile": 30,
-            "value": -0.4
+            "display": "-1.1",
+            "pctile": 32,
+            "value": -1.1
           },
           "five_star": {
             "display": "0.0",
@@ -90147,9 +90147,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "-1.7",
+              "display": "-2.4",
               "pctile": 1,
-              "value": -1.7
+              "value": -2.4
             },
             "five_star": {
               "display": "0.0",
@@ -90836,9 +90836,9 @@
             "value": -5.7
           },
           "jump": {
-            "display": "-0.5",
+            "display": "-1.3",
             "pctile": 18,
-            "value": -0.5
+            "value": -1.3
           },
           "five_star": {
             "display": "4.3",
@@ -93295,9 +93295,9 @@
               "value": 4.0
             },
             "jump": {
-              "display": "0.7",
-              "pctile": 57,
-              "value": 0.7
+              "display": "0.0",
+              "pctile": 62,
+              "value": 0.0
             },
             "five_star": {
               "display": "16.7",
@@ -93608,7 +93608,7 @@
     {
       "player_id": 686894,
       "name": "Joey Wiemer",
-      "team": "CWS",
+      "team": "WSN",
       "positions": {
         "CF": {
           "innings": 65.0,
@@ -93780,9 +93780,9 @@
             "value": -0.2
           },
           "jump": {
-            "display": "1.6",
-            "pctile": 81,
-            "value": 1.6
+            "display": "0.9",
+            "pctile": 82,
+            "value": 0.9
           },
           "five_star": {
             "display": "0.0",
@@ -94165,9 +94165,9 @@
             "value": 2.3
           },
           "jump": {
-            "display": "-0.2",
-            "pctile": 26,
-            "value": -0.2
+            "display": "-1.0",
+            "pctile": 25,
+            "value": -1.0
           },
           "five_star": {
             "display": "14.3",
@@ -94341,9 +94341,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "2.5",
-              "pctile": 94,
-              "value": 2.5
+              "display": "1.8",
+              "pctile": 95,
+              "value": 1.8
             },
             "five_star": {
               "display": "0.0",
@@ -96089,7 +96089,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 9,
+              "pctile": 7,
               "value": -2.0
             },
             "oaa_back": {
@@ -96108,14 +96108,14 @@
               "value": 3.0
             },
             "oaa_success": {
-              "display": "72.0",
-              "pctile": 47,
-              "value": 72.0
+              "display": "73.0",
+              "pctile": 52,
+              "value": 73.0
             },
             "esra": {
-              "display": "0.0",
-              "pctile": 53,
-              "value": 0.0
+              "display": "1.0",
+              "pctile": 69,
+              "value": 1.0
             },
             "frv_receiving": {
               "display": "-3.0",
@@ -96443,9 +96443,9 @@
             "value": 1.8
           },
           "jump": {
-            "display": "2.3",
+            "display": "1.5",
             "pctile": 91,
-            "value": 2.3
+            "value": 1.5
           },
           "five_star": {
             "display": "29.2",
@@ -96937,9 +96937,9 @@
             "value": -0.8
           },
           "jump": {
-            "display": "0.1",
-            "pctile": 38,
-            "value": 0.1
+            "display": "-0.6",
+            "pctile": 39,
+            "value": -0.6
           },
           "five_star": {
             "display": "0.0",
@@ -97159,9 +97159,9 @@
             "value": -1.6
           },
           "jump": {
-            "display": "1.6",
-            "pctile": 63,
-            "value": 1.6
+            "display": "0.8",
+            "pctile": 64,
+            "value": 0.8
           },
           "five_star": {
             "display": "0.0",
@@ -97265,9 +97265,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-1.0",
-              "pctile": 7,
-              "value": -1.0
+              "display": "-1.7",
+              "pctile": 9,
+              "value": -1.7
             },
             "five_star": {
               "display": "0.0",
@@ -97554,9 +97554,9 @@
             "value": 1.6
           },
           "jump": {
-            "display": "2.0",
+            "display": "1.2",
             "pctile": 86,
-            "value": 2.0
+            "value": 1.2
           },
           "five_star": {
             "display": "37.5",
@@ -98086,13 +98086,13 @@
               "value": 0.0
             },
             "oaa": {
-              "display": "1.0",
-              "pctile": 73,
-              "value": 1.0
+              "display": "2.0",
+              "pctile": 87,
+              "value": 2.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -98121,14 +98121,14 @@
               "value": -1.0
             },
             "oaa_success": {
-              "display": "80.0",
-              "pctile": 89,
-              "value": 80.0
+              "display": "82.0",
+              "pctile": 92,
+              "value": 82.0
             },
             "esra": {
-              "display": "3.0",
-              "pctile": 89,
-              "value": 3.0
+              "display": "4.0",
+              "pctile": 94,
+              "value": 4.0
             },
             "frv_receiving": {
               "display": "-1.0",
@@ -98277,9 +98277,9 @@
             "value": -0.1
           },
           "oaa": {
-            "display": "3.0",
-            "pctile": 88,
-            "value": 3.0
+            "display": "4.0",
+            "pctile": 91,
+            "value": 4.0
           },
           "frv_range": {
             "display": "2.0",
@@ -98519,9 +98519,9 @@
             "value": 0.6
           },
           "jump": {
-            "display": "0.9",
-            "pctile": 70,
-            "value": 0.9
+            "display": "0.1",
+            "pctile": 69,
+            "value": 0.1
           },
           "five_star": {
             "display": "11.1",
@@ -99437,12 +99437,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 25,
+              "pctile": 24,
               "value": 68.0
             },
             "esra": {
               "display": "-4.0",
-              "pctile": 21,
+              "pctile": 22,
               "value": -4.0
             },
             "frv_receiving": {
@@ -99832,9 +99832,9 @@
             "value": 1.4
           },
           "jump": {
-            "display": "0.5",
-            "pctile": 53,
-            "value": 0.5
+            "display": "-0.3",
+            "pctile": 52,
+            "value": -0.3
           },
           "five_star": {
             "display": "0.0",
@@ -99909,13 +99909,13 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
-              "display": "1.0",
-              "pctile": 77,
-              "value": 1.0
+              "display": "0.0",
+              "pctile": 56,
+              "value": 0.0
             },
             "drs_rpm": {
               "display": "-6.0",
@@ -99929,7 +99929,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 89,
+              "pctile": 90,
               "value": 2.0
             },
             "oaa_back": {
@@ -99949,7 +99949,7 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 53,
+              "pctile": 52,
               "value": 73.0
             },
             "esra": {
@@ -100495,9 +100495,9 @@
               "value": -5.0
             },
             "jump": {
-              "display": "1.4",
-              "pctile": 79,
-              "value": 1.4
+              "display": "0.7",
+              "pctile": 80,
+              "value": 0.7
             },
             "five_star": {
               "display": "0.0",
@@ -101073,9 +101073,9 @@
             "value": 1.4
           },
           "jump": {
-            "display": "-0.2",
+            "display": "-0.9",
             "pctile": 10,
-            "value": -0.2
+            "value": -0.9
           },
           "five_star": {
             "display": "0.0",
@@ -101467,9 +101467,9 @@
             "value": -2.2
           },
           "jump": {
-            "display": "-1.3",
+            "display": "-2.1",
             "pctile": 15,
-            "value": -1.3
+            "value": -2.1
           },
           "five_star": {
             "display": "0.0",
@@ -101899,9 +101899,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-0.3",
-              "pctile": 26,
-              "value": -0.3
+              "display": "-1.1",
+              "pctile": 25,
+              "value": -1.1
             },
             "five_star": {
               "display": "0.0",
@@ -102006,9 +102006,9 @@
               "value": -1.0
             },
             "jump": {
-              "display": "1.4",
-              "pctile": 64,
-              "value": 1.4
+              "display": "0.6",
+              "pctile": 63,
+              "value": 0.6
             },
             "five_star": {
               "display": "3.8",
@@ -102234,9 +102234,9 @@
             "value": 3.9
           },
           "jump": {
-            "display": "0.4",
+            "display": "-0.4",
             "pctile": 44,
-            "value": 0.4
+            "value": -0.4
           },
           "five_star": {
             "display": "3.7",
@@ -102447,9 +102447,9 @@
               "value": -1.0
             },
             "jump": {
-              "display": "0.1",
-              "pctile": 15,
-              "value": 0.1
+              "display": "-0.7",
+              "pctile": 13,
+              "value": -0.7
             },
             "five_star": {
               "display": "0.0",
@@ -102884,9 +102884,9 @@
             "value": 0.3
           },
           "jump": {
-            "display": "2.8",
+            "display": "2.0",
             "pctile": 94,
-            "value": 2.8
+            "value": 2.0
           },
           "five_star": {
             "display": "16.7",
@@ -102985,9 +102985,9 @@
               "value": -6.0
             },
             "jump": {
-              "display": "2.3",
-              "pctile": 91,
-              "value": 2.3
+              "display": "1.6",
+              "pctile": 92,
+              "value": 1.6
             },
             "five_star": {
               "display": "0.0",
@@ -103048,12 +103048,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -103063,7 +103063,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -103083,7 +103083,7 @@
             },
             "oaa_success": {
               "display": "80.0",
-              "pctile": 89,
+              "pctile": 88,
               "value": 80.0
             },
             "esra": {
@@ -105190,9 +105190,9 @@
               "value": -6.0
             },
             "jump": {
-              "display": "0.2",
-              "pctile": 40,
-              "value": 0.2
+              "display": "-0.5",
+              "pctile": 41,
+              "value": -0.5
             },
             "five_star": {
               "display": "0.0",
@@ -105637,12 +105637,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -105672,7 +105672,7 @@
             },
             "oaa_success": {
               "display": "80.0",
-              "pctile": 89,
+              "pctile": 88,
               "value": 80.0
             },
             "esra": {
@@ -105984,9 +105984,9 @@
             "value": 0.5
           },
           "jump": {
-            "display": "2.1",
+            "display": "1.4",
             "pctile": null,
-            "value": 2.1
+            "value": 1.4
           },
           "five_star": {
             "display": "25.0",
@@ -106964,9 +106964,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "2.0",
-              "pctile": 85,
-              "value": 2.0
+              "display": "1.2",
+              "pctile": 86,
+              "value": 1.2
             },
             "five_star": {
               "display": "21.7",
@@ -107149,7 +107149,7 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 10,
+              "pctile": 9,
               "value": -5.0
             },
             "frv_range": {
@@ -107169,7 +107169,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -107189,12 +107189,12 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 60,
+              "pctile": 61,
               "value": 74.0
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 26,
+              "pctile": 27,
               "value": -3.0
             },
             "frv_receiving": {
@@ -107271,12 +107271,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -107383,7 +107383,7 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 10,
+              "pctile": 9,
               "value": -5.0
             },
             "frv_range": {
@@ -107398,7 +107398,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -107418,13 +107418,13 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 25,
+              "pctile": 24,
               "value": 68.0
             },
             "esra": {
-              "display": "-3.0",
-              "pctile": 26,
-              "value": -3.0
+              "display": "-4.0",
+              "pctile": 22,
+              "value": -4.0
             },
             "frv_receiving": {
               "display": "1.0",
@@ -107625,7 +107625,7 @@
           },
           "frv_range": {
             "display": "-3.0",
-            "pctile": 22,
+            "pctile": 23,
             "value": -3.0
           },
           "drs_rpm": {
@@ -107639,9 +107639,9 @@
             "value": -1.4
           },
           "jump": {
-            "display": "0.7",
+            "display": "-0.1",
             "pctile": 79,
-            "value": 0.7
+            "value": -0.1
           },
           "five_star": {
             "display": "0.0",
@@ -108748,9 +108748,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-1.2",
-              "pctile": 5,
-              "value": -1.2
+              "display": "-1.9",
+              "pctile": 6,
+              "value": -1.9
             },
             "five_star": {
               "display": "0.0",
@@ -108821,12 +108821,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -108940,9 +108940,9 @@
               "value": -5.0
             },
             "jump": {
-              "display": "-1.6",
+              "display": "-2.3",
               "pctile": 7,
-              "value": -1.6
+              "value": -2.3
             },
             "five_star": {
               "display": "0.0",
@@ -109289,9 +109289,9 @@
             "value": -5.5
           },
           "jump": {
-            "display": "-0.3",
+            "display": "-1.1",
             "pctile": 4,
-            "value": -0.3
+            "value": -1.1
           },
           "five_star": {
             "display": "0.0",
@@ -109516,9 +109516,9 @@
             "value": -1.1
           },
           "jump": {
-            "display": "-1.0",
-            "pctile": 16,
-            "value": -1.0
+            "display": "-1.8",
+            "pctile": 15,
+            "value": -1.8
           },
           "five_star": {
             "display": "0.0",
@@ -109724,7 +109724,7 @@
           },
           "frv_range": {
             "display": "-9.0",
-            "pctile": 2,
+            "pctile": 1,
             "value": -9.0
           },
           "drs_rpm": {
@@ -109738,9 +109738,9 @@
             "value": -3.5
           },
           "jump": {
-            "display": "0.2",
-            "pctile": 41,
-            "value": 0.2
+            "display": "-0.6",
+            "pctile": 39,
+            "value": -0.6
           },
           "five_star": {
             "display": "0.0",
@@ -109844,9 +109844,9 @@
               "value": -1.0
             },
             "jump": {
-              "display": "1.2",
+              "display": "0.4",
               "pctile": 71,
-              "value": 1.2
+              "value": 0.4
             },
             "five_star": {
               "display": "0.0",
@@ -109917,7 +109917,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -110642,7 +110642,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 9,
+              "pctile": 7,
               "value": -2.0
             },
             "oaa_back": {
@@ -111306,9 +111306,9 @@
             "value": 2.6
           },
           "jump": {
-            "display": "0.4",
+            "display": "-0.4",
             "pctile": 21,
-            "value": 0.4
+            "value": -0.4
           },
           "five_star": {
             "display": "0.0",
@@ -112710,7 +112710,7 @@
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -112811,7 +112811,7 @@
           },
           "frv_abs": {
             "display": "1.6",
-            "pctile": 77,
+            "pctile": 74,
             "value": 1.6
           },
           "drs_rgfp": {
@@ -114207,9 +114207,9 @@
               "value": -5.0
             },
             "jump": {
-              "display": "-1.1",
-              "pctile": 10,
-              "value": -1.1
+              "display": "-1.8",
+              "pctile": 11,
+              "value": -1.8
             },
             "five_star": {
               "display": "0.0",
@@ -114285,12 +114285,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -114324,9 +114324,9 @@
               "value": 0.0
             },
             "oaa_success": {
-              "display": "76.0",
-              "pctile": 73,
-              "value": 76.0
+              "display": "73.0",
+              "pctile": 52,
+              "value": 73.0
             },
             "esra": {
               "display": "4.0",
@@ -114710,7 +114710,7 @@
             "overturns": 48,
             "confirms": 39,
             "runs_gained": 7.8,
-            "runs_cost": 1.5,
+            "runs_cost": 1.4,
             "challenges_against": 44,
             "overturns_against": 19
           },
@@ -114745,7 +114745,7 @@
               "x": -0.621,
               "z": 1.507,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-2",
               "date": "2026-03-27",
@@ -114758,7 +114758,7 @@
               "x": 0.445,
               "z": 1.393,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-0",
               "date": "2026-03-30",
@@ -114836,7 +114836,7 @@
               "x": 0.946,
               "z": 2.303,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "2-1",
               "date": "2026-04-09",
@@ -114862,7 +114862,7 @@
               "x": -0.468,
               "z": 3.579,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-1",
               "date": "2026-04-14",
@@ -114901,7 +114901,7 @@
               "x": 0.374,
               "z": 1.34,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-2",
               "date": "2026-04-16",
@@ -114914,7 +114914,7 @@
               "x": 0.929,
               "z": 2.082,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-1",
               "date": "2026-04-16",
@@ -114953,7 +114953,7 @@
               "x": 0.574,
               "z": 1.451,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-1",
               "date": "2026-04-17",
@@ -114992,7 +114992,7 @@
               "x": -0.016,
               "z": 1.479,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-0",
               "date": "2026-04-28",
@@ -115031,7 +115031,7 @@
               "x": 0.87,
               "z": 2.518,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-1",
               "date": "2026-04-29",
@@ -115070,7 +115070,7 @@
               "x": -0.832,
               "z": 3.233,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-0",
               "date": "2026-05-05",
@@ -115096,7 +115096,7 @@
               "x": 0.686,
               "z": 1.429,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-0",
               "date": "2026-07-05",
@@ -115109,7 +115109,7 @@
               "x": 0.418,
               "z": 3.497,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-2",
               "date": "2026-07-07",
@@ -115135,7 +115135,7 @@
               "x": 0.878,
               "z": 2.125,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "2-2",
               "date": "2026-07-08",
@@ -115148,7 +115148,7 @@
               "x": 0.137,
               "z": 3.287,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-2",
               "date": "2026-07-09",
@@ -115161,7 +115161,7 @@
               "x": 0.914,
               "z": 2.713,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-2",
               "date": "2026-07-09",
@@ -115200,7 +115200,7 @@
               "x": 0.221,
               "z": 1.355,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-1",
               "date": "2026-07-17",
@@ -115226,7 +115226,7 @@
               "x": -0.691,
               "z": 3.337,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-2",
               "date": "2026-07-17",
@@ -115239,7 +115239,7 @@
               "x": 0.655,
               "z": 1.392,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-2",
               "date": "2026-07-19",
@@ -115252,7 +115252,7 @@
               "x": 0.87,
               "z": 1.986,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-2",
               "date": "2026-07-21",
@@ -115304,7 +115304,7 @@
               "x": 0.9,
               "z": 1.816,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-0",
               "date": "2026-07-24",
@@ -115356,7 +115356,7 @@
               "x": 0.11,
               "z": 1.487,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-0",
               "date": "2026-07-30",
@@ -115408,7 +115408,7 @@
               "x": 0.864,
               "z": 2.303,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-2",
               "date": "2026-08-05",
@@ -115421,7 +115421,7 @@
               "x": -0.419,
               "z": 1.546,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-2",
               "date": "2026-08-07",
@@ -115460,7 +115460,7 @@
               "x": 0.953,
               "z": 2.223,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-0",
               "date": "2026-08-11",
@@ -115473,7 +115473,7 @@
               "x": 0.535,
               "z": 3.385,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-0",
               "date": "2026-08-12",
@@ -115538,7 +115538,7 @@
               "x": 0.013,
               "z": 1.354,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-1",
               "date": "2026-08-17",
@@ -115551,7 +115551,7 @@
               "x": 0.906,
               "z": 2.728,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "2-0",
               "date": "2026-08-19",
@@ -115564,7 +115564,7 @@
               "x": 0.976,
               "z": 2.7,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "2-0",
               "date": "2026-08-23",
@@ -115577,7 +115577,7 @@
               "x": 0.71,
               "z": 3.235,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-2",
               "date": "2026-08-25",
@@ -115603,7 +115603,7 @@
               "x": 0.549,
               "z": 3.241,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-1",
               "date": "2026-08-31",
@@ -115655,7 +115655,7 @@
               "x": 0.775,
               "z": 1.462,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-0",
               "date": "2026-09-06",
@@ -115668,7 +115668,7 @@
               "x": -0.52,
               "z": 3.371,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-2",
               "date": "2026-09-09",
@@ -115707,7 +115707,7 @@
               "x": -0.253,
               "z": 3.392,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-0",
               "date": "2026-09-12",
@@ -115720,7 +115720,7 @@
               "x": 1.056,
               "z": 2.473,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-1",
               "date": "2026-09-15",
@@ -115746,7 +115746,7 @@
               "x": 0.553,
               "z": 3.384,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-2",
               "date": "2026-09-17",
@@ -115772,7 +115772,7 @@
               "x": -0.332,
               "z": 3.424,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "2-2",
               "date": "2026-09-22",
@@ -115785,7 +115785,7 @@
               "x": -0.34,
               "z": 3.471,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "1-1",
               "date": "2026-09-22",
@@ -115824,7 +115824,7 @@
               "x": 0.219,
               "z": 1.474,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "3-1",
               "date": "2026-09-25",
@@ -115837,7 +115837,7 @@
               "x": 0.274,
               "z": 1.262,
               "overturned": false,
-              "runs": -0.038,
+              "runs": -0.036,
               "call": "Ball",
               "count": "0-2",
               "date": "2026-09-25",
@@ -115929,9 +115929,9 @@
               "value": 1.0
             },
             "oaa": {
-              "display": "3.0",
-              "pctile": 92,
-              "value": 3.0
+              "display": "4.0",
+              "pctile": 95,
+              "value": 4.0
             },
             "frv_range": {
               "display": "3.0",
@@ -115970,13 +115970,13 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 53,
+              "pctile": 52,
               "value": 73.0
             },
             "esra": {
-              "display": "2.0",
-              "pctile": 81,
-              "value": 2.0
+              "display": "1.0",
+              "pctile": 69,
+              "value": 1.0
             },
             "frv_receiving": {
               "display": "-2.0",
@@ -116197,9 +116197,9 @@
             "value": 1.3
           },
           "jump": {
-            "display": "1.3",
-            "pctile": 74,
-            "value": 1.3
+            "display": "0.6",
+            "pctile": 77,
+            "value": 0.6
           },
           "five_star": {
             "display": "0.0",
@@ -116378,9 +116378,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-0.2",
-              "pctile": 30,
-              "value": -0.2
+              "display": "-1.0",
+              "pctile": 29,
+              "value": -1.0
             },
             "five_star": {
               "display": "0.0",
@@ -116666,9 +116666,9 @@
             "value": -0.2
           },
           "jump": {
-            "display": "0.1",
-            "pctile": 10,
-            "value": 0.1
+            "display": "-0.6",
+            "pctile": 14,
+            "value": -0.6
           },
           "five_star": {
             "display": "25.0",
@@ -118350,9 +118350,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "0.2",
-              "pctile": 19,
-              "value": 0.2
+              "display": "-0.6",
+              "pctile": 18,
+              "value": -0.6
             },
             "four_star": {
               "display": "0.0",
@@ -118744,9 +118744,9 @@
             "value": -3.3
           },
           "jump": {
-            "display": "0.6",
+            "display": "-0.2",
             "pctile": null,
-            "value": 0.6
+            "value": -0.2
           },
           "five_star": {
             "display": "6.3",
@@ -119187,9 +119187,9 @@
             "value": 0.4
           },
           "jump": {
-            "display": "-0.8",
+            "display": "-1.5",
             "pctile": 14,
-            "value": -0.8
+            "value": -1.5
           },
           "five_star": {
             "display": "0.0",
@@ -119979,12 +119979,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 25,
+              "pctile": 24,
               "value": 68.0
             },
             "esra": {
               "display": "-6.0",
-              "pctile": 11,
+              "pctile": 10,
               "value": -6.0
             },
             "frv_receiving": {
@@ -120567,7 +120567,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 89,
+              "pctile": 90,
               "value": 2.0
             },
             "oaa_back": {
@@ -120853,9 +120853,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "2.5",
+              "display": "1.7",
               "pctile": 94,
-              "value": 2.5
+              "value": 1.7
             },
             "five_star": {
               "display": "0.0",
@@ -121213,9 +121213,9 @@
             "value": -4.6
           },
           "jump": {
-            "display": "0.2",
+            "display": "-0.6",
             "pctile": 14,
-            "value": 0.2
+            "value": -0.6
           },
           "five_star": {
             "display": "14.3",
@@ -121319,9 +121319,9 @@
               "value": -4.0
             },
             "jump": {
-              "display": "-3.6",
+              "display": "-4.3",
               "pctile": 0,
-              "value": -3.6
+              "value": -4.3
             },
             "five_star": {
               "display": "0.0",
@@ -121638,9 +121638,9 @@
             "value": -1.2
           },
           "jump": {
-            "display": "0.4",
-            "pctile": 51,
-            "value": 0.4
+            "display": "-0.3",
+            "pctile": 52,
+            "value": -0.3
           },
           "five_star": {
             "display": "22.2",
@@ -121739,9 +121739,9 @@
               "value": 4.0
             },
             "jump": {
-              "display": "1.7",
-              "pctile": 73,
-              "value": 1.7
+              "display": "0.8",
+              "pctile": 70,
+              "value": 0.8
             },
             "five_star": {
               "display": "33.3",
@@ -121841,9 +121841,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "1.2",
+              "display": "0.4",
               "pctile": 74,
-              "value": 1.2
+              "value": 0.4
             },
             "five_star": {
               "display": "14.3",
@@ -122273,9 +122273,9 @@
             "value": -0.7
           },
           "jump": {
-            "display": "1.3",
-            "pctile": 83,
-            "value": 1.3
+            "display": "0.5",
+            "pctile": 82,
+            "value": 0.5
           },
           "five_star": {
             "display": "0.0",
@@ -122390,7 +122390,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 60,
+              "pctile": 61,
               "value": 74.0
             },
             "esra": {
@@ -122617,9 +122617,9 @@
             "value": -2.3
           },
           "jump": {
-            "display": "0.0",
-            "pctile": 35,
-            "value": 0.0
+            "display": "-0.8",
+            "pctile": 33,
+            "value": -0.8
           },
           "five_star": {
             "display": "0.0",
@@ -122723,9 +122723,9 @@
               "value": 4.0
             },
             "jump": {
-              "display": "1.5",
+              "display": "0.7",
               "pctile": 66,
-              "value": 1.5
+              "value": 0.7
             },
             "five_star": {
               "display": "5.6",
@@ -123607,9 +123607,9 @@
             "value": 0.5
           },
           "jump": {
-            "display": "0.3",
+            "display": "-0.4",
             "pctile": 49,
-            "value": 0.3
+            "value": -0.4
           },
           "five_star": {
             "display": "0.0",
@@ -125137,12 +125137,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -125152,7 +125152,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -125172,7 +125172,7 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 76.0
             },
             "esra": {
@@ -125438,9 +125438,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "0.5",
-              "pctile": 32,
-              "value": 0.5
+              "display": "-0.3",
+              "pctile": 31,
+              "value": -0.3
             },
             "five_star": {
               "display": "0.0",
@@ -125671,9 +125671,9 @@
             "value": -0.7
           },
           "jump": {
-            "display": "0.8",
+            "display": "0.0",
             "pctile": 64,
-            "value": 0.8
+            "value": 0.0
           },
           "five_star": {
             "display": "0.0",
@@ -126945,12 +126945,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -126980,7 +126980,7 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 67,
+              "pctile": 68,
               "value": 75.0
             },
             "esra": {
@@ -127193,13 +127193,13 @@
               "value": 0.0
             },
             "oaa": {
-              "display": "0.0",
-              "pctile": 53,
-              "value": 0.0
+              "display": "-1.0",
+              "pctile": 38,
+              "value": -1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -127214,7 +127214,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 89,
+              "pctile": 90,
               "value": 2.0
             },
             "oaa_back": {
@@ -127537,9 +127537,9 @@
             "value": 5.5
           },
           "jump": {
-            "display": "1.0",
-            "pctile": 42,
-            "value": 1.0
+            "display": "0.2",
+            "pctile": 41,
+            "value": 0.2
           },
           "five_star": {
             "display": "5.6",
@@ -127905,9 +127905,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "-0.1",
-              "pctile": 10,
-              "value": -0.1
+              "display": "-0.8",
+              "pctile": 11,
+              "value": -0.8
             },
             "five_star": {
               "display": "20.0",
@@ -128235,9 +128235,9 @@
             "value": 0.9
           },
           "jump": {
-            "display": "0.8",
+            "display": "0.0",
             "pctile": 33,
-            "value": 0.8
+            "value": 0.0
           },
           "five_star": {
             "display": "8.3",
@@ -128523,9 +128523,9 @@
             "value": -2.1
           },
           "jump": {
-            "display": "-0.2",
-            "pctile": 26,
-            "value": -0.2
+            "display": "-1.0",
+            "pctile": 25,
+            "value": -1.0
           },
           "five_star": {
             "display": "6.3",
@@ -128640,12 +128640,12 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 33,
+              "pctile": 31,
               "value": 69.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 34,
+              "pctile": 33,
               "value": -2.0
             },
             "frv_receiving": {
@@ -128746,9 +128746,9 @@
               "value": -13.0
             },
             "jump": {
-              "display": "-0.5",
-              "pctile": 20,
-              "value": -0.5
+              "display": "-1.2",
+              "pctile": 22,
+              "value": -1.2
             },
             "five_star": {
               "display": "0.0",
@@ -129191,9 +129191,9 @@
               "value": -6.0
             },
             "jump": {
-              "display": "-1.7",
-              "pctile": 4,
-              "value": -1.7
+              "display": "-2.5",
+              "pctile": 3,
+              "value": -2.5
             },
             "five_star": {
               "display": "0.0",
@@ -131170,7 +131170,7 @@
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 41,
+              "pctile": 40,
               "value": -1.0
             },
             "frv_receiving": {
@@ -131645,9 +131645,9 @@
               "value": 6.0
             },
             "jump": {
-              "display": "3.0",
+              "display": "2.1",
               "pctile": 99,
-              "value": 3.0
+              "value": 2.1
             },
             "five_star": {
               "display": "50.0",
@@ -131738,7 +131738,7 @@
             },
             "oaa_success": {
               "display": "83.0",
-              "pctile": 96,
+              "pctile": 95,
               "value": 83.0
             },
             "esra": {
@@ -132721,9 +132721,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-0.4",
-              "pctile": 18,
-              "value": -0.4
+              "display": "-1.1",
+              "pctile": 20,
+              "value": -1.1
             },
             "five_star": {
               "display": "0.0",
@@ -133013,7 +133013,7 @@
             },
             "oaa": {
               "display": "4.0",
-              "pctile": 96,
+              "pctile": 95,
               "value": 4.0
             },
             "frv_range": {
@@ -133053,13 +133053,13 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 53,
+              "pctile": 52,
               "value": 73.0
             },
             "esra": {
-              "display": "2.0",
-              "pctile": 81,
-              "value": 2.0
+              "display": "1.0",
+              "pctile": 69,
+              "value": 1.0
             },
             "frv_receiving": {
               "display": "2.0",
@@ -133159,9 +133159,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "0.2",
-              "pctile": 19,
-              "value": 0.2
+              "display": "-0.6",
+              "pctile": 18,
+              "value": -0.6
             },
             "five_star": {
               "display": "6.3",
@@ -133871,9 +133871,9 @@
               "value": -17.0
             },
             "jump": {
-              "display": "-2.0",
-              "pctile": 4,
-              "value": -2.0
+              "display": "-2.7",
+              "pctile": 5,
+              "value": -2.7
             },
             "five_star": {
               "display": "0.0",
@@ -134080,9 +134080,9 @@
               "value": -4.0
             },
             "jump": {
-              "display": "0.7",
-              "pctile": 57,
-              "value": 0.7
+              "display": "0.0",
+              "pctile": 61,
+              "value": 0.0
             },
             "five_star": {
               "display": "8.3",
@@ -136820,12 +136820,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -136860,7 +136860,7 @@
             },
             "oaa_success": {
               "display": "66.0",
-              "pctile": 14,
+              "pctile": 15,
               "value": 66.0
             },
             "esra": {
@@ -138064,14 +138064,14 @@
               "value": 0.7
             },
             "oaa": {
-              "display": "1.0",
-              "pctile": 73,
-              "value": 1.0
+              "display": "0.0",
+              "pctile": 54,
+              "value": 0.0
             },
             "frv_range": {
-              "display": "1.0",
-              "pctile": 77,
-              "value": 1.0
+              "display": "0.0",
+              "pctile": 56,
+              "value": 0.0
             },
             "drs_rpm": {
               "display": "-3.0",
@@ -138084,9 +138084,9 @@
               "value": 0.7
             },
             "oaa_in": {
-              "display": "0.0",
-              "pctile": 49,
-              "value": 0.0
+              "display": "-1.0",
+              "pctile": 23,
+              "value": -1.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -138105,7 +138105,7 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 76.0
             },
             "esra": {
@@ -138216,9 +138216,9 @@
               "value": 6.0
             },
             "jump": {
-              "display": "3.1",
+              "display": "2.3",
               "pctile": 99,
-              "value": 3.1
+              "value": 2.3
             },
             "five_star": {
               "display": "50.0",
@@ -138323,9 +138323,9 @@
               "value": -1.0
             },
             "jump": {
-              "display": "0.0",
-              "pctile": 12,
-              "value": 0.0
+              "display": "-0.8",
+              "pctile": 11,
+              "value": -0.8
             },
             "five_star": {
               "display": "0.0",
@@ -138415,9 +138415,9 @@
               "value": 0.0
             },
             "oaa_in": {
-              "display": "3.0",
-              "pctile": 95,
-              "value": 3.0
+              "display": "2.0",
+              "pctile": 90,
+              "value": 2.0
             },
             "oaa_back": {
               "display": "-1.0",
@@ -138441,7 +138441,7 @@
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 41,
+              "pctile": 40,
               "value": -1.0
             },
             "frv_receiving": {
@@ -139183,7 +139183,7 @@
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 26,
+              "pctile": 27,
               "value": -3.0
             },
             "frv_receiving": {
@@ -139873,9 +139873,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "1.1",
-              "pctile": 71,
-              "value": 1.1
+              "display": "0.4",
+              "pctile": 74,
+              "value": 0.4
             },
             "five_star": {
               "display": "9.1",
@@ -140203,9 +140203,9 @@
             "value": -2.2
           },
           "jump": {
-            "display": "0.9",
-            "pctile": 70,
-            "value": 0.9
+            "display": "0.1",
+            "pctile": 69,
+            "value": 0.1
           },
           "five_star": {
             "display": "10.0",
@@ -140304,9 +140304,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-1.5",
+              "display": "-2.2",
               "pctile": 7,
-              "value": -1.5
+              "value": -2.2
             },
             "five_star": {
               "display": "4.3",
@@ -140513,9 +140513,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "0.6",
+              "display": "-0.2",
               "pctile": 52,
-              "value": 0.6
+              "value": -0.2
             },
             "five_star": {
               "display": "0.0",
@@ -140832,9 +140832,9 @@
               "value": -6.0
             },
             "frv_range": {
-              "display": "-4.0",
-              "pctile": 8,
-              "value": -4.0
+              "display": "-5.0",
+              "pctile": 4,
+              "value": -5.0
             },
             "drs_rpm": {
               "display": "-8.0",
@@ -140868,12 +140868,12 @@
             },
             "oaa_success": {
               "display": "62.0",
-              "pctile": 7,
+              "pctile": 6,
               "value": 62.0
             },
             "esra": {
               "display": "-6.0",
-              "pctile": 11,
+              "pctile": 10,
               "value": -6.0
             },
             "frv_receiving": {
@@ -141081,9 +141081,9 @@
               "value": -4.0
             },
             "jump": {
-              "display": "2.0",
-              "pctile": 88,
-              "value": 2.0
+              "display": "1.3",
+              "pctile": 89,
+              "value": 1.3
             },
             "five_star": {
               "display": "0.0",
@@ -141178,9 +141178,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "0.0",
-              "pctile": 35,
-              "value": 0.0
+              "display": "-0.8",
+              "pctile": 34,
+              "value": -0.8
             },
             "five_star": {
               "display": "0.0",
@@ -141772,9 +141772,9 @@
               "value": -4.0
             },
             "jump": {
-              "display": "-2.5",
+              "display": "-3.2",
               "pctile": 3,
-              "value": -2.5
+              "value": -3.2
             },
             "five_star": {
               "display": "0.0",
@@ -141879,9 +141879,9 @@
               "value": -4.0
             },
             "jump": {
-              "display": "-1.1",
+              "display": "-1.9",
               "pctile": 6,
-              "value": -1.1
+              "value": -1.9
             },
             "five_star": {
               "display": "0.0",
@@ -142161,7 +142161,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -142181,12 +142181,12 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 33,
+              "pctile": 31,
               "value": 69.0
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 41,
+              "pctile": 40,
               "value": -1.0
             },
             "frv_receiving": {
@@ -142443,7 +142443,7 @@
           },
           "frv_range": {
             "display": "-3.0",
-            "pctile": 22,
+            "pctile": 23,
             "value": -3.0
           },
           "drs_rpm": {
@@ -144330,9 +144330,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "0.5",
-              "pctile": 32,
-              "value": 0.5
+              "display": "-0.3",
+              "pctile": 31,
+              "value": -0.3
             },
             "five_star": {
               "display": "0.0",
@@ -144576,12 +144576,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -144591,7 +144591,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -144611,12 +144611,12 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 33,
+              "pctile": 31,
               "value": 69.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -144700,9 +144700,9 @@
               "value": -5.0
             },
             "jump": {
-              "display": "-0.1",
-              "pctile": 31,
-              "value": -0.1
+              "display": "-0.9",
+              "pctile": 30,
+              "value": -0.9
             },
             "five_star": {
               "display": "25.0",
@@ -144858,12 +144858,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -144893,7 +144893,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 60,
+              "pctile": 61,
               "value": 74.0
             },
             "esra": {
@@ -145109,9 +145109,9 @@
             "value": -1.1
           },
           "jump": {
-            "display": "0.6",
+            "display": "-0.2",
             "pctile": 51,
-            "value": 0.6
+            "value": -0.2
           },
           "five_star": {
             "display": "0.0",
@@ -145341,9 +145341,9 @@
             "value": -0.4
           },
           "jump": {
-            "display": "0.2",
+            "display": "-0.6",
             "pctile": 14,
-            "value": 0.2
+            "value": -0.6
           },
           "five_star": {
             "display": "0.0",
@@ -145529,9 +145529,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "0.9",
-              "pctile": 66,
-              "value": 0.9
+              "display": "0.1",
+              "pctile": 65,
+              "value": 0.1
             },
             "five_star": {
               "display": "7.1",
@@ -145642,7 +145642,7 @@
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 41,
+              "pctile": 40,
               "value": -1.0
             },
             "frv_receiving": {
@@ -147046,7 +147046,7 @@
             },
             "oaa_success": {
               "display": "66.0",
-              "pctile": 14,
+              "pctile": 15,
               "value": 66.0
             },
             "esra": {
@@ -147117,7 +147117,7 @@
           },
           "frv_abs": {
             "display": "0.8",
-            "pctile": 67,
+            "pctile": 63,
             "value": 0.8
           },
           "drs_rgfp": {
@@ -147267,9 +147267,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "-0.1",
-              "pctile": 32,
-              "value": -0.1
+              "display": "-0.8",
+              "pctile": 34,
+              "value": -0.8
             },
             "five_star": {
               "display": "0.0",
@@ -147444,9 +147444,9 @@
               "value": 5.0
             },
             "jump": {
-              "display": "0.1",
-              "pctile": 39,
-              "value": 0.1
+              "display": "-0.7",
+              "pctile": 37,
+              "value": -0.7
             },
             "five_star": {
               "display": "0.0",
@@ -147708,9 +147708,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "0.1",
-              "pctile": 39,
-              "value": 0.1
+              "display": "-0.6",
+              "pctile": 40,
+              "value": -0.6
             },
             "five_star": {
               "display": "0.0",
@@ -148747,12 +148747,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -148853,7 +148853,7 @@
           },
           "frv_abs": {
             "display": "-1.9",
-            "pctile": 11,
+            "pctile": 12,
             "value": -1.9
           },
           "drs_rgfp": {
@@ -149427,7 +149427,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -149447,12 +149447,12 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 33,
+              "pctile": 31,
               "value": 69.0
             },
             "esra": {
               "display": "-6.0",
-              "pctile": 11,
+              "pctile": 10,
               "value": -6.0
             },
             "frv_receiving": {
@@ -150791,9 +150791,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "1.5",
+              "display": "0.7",
               "pctile": 80,
-              "value": 1.5
+              "value": 0.7
             },
             "five_star": {
               "display": "11.8",
@@ -152307,13 +152307,13 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 10,
+              "pctile": 9,
               "value": -5.0
             },
             "frv_range": {
-              "display": "-3.0",
-              "pctile": 13,
-              "value": -3.0
+              "display": "-4.0",
+              "pctile": 8,
+              "value": -4.0
             },
             "drs_rpm": {
               "display": "-4.0",
@@ -152327,7 +152327,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 89,
+              "pctile": 90,
               "value": 2.0
             },
             "oaa_back": {
@@ -152347,12 +152347,12 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 60,
+              "pctile": 61,
               "value": 74.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 34,
+              "pctile": 33,
               "value": -2.0
             },
             "frv_receiving": {
@@ -152640,9 +152640,9 @@
             "value": 0.7
           },
           "jump": {
-            "display": "0.5",
+            "display": "-0.3",
             "pctile": 25,
-            "value": 0.5
+            "value": -0.3
           },
           "five_star": {
             "display": "0.0",
@@ -152707,12 +152707,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -152742,7 +152742,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 60,
+              "pctile": 61,
               "value": 74.0
             },
             "esra": {
@@ -153054,9 +153054,9 @@
             "value": -2.0
           },
           "jump": {
-            "display": "0.3",
+            "display": "-0.4",
             "pctile": 64,
-            "value": 0.3
+            "value": -0.4
           },
           "five_star": {
             "display": "0.0",
@@ -153166,7 +153166,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -153191,7 +153191,7 @@
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 26,
+              "pctile": 27,
               "value": -3.0
             },
             "frv_receiving": {
@@ -153297,9 +153297,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "-1.8",
+              "display": "-2.6",
               "pctile": 2,
-              "value": -1.8
+              "value": -2.6
             },
             "five_star": {
               "display": "0.0",
@@ -153404,9 +153404,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "1.9",
-              "pctile": 89,
-              "value": 1.9
+              "display": "1.3",
+              "pctile": 92,
+              "value": 1.3
             },
             "five_star": {
               "display": "0.0",
@@ -153617,9 +153617,9 @@
             "value": 1.8
           },
           "jump": {
-            "display": "0.7",
+            "display": "-0.1",
             "pctile": 31,
-            "value": 0.7
+            "value": -0.1
           },
           "five_star": {
             "display": "17.6",
@@ -154192,9 +154192,9 @@
             "value": -1.2
           },
           "jump": {
-            "display": "0.6",
+            "display": "-0.2",
             "pctile": 29,
-            "value": 0.6
+            "value": -0.2
           },
           "five_star": {
             "display": "0.0",
@@ -154289,7 +154289,7 @@
             },
             "oaa_in": {
               "display": "3.0",
-              "pctile": 95,
+              "pctile": 96,
               "value": 3.0
             },
             "oaa_back": {
@@ -154309,12 +154309,12 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 53,
+              "pctile": 52,
               "value": 73.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -154607,9 +154607,9 @@
             "value": 0.9
           },
           "jump": {
-            "display": "0.9",
-            "pctile": 70,
-            "value": 0.9
+            "display": "0.2",
+            "pctile": 72,
+            "value": 0.2
           },
           "five_star": {
             "display": "0.0",
@@ -154941,9 +154941,9 @@
             "value": -3.4
           },
           "jump": {
-            "display": "-0.1",
+            "display": "-0.9",
             "pctile": 39,
-            "value": -0.1
+            "value": -0.9
           },
           "five_star": {
             "display": "0.0",
@@ -155047,9 +155047,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "-0.9",
-              "pctile": 13,
-              "value": -0.9
+              "display": "-1.6",
+              "pctile": 15,
+              "value": -1.6
             },
             "five_star": {
               "display": "0.0",
@@ -155533,13 +155533,13 @@
               "value": 0.0
             },
             "oaa": {
-              "display": "1.0",
-              "pctile": 73,
-              "value": 1.0
+              "display": "0.0",
+              "pctile": 54,
+              "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -155548,9 +155548,9 @@
               "value": 3.0
             },
             "oaa_in": {
-              "display": "0.0",
-              "pctile": 49,
-              "value": 0.0
+              "display": "-1.0",
+              "pctile": 23,
+              "value": -1.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -155568,9 +155568,9 @@
               "value": 2.0
             },
             "oaa_success": {
-              "display": "77.0",
-              "pctile": 79,
-              "value": 77.0
+              "display": "76.0",
+              "pctile": 74,
+              "value": 76.0
             },
             "esra": {
               "display": "0.0",
@@ -155770,13 +155770,13 @@
             "value": -3.1
           },
           "oaa": {
-            "display": "2.0",
-            "pctile": 82,
-            "value": 2.0
+            "display": "1.0",
+            "pctile": 74,
+            "value": 1.0
           },
           "frv_range": {
             "display": "1.0",
-            "pctile": 75,
+            "pctile": 78,
             "value": 1.0
           },
           "drs_rpm": {
@@ -155790,9 +155790,9 @@
             "value": -3.1
           },
           "jump": {
-            "display": "2.6",
+            "display": "1.9",
             "pctile": 93,
-            "value": 2.6
+            "value": 1.9
           },
           "five_star": {
             "display": "16.7",
@@ -156118,9 +156118,9 @@
             "value": 0.8
           },
           "jump": {
-            "display": "0.5",
+            "display": "-0.3",
             "pctile": null,
-            "value": 0.5
+            "value": -0.3
           },
           "five_star": {
             "display": "0.0",
@@ -156340,9 +156340,9 @@
             "value": 1.7
           },
           "jump": {
-            "display": "1.2",
+            "display": "0.4",
             "pctile": 78,
-            "value": 1.2
+            "value": 0.4
           },
           "five_star": {
             "display": "27.3",
@@ -156422,7 +156422,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 24,
+              "pctile": 23,
               "value": -1.0
             },
             "oaa_back": {
@@ -156598,7 +156598,7 @@
           },
           "oaa": {
             "display": "-6.0",
-            "pctile": 13,
+            "pctile": 12,
             "value": -6.0
           },
           "frv_range": {
@@ -157278,9 +157278,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "0.3",
-              "pctile": 23,
-              "value": 0.3
+              "display": "-0.5",
+              "pctile": 22,
+              "value": -0.5
             },
             "five_star": {
               "display": "15.4",
@@ -157385,9 +157385,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "-1.7",
+              "display": "-2.5",
               "pctile": 6,
-              "value": -1.7
+              "value": -2.5
             },
             "five_star": {
               "display": "0.0",
@@ -158038,9 +158038,9 @@
             "value": 1.3
           },
           "jump": {
-            "display": "2.2",
+            "display": "1.4",
             "pctile": 89,
-            "value": 2.2
+            "value": 1.4
           },
           "five_star": {
             "display": "21.7",
@@ -158110,12 +158110,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 77,
+              "pctile": 79,
               "value": 1.0
             },
             "drs_rpm": {
@@ -158145,7 +158145,7 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 76.0
             },
             "esra": {
@@ -158366,9 +158366,9 @@
             "value": -3.5
           },
           "jump": {
-            "display": "-1.2",
+            "display": "-2.0",
             "pctile": 7,
-            "value": -1.2
+            "value": -2.0
           },
           "five_star": {
             "display": "0.0",
@@ -158574,9 +158574,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "1.7",
-              "pctile": 84,
-              "value": 1.7
+              "display": "1.0",
+              "pctile": 86,
+              "value": 1.0
             },
             "five_star": {
               "display": "0.0",
@@ -158793,9 +158793,9 @@
               "value": -1.0
             },
             "jump": {
-              "display": "3.6",
+              "display": "2.8",
               "pctile": 100,
-              "value": 3.6
+              "value": 2.8
             },
             "five_star": {
               "display": "0.0",
@@ -158955,9 +158955,9 @@
               "value": -5.0
             },
             "jump": {
-              "display": "-0.2",
-              "pctile": 27,
-              "value": -0.2
+              "display": "-0.9",
+              "pctile": 30,
+              "value": -0.9
             },
             "five_star": {
               "display": "12.5",
@@ -160131,7 +160131,7 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 33,
+              "pctile": 31,
               "value": 69.0
             },
             "esra": {
@@ -160232,9 +160232,9 @@
               "value": -2.0
             },
             "jump": {
-              "display": "0.2",
-              "pctile": 40,
-              "value": 0.2
+              "display": "-0.6",
+              "pctile": 38,
+              "value": -0.6
             },
             "five_star": {
               "display": "0.0",
@@ -160339,9 +160339,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "0.6",
-              "pctile": 54,
-              "value": 0.6
+              "display": "-0.1",
+              "pctile": 56,
+              "value": -0.1
             },
             "five_star": {
               "display": "0.0",
@@ -162998,9 +162998,9 @@
             "value": -1.2
           },
           "jump": {
-            "display": "1.3",
-            "pctile": 83,
-            "value": 1.3
+            "display": "0.5",
+            "pctile": 82,
+            "value": 0.5
           },
           "five_star": {
             "display": "20.0",
@@ -163085,7 +163085,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 9,
+              "pctile": 7,
               "value": -2.0
             },
             "oaa_back": {
@@ -163104,14 +163104,14 @@
               "value": 1.0
             },
             "oaa_success": {
-              "display": "61.0",
-              "pctile": 5,
-              "value": 61.0
+              "display": "62.0",
+              "pctile": 6,
+              "value": 62.0
             },
             "esra": {
-              "display": "-6.0",
-              "pctile": 11,
-              "value": -6.0
+              "display": "-5.0",
+              "pctile": 16,
+              "value": -5.0
             },
             "frv_receiving": {
               "display": "1.0",
@@ -163588,9 +163588,9 @@
             "value": -3.6
           },
           "jump": {
-            "display": "0.2",
-            "pctile": 48,
-            "value": 0.2
+            "display": "-0.6",
+            "pctile": 47,
+            "value": -0.6
           },
           "five_star": {
             "display": "0.0",
@@ -165502,12 +165502,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -165517,7 +165517,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 89,
+              "pctile": 90,
               "value": 2.0
             },
             "oaa_back": {
@@ -165537,12 +165537,12 @@
             },
             "oaa_success": {
               "display": "82.0",
-              "pctile": 94,
+              "pctile": 92,
               "value": 82.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -165608,7 +165608,7 @@
           },
           "frv_abs": {
             "display": "2.2",
-            "pctile": 89,
+            "pctile": 88,
             "value": 2.2
           },
           "drs_rgfp": {
@@ -165799,9 +165799,9 @@
             "value": 1.6
           },
           "jump": {
-            "display": "2.8",
+            "display": "2.0",
             "pctile": 94,
-            "value": 2.8
+            "value": 2.0
           },
           "five_star": {
             "display": "35.7",
@@ -166026,9 +166026,9 @@
             "value": -0.9
           },
           "jump": {
-            "display": "0.5",
+            "display": "-0.3",
             "pctile": 47,
-            "value": 0.5
+            "value": -0.3
           },
           "five_star": {
             "display": "16.7",
@@ -166132,9 +166132,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "1.1",
+              "display": "0.3",
               "pctile": 54,
-              "value": 1.1
+              "value": 0.3
             },
             "five_star": {
               "display": "0.0",
@@ -166210,13 +166210,13 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
-              "display": "1.0",
-              "pctile": 77,
-              "value": 1.0
+              "display": "0.0",
+              "pctile": 56,
+              "value": 0.0
             },
             "drs_rpm": {
               "display": "5.0",
@@ -166230,7 +166230,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 9,
+              "pctile": 7,
               "value": -2.0
             },
             "oaa_back": {
@@ -166250,7 +166250,7 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 67,
+              "pctile": 68,
               "value": 75.0
             },
             "esra": {
@@ -166331,14 +166331,14 @@
               "value": 0.6
             },
             "oaa": {
-              "display": "4.0",
-              "pctile": 96,
-              "value": 4.0
+              "display": "6.0",
+              "pctile": 97,
+              "value": 6.0
             },
             "frv_range": {
-              "display": "3.0",
-              "pctile": 95,
-              "value": 3.0
+              "display": "4.0",
+              "pctile": 97,
+              "value": 4.0
             },
             "drs_rpm": {
               "display": "9.0",
@@ -166351,9 +166351,9 @@
               "value": 0.6
             },
             "oaa_in": {
-              "display": "-2.0",
-              "pctile": 9,
-              "value": -2.0
+              "display": "-1.0",
+              "pctile": 23,
+              "value": -1.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -166371,14 +166371,14 @@
               "value": 6.0
             },
             "oaa_success": {
-              "display": "77.0",
-              "pctile": 79,
-              "value": 77.0
+              "display": "78.0",
+              "pctile": 83,
+              "value": 78.0
             },
             "esra": {
-              "display": "1.0",
-              "pctile": 68,
-              "value": 1.0
+              "display": "2.0",
+              "pctile": 81,
+              "value": 2.0
             },
             "frv_receiving": {
               "display": "1.0",
@@ -166599,9 +166599,9 @@
             "value": 4.5
           },
           "jump": {
-            "display": "1.3",
-            "pctile": 83,
-            "value": 1.3
+            "display": "0.6",
+            "pctile": 84,
+            "value": 0.6
           },
           "five_star": {
             "display": "0.0",
@@ -166700,9 +166700,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "1.1",
+              "display": "0.3",
               "pctile": 54,
-              "value": 1.1
+              "value": 0.3
             },
             "five_star": {
               "display": "0.0",
@@ -166918,9 +166918,9 @@
             "value": 0.3
           },
           "jump": {
-            "display": "-0.2",
-            "pctile": 26,
-            "value": -0.2
+            "display": "-0.9",
+            "pctile": 30,
+            "value": -0.9
           },
           "five_star": {
             "display": "25.0",
@@ -167355,9 +167355,9 @@
               "value": 3.0
             },
             "jump": {
-              "display": "2.9",
+              "display": "2.3",
               "pctile": 98,
-              "value": 2.9
+              "value": 2.3
             },
             "five_star": {
               "display": "50.0",
@@ -168398,12 +168398,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -171457,12 +171457,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 73,
+              "pctile": 74,
               "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -171477,7 +171477,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 9,
+              "pctile": 7,
               "value": -2.0
             },
             "oaa_back": {
@@ -171497,12 +171497,12 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 60,
+              "pctile": 61,
               "value": 74.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 68,
+              "pctile": 69,
               "value": 1.0
             },
             "frv_receiving": {
@@ -171715,9 +171715,9 @@
               "value": 1.0
             },
             "jump": {
-              "display": "1.8",
+              "display": "1.1",
               "pctile": 86,
-              "value": 1.8
+              "value": 1.1
             },
             "five_star": {
               "display": "15.0",
@@ -171943,9 +171943,9 @@
             "value": 2.6
           },
           "jump": {
-            "display": "2.5",
+            "display": "1.7",
             "pctile": 97,
-            "value": 2.5
+            "value": 1.7
           },
           "five_star": {
             "display": "7.1",
@@ -173755,12 +173755,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 53,
+              "pctile": 54,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 55,
+              "pctile": 56,
               "value": 0.0
             },
             "drs_rpm": {
@@ -174337,9 +174337,9 @@
             "value": -1.4
           },
           "jump": {
-            "display": "-0.4",
-            "pctile": 30,
-            "value": -0.4
+            "display": "-1.1",
+            "pctile": 32,
+            "value": -1.1
           },
           "five_star": {
             "display": "0.0",
@@ -174438,9 +174438,9 @@
               "value": -8.0
             },
             "jump": {
-              "display": "-4.1",
+              "display": "-4.8",
               "pctile": 0,
-              "value": -4.1
+              "value": -4.8
             },
             "five_star": {
               "display": "0.0",
@@ -174763,9 +174763,9 @@
             "value": -0.5
           },
           "jump": {
-            "display": "-3.1",
+            "display": "-3.9",
             "pctile": 2,
-            "value": -3.1
+            "value": -3.9
           },
           "five_star": {
             "display": "0.0",
@@ -174864,9 +174864,9 @@
               "value": 0.0
             },
             "jump": {
-              "display": "1.2",
+              "display": "0.4",
               "pctile": 74,
-              "value": 1.2
+              "value": 0.4
             },
             "five_star": {
               "display": "0.0",
@@ -174956,9 +174956,9 @@
               "value": -3.0
             },
             "jump": {
-              "display": "-0.3",
-              "pctile": 26,
-              "value": -0.3
+              "display": "-1.1",
+              "pctile": 25,
+              "value": -1.1
             },
             "five_star": {
               "display": "0.0",
@@ -175218,9 +175218,9 @@
               "value": 2.0
             },
             "jump": {
-              "display": "1.2",
-              "pctile": 71,
-              "value": 1.2
+              "display": "0.5",
+              "pctile": 74,
+              "value": 0.5
             },
             "five_star": {
               "display": "16.7",
@@ -175796,9 +175796,9 @@
             "value": 1.5
           },
           "jump": {
-            "display": "1.7",
+            "display": "0.8",
             "pctile": 75,
-            "value": 1.7
+            "value": 0.8
           },
           "five_star": {
             "display": "0.0",
@@ -175959,6 +175959,6 @@
       "FanGraphs",
       "BP"
     ],
-    "generated_at": "2026-11-08 14:02:05 UTC"
+    "generated_at": "2026-11-09 14:02:28 UTC"
   }
 }
