@@ -51,7 +51,7 @@ Comprehensive reference for the project across both repos. Use this when startin
 | `iswing_meta.json` | `iswing_update.py` — seasons scored by the current model (drives the *new* labels) | Daily |
 | `similarity_hitters_{year}.json` | `build_similarity_hitters.py` — hitter similarity vectors (Similar Players panel) | After data updates |
 | `similarity_pitchers_{year}.json` | `build_similarity_pitchers.py` — pitcher similarity vectors + per-type arsenal shapes | After scoring |
-| `hitter_spray_{year}.json` | `build_hitter_xrv.py` (manual, `.venv-xrv`) — per hitter and batter side, LF/CF/RF (±15° spray split) season totals: RV (Σ delta_run_exp) vs model xRV (Σ per-pitch `xrv`, same scale), BBE %, barrels, avg EV, EV90, avg LA, each percentiled within the same-side pool (qualified hitters with ≥20 BBE from that side; EV/LA stats need ≥5 BBE in the zone). Spray table on the hitter card | With the xRV build |
+| `hitter_spray_{year}.json` | `build_hitter_xrv.py` (manual, `.venv-xrv`) — per hitter and batter side, LF/CF/RF (±15° spray split) season totals: RV (Σ delta_run_exp) vs model xRV (Σ per-pitch `xrv`, same scale), BBE %, Barrel% (barrels / zone BBE), avg EV, EV90, avg LA, each percentiled within the same-side pool (qualified hitters with ≥20 BBE from that side; Barrel%/EV/LA stats need ≥5 BBE in the zone). Spray table on the hitter card | With the xRV build |
 | `counting_stats_{year}.json` | `baseball_pipeline.py` (`build_counting_stats`) — FanGraphs season lines (G/PA/HR… Off/Def/WPA/WAR; G/GS/IP/W/L/SV… ERA/xERA/WAR) keyed by MLBAM id, for the season-totals table under the cards. Needs FG cookies; left untouched when FG is unreachable | With the pipeline |
 
 ### Card layout (MLB cards)

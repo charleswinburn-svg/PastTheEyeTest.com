@@ -6,7 +6,7 @@ import { binColor, textOnBin, NUM_FONT, NUM_WEIGHT } from "./SharedComponents.js
 // SPRAY ZONE TABLE (hitter card, under the spray chart)
 // ═══════════════════════════════════════════════════════════
 // LF / CF / RF season totals from public/hitter_spray_{season}.json
-// (build_hitter_xrv.py): actual RV vs model xRV, share of BBE, barrels, EV,
+// (build_hitter_xrv.py): actual RV vs model xRV, share of BBE, barrel rate, EV,
 // 90th-pct EV and LA. Every value carries a percentile ranked among hitters
 // batting from the same side; switch hitters get an L/R toggle. Season-only —
 // the file has no per-game breakdown, so date-range mode still shows the season.
@@ -18,17 +18,17 @@ const COLS = [
   ["rv",   "RV",      1, true,  true],
   ["xrv",  "xRV",     1, true,  true],
   ["pct",  "BBE%",    1, false, true],
-  ["brl",  "Barrels", 0, false, true],
+  ["brl_pct", "Barrel%", 1, false, true],
   ["ev",   "Avg EV",  1, false, true],
   ["ev90", "EV90",    1, false, true],
   ["la",   "Avg LA",  1, false, true],
 ];
 const HAND_LABEL = { L: "LHH", R: "RHH" };
 const STAT_TITLE = {
-  rv: "Run Value", xrv: "Expected Run Value (xRV)", pct: "Share of Batted Balls", brl: "Barrels",
+  rv: "Run Value", xrv: "Expected Run Value (xRV)", pct: "Share of Batted Balls", brl_pct: "Barrel Rate (Barrels / BBE)",
   ev: "Average Exit Velocity", ev90: "90th-Percentile Exit Velocity", la: "Average Launch Angle",
 };
-const STAT_UNIT = { rv: "", xrv: "", pct: "%", brl: "", ev: " mph", ev90: " mph", la: "°" };
+const STAT_UNIT = { rv: "", xrv: "", pct: "%", brl_pct: "%", ev: " mph", ev90: " mph", la: "°" };
 // Spray-angle edges (degrees, 0 = straight to CF, negative = LF side).
 const ZONE_EDGES = { LF: [-45, -15], CF: [-15, 15], RF: [15, 45] };
 

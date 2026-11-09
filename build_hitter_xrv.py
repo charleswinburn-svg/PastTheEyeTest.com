@@ -15,7 +15,7 @@ write three files:
                                         rank it against the season distribution.
 
   public/hitter_spray_{season}.json     per-batter, per-side LF / CF / RF batted-ball
-                                        totals (RV vs model xRV, BBE %, barrels, EV,
+                                        totals (RV vs model xRV, BBE %, Barrel%, EV,
                                         EV90, LA), each percentiled within the
                                         batter-side pool. Hitter card spray table.
 
@@ -100,10 +100,10 @@ SPRAY_ORIGIN = (125.42, 198.27)
 SPRAY_BOUND = 15.0
 SPRAY_ZONES = ("LF", "CF", "RF")
 SPRAY_MIN_SIDE_BBE = 20   # a side needs this many BBE to be ranked / join the pool
-SPRAY_MIN_ZONE_BBE = 5    # rate stats (EV, EV90, LA) in a thinner zone are unranked
-SPRAY_STATS = ("rv", "xrv", "pct", "brl", "ev", "ev90", "la")
-SPRAY_RATE_STATS = {"ev", "ev90", "la"}
-SPRAY_DECIMALS = {"rv": 2, "xrv": 2, "pct": 1, "brl": 0, "ev": 1, "ev90": 1, "la": 1}
+SPRAY_MIN_ZONE_BBE = 5    # rate stats (Barrel%, EV, EV90, LA) in a thinner zone are unranked
+SPRAY_STATS = ("rv", "xrv", "pct", "brl_pct", "ev", "ev90", "la")
+SPRAY_RATE_STATS = {"brl_pct", "ev", "ev90", "la"}
+SPRAY_DECIMALS = {"rv": 2, "xrv": 2, "pct": 1, "brl_pct": 1, "ev": 1, "ev90": 1, "la": 1}
 # Columns re-attached from the source Statcast frame (model.score() drops them).
 SPRAY_SRC_COLS = ["stand", "description", "hc_x", "hc_y", "launch_speed", "launch_angle",
                   "launch_speed_angle", "delta_run_exp"]
@@ -266,8 +266,8 @@ def build_spray_json(scored: pd.DataFrame, df: pd.DataFrame, qualified_ids: set,
             two compare directly. (`total` / `contact_spray` are the skill split
             behind the card's xRV/600 and are not an outcome expectation.)
       pct   zone BBE / side BBE × 100
-      brl   barrels (launch_speed_angle == 6)
-      ev, la, ev90   mean EV, mean LA, 90th-pct EV
+      brl_pct  barrels (launch_speed_angle == 6) / zone BBE × 100
+      ev, la, ev90   mean EV, mean LA, 90th-pct EV (rate stats are null for an empty zone)
     Totals, not rates per PA. Only qualified hitters are emitted."""
     src = df[PITCH_KEYS + [c for c in SPRAY_SRC_COLS if c in df.columns]].copy()
     for c in SPRAY_SRC_COLS:
@@ -300,7 +300,7 @@ def build_spray_json(scored: pd.DataFrame, df: pd.DataFrame, qualified_ids: set,
         "n":    g.size(),
         "rv":   g["delta_run_exp"].sum(),
         "xrv":  g["xrv"].sum(),
-        "brl":  g["_brl"].sum(),
+        "brl_pct": g["_brl"].mean() * 100.0,
         "ev":   g["launch_speed"].mean(),
         "la":   g["launch_angle"].mean(),
         "ev90": g["launch_speed"].quantile(0.9),
@@ -310,7 +310,7 @@ def build_spray_json(scored: pd.DataFrame, df: pd.DataFrame, qualified_ids: set,
     full = pd.MultiIndex.from_tuples(
         [(b, st, zn) for (b, st) in side_bbe.index for zn in SPRAY_ZONES], names=["batter", "stand", "zone"])
     z = z.reindex(full)
-    for c in ("n", "rv", "xrv", "brl"):
+    for c in ("n", "rv", "xrv"):
         z[c] = z[c].fillna(0.0)
     z = z.reset_index().merge(side_bbe.reset_index(), on=["batter", "stand"])
     z["pct"] = z["n"] / z["bbe"] * 100.0
