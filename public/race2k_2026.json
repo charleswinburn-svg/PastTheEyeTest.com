@@ -4277,7 +4277,7 @@
     {
       "player_id": 680730,
       "name": "Mitchell Parker",
-      "team": "WSH",
+      "team": "ATL",
       "ip": 40.9,
       "gs": 0,
       "g": 22,
@@ -5033,7 +5033,7 @@
     {
       "player_id": 676755,
       "name": "Isaac Mattson",
-      "team": "PIT",
+      "team": "SEA",
       "ip": 38.0,
       "gs": 0,
       "g": 38,
@@ -5047,7 +5047,7 @@
     {
       "player_id": 679358,
       "name": "Eric Orze",
-      "team": "MIN",
+      "team": "CHC",
       "ip": 42.4,
       "gs": 0,
       "g": 36,
@@ -5061,7 +5061,7 @@
     {
       "player_id": 687606,
       "name": "Paxton Schultz",
-      "team": "WSH",
+      "team": "CIN",
       "ip": 32.9,
       "gs": 1,
       "g": 27,
@@ -5537,7 +5537,7 @@
     {
       "player_id": 666808,
       "name": "Camilo Doval",
-      "team": "PIT",
+      "team": "SF",
       "ip": 61.0,
       "gs": 0,
       "g": 66,
@@ -6349,7 +6349,7 @@
     {
       "player_id": 665665,
       "name": "Reiver Sanmartin",
-      "team": "SF",
+      "team": "WSH",
       "ip": 22.0,
       "gs": 0,
       "g": 24,
@@ -7527,6 +7527,6 @@
     "min_ip": 20,
     "role_method": "starter_pct_gt_50",
     "total_pitches_analyzed": 716792,
-    "generated_at": "2026-11-09 15:01:43 UTC"
+    "generated_at": "2026-11-10 15:01:12 UTC"
   }
 }
