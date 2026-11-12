@@ -4277,7 +4277,7 @@
     {
       "player_id": 680730,
       "name": "Mitchell Parker",
-      "team": "WSH",
+      "team": "ATL",
       "ip": 40.9,
       "gs": 0,
       "g": 22,
@@ -5033,7 +5033,7 @@
     {
       "player_id": 676755,
       "name": "Isaac Mattson",
-      "team": "PIT",
+      "team": "SEA",
       "ip": 38.0,
       "gs": 0,
       "g": 38,
@@ -5537,7 +5537,7 @@
     {
       "player_id": 666808,
       "name": "Camilo Doval",
-      "team": "PIT",
+      "team": "SF",
       "ip": 61.0,
       "gs": 0,
       "g": 66,
@@ -6307,7 +6307,7 @@
     {
       "player_id": 680802,
       "name": "Ryan Weiss",
-      "team": "HOU",
+      "team": "SD",
       "ip": 26.0,
       "gs": 2,
       "g": 9,
@@ -7527,6 +7527,6 @@
     "min_ip": 20,
     "role_method": "starter_pct_gt_50",
     "total_pitches_analyzed": 716792,
-    "generated_at": "2026-11-11 15:01:34 UTC"
+    "generated_at": "2026-11-12 14:59:37 UTC"
   }
 }

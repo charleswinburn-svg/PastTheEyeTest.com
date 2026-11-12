@@ -1265,13 +1265,13 @@
               "value": 0.1
             },
             "oaa": {
-              "display": "0.0",
-              "pctile": 54,
-              "value": 0.0
+              "display": "-1.0",
+              "pctile": 38,
+              "value": -1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -1285,9 +1285,9 @@
               "value": 0.1
             },
             "oaa_in": {
-              "display": "1.0",
-              "pctile": 75,
-              "value": 1.0
+              "display": "0.0",
+              "pctile": 49,
+              "value": 0.0
             },
             "oaa_back": {
               "display": "0.0",
@@ -1305,14 +1305,14 @@
               "value": -1.0
             },
             "oaa_success": {
-              "display": "83.0",
-              "pctile": 95,
-              "value": 83.0
+              "display": "81.0",
+              "pctile": 91,
+              "value": 81.0
             },
             "esra": {
-              "display": "0.0",
-              "pctile": 53,
-              "value": 0.0
+              "display": "-1.0",
+              "pctile": 41,
+              "value": -1.0
             },
             "frv_receiving": {
               "display": "0.0",
@@ -3967,7 +3967,7 @@
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 27,
+              "pctile": 26,
               "value": -3.0
             },
             "frv_receiving": {
@@ -4209,12 +4209,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -4228,9 +4228,9 @@
               "value": 0.0
             },
             "oaa_in": {
-              "display": "-2.0",
-              "pctile": 7,
-              "value": -2.0
+              "display": "-3.0",
+              "pctile": 2,
+              "value": -3.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -4249,7 +4249,7 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 52,
+              "pctile": 53,
               "value": 73.0
             },
             "esra": {
@@ -9136,7 +9136,7 @@
             },
             "oaa": {
               "display": "-4.0",
-              "pctile": 13,
+              "pctile": 14,
               "value": -4.0
             },
             "frv_range": {
@@ -9176,7 +9176,7 @@
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 27,
+              "pctile": 26,
               "value": -3.0
             },
             "frv_receiving": {
@@ -9337,7 +9337,7 @@
           },
           "frv_range": {
             "display": "-3.0",
-            "pctile": 23,
+            "pctile": 22,
             "value": -3.0
           },
           "drs_rpm": {
@@ -9771,7 +9771,7 @@
             },
             "oaa": {
               "display": "-4.0",
-              "pctile": 13,
+              "pctile": 14,
               "value": -4.0
             },
             "frv_range": {
@@ -9791,7 +9791,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -15721,14 +15721,14 @@
               "value": -0.8
             },
             "oaa": {
-              "display": "-6.0",
-              "pctile": 5,
-              "value": -6.0
+              "display": "-7.0",
+              "pctile": 4,
+              "value": -7.0
             },
             "frv_range": {
-              "display": "-4.0",
-              "pctile": 8,
-              "value": -4.0
+              "display": "-5.0",
+              "pctile": 4,
+              "value": -5.0
             },
             "drs_rpm": {
               "display": "-6.0",
@@ -15741,9 +15741,9 @@
               "value": -0.8
             },
             "oaa_in": {
-              "display": "-1.0",
-              "pctile": 23,
-              "value": -1.0
+              "display": "-2.0",
+              "pctile": 9,
+              "value": -2.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -15767,7 +15767,7 @@
             },
             "esra": {
               "display": "-4.0",
-              "pctile": 22,
+              "pctile": 21,
               "value": -4.0
             },
             "frv_receiving": {
@@ -17278,12 +17278,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -17313,7 +17313,7 @@
             },
             "oaa_success": {
               "display": "82.0",
-              "pctile": 92,
+              "pctile": 94,
               "value": 82.0
             },
             "esra": {
@@ -21480,12 +21480,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 24,
+              "pctile": 25,
               "value": 68.0
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 27,
+              "pctile": 26,
               "value": -3.0
             },
             "frv_receiving": {
@@ -22016,7 +22016,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -22036,7 +22036,7 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 24,
+              "pctile": 25,
               "value": 68.0
             },
             "esra": {
@@ -25840,12 +25840,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -25860,7 +25860,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 7,
+              "pctile": 9,
               "value": -2.0
             },
             "oaa_back": {
@@ -25879,14 +25879,14 @@
               "value": 1.0
             },
             "oaa_success": {
-              "display": "66.0",
-              "pctile": 15,
-              "value": 66.0
+              "display": "67.0",
+              "pctile": 18,
+              "value": 67.0
             },
             "esra": {
-              "display": "0.0",
-              "pctile": 53,
-              "value": 0.0
+              "display": "1.0",
+              "pctile": 68,
+              "value": 1.0
             },
             "frv_receiving": {
               "display": "1.0",
@@ -25952,7 +25952,7 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 9,
+              "pctile": 10,
               "value": -5.0
             },
             "frv_range": {
@@ -25967,7 +25967,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 90,
+              "pctile": 89,
               "value": 2.0
             },
             "oaa_back": {
@@ -25987,12 +25987,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 24,
+              "pctile": 25,
               "value": 68.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 33,
+              "pctile": 34,
               "value": -2.0
             },
             "frv_receiving": {
@@ -29472,7 +29472,7 @@
           },
           "frv_range": {
             "display": "-8.0",
-            "pctile": 4,
+            "pctile": 5,
             "value": -8.0
           },
           "drs_rpm": {
@@ -30954,7 +30954,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -34270,12 +34270,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -34304,9 +34304,9 @@
               "value": 0.0
             },
             "oaa_success": {
-              "display": "70.0",
-              "pctile": 37,
-              "value": 70.0
+              "display": "68.0",
+              "pctile": 25,
+              "value": 68.0
             },
             "esra": {
               "display": "0.0",
@@ -35450,12 +35450,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -35485,7 +35485,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 61,
+              "pctile": 60,
               "value": 74.0
             },
             "esra": {
@@ -38011,7 +38011,7 @@
             },
             "oaa_in": {
               "display": "3.0",
-              "pctile": 96,
+              "pctile": 95,
               "value": 3.0
             },
             "oaa_back": {
@@ -38031,12 +38031,12 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 76.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -38108,7 +38108,7 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 9,
+              "pctile": 10,
               "value": -5.0
             },
             "frv_range": {
@@ -38128,7 +38128,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 7,
+              "pctile": 9,
               "value": -2.0
             },
             "oaa_back": {
@@ -38148,7 +38148,7 @@
             },
             "oaa_success": {
               "display": "61.0",
-              "pctile": 4,
+              "pctile": 5,
               "value": 61.0
             },
             "esra": {
@@ -38356,12 +38356,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -38391,12 +38391,12 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 68,
+              "pctile": 67,
               "value": 75.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -40222,7 +40222,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -40864,12 +40864,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -40899,12 +40899,12 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 68,
+              "pctile": 67,
               "value": 75.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -42426,7 +42426,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -42446,7 +42446,7 @@
             },
             "oaa_success": {
               "display": "61.0",
-              "pctile": 4,
+              "pctile": 5,
               "value": 61.0
             },
             "esra": {
@@ -46047,12 +46047,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -46082,7 +46082,7 @@
             },
             "oaa_success": {
               "display": "81.0",
-              "pctile": 90,
+              "pctile": 91,
               "value": 81.0
             },
             "esra": {
@@ -47600,12 +47600,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -59370,12 +59370,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -59385,7 +59385,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -59405,12 +59405,12 @@
             },
             "oaa_success": {
               "display": "83.0",
-              "pctile": 95,
+              "pctile": 96,
               "value": 83.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 33,
+              "pctile": 34,
               "value": -2.0
             },
             "frv_receiving": {
@@ -60040,12 +60040,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -64171,12 +64171,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -68942,7 +68942,7 @@
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 33,
+              "pctile": 34,
               "value": -2.0
             },
             "frv_receiving": {
@@ -69103,7 +69103,7 @@
           },
           "frv_range": {
             "display": "-3.0",
-            "pctile": 23,
+            "pctile": 22,
             "value": -3.0
           },
           "drs_rpm": {
@@ -69930,12 +69930,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 24,
+              "pctile": 25,
               "value": 68.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 33,
+              "pctile": 34,
               "value": -2.0
             },
             "frv_receiving": {
@@ -76778,7 +76778,7 @@
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -76813,7 +76813,7 @@
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -76979,7 +76979,7 @@
           },
           "frv_range": {
             "display": "1.0",
-            "pctile": 78,
+            "pctile": 75,
             "value": 1.0
           },
           "drs_rpm": {
@@ -77162,12 +77162,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -77202,7 +77202,7 @@
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -81158,9 +81158,9 @@
               "value": -1.0
             },
             "frv_range": {
-              "display": "0.0",
-              "pctile": 56,
-              "value": 0.0
+              "display": "-1.0",
+              "pctile": 35,
+              "value": -1.0
             },
             "drs_rpm": {
               "display": "1.0",
@@ -81168,9 +81168,9 @@
               "value": 1.0
             },
             "oaa_in": {
-              "display": "0.0",
-              "pctile": 49,
-              "value": 0.0
+              "display": "-1.0",
+              "pctile": 24,
+              "value": -1.0
             },
             "oaa_back": {
               "display": "-1.0",
@@ -81188,13 +81188,13 @@
               "value": -1.0
             },
             "oaa_success": {
-              "display": "74.0",
-              "pctile": 61,
-              "value": 74.0
+              "display": "73.0",
+              "pctile": 53,
+              "value": 73.0
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 40,
+              "pctile": 41,
               "value": -1.0
             },
             "frv_receiving": {
@@ -81349,9 +81349,9 @@
             "value": -10.0
           },
           "frv_range": {
-            "display": "-8.0",
-            "pctile": 4,
-            "value": -8.0
+            "display": "-9.0",
+            "pctile": 2,
+            "value": -9.0
           },
           "drs_rpm": {
             "display": "-7.0",
@@ -81887,7 +81887,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 61,
+              "pctile": 60,
               "value": 74.0
             },
             "esra": {
@@ -82428,9 +82428,9 @@
               "value": -4.0
             },
             "oaa": {
-              "display": "-4.0",
-              "pctile": 13,
-              "value": -4.0
+              "display": "-5.0",
+              "pctile": 10,
+              "value": -5.0
             },
             "frv_range": {
               "display": "-3.0",
@@ -82444,7 +82444,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 7,
+              "pctile": 9,
               "value": -2.0
             },
             "oaa_back": {
@@ -82463,14 +82463,14 @@
               "value": -1.0
             },
             "oaa_success": {
-              "display": "69.0",
-              "pctile": 31,
-              "value": 69.0
+              "display": "68.0",
+              "pctile": 25,
+              "value": 68.0
             },
             "esra": {
-              "display": "-1.0",
-              "pctile": 40,
-              "value": -1.0
+              "display": "-2.0",
+              "pctile": 34,
+              "value": -2.0
             },
             "frv_receiving": {
               "display": "0.0",
@@ -82665,9 +82665,9 @@
             "value": -1.7
           },
           "oaa": {
-            "display": "-7.0",
+            "display": "-8.0",
             "pctile": 8,
-            "value": -7.0
+            "value": -8.0
           },
           "frv_range": {
             "display": "-6.0",
@@ -82772,12 +82772,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -82792,7 +82792,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -82924,7 +82924,7 @@
             },
             "esra": {
               "display": "-4.0",
-              "pctile": 22,
+              "pctile": 21,
               "value": -4.0
             },
             "frv_receiving": {
@@ -86688,12 +86688,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -86708,7 +86708,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 90,
+              "pctile": 89,
               "value": 2.0
             },
             "oaa_back": {
@@ -86728,7 +86728,7 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 76.0
             },
             "esra": {
@@ -88469,7 +88469,7 @@
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -88479,7 +88479,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 90,
+              "pctile": 89,
               "value": 2.0
             },
             "oaa_back": {
@@ -88499,7 +88499,7 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 68,
+              "pctile": 67,
               "value": 75.0
             },
             "esra": {
@@ -96089,7 +96089,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 7,
+              "pctile": 9,
               "value": -2.0
             },
             "oaa_back": {
@@ -96108,14 +96108,14 @@
               "value": 3.0
             },
             "oaa_success": {
-              "display": "73.0",
-              "pctile": 52,
-              "value": 73.0
+              "display": "72.0",
+              "pctile": 47,
+              "value": 72.0
             },
             "esra": {
-              "display": "1.0",
-              "pctile": 69,
-              "value": 1.0
+              "display": "0.0",
+              "pctile": 53,
+              "value": 0.0
             },
             "frv_receiving": {
               "display": "-3.0",
@@ -98086,13 +98086,13 @@
               "value": 0.0
             },
             "oaa": {
-              "display": "2.0",
-              "pctile": 87,
-              "value": 2.0
+              "display": "1.0",
+              "pctile": 73,
+              "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -98121,14 +98121,14 @@
               "value": -1.0
             },
             "oaa_success": {
-              "display": "82.0",
-              "pctile": 92,
-              "value": 82.0
+              "display": "80.0",
+              "pctile": 89,
+              "value": 80.0
             },
             "esra": {
-              "display": "4.0",
-              "pctile": 94,
-              "value": 4.0
+              "display": "3.0",
+              "pctile": 89,
+              "value": 3.0
             },
             "frv_receiving": {
               "display": "-1.0",
@@ -98277,9 +98277,9 @@
             "value": -0.1
           },
           "oaa": {
-            "display": "4.0",
-            "pctile": 91,
-            "value": 4.0
+            "display": "3.0",
+            "pctile": 88,
+            "value": 3.0
           },
           "frv_range": {
             "display": "2.0",
@@ -99437,12 +99437,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 24,
+              "pctile": 25,
               "value": 68.0
             },
             "esra": {
               "display": "-4.0",
-              "pctile": 22,
+              "pctile": 21,
               "value": -4.0
             },
             "frv_receiving": {
@@ -99909,13 +99909,13 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
-              "display": "0.0",
-              "pctile": 56,
-              "value": 0.0
+              "display": "1.0",
+              "pctile": 77,
+              "value": 1.0
             },
             "drs_rpm": {
               "display": "-6.0",
@@ -99929,7 +99929,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 90,
+              "pctile": 89,
               "value": 2.0
             },
             "oaa_back": {
@@ -99949,7 +99949,7 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 52,
+              "pctile": 53,
               "value": 73.0
             },
             "esra": {
@@ -103048,12 +103048,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -103063,7 +103063,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -103083,7 +103083,7 @@
             },
             "oaa_success": {
               "display": "80.0",
-              "pctile": 88,
+              "pctile": 89,
               "value": 80.0
             },
             "esra": {
@@ -105637,12 +105637,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -105672,7 +105672,7 @@
             },
             "oaa_success": {
               "display": "80.0",
-              "pctile": 88,
+              "pctile": 89,
               "value": 80.0
             },
             "esra": {
@@ -107149,7 +107149,7 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 9,
+              "pctile": 10,
               "value": -5.0
             },
             "frv_range": {
@@ -107169,7 +107169,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -107189,12 +107189,12 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 61,
+              "pctile": 60,
               "value": 74.0
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 27,
+              "pctile": 26,
               "value": -3.0
             },
             "frv_receiving": {
@@ -107271,12 +107271,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -107383,7 +107383,7 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 9,
+              "pctile": 10,
               "value": -5.0
             },
             "frv_range": {
@@ -107398,7 +107398,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -107418,13 +107418,13 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 24,
+              "pctile": 25,
               "value": 68.0
             },
             "esra": {
-              "display": "-4.0",
-              "pctile": 22,
-              "value": -4.0
+              "display": "-3.0",
+              "pctile": 26,
+              "value": -3.0
             },
             "frv_receiving": {
               "display": "1.0",
@@ -107625,7 +107625,7 @@
           },
           "frv_range": {
             "display": "-3.0",
-            "pctile": 23,
+            "pctile": 22,
             "value": -3.0
           },
           "drs_rpm": {
@@ -108821,12 +108821,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -109724,7 +109724,7 @@
           },
           "frv_range": {
             "display": "-9.0",
-            "pctile": 1,
+            "pctile": 2,
             "value": -9.0
           },
           "drs_rpm": {
@@ -109917,7 +109917,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -110642,7 +110642,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 7,
+              "pctile": 9,
               "value": -2.0
             },
             "oaa_back": {
@@ -112710,7 +112710,7 @@
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -114285,12 +114285,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -114324,9 +114324,9 @@
               "value": 0.0
             },
             "oaa_success": {
-              "display": "73.0",
-              "pctile": 52,
-              "value": 73.0
+              "display": "76.0",
+              "pctile": 73,
+              "value": 76.0
             },
             "esra": {
               "display": "4.0",
@@ -115929,9 +115929,9 @@
               "value": 1.0
             },
             "oaa": {
-              "display": "4.0",
-              "pctile": 95,
-              "value": 4.0
+              "display": "3.0",
+              "pctile": 92,
+              "value": 3.0
             },
             "frv_range": {
               "display": "3.0",
@@ -115970,13 +115970,13 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 52,
+              "pctile": 53,
               "value": 73.0
             },
             "esra": {
-              "display": "1.0",
-              "pctile": 69,
-              "value": 1.0
+              "display": "2.0",
+              "pctile": 81,
+              "value": 2.0
             },
             "frv_receiving": {
               "display": "-2.0",
@@ -119979,12 +119979,12 @@
             },
             "oaa_success": {
               "display": "68.0",
-              "pctile": 24,
+              "pctile": 25,
               "value": 68.0
             },
             "esra": {
               "display": "-6.0",
-              "pctile": 10,
+              "pctile": 11,
               "value": -6.0
             },
             "frv_receiving": {
@@ -120567,7 +120567,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 90,
+              "pctile": 89,
               "value": 2.0
             },
             "oaa_back": {
@@ -122390,7 +122390,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 61,
+              "pctile": 60,
               "value": 74.0
             },
             "esra": {
@@ -125137,12 +125137,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -125152,7 +125152,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -125172,7 +125172,7 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 76.0
             },
             "esra": {
@@ -126945,12 +126945,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -126980,7 +126980,7 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 68,
+              "pctile": 67,
               "value": 75.0
             },
             "esra": {
@@ -127193,13 +127193,13 @@
               "value": 0.0
             },
             "oaa": {
-              "display": "-1.0",
-              "pctile": 38,
-              "value": -1.0
+              "display": "0.0",
+              "pctile": 53,
+              "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -127214,7 +127214,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 90,
+              "pctile": 89,
               "value": 2.0
             },
             "oaa_back": {
@@ -128640,12 +128640,12 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 31,
+              "pctile": 33,
               "value": 69.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 33,
+              "pctile": 34,
               "value": -2.0
             },
             "frv_receiving": {
@@ -131170,7 +131170,7 @@
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 40,
+              "pctile": 41,
               "value": -1.0
             },
             "frv_receiving": {
@@ -131738,7 +131738,7 @@
             },
             "oaa_success": {
               "display": "83.0",
-              "pctile": 95,
+              "pctile": 96,
               "value": 83.0
             },
             "esra": {
@@ -133013,7 +133013,7 @@
             },
             "oaa": {
               "display": "4.0",
-              "pctile": 95,
+              "pctile": 96,
               "value": 4.0
             },
             "frv_range": {
@@ -133053,13 +133053,13 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 52,
+              "pctile": 53,
               "value": 73.0
             },
             "esra": {
-              "display": "1.0",
-              "pctile": 69,
-              "value": 1.0
+              "display": "2.0",
+              "pctile": 81,
+              "value": 2.0
             },
             "frv_receiving": {
               "display": "2.0",
@@ -136820,12 +136820,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -136860,7 +136860,7 @@
             },
             "oaa_success": {
               "display": "66.0",
-              "pctile": 15,
+              "pctile": 14,
               "value": 66.0
             },
             "esra": {
@@ -138064,14 +138064,14 @@
               "value": 0.7
             },
             "oaa": {
-              "display": "0.0",
-              "pctile": 54,
-              "value": 0.0
+              "display": "1.0",
+              "pctile": 73,
+              "value": 1.0
             },
             "frv_range": {
-              "display": "0.0",
-              "pctile": 56,
-              "value": 0.0
+              "display": "1.0",
+              "pctile": 77,
+              "value": 1.0
             },
             "drs_rpm": {
               "display": "-3.0",
@@ -138084,9 +138084,9 @@
               "value": 0.7
             },
             "oaa_in": {
-              "display": "-1.0",
-              "pctile": 23,
-              "value": -1.0
+              "display": "0.0",
+              "pctile": 49,
+              "value": 0.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -138105,7 +138105,7 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 76.0
             },
             "esra": {
@@ -138415,9 +138415,9 @@
               "value": 0.0
             },
             "oaa_in": {
-              "display": "2.0",
-              "pctile": 90,
-              "value": 2.0
+              "display": "3.0",
+              "pctile": 95,
+              "value": 3.0
             },
             "oaa_back": {
               "display": "-1.0",
@@ -138441,7 +138441,7 @@
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 40,
+              "pctile": 41,
               "value": -1.0
             },
             "frv_receiving": {
@@ -139183,7 +139183,7 @@
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 27,
+              "pctile": 26,
               "value": -3.0
             },
             "frv_receiving": {
@@ -140832,9 +140832,9 @@
               "value": -6.0
             },
             "frv_range": {
-              "display": "-5.0",
-              "pctile": 4,
-              "value": -5.0
+              "display": "-4.0",
+              "pctile": 8,
+              "value": -4.0
             },
             "drs_rpm": {
               "display": "-8.0",
@@ -140868,12 +140868,12 @@
             },
             "oaa_success": {
               "display": "62.0",
-              "pctile": 6,
+              "pctile": 7,
               "value": 62.0
             },
             "esra": {
               "display": "-6.0",
-              "pctile": 10,
+              "pctile": 11,
               "value": -6.0
             },
             "frv_receiving": {
@@ -142161,7 +142161,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -142181,12 +142181,12 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 31,
+              "pctile": 33,
               "value": 69.0
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 40,
+              "pctile": 41,
               "value": -1.0
             },
             "frv_receiving": {
@@ -142443,7 +142443,7 @@
           },
           "frv_range": {
             "display": "-3.0",
-            "pctile": 23,
+            "pctile": 22,
             "value": -3.0
           },
           "drs_rpm": {
@@ -144576,12 +144576,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -144591,7 +144591,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -144611,12 +144611,12 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 31,
+              "pctile": 33,
               "value": 69.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -144858,12 +144858,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -144893,7 +144893,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 61,
+              "pctile": 60,
               "value": 74.0
             },
             "esra": {
@@ -145642,7 +145642,7 @@
             },
             "esra": {
               "display": "-1.0",
-              "pctile": 40,
+              "pctile": 41,
               "value": -1.0
             },
             "frv_receiving": {
@@ -147046,7 +147046,7 @@
             },
             "oaa_success": {
               "display": "66.0",
-              "pctile": 15,
+              "pctile": 14,
               "value": 66.0
             },
             "esra": {
@@ -148747,12 +148747,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -149427,7 +149427,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -149447,12 +149447,12 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 31,
+              "pctile": 33,
               "value": 69.0
             },
             "esra": {
               "display": "-6.0",
-              "pctile": 10,
+              "pctile": 11,
               "value": -6.0
             },
             "frv_receiving": {
@@ -152307,13 +152307,13 @@
             },
             "oaa": {
               "display": "-5.0",
-              "pctile": 9,
+              "pctile": 10,
               "value": -5.0
             },
             "frv_range": {
-              "display": "-4.0",
-              "pctile": 8,
-              "value": -4.0
+              "display": "-3.0",
+              "pctile": 13,
+              "value": -3.0
             },
             "drs_rpm": {
               "display": "-4.0",
@@ -152327,7 +152327,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 90,
+              "pctile": 89,
               "value": 2.0
             },
             "oaa_back": {
@@ -152347,12 +152347,12 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 61,
+              "pctile": 60,
               "value": 74.0
             },
             "esra": {
               "display": "-2.0",
-              "pctile": 33,
+              "pctile": 34,
               "value": -2.0
             },
             "frv_receiving": {
@@ -152707,12 +152707,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -152742,7 +152742,7 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 61,
+              "pctile": 60,
               "value": 74.0
             },
             "esra": {
@@ -153166,7 +153166,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -153191,7 +153191,7 @@
             },
             "esra": {
               "display": "-3.0",
-              "pctile": 27,
+              "pctile": 26,
               "value": -3.0
             },
             "frv_receiving": {
@@ -154289,7 +154289,7 @@
             },
             "oaa_in": {
               "display": "3.0",
-              "pctile": 96,
+              "pctile": 95,
               "value": 3.0
             },
             "oaa_back": {
@@ -154309,12 +154309,12 @@
             },
             "oaa_success": {
               "display": "73.0",
-              "pctile": 52,
+              "pctile": 53,
               "value": 73.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -155533,13 +155533,13 @@
               "value": 0.0
             },
             "oaa": {
-              "display": "0.0",
-              "pctile": 54,
-              "value": 0.0
+              "display": "1.0",
+              "pctile": 73,
+              "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -155548,9 +155548,9 @@
               "value": 3.0
             },
             "oaa_in": {
-              "display": "-1.0",
-              "pctile": 23,
-              "value": -1.0
+              "display": "0.0",
+              "pctile": 49,
+              "value": 0.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -155568,9 +155568,9 @@
               "value": 2.0
             },
             "oaa_success": {
-              "display": "76.0",
-              "pctile": 74,
-              "value": 76.0
+              "display": "77.0",
+              "pctile": 79,
+              "value": 77.0
             },
             "esra": {
               "display": "0.0",
@@ -155770,13 +155770,13 @@
             "value": -3.1
           },
           "oaa": {
-            "display": "1.0",
-            "pctile": 74,
-            "value": 1.0
+            "display": "2.0",
+            "pctile": 82,
+            "value": 2.0
           },
           "frv_range": {
             "display": "1.0",
-            "pctile": 78,
+            "pctile": 75,
             "value": 1.0
           },
           "drs_rpm": {
@@ -156422,7 +156422,7 @@
             },
             "oaa_in": {
               "display": "-1.0",
-              "pctile": 23,
+              "pctile": 24,
               "value": -1.0
             },
             "oaa_back": {
@@ -156598,7 +156598,7 @@
           },
           "oaa": {
             "display": "-6.0",
-            "pctile": 12,
+            "pctile": 13,
             "value": -6.0
           },
           "frv_range": {
@@ -158110,12 +158110,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "1.0",
-              "pctile": 79,
+              "pctile": 77,
               "value": 1.0
             },
             "drs_rpm": {
@@ -158145,7 +158145,7 @@
             },
             "oaa_success": {
               "display": "76.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 76.0
             },
             "esra": {
@@ -160131,7 +160131,7 @@
             },
             "oaa_success": {
               "display": "69.0",
-              "pctile": 31,
+              "pctile": 33,
               "value": 69.0
             },
             "esra": {
@@ -163085,7 +163085,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 7,
+              "pctile": 9,
               "value": -2.0
             },
             "oaa_back": {
@@ -163104,14 +163104,14 @@
               "value": 1.0
             },
             "oaa_success": {
-              "display": "62.0",
-              "pctile": 6,
-              "value": 62.0
+              "display": "61.0",
+              "pctile": 5,
+              "value": 61.0
             },
             "esra": {
-              "display": "-5.0",
-              "pctile": 16,
-              "value": -5.0
+              "display": "-6.0",
+              "pctile": 11,
+              "value": -6.0
             },
             "frv_receiving": {
               "display": "1.0",
@@ -165502,12 +165502,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -165517,7 +165517,7 @@
             },
             "oaa_in": {
               "display": "2.0",
-              "pctile": 90,
+              "pctile": 89,
               "value": 2.0
             },
             "oaa_back": {
@@ -165537,12 +165537,12 @@
             },
             "oaa_success": {
               "display": "82.0",
-              "pctile": 92,
+              "pctile": 94,
               "value": 82.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -166210,13 +166210,13 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
-              "display": "0.0",
-              "pctile": 56,
-              "value": 0.0
+              "display": "1.0",
+              "pctile": 77,
+              "value": 1.0
             },
             "drs_rpm": {
               "display": "5.0",
@@ -166230,7 +166230,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 7,
+              "pctile": 9,
               "value": -2.0
             },
             "oaa_back": {
@@ -166250,7 +166250,7 @@
             },
             "oaa_success": {
               "display": "75.0",
-              "pctile": 68,
+              "pctile": 67,
               "value": 75.0
             },
             "esra": {
@@ -166331,14 +166331,14 @@
               "value": 0.6
             },
             "oaa": {
-              "display": "6.0",
-              "pctile": 97,
-              "value": 6.0
+              "display": "4.0",
+              "pctile": 96,
+              "value": 4.0
             },
             "frv_range": {
-              "display": "4.0",
-              "pctile": 97,
-              "value": 4.0
+              "display": "3.0",
+              "pctile": 95,
+              "value": 3.0
             },
             "drs_rpm": {
               "display": "9.0",
@@ -166351,9 +166351,9 @@
               "value": 0.6
             },
             "oaa_in": {
-              "display": "-1.0",
-              "pctile": 23,
-              "value": -1.0
+              "display": "-2.0",
+              "pctile": 9,
+              "value": -2.0
             },
             "oaa_back": {
               "display": "1.0",
@@ -166371,14 +166371,14 @@
               "value": 6.0
             },
             "oaa_success": {
-              "display": "78.0",
-              "pctile": 83,
-              "value": 78.0
+              "display": "77.0",
+              "pctile": 79,
+              "value": 77.0
             },
             "esra": {
-              "display": "2.0",
-              "pctile": 81,
-              "value": 2.0
+              "display": "1.0",
+              "pctile": 68,
+              "value": 1.0
             },
             "frv_receiving": {
               "display": "1.0",
@@ -168398,12 +168398,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -171457,12 +171457,12 @@
             },
             "oaa": {
               "display": "1.0",
-              "pctile": 74,
+              "pctile": 73,
               "value": 1.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -171477,7 +171477,7 @@
             },
             "oaa_in": {
               "display": "-2.0",
-              "pctile": 7,
+              "pctile": 9,
               "value": -2.0
             },
             "oaa_back": {
@@ -171497,12 +171497,12 @@
             },
             "oaa_success": {
               "display": "74.0",
-              "pctile": 61,
+              "pctile": 60,
               "value": 74.0
             },
             "esra": {
               "display": "1.0",
-              "pctile": 69,
+              "pctile": 68,
               "value": 1.0
             },
             "frv_receiving": {
@@ -173755,12 +173755,12 @@
             },
             "oaa": {
               "display": "0.0",
-              "pctile": 54,
+              "pctile": 53,
               "value": 0.0
             },
             "frv_range": {
               "display": "0.0",
-              "pctile": 56,
+              "pctile": 55,
               "value": 0.0
             },
             "drs_rpm": {
@@ -175959,6 +175959,6 @@
       "FanGraphs",
       "BP"
     ],
-    "generated_at": "2026-11-11 14:02:24 UTC"
+    "generated_at": "2026-11-12 14:02:29 UTC"
   }
 }
