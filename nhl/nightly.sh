@@ -26,17 +26,28 @@ if ! flock -n 9; then
     exit 0
 fi
 
-if [[ ! -x "$VENV/bin/python" ]]; then
-    echo "Creating the Python environment in $VENV (first run only)"
-    python3 -m venv "$VENV"
-fi
-"$VENV/bin/pip" install -q --disable-pip-version-check -r "$REPO/nhl/requirements.txt" \
-    || echo "WARNING: could not check the Python packages; carrying on with what is installed"
-
 LOG="$NHL_DATA_DIR/logs/$(date -u +%Y-%m-%d_%H%M).log"
 ln -sfn "$LOG" "$NHL_DATA_DIR/logs/latest.log"
 { ls -1t "$NHL_DATA_DIR"/logs/20*.log 2>/dev/null || true; } | tail -n +61 | xargs -r rm -f    # keep the last 60 logs
+exec > >(tee -a "$LOG") 2>&1          # from here on, everything is in the log as well as on screen
+echo "Log: $LOG"
+
+# The Python environment. Rebuilt when it is missing or half-made (an interrupted first run).
+if ! "$VENV/bin/python" -c "import pip" 2>/dev/null; then
+    echo "Creating the Python environment in $VENV (first run only; the packages take a few minutes)"
+    if [[ -f "$VENV/pyvenv.cfg" ]]; then rm -rf "$VENV"; fi
+    if ! python3 -m venv "$VENV"; then
+        echo "Could not create the Python environment. On Ubuntu run:  apt install -y python3-venv"
+        echo "then start nhl/nightly.sh again."
+        exit 1
+    fi
+fi
+"$VENV/bin/python" -m pip install -q --disable-pip-version-check -r "$REPO/nhl/requirements.txt" \
+    || echo "WARNING: could not check the Python packages; carrying on with what is installed"
+if ! "$VENV/bin/python" -c "import numpy, pandas, scipy, sklearn, xgboost, matplotlib, requests"; then
+    echo "The Python packages in $VENV are incomplete (see the error above). Fix that, then start again."
+    exit 1
+fi
 
 cd "$REPO"
-echo "Log: $LOG"
-nice -n 10 "$VENV/bin/python" -u -m nhl.run nightly "$@" 2>&1 | tee -a "$LOG"
+nice -n 10 "$VENV/bin/python" -u -m nhl.run nightly "$@"
