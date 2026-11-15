@@ -86,6 +86,12 @@ the baseball update uses, and commits only `public/nhl/`.
 
 - **Finished seasons are scraped once.** The current season is rebuilt from the cache each night
   from the schedule's finished games; games whose shift chart was missing are retried.
+- **Games with no shift chart fall back to the NHL's printed shift report.** The shift API
+  sometimes returns nothing for a run of games (all of October 22–28, 2026, for one). For those,
+  `nhl/shift_reports.py` reads the "TOI Shift Report" pages on nhl.com instead; on games where
+  both exist the two sources give identical shifts. The current season does this on its own
+  every night. For earlier seasons, run it once:
+  `nhl/nightly.sh --refill-shifts --refresh-all --all` (re-scores xG and rewrites every season's site files).
 - **Duplicate shift records are merged** before anything is built (`merge_shifts` in `run.py`).
   The NHL's charts sometimes list a shift twice, which made the ice-time file undercount 5v5.
 - **xG settings** (`xg_config.json`: `hp`, `ntrees`, `H`) come from section 8 of the modeling
@@ -113,6 +119,7 @@ Run from the repository root with the pipeline's Python (`/var/lib/pte-nhl/venv/
 | Command | What it does |
 |---|---|
 | `python -m nhl.run scrape` | Only fetch and build the tables |
+| `python -m nhl.run scrape --refill-shifts` | Also retry earlier seasons' games that have no shift chart |
 | `python -m nhl.run xg --tune` | Search for xG settings again, then score |
 | `python -m nhl.run ratings --skip-diagnostics` | Fit the ratings without section 15's leader and repeatability tables |
 | `python -m nhl.run check` | The pre-publish checks on what is on disk |

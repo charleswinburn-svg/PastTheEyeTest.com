@@ -18,7 +18,7 @@ import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from . import nbrun
+from . import nbrun, shift_reports
 from .nbrun import log
 
 REPO = Path(__file__).resolve().parent.parent
@@ -97,8 +97,21 @@ def stage_scrape(a):
     import pandas as pd
     DATA.mkdir(parents=True, exist_ok=True)
     ns = nbrun.run(NB / "nhl_xg_scraper.ipynb", [1, 2], DATA, overrides=a.set.get("scraper"))
-    raw_fetch = ns["fetch_shifts"]
-    ns["fetch_shifts"] = lambda gid: merge_shifts(raw_fetch(gid))
+    raw_fetch, recovered = ns["fetch_shifts"], []
+
+    def fetch_shifts(gid):
+        # The API first; when it has nothing for a game, the NHL's printed shift report (nhl/shift_reports.py).
+        shifts = raw_fetch(gid)
+        if not shifts:
+            pbp = ns["fetch_pbp"](gid)
+            shifts = shift_reports.fetch(gid, pbp, ns["session"], log) if pbp else None
+            if shifts:
+                (ns["CACHE_DIR"] / f"shifts_{gid}.json").write_text(json.dumps(shifts))   # where stints read from
+                recovered.append(int(gid))
+                time.sleep(0.5)
+        return merge_shifts(shifts)
+
+    ns["fetch_shifts"] = fetch_shifts
     cur, changed = season_now(), False
 
     def save(out, y):
@@ -118,6 +131,21 @@ def stage_scrape(a):
             raise SystemExit(f"No games came back for {y}. Is the NHL API reachable?")
         save(out, y)
         changed = True
+
+    # Asked for with --refill-shifts: earlier seasons' games that have no shift chart get one more try
+    # (the printed reports cover games the API never filled in). A season that gains any is rebuilt from cache.
+    if a.refill_shifts:
+        for y in range(a.first_season, cur):
+            have, have_toi = game_sets(y)
+            missing = sorted(have - have_toi)
+            if not missing:
+                continue
+            log(f"=== {y}-{str(y + 1)[2:]}: {len(missing)} game(s) without a shift chart; trying the shift reports")
+            got = [g for g in missing if fetch_shifts(g)]
+            log(f"    recovered {len(got)} of {len(missing)}")
+            if got:
+                save(ns["scrape_games"](sorted(have), stop_after_misses=len(have) + 1), y)
+                changed = True
 
     # The season under way: finished games only, from the schedule (as section 6 of the notebook).
     start, yday = f"{cur}-10-01", (date.today() - timedelta(days=1)).isoformat()
@@ -169,6 +197,10 @@ def stage_scrape(a):
     players.to_csv(DATA / "players.csv", index=False)
     log(f"saved players.csv: {len(players):,} players")
 
+    if recovered:
+        log(f"shift charts taken from the NHL's printed reports for {len(recovered)} game(s) the API had nothing for")
+        write_json(STATE / "shift_report_games.json",
+                   sorted(set(read_json(STATE / "shift_report_games.json", []) + recovered)))
     have, have_toi = game_sets(cur)
     write_json(STATE / "scrape.json", {"season": cur, "games": len(have), "games_with_shifts": len(have_toi),
                                        "changed": bool(changed), "at": datetime.now(timezone.utc).isoformat()})
@@ -408,6 +440,8 @@ def main():
     p.add_argument("--refresh-all", action="store_true", help="xg: re-score earlier seasons too")
     p.add_argument("--all", action="store_true", help="export: rewrite earlier seasons' site files too")
     p.add_argument("--skip-diagnostics", action="store_true", help="ratings: skip section 15 (leaders, repeatability)")
+    p.add_argument("--refill-shifts", action="store_true",
+                   help="scrape: retry earlier seasons' games that have no shift chart, using the shift reports")
     p.add_argument("--first-season", type=int, default=int(os.environ.get("NHL_FIRST_SEASON", 2019)))
     p.add_argument("--max-games", type=int, default=0, help="testing only: cap the games scraped per season")
     p.add_argument("--set", action="append", metavar="NOTEBOOK.NAME=VALUE",
