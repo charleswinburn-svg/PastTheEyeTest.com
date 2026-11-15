@@ -9,7 +9,7 @@ import { Segmented } from "./PlayerCard.jsx";
 // ═══════════════════════════════════════════════════════════
 // LEADERBOARD
 // One sortable table per kind. Filters: team, position, tier, minimum games, name search.
-// Column groups switch on and off. "Colour" shades each number by where it ranks among the
+// Column groups switch on and off. "Color" shades each number by where it ranks among the
 // players shown (blue low, grey middle, red high; reversed for columns where lower is better).
 // ═══════════════════════════════════════════════════════════
 
@@ -101,7 +101,7 @@ export default function Leaderboard({ players, kind, v, teams, team, onTeam, onP
         <span style={{ display: "inline-flex", alignItems: "center" }}><span style={label}>Min games</span>
           <input type="range" min={0} max={Math.max(mostGp, 1)} value={least} onChange={e => setMinGp(+e.target.value)} style={{ width: 110, accentColor: t.accent }} />
           <b style={{ marginLeft: 8, fontSize: 12, color: t.text, minWidth: 18 }}>{least}</b></span>
-        <span><span style={label}>Colour</span>
+        <span><span style={label}>Color</span>
           <Segmented t={t} value={colored ? "on" : "off"} onChange={x => setColored(x === "on")} options={[["on", "On"], ["off", "Off"]]} /></span>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, marginBottom: 12 }}>
@@ -168,7 +168,7 @@ export default function Leaderboard({ players, kind, v, teams, team, onTeam, onP
         </table>
       </div>
       <div style={{ fontSize: 11, color: t.textFaint, marginTop: 8 }}>
-        {shown.length} {kind}{colored ? " · colour shows where each number ranks among the players listed (blue low, red high)" : ""} · click a name to open his card
+        {shown.length} {kind}{colored ? " · color shows where each number ranks among the players listed (blue low, red high)" : ""} · click a name to open his card
       </div>
     </div>
   );

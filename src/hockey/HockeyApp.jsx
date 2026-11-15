@@ -3,7 +3,7 @@ import { ThemeProvider, useTheme, ThemeToggle } from "../baseball/ThemeContext.j
 import { SearchableSelect, NUM_FONT } from "../baseball/SharedComponents.jsx";
 import PlayerCard, { Segmented } from "./PlayerCard.jsx";
 import Leaderboard from "./Leaderboard.jsx";
-import { useNhl, toObjects, seasonLabel, logoUrl, headshotUrl } from "./nhlData.js";
+import { useNhl, toObjects, seasonLabel, periodLabel, logoUrl, headshotUrl } from "./nhlData.js";
 import { VERSIONS } from "./rows.js";
 
 // ═══════════════════════════════════════════════════════════
@@ -94,7 +94,7 @@ function Hockey() {
           <Segmented t={t} value={kind} onChange={setKind} options={[["skaters", "Skaters"], ["goalies", "Goalies"]]} />
           <select value={y ?? ""} onChange={e => setSeason(+e.target.value)} style={input} aria-label="Season">
             {[...(meta.data?.seasons || [])].reverse().map(s => (
-              <option key={s.season} value={s.season}>{s.label}{s.in_progress ? " (in progress)" : ""}</option>
+              <option key={s.season} value={s.season}>{periodLabel(s.season, v, inProgressSeason)}</option>
             ))}
           </select>
           <Segmented t={t} value={v} onChange={setV} options={VERSIONS.map(x => [x.id, x.label])} />
@@ -131,7 +131,7 @@ function Hockey() {
       ) : (
         <div style={{ padding: mobile ? "14px 10px 40px" : "20px 24px 60px", maxWidth: 1560, margin: "0 auto" }}>
           <div style={{ fontSize: 12, color: t.textMuted, fontWeight: 600, marginBottom: 12 }}>
-            {team ? `${team} · ` : ""}{seasonLabel(y)}{file.data.season_done < 1 ? " (in progress)" : ""} · {VERSIONS.find(x => x.id === v).long}
+            {team ? `${team} · ` : ""}{periodLabel(y, v, inProgressSeason)} · {VERSIONS.find(x => x.id === v).long}
           </div>
           <Leaderboard key={kind} players={pool} kind={kind} v={v} teams={teams} team={team} onTeam={setTeam}
             onPick={id => { setPicked(s => ({ ...s, [kind]: id })); setView("player"); window.scrollTo({ top: 0 }); }} />

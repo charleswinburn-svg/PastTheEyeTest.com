@@ -42,6 +42,14 @@ export function toObjects(file) {
 export const seasonLabel = y => `${y}-${String(y + 1).slice(2)}`;
 export const seasonShort = y => `${String(y).slice(2)}-${String(y + 1).slice(2)}`;
 
+// How the selected season is named on the page. A 3-year rating for the season under way is
+// mostly last season's games with this season's blended in, so it reads as the two together
+// ("2025-27"). Everything else is the season itself, marked while it is still being played.
+export function periodLabel(y, v, inProgressSeason) {
+  if (y !== inProgressSeason) return seasonLabel(y);
+  return v === "3y" ? `${y - 1}-${String(y + 1).slice(2)}` : `${seasonLabel(y)} (in progress)`;
+}
+
 // ── NHL assets, through the site's existing proxies ──
 export const logoUrl = team => (team ? `/nhl-assets/logos/nhl/svg/${team}_light.svg` : null);
 export const headshotUrl = (id, team, season) =>
