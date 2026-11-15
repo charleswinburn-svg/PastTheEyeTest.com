@@ -8,7 +8,7 @@ import {
   skaterRows, goalieRows, rawValue, SKATER_PARTS, GOALIE_PARTS, skaterZ, goalieZ, zScores,
   GOALIE_TOTALS, MEASURES, POSITION_NAME, GROUP_NAME, VERSIONS, fixed, whole,
 } from "./rows.js";
-import { seasonLabel, logoUrl, headshotUrl, headshotFallback, flagUrl, NHL_TEAM_PRIMARY } from "./nhlData.js";
+import { seasonLabel, periodLabel, logoUrl, headshotUrl, headshotFallback, flagUrl, NHL_TEAM_PRIMARY } from "./nhlData.js";
 
 // The card header keeps the site's type (the same face the MLB card headers use);
 // everything under it is set in Pliant.
@@ -211,8 +211,7 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
 
   const goalie = kind === "goalies";
   const group = GROUP_NAME[p.pos_group] || "skaters";
-  const inProgress = seasonDone < 1;
-  const seasonText = seasonLabel(season) + (inProgress ? " (in progress)" : "");
+  const seasonText = periodLabel(season, v, seasonDone < 1 ? season : inProgressSeason);
   const version = VERSIONS.find(x => x.id === v);
   const k = wide ? SIZES.wide : SIZES.narrow, width = k.width;
   // Wide: two columns. Left holds the percentiles with the impact chart directly under them;
@@ -294,7 +293,7 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
     try {
       if (document.fonts?.ready) await document.fonts.ready;
       const restore = await rasterizeSvgImages(cardRef.current);
-      try { await saveCardAsPng(cardRef, `${p.player}_${seasonLabel(season)}_${v}.png`.replace(/\s+/g, "_")); }
+      try { await saveCardAsPng(cardRef, `${p.player}_${seasonText.replace(/ \(.*\)/, "")}_${v}.png`.replace(/\s+/g, "_")); }
       finally { restore(); }
     } finally { setSaving(false); }
   };
