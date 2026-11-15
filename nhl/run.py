@@ -186,7 +186,26 @@ def stage_xg(a):
                                "This is the slow part and happens once."))
     prev = pd.read_csv(out) if out.exists() and not (tune or a.refresh_all) else None
 
+    def tuning_progress(ns):
+        # Section 8 prints nothing until a whole strength state is finished, which can be over an hour.
+        # Count the model fits as they complete so the log shows it moving. Each setting is fitted twice.
+        xgb, per_state = ns["xgb"], 2 * (int(ns.get("N_TRIALS", 30)) + 1)
+        original, t0, done = xgb.XGBClassifier.fit, time.time(), [0]
+
+        def fit(self, *args, **kwargs):
+            out = original(self, *args, **kwargs)
+            done[0] += 1
+            k, state = done[0], (done[0] - 1) // per_state
+            if k % 2 == 0 and state < len(ns["states"]):
+                log(f"tuning {ns['states'][state]}: {(k - state * per_state) // 2} of {per_state // 2} settings tried "
+                    f"({(time.time() - t0) / 60:.0f} min since tuning began)")
+            return out
+
+        xgb.XGBClassifier.fit = fit
+        ns["_restore_fit"] = lambda: setattr(xgb.XGBClassifier, "fit", original)
+
     def save_cfg(ns):
+        ns.pop("_restore_fit", lambda: None)()
         write_json(cfg_path, {"H": ns["H"], "hp": ns["hp"], "ntrees": {k: int(v) for k, v in ns["ntrees"].items()},
                               "features": list(ns["features"]), "n_trials": ns.get("N_TRIALS"),
                               "tuned_at": datetime.now(timezone.utc).isoformat()})
@@ -220,7 +239,8 @@ def stage_xg(a):
 
     nbrun.run(NB / "nhl_xg_modeling.ipynb", [1, 2, 3, 4, 5] + ([8] if tune else []) + [14, 15, 16, 17], DATA,
               overrides=a.set.get("xg"),
-              hooks={("after", 8): save_cfg, ("before", 14): load_cfg, ("after", 17): freeze})
+              hooks={("before", 8): tuning_progress, ("after", 8): save_cfg, ("before", 14): load_cfg,
+                     ("after", 17): freeze})
 
 
 # --------------------------------------------------------------------------- ratings
