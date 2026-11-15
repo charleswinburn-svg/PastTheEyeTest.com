@@ -1,5 +1,17 @@
 # NHL overhaul: run the scraper → xG → ratings pipeline on the droplet and rebuild the NHL tab on it
 
+> **Update, 2026-11-15: what was built first, and where it differs from this plan.**
+> The pipeline is in `nhl/` (see `nhl/README.md`) and runs with one command, `nhl/nightly.sh`.
+> Two things differ from the steps below:
+>
+> - **The notebooks are run as they are** (`nhl/nbrun.py`), not re-written as Python modules.
+>   Replacing a file in `notebooks/nhl/` updates the model. The ratings notebook therefore still
+>   chooses its own shrinkage and weights each run; pinning those choices (step 3) is not done yet.
+> - **The site files go to GitHub** in `public/nhl/`, pushed by the nightly run like the baseball
+>   update, instead of being served from `api.pasttheeyetest.com/nhl`. The front end reads `/nhl/*.json`.
+>
+> Still to do: the React tab (step 5) and the cut-over (step 6).
+
 ## Context
 
 The NHL tab today (`src/hockey/HockeyApp.jsx`) shows composite percentile cards built by

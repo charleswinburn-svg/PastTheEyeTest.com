@@ -53,7 +53,7 @@ tail -f /var/lib/pte-nhl/logs/latest.log
 
 | Step | From nothing | With the Drive files copied over |
 |---|---|---|
-| Scrape 2019-20 to now | 4–5 hours | minutes (current season only) |
+| Scrape 2019-20 to now, plus details for about 2,500 players | 6–7 hours | minutes (current season only) |
 | Tune the xG model (once; skipped when `xg_config.json` exists) | 1–2 hours | 1–2 hours, or none |
 | Score xG, fit ratings, export, push | about 1–1.5 hours | about 1–1.5 hours |
 

@@ -30,12 +30,12 @@ if [[ ! -x "$VENV/bin/python" ]]; then
     echo "Creating the Python environment in $VENV (first run only)"
     python3 -m venv "$VENV"
 fi
-"$VENV/bin/pip" install -q -r "$REPO/nhl/requirements.txt" \
+"$VENV/bin/pip" install -q --disable-pip-version-check -r "$REPO/nhl/requirements.txt" \
     || echo "WARNING: could not check the Python packages; carrying on with what is installed"
 
 LOG="$NHL_DATA_DIR/logs/$(date -u +%Y-%m-%d_%H%M).log"
 ln -sfn "$LOG" "$NHL_DATA_DIR/logs/latest.log"
-ls -1t "$NHL_DATA_DIR"/logs/20*.log 2>/dev/null | tail -n +61 | xargs -r rm -f      # keep the last 60 logs
+{ ls -1t "$NHL_DATA_DIR"/logs/20*.log 2>/dev/null || true; } | tail -n +61 | xargs -r rm -f    # keep the last 60 logs
 
 cd "$REPO"
 echo "Log: $LOG"
