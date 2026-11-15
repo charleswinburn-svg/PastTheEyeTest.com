@@ -121,6 +121,11 @@ def run(nb_path, want, data_dir, overrides=None, hooks=None, tolerant=(), ns=Non
     """
     nb_path, overrides, hooks = Path(nb_path), dict(overrides or {}), hooks or {}
     ns = {"__name__": "__nb__", "display": _show} if ns is None else ns
+    try:                                             # wide tables print whole in the log, as they do in Colab
+        import pandas as pd
+        pd.set_option("display.width", 250, "display.max_columns", 60, "display.max_rows", 200)
+    except ImportError:
+        pass
     have = {num: (title, cells) for num, title, cells in sections(nb_path)}
     missing = [s for s in want if s not in have]
     if missing:
