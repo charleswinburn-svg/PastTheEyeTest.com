@@ -225,18 +225,18 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
     goalie ? `${whole(p.shots)} shots faced` : (p.min_5v5_1y != null ? `${whole(p.min_5v5_1y)} min 5v5` : null),
   ].filter(Boolean).join(" | ");
 
-  const impactPct = p[`impact_${v}_pct`];
+  // The three headline boxes: the same value three ways, in the ratings version being shown.
+  const span = v === "3y" ? "3-year" : "this season";
   const tiles = [
-    ["WAR, this season", fixed(p.war_1y, 1), goalie ? "Wins above replacement, built on goals saved above expected (GSAx), not raw saves."
-      : "Wins above replacement from this season's ratings and minutes."],
-    ["WAR, 3-year", fixed(p.war_3y, 1), goalie ? "A typical season at his 3-year level: 3-year rating and his average workload."
-      : "A typical season at his 3-year level: 3-year ratings and his average minutes."],
-    ["Impact percentile", impactPct == null ? "–" : String(Math.round(impactPct)),
-      goalie ? "Percentile among goalies. Goals saved above average per game's worth of shots."
-        : `Percentile among ${group}. Goals above average per 60 minutes, all components combined.`],
-    goalie ? ["GSAx, this season", fixed(p.gsax, 1), "Goals saved above expected on every shot he faced this season, before any adjustment."]
-      : ["Impact, goals /60", fixed(p[`impact_${v}`], 2), "Goals above average per 60 minutes of ice time."],
-  ];
+    ["WAR", "Wins above replacement", p[`war_${v}`], goalie
+      ? "Wins above replacement, built on goals saved above expected (GSAx), not raw saves."
+      : "Goals above replacement divided by the number of goals a win costs."],
+    ["GAR", goalie ? "Goals saved above replacement" : "Goals above replacement", p[`gar_${v}`],
+      "Value against a replacement-level player in the same workload, in goals."],
+    ["GAA", goalie ? "Goals saved above average" : "Goals above average", p[`gaa_${v}`],
+      "Value against a league-average player in the same workload, in goals."],
+  ].map(([label, name, value, tip]) => [label, name, fixed(value, 1),
+    `${name}, ${v === "3y" ? "a typical season at his 3-year level" : "from this season alone"}. ${tip}`]);
 
   const rows = goalie ? goalieRows(v) : skaterRows(v);
   const parts = (goalie ? GOALIE_PARTS : SKATER_PARTS)
@@ -309,11 +309,16 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
           <CardHeader name={p.player} team={p.team} flag={p.flag} subtitle={subtitle} playerId={p.player_id} season={season} k={k} />
           <div style={{ padding: `${k.pad - 4}px ${k.pad}px 6px`, fontFamily: NUM_FONT, color: t.text, display: "grid", rowGap: k.pad }}>
             <div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: wide ? 12 : 8 }}>
-                {tiles.map(([label, value, tip]) => (
-                  <div key={label} title={tip} style={{ background: t.inputBg, border: `1px solid ${t.cardBorder}`, borderRadius: 10, padding: wide ? "12px 16px 10px" : "9px 12px 8px" }}>
-                    <div style={{ fontSize: k.tileLabel, fontWeight: 700, color: t.textMuted, letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}>{label}</div>
+              <div style={{ display: "grid", gridTemplateColumns: `repeat(${tiles.length}, 1fr)`, gap: wide ? 12 : 8 }}>
+                {tiles.map(([label, name, value, tip]) => (
+                  <div key={label} title={tip} style={{ background: t.inputBg, border: `1px solid ${t.cardBorder}`, borderRadius: 10, padding: wide ? "12px 16px 11px" : "9px 12px 9px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, fontSize: k.tileLabel, fontWeight: 700,
+                                  letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                      <span style={{ color: t.text, fontWeight: 800 }}>{label}</span>
+                      <span style={{ color: t.textFaint }}>{span}</span>
+                    </div>
                     <div style={{ fontSize: k.tileValue, fontWeight: 800, color: t.text, lineHeight: 1.15, marginTop: 2 }}>{value}</div>
+                    <div style={{ fontSize: k.tileLabel, fontWeight: 600, color: t.textMuted, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</div>
                   </div>
                 ))}
               </div>
