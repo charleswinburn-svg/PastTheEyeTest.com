@@ -4,7 +4,7 @@ import BaseballApp from "./baseball/BaseballApp.jsx";
 // World Cup tab hidden for now; src/soccer stays in the repo to bring it back.
 
 const SPORTS = [
-  { id: "hockey",  label: "NHL",           icon: "🏒" },
+  { id: "hockey",  label: "NHL",           icon: "🏒", badge: "beta" },
   { id: "baseball", label: "MLB",          icon: "⚾" },
 ];
 
@@ -86,6 +86,21 @@ export default function App() {
             >
               <span style={{ fontSize: 14 }}>{s.icon}</span>
               {s.label}
+              {s.badge && (
+                <span style={{
+                  padding: "2px 6px",
+                  borderRadius: 4,
+                  background: "#ea580c",
+                  color: "#ffffff",
+                  fontSize: 9,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  lineHeight: 1.2,
+                }}>
+                  {s.badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
