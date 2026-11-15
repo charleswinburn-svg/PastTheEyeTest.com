@@ -10,7 +10,15 @@
 > - **The site files go to GitHub** in `public/nhl/`, pushed by the nightly run like the baseball
 >   update, instead of being served from `api.pasttheeyetest.com/nhl`. The front end reads `/nhl/*.json`.
 >
-> Still to do: the React tab (step 5) and the cut-over (step 6).
+> **Update, 2026-11-16:** the React tab is built (`src/hockey/`), reading `/nhl/*.json`. It differs
+> from step 5 in what was asked for afterwards: everything under the card header is in Pliant, no
+> plus signs on positive numbers, a larger two-column card with the impact chart under the
+> percentiles, tier bands in four colours for forwards and three for defensemen and goalies, and a
+> colour on/off switch on the leaderboards. The saved PNG is the card as shown, not a fixed square.
+> Games the shift API is missing are filled from the NHL's printed shift reports (`nhl/shift_reports.py`).
+>
+> Still to do: the cut-over (step 6: remove `hockey_pipeline.py`, the NST/EH CSVs and `hockey_data_*.json`)
+> and pinning the ratings notebook's choices (step 3).
 
 ## Context
 

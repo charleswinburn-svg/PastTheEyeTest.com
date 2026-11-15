@@ -1,10 +1,20 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ReferenceLine } from "recharts";
-import { SearchableSelect, exportCanvasAsPng, NUM_FONT, NUM_WEIGHT } from "../baseball/SharedComponents.jsx";
-import FitToWidth from "../FitToWidth.jsx";
+import { useEffect, useMemo, useState } from "react";
+import { ThemeProvider, useTheme, ThemeToggle } from "../baseball/ThemeContext.jsx";
+import { SearchableSelect, NUM_FONT } from "../baseball/SharedComponents.jsx";
+import PlayerCard, { Segmented } from "./PlayerCard.jsx";
+import Leaderboard from "./Leaderboard.jsx";
+import { useNhl, toObjects, seasonLabel, logoUrl, headshotUrl } from "./nhlData.js";
+import { VERSIONS } from "./rows.js";
+
+// ═══════════════════════════════════════════════════════════
+// NHL TAB
+// Player cards and leaderboards built on PastTheEyeTest's own expected-goals model and
+// player ratings. The data is the set of JSON files the droplet's nightly run writes to
+// public/nhl/ (nhl/README.md). Everything below the card header is set in Pliant.
+// ═══════════════════════════════════════════════════════════
 
 function useWindowWidth() {
-  const [w, setW] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1024));
+  const [w, setW] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1200));
   useEffect(() => {
     const h = () => setW(window.innerWidth);
     window.addEventListener("resize", h);
@@ -13,507 +23,172 @@ function useWindowWidth() {
   return w;
 }
 
-const BIN_COLORS={"0-10":"#08306B","10-25":"#2171B5","25-45":"#6BAED6","45-55":"#D9D9D9","55-75":"#FC9272","75-90":"#FB6A4A","90-100":"#CB181D"};
-const pctToBin=p=>{if(p==null||!isFinite(p))return"NA";if(p>=90)return"90-100";if(p>=75)return"75-90";if(p>=55)return"55-75";if(p>=45)return"45-55";if(p>=25)return"25-45";if(p>=10)return"10-25";return"0-10"};
-const binColor=p=>BIN_COLORS[pctToBin(p)]||"#444";
-const textOnBin=p=>{if(p==null)return"#aaa";return(p<25||p>=75)?"#fff":"#111"};
-const LOGO_FALLBACK=a=>{const m={"L.A":"LAK","N.J":"NJD","S.J":"SJS","T.B":"TBL"};const nhl=m[a]||a;return`/nhl-assets/logos/nhl/svg/${nhl}_light.svg`};
-const FLAG=c=>c?`/flag-assets/w80/${c.toLowerCase()}.png`:null;
+const VIEWS = [["player", "Player card"], ["leaderboard", "Leaderboard"], ["about", "About the numbers"]];
 
-const NST_TO_NHL={"L.A":"LAK","N.J":"NJD","S.J":"SJS","T.B":"TBL"};
+function Hockey() {
+  const { theme: t } = useTheme();
+  const winW = useWindowWidth();
+  const mobile = winW < 700, wide = winW >= 1100;
 
-const NHL_TEAM_PRIMARY={
-  ANA:"#F47A38",BOS:"#FFB81C",BUF:"#003087",CAR:"#CC0000",
-  CBJ:"#002654",CGY:"#C8102E",CHI:"#CF0A2C",COL:"#6F263D",
-  DAL:"#006847",DET:"#CE1126",EDM:"#FF4C00",FLA:"#041E42",
-  LAK:"#111111",MIN:"#154734",MTL:"#AF1E2D",NJD:"#CE1126",
-  NSH:"#FFB81C",NYI:"#003087",NYR:"#0038A8",OTT:"#E31837",
-  PHI:"#F74902",PIT:"#FCB514",SEA:"#001628",SJS:"#006D75",
-  STL:"#002F87",TBL:"#002868",TOR:"#00205B",UTA:"#71B2C9",
-  VAN:"#00205B",VGK:"#B4975A",WPG:"#041E42",WSH:"#C8102E",
-  // NST abbreviations
-  "L.A":"#111111","N.J":"#CE1126","S.J":"#006D75","T.B":"#002868",
-};
+  const [view, setView] = useState("player");
+  const [kind, setKind] = useState("skaters");
+  const [season, setSeason] = useState(null);
+  const [v, setV] = useState("3y");
+  const [team, setTeam] = useState("");
+  const [picked, setPicked] = useState({ skaters: null, goalies: null });
+  const [pctStyle, setPctStyle] = useState("boxes");
 
-function nhlHexLuminance(hex){
-  return[hex.slice(1,3),hex.slice(3,5),hex.slice(5,7)].reduce((sum,h,i)=>{
-    const c=parseInt(h,16)/255;
-    const lin=c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);
-    return sum+lin*[0.2126,0.7152,0.0722][i];
-  },0);
-}
+  const meta = useNhl("meta.json");
+  const y = season ?? meta.data?.latest_season ?? null;
+  const file = useNhl(y == null ? null : `${kind}_${y}.json`);
+  const history = useNhl("history.json");
 
-function useLogos(){
-  const[map,setMap]=useState({});
-  useEffect(()=>{
-    fetch('/logos.json')
-      .then(r=>{if(!r.ok)throw new Error('no file');return r.json()})
-      .then(d=>{
-        // Convert full URLs to proxy URLs
-        const m={};
-        for(const[k,v] of Object.entries(d)){
-          m[k]=v.replace("https://assets.nhle.com/","/nhl-assets/");
-        }
-        setMap(m);
-      })
-      .catch(()=>{
-        // Fallback: build from known abbreviations
-        const m={};
-        const all=["ANA","BOS","BUF","CAR","CBJ","CGY","CHI","COL","DAL","DET","EDM","FLA","LAK","MIN","MTL","NJD","NSH","NYI","NYR","OTT","PHI","PIT","SEA","SJS","STL","TBL","TOR","UTA","VAN","VGK","WPG","WSH"];
-        all.forEach(t=>{m[t]=`/nhl-assets/logos/nhl/svg/${t}_light.svg`});
-        Object.entries(NST_TO_NHL).forEach(([nst,nhl])=>{m[nst]=`/nhl-assets/logos/nhl/svg/${nhl}_light.svg`});
-        setMap(m);
-      });
-  },[]);
-  return map;
-}
-const HEADSHOT_PREFIX="/nhl-assets/";
+  const seasons = useMemo(() => (meta.data?.seasons || []).map(s => s.season), [meta.data]);
+  const inProgressSeason = meta.data?.seasons?.find(s => s.in_progress)?.season ?? null;
+  const players = useMemo(() => toObjects(file.data), [file.data]);
+  const teams = useMemo(() => [...new Set(players.map(p => p.team).filter(Boolean))].sort(), [players]);
+  const pool = useMemo(() => (team ? players.filter(p => p.team === team) : players), [players, team]);
+  const current = useMemo(() => pool.find(p => p.player_id === picked[kind]) || pool[0] || null, [pool, picked, kind]);
+  const options = useMemo(() => [...pool].sort((a, b) => a.player.localeCompare(b.player)).map(p => ({
+    value: p.player_id, label: p.player, sublabel: `${p.team}${p.position ? " · " + p.position : " · G"}`,
+    image: headshotUrl(p.player_id, p.team, y), logo: logoUrl(p.team),
+  })), [pool, y]);
+  useEffect(() => { if (team && teams.length && !teams.includes(team)) setTeam(""); }, [teams, team]);
 
-const ALL_TEAMS=["ANA","BOS","BUF","CAR","CBJ","CGY","CHI","COL","DAL","DET","EDM","FLA","LAK","MIN","MTL","NJD","NSH","NYI","NYR","OTT","PHI","PIT","SEA","SJS","STL","TBL","TOR","UTA","VAN","VGK","WPG","WSH"];
+  const error = meta.error || file.error;
+  const input = { padding: "7px 10px", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
+                  color: t.text, fontSize: 12, outline: "none", fontFamily: "inherit", fontWeight: 600 };
 
-function useHeadshots(){
-  const[map,setMap]=useState({});
-  useEffect(()=>{
-    fetch('/headshots.json')
-      .then(r=>{if(!r.ok)throw new Error('no file');return r.json()})
-      .then(d=>{
-        // Convert full NHL URLs to proxy URLs
-        const m={};
-        for(const[k,v] of Object.entries(d)){
-          m[k]=v.replace("https://assets.nhle.com/","/nhl-assets/");
-        }
-        setMap(m);
-      })
-      .catch(()=>{
-        // Fallback: fetch from NHL API
-        const m={};
-        Promise.allSettled(ALL_TEAMS.map(t=>
-          fetch(`/nhl-api/v1/roster/${t}/current`).then(r=>r.json()).then(d=>{
-            ["forwards","defensemen","goalies"].forEach(pos=>{
-              (d[pos]||[]).forEach(p=>{
-                const fn=p.firstName?.default||"";
-                const ln=p.lastName?.default||"";
-                const name=`${fn} ${ln}`.trim();
-                if(name&&p.headshot)m[name]=p.headshot.replace("https://assets.nhle.com/","/nhl-assets/");
-              });
-            });
-          }).catch(()=>{})
-        )).then(()=>{if(Object.keys(m).length>0)setMap({...m})});
-      });
-  },[]);
-  return map;
-}
-
-function PercentileBar({label,pctile,isOverall,weight}){
-  const w=pctile!=null?Math.max(2,pctile):0;
-  return(
-    <div style={{display:"flex",alignItems:"center",marginBottom:isOverall?12:5,gap:8,width:"100%"}}>
-      <div style={{width:115,textAlign:"right",fontSize:isOverall?13:12,fontWeight:isOverall?800:500,color:isOverall?"#f8fafc":"#e2e8f0",flexShrink:0,whiteSpace:"nowrap"}}>{label}{weight===0&&pctile==null?" (N/A)":""}</div>
-      <div style={{flex:1,position:"relative",height:isOverall?28:22,background:"#0f172a",borderRadius:4,border:isOverall?"2px solid #f59e0b":"1px solid #1e3a5f",overflow:"hidden"}}>
-        <div style={{width:`${w}%`,height:"100%",background:binColor(pctile),borderRadius:3,transition:"width 0.6s cubic-bezier(0.25,0.46,0.45,0.94)"}}/>
-      </div>
-      <div style={{width:32,textAlign:"right",fontSize:isOverall?14:12,fontWeight:isOverall?800:NUM_WEIGHT,color:pctile!=null?"#f8fafc":"#64748b",fontFamily:NUM_FONT,flexShrink:0,whiteSpace:"nowrap"}}>{pctile!=null?Math.round(pctile):"—"}</div>
-    </div>
-  );
-}
-
-function PlayerHeader({name,team,subtitle,olympicCountry,headshotUrl,logoSrc}){
-  const nhlTeam=NST_TO_NHL[team]||team;
-  const bgColor=NHL_TEAM_PRIMARY[nhlTeam]||NHL_TEAM_PRIMARY[team]||"#1e293b";
-  const light=nhlHexLuminance(bgColor)>0.179;
-  const textColor=light?"#111111":"#ffffff";
-  const subColor=light?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.72)";
-  const ringColor=light?"rgba(0,0,0,0.2)":"rgba(255,255,255,0.25)";
-  return(
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 20px 14px",gap:16,background:bgColor}}>
-      <img crossOrigin="anonymous" src={logoSrc||LOGO_FALLBACK(team)} alt={team} style={{width:64,height:64,objectFit:"contain",filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.4))"}} onError={e=>{e.target.style.display="none"}}/>
-      <div style={{flex:1,textAlign:"center"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          <span style={{fontSize:22,fontWeight:800,color:textColor,letterSpacing:"-0.02em"}}>{name}</span>
-          {FLAG(olympicCountry)&&<img crossOrigin="anonymous" src={FLAG(olympicCountry)} alt="" style={{height:16,border:"1px solid rgba(255,255,255,0.4)",borderRadius:2}}/>}
-        </div>
-        <div style={{fontSize:11,color:subColor,marginTop:4,letterSpacing:"0.06em",fontStyle:"italic",fontWeight:600,textTransform:"uppercase"}}>{subtitle}</div>
-      </div>
-      <div style={{width:64,height:64,borderRadius:"50%",background:ringColor,overflow:"hidden",border:`2px solid ${ringColor}`,flexShrink:0,position:"relative"}}>
-        {headshotUrl&&<img crossOrigin="anonymous" src={headshotUrl} alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none"}}/>}
-      </div>
-    </div>
-  );
-}
-
-function TrendChart({data,lines,colors,labels}){
-  if(!data||data.length===0)return null;
-  const order=["23-24","24-25","25-26"];
-  const sorted=[...data].sort((a,b)=>order.indexOf(a.season)-order.indexOf(b.season));
-  return(
-    <div style={{padding:"8px 12px 0"}}>
-      <ResponsiveContainer width="100%" height={170}>
-        <LineChart data={sorted} margin={{top:8,right:16,bottom:4,left:0}}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f"/>
-          <XAxis dataKey="season" tick={{fill:"#94a3b8",fontSize:11,fontFamily:NUM_FONT,fontWeight:NUM_WEIGHT}} tickLine={false} axisLine={{stroke:"#334155"}}/>
-          <YAxis domain={[0,100]} ticks={[0,25,50,75,100]} tick={{fill:"#64748b",fontSize:10,fontFamily:NUM_FONT,fontWeight:NUM_WEIGHT}} tickLine={false} axisLine={false} width={28}/>
-          {lines.map((key,i)=>(
-            <Line key={key} type="monotone" dataKey={key} stroke={colors[i]} strokeWidth={2.5} dot={{r:4,fill:colors[i],stroke:"#0f172a",strokeWidth:2}}/>
+  return (
+    <div style={{ minHeight: "100vh", background: t.bg, color: t.text, fontFamily: NUM_FONT }}>
+      {/* ── views ── */}
+      <div style={{ background: t.cardBg, borderBottom: `2px solid ${t.accent}`, padding: mobile ? "0 8px" : "0 20px",
+                    display: "flex", alignItems: "stretch", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "stretch", overflowX: "auto" }}>
+          {!mobile && (
+            <div style={{ display: "flex", alignItems: "center", padding: "12px 20px 12px 0", borderRight: `1px solid ${t.divider}`, marginRight: 8,
+                          fontSize: 16, fontWeight: 800, fontStyle: "italic", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
+              <span style={{ color: t.accentSecondary }}>NHL</span>&nbsp;<span style={{ color: t.accent }}>Player Ratings</span>
+            </div>
+          )}
+          {VIEWS.map(([id, label]) => (
+            <button key={id} onClick={() => setView(id)}
+              style={{ padding: mobile ? "11px 10px" : "15px 18px", fontSize: mobile ? 11 : 12, fontWeight: view === id ? 800 : 600, letterSpacing: "0.04em",
+                       textTransform: "uppercase", whiteSpace: "nowrap", fontFamily: "inherit", cursor: "pointer", border: "none",
+                       background: view === id ? `${t.accent}1a` : "transparent", color: view === id ? t.accent : t.textMuted,
+                       borderBottom: view === id ? `3px solid ${t.accent}` : "3px solid transparent" }}>
+              {label}
+            </button>
           ))}
-          <Legend formatter={v=>labels[lines.indexOf(v)]||v} wrapperStyle={{fontSize:10,color:"#94a3b8",paddingTop:4}}/>
-          <ReferenceLine y={50} stroke="#475569" strokeDasharray="4 4"/>
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-function Card({player,type,trends,mode,headshots,logos}){
-  const cardRef=useRef(null);
-  const pname=player?(type==="goalie"?player.name:player.display_name):"";
-  const saveCard=useCallback(async()=>{
-    if(!cardRef.current)return;
-    // Neutralize any <FitToWidth> ancestor scale for the whole capture, so both the
-    // per-image sizing (getBoundingClientRect below) and html2canvas run at full
-    // resolution instead of the shrunk on-screen size. Restored in finally.
-    const fit=cardRef.current.closest("[data-ptet-fit]");
-    const prevTransform=fit?fit.style.transform:"";
-    if(fit)fit.style.transform="none";
-    const imgs=[...cardRef.current.querySelectorAll("img")];
-    const originals=[];
-    const toDataUrl=(src,w,h)=>new Promise(resolve=>{
-      const c=document.createElement("canvas");
-      const s=2;c.width=w*s;c.height=h*s;
-      const ctx=c.getContext("2d");
-      const i=new Image();
-      i.crossOrigin="anonymous";
-      i.onload=()=>{
-        const iw=i.naturalWidth||i.width;
-        const ih=i.naturalHeight||i.height;
-        const scale=Math.min(c.width/iw,c.height/ih);
-        const dw=iw*scale,dh=ih*scale;
-        const dx=(c.width-dw)/2,dy=(c.height-dh)/2;
-        ctx.drawImage(i,dx,dy,dw,dh);
-        resolve(c.toDataURL("image/png"));
-      };
-      i.onerror=()=>resolve(null);
-      i.src=src;
-    });
-    let capturedCanvas=null;
-    try{
-      await Promise.allSettled(imgs.map(async img=>{
-        if(!img.src||img.src.startsWith("data:"))return;
-        try{
-          const rect=img.getBoundingClientRect();
-          const w=rect.width||64;
-          const h=rect.height||64;
-          const dataUrl=await toDataUrl(img.src,w,h);
-          if(dataUrl){originals.push({img,orig:img.src});img.src=dataUrl;}
-        }catch(e){}
-      }));
-      await new Promise(r=>setTimeout(r,100));
-      const html2canvas=(await import("html2canvas")).default;
-      capturedCanvas=await html2canvas(cardRef.current,{backgroundColor:"#0a0f1a",scale:2,logging:false});
-    }finally{
-      originals.forEach(({img,orig})=>{img.src=orig});
-      if(fit)fit.style.transform=prevTransform;
-    }
-    // Deliver outside the capture block: download on desktop, share sheet on mobile.
-    if(capturedCanvas) await exportCanvasAsPng(capturedCanvas,`${pname.replace(/\s+/g,"_")}_card.png`);
-  },[pname]);
-  if(!player)return <div style={{color:"#64748b",padding:40,textAlign:"center"}}>Select a player</div>;
-  const cats=Object.entries(player.categories);
-  const headshotRaw=headshots?.[pname]||null;
-  const headshotUrl=headshotRaw;
-  const subtitle=type==="goalie"
-    ?`${player.team} | G | GP: ${player.gp} | TOI: ${player.icetime_hrs} hrs | GSAx: ${player.gsax_total>0?"+":""}${player.gsax_total} | GP Share: ${player.gp_share}%`
-    :`${player.team} | ${player.position} | GP: ${player.gp} | 5v5 TOI: ${player.toi_min} min${player.oz_shift_pct!=null?` | OZ%: ${player.oz_shift_pct}%`:""}`;
-  const trendData=trends?trends[pname]:null;
-  const showTrend=mode==="3-Year Rolling"&&trendData&&trendData.length>0;
-  return(
-    <div>
-      <FitToWidth designWidth={600}>
-      <div ref={cardRef} style={{background:"#111827",borderRadius:12,border:"1px solid #1e3a5f",overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.5)",maxWidth:600,margin:"0 auto"}}>
-        <PlayerHeader name={pname} team={player.team} subtitle={subtitle} olympicCountry={player.olympic_country} headshotUrl={headshotUrl} logoSrc={logos?.[player.team]}/>
-        <div style={{padding:"8px 12px 4px"}}>
-          <PercentileBar label="Impact" pctile={player.overall_pctile} isOverall={true}/>
-          <div style={{height:4}}/>
-          {cats.map(([name,cat])=><PercentileBar key={name} label={name} pctile={cat.pctile} weight={cat.weight} isOverall={false}/>)}
         </div>
-        {showTrend&&<TrendChart data={trendData}
-          lines={type==="goalie"?["hd_gsax","md_gsax","ld_gsax"]:["offense","defense","overall"]}
-          colors={type==="goalie"?["#f59e0b","#94a3b8","#3b82f6"]:["#f59e0b","#3b82f6","#f8fafc"]}
-          labels={type==="goalie"?["High Danger","Med Danger","Low Danger"]:["5v5 Offense","5v5 Defense","Overall"]}/>}
-        <div style={{padding:"6px 16px 10px",display:"flex",justifyContent:"space-between",fontSize:10,color:"#64748b"}}>
-          <span>{mode==="3-Year Rolling"?"3-Year Rolling Weighted":mode} | {type==="goalie"?"All goalies":`${player.pos_group} only`}</span>
-          <span style={{fontStyle:"italic"}}>PastTheEyeTest | NST + EH</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0" }}>
+          {meta.data && !mobile && <span style={{ fontSize: 10, color: t.textFaint, fontWeight: 600 }}>Updated {meta.data.updated.slice(0, 10)}</span>}
+          <ThemeToggle />
         </div>
       </div>
-      </FitToWidth>
-      <div style={{maxWidth:600,margin:"8px auto 0",textAlign:"right"}}>
-        <button onClick={saveCard} style={{padding:"6px 16px",fontSize:11,fontWeight:600,background:"#0f172a",color:"#94a3b8",border:"1px solid #1e3a5f",borderRadius:6,cursor:"pointer",transition:"all 0.15s"}}
-          onMouseEnter={e=>{e.target.style.background="#f59e0b";e.target.style.color="#0f172a";e.target.style.borderColor="#f59e0b"}}
-          onMouseLeave={e=>{e.target.style.background="#0f172a";e.target.style.color="#94a3b8";e.target.style.borderColor="#1e3a5f"}}>
-          Save as PNG
-        </button>
-      </div>
-    </div>
-  );
-}
 
-function WeightTable({player,type}){
-  if(!player)return null;
-  const cats=Object.entries(player.categories);
-  const tdS={padding:"5px 8px",fontSize:11,borderBottom:"1px solid #1e3a5f"};
-  return(
-    <div style={{marginTop:16,maxWidth:600,margin:"16px auto 0"}}>
-      <div style={{fontSize:13,fontWeight:700,color:"#94a3b8",marginBottom:8}}>Weight Breakdown</div>
-      <table style={{width:"100%",borderCollapse:"collapse",background:"#0f172a",borderRadius:8,overflow:"hidden"}}>
-        <thead><tr>
-          <th style={{textAlign:"left",padding:"6px 8px",borderBottom:"2px solid #334155",color:"#64748b",fontSize:11}}>Category</th>
-          <th style={{textAlign:"center",padding:"6px 8px",borderBottom:"2px solid #334155",color:"#64748b",fontSize:11}}>Pctile</th>
-          {type==="goalie"&&<th style={{textAlign:"center",padding:"6px 8px",borderBottom:"2px solid #334155",color:"#64748b",fontSize:11}}>Per 60</th>}
-          <th style={{textAlign:"right",padding:"6px 8px",borderBottom:"2px solid #334155",color:"#64748b",fontSize:11}}>Weight</th>
-        </tr></thead>
-        <tbody>
-          <tr style={{background:"#1e293b"}}>
-            <td style={{...tdS,fontWeight:700,color:"#f8fafc"}}>IMPACT SCORE</td>
-            <td style={{...tdS,textAlign:"center",fontWeight:700,color:"#f59e0b"}}>{player.overall_pctile?.toFixed(1)}</td>
-            {type==="goalie"&&<td style={{...tdS,textAlign:"center",color:"#64748b"}}>—</td>}
-            <td style={{...tdS,textAlign:"right",color:"#94a3b8"}}>100%</td>
-          </tr>
-          {cats.map(([name,cat],i)=>{
-            const rk={"5v5 GSAx":"ev5_gsax","Penalty Kill":"pk_gsax","High Danger GSAx":"hd_gsax","Med Danger GSAx":"md_gsax","Low Danger GSAx":"ld_gsax","Rebound Control":"reb"}[name];
-            return(
-              <tr key={name} style={{background:i%2===0?"#0f172a":"#1e293b"}}>
-                <td style={{...tdS,color:"#e2e8f0"}}>{name}</td>
-                <td style={{...tdS,textAlign:"center",color:cat.pctile!=null?"#f8fafc":"#475569"}}>{cat.pctile!=null?cat.pctile.toFixed(1):"N/A"}</td>
-                {type==="goalie"&&<td style={{...tdS,textAlign:"center",color:"#94a3b8"}}>{rk&&player.raw_per60?.[rk]!=null?player.raw_per60[rk]:name==="Ice Time"?`${player.gp_share}%`:"—"}</td>}
-                <td style={{...tdS,textAlign:"right",color:"#94a3b8"}}>{cat.weight===0?"N/A":`${(cat.weight*100).toFixed(1)}%`}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function HockeyLeaderboard({players,columns,sortDefault}){
-  const[sortCol,setSortCol]=useState(sortDefault||"overall_pctile");
-  const[sortDir,setSortDir]=useState("desc");
-  const[search,setSearch]=useState("");
-  const filtered=useMemo(()=>{
-    let arr=[...players];
-    if(search){const q=search.toLowerCase();arr=arr.filter(p=>(p.display_name||p.name).toLowerCase().includes(q)||p.team.toLowerCase().includes(q))}
-    arr.sort((a,b)=>{
-      let av,bv;
-      if(sortCol==="name"){av=(a.display_name||a.name);bv=(b.display_name||b.name)}
-      else if(sortCol==="team"){av=a.team;bv=b.team}
-      else if(sortCol==="gp"){av=a.gp;bv=b.gp}
-      else if(sortCol==="toi_min"){av=a.toi_min;bv=b.toi_min}
-      else if(sortCol==="overall_pctile"){av=a.overall_pctile;bv=b.overall_pctile}
-      else{av=a.categories[sortCol]?.pctile;bv=b.categories[sortCol]?.pctile}
-      if(av==null)return 1;if(bv==null)return-1;
-      if(typeof av==="string")return sortDir==="asc"?av.localeCompare(bv):bv.localeCompare(av);
-      return sortDir==="asc"?av-bv:bv-av;
-    });
-    return arr;
-  },[players,sortCol,sortDir,search]);
-  const toggle=col=>{if(sortCol===col)setSortDir(d=>d==="asc"?"desc":"asc");else{setSortCol(col);setSortDir("desc")}};
-  const thS={padding:"8px 6px",textAlign:"center",cursor:"pointer",fontSize:10,fontWeight:700,color:"#94a3b8",borderBottom:"2px solid #334155",whiteSpace:"nowrap",userSelect:"none",position:"sticky",top:0,background:"#111827",zIndex:2};
-  const tdS={padding:"5px 6px",textAlign:"center",fontSize:11,borderBottom:"1px solid #1e3a5f",whiteSpace:"nowrap"};
-  return(
-    <div>
-      <input type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search player or team..."
-        style={{width:"100%",maxWidth:300,padding:"8px 12px",background:"#0f172a",border:"1px solid #1e3a5f",borderRadius:6,color:"#f8fafc",fontSize:13,marginBottom:12,outline:"none"}}/>
-      <div style={{overflowX:"auto",borderRadius:8,border:"1px solid #1e3a5f",maxHeight:"70vh",overflowY:"auto"}}>
-        <table style={{width:"100%",borderCollapse:"collapse",background:"#0f172a"}}>
-          <thead><tr>{columns.map(c=><th key={c.key} onClick={()=>toggle(c.key)} style={thS}>{c.label} {sortCol===c.key?(sortDir==="desc"?"▾":"▴"):""}</th>)}</tr></thead>
-          <tbody>{filtered.map((p,i)=>(
-            <tr key={i} style={{background:i%2===0?"#0f172a":"#1e293b"}}>
-              {columns.map(c=>{
-                let val,st={...tdS};
-                if(c.key==="name"){val=p.display_name||p.name;st.textAlign="left";st.fontWeight=600;st.color="#f8fafc";st.position="sticky";st.left=0;st.background=i%2===0?"#0f172a":"#1e293b";st.zIndex=1}
-                else if(c.key==="team"){val=p.team;st.color="#94a3b8"}
-                else if(c.key==="position"){val=p.position;st.color="#94a3b8"}
-                else if(c.key==="gp"){val=p.gp;st.color="#94a3b8"}
-                else if(c.key==="toi_min"){val=p.toi_min;st.color="#94a3b8"}
-                else if(c.key==="overall_pctile"){val=p.overall_pctile!=null?p.overall_pctile.toFixed(1):"—";st.background=binColor(p.overall_pctile);st.color=textOnBin(p.overall_pctile);st.fontWeight=700}
-                else{const cat=p.categories[c.key];val=cat?.pctile!=null?cat.pctile.toFixed(1):"—";st.color=cat?.pctile!=null?"#e2e8f0":"#475569"}
-                return <td key={c.key} style={st}>{val}</td>;
-              })}
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-      <div style={{fontSize:10,color:"#64748b",marginTop:8}}>{filtered.length} players</div>
-    </div>
-  );
-}
-
-const TABS=[
-  {id:"skater",label:"Player Card"},
-  {id:"goalie",label:"Goalie Card"},
-  {id:"leaderboard",label:"Leaderboard",dropdown:[
-    {id:"skater_lb",label:"Player LB"},
-    {id:"goalie_lb",label:"Goalie LB"},
-  ]},
-];
-const MODES=[{id:"rolling",label:"3-Year Rolling",file:"hockey_data_rolling.json"},{id:"2025",label:"2025-26",file:"hockey_data_2025.json"},{id:"2024",label:"2024-25",file:"hockey_data_2024.json"},{id:"2023",label:"2023-24",file:"hockey_data_2023.json"}];
-const SK_COLS=[{key:"name",label:"Player"},{key:"team",label:"Tm"},{key:"position",label:"Pos"},{key:"gp",label:"GP"},{key:"toi_min",label:"TOI"},{key:"overall_pctile",label:"Overall"},{key:"5v5 Offense",label:"5v5 Off"},{key:"5v5 Defense",label:"5v5 Def"},{key:"Production",label:"Prod"},{key:"Power Play",label:"PP"},{key:"Penalty Kill",label:"PK"},{key:"Penalties",label:"Pen"},{key:"Competition",label:"Comp"},{key:"Teammates",label:"Tmts"}];
-const GL_COLS=[{key:"name",label:"Goalie"},{key:"team",label:"Tm"},{key:"gp",label:"GP"},{key:"overall_pctile",label:"Overall"},{key:"5v5 GSAx",label:"5v5"},{key:"Penalty Kill",label:"PK"},{key:"High Danger GSAx",label:"HD"},{key:"Med Danger GSAx",label:"MD"},{key:"Low Danger GSAx",label:"LD"},{key:"Rebound Control",label:"Reb"},{key:"Ice Time",label:"TOI"}];
-
-export default function HockeyApp(){
-  const[data,setData]=useState(null);
-  const[error,setError]=useState(null);
-  const[loading,setLoading]=useState(true);
-  const[tab,setTab]=useState("skater");
-  const[openDropdown,setOpenDropdown]=useState(null);
-  const[modeId,setModeId]=useState("rolling");
-  const[selectedSkater,setSelectedSkater]=useState(null);
-  const[selectedGoalie,setSelectedGoalie]=useState(null);
-  const[posFilter,setPosFilter]=useState("F");
-  const headshots=useHeadshots();
-  const logos=useLogos();
-
-  const curMode=MODES.find(m=>m.id===modeId)||MODES[0];
-
-  useEffect(()=>{
-    setLoading(true); setError(null);
-    fetch('/'+curMode.file)
-      .then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status} - ${curMode.file} not found. Run: python3 hockey_pipeline.py ./data all ./output`);return r.json()})
-      .then(d=>{setData(d);setLoading(false)})
-      .catch(e=>{setError(e.message);setLoading(false)});
-  },[curMode.file]);
-
-  const skaters=useMemo(()=>data?.skaters||[],[data]);
-  const goalies=useMemo(()=>data?.goalies||[],[data]);
-  const skaterNames=useMemo(()=>skaters.map(s=>s.display_name).sort(),[skaters]);
-  const goalieNames=useMemo(()=>goalies.map(g=>g.name).sort(),[goalies]);
-  const hockeyOpts=(list,nameOf)=>[...list].sort((a,b)=>nameOf(a).localeCompare(nameOf(b))).map(p=>({value:nameOf(p),label:nameOf(p),sublabel:p.team,image:headshots?.[nameOf(p)]||null,logo:p.team?(logos?.[p.team]||LOGO_FALLBACK(p.team)):null}));
-  const skaterOpts=useMemo(()=>hockeyOpts(skaters,s=>s.display_name),[skaters,headshots,logos]);
-  const goalieOpts=useMemo(()=>hockeyOpts(goalies,g=>g.name),[goalies,headshots,logos]);
-  const filteredSkaters=useMemo(()=>posFilter?skaters.filter(s=>s.pos_group===posFilter):skaters,[skaters,posFilter]);
-  const mode=data?.mode||"3-Year Rolling";
-
-  useEffect(()=>{if(skaterNames.length>0&&(!selectedSkater||!skaterNames.includes(selectedSkater)))setSelectedSkater(skaterNames[0])},[skaterNames]);
-  useEffect(()=>{if(goalieNames.length>0&&(!selectedGoalie||!goalieNames.includes(selectedGoalie)))setSelectedGoalie(goalieNames[0])},[goalieNames]);
-
-  const curSkater=useMemo(()=>skaters.find(s=>s.display_name===selectedSkater),[skaters,selectedSkater]);
-  const curGoalie=useMemo(()=>goalies.find(g=>g.name===selectedGoalie),[goalies,selectedGoalie]);
-
-  const isLbTab=(id)=>id==="skater_lb"||id==="goalie_lb";
-  const isTabActive=(id)=>id==="leaderboard"?isLbTab(tab):tab===id;
-
-  const winWidth = useWindowWidth();
-  const isMobile = winWidth < 640;
-
-  return(
-    <div style={{minHeight:"100vh",background:"#0a0f1a"}} onClick={()=>setOpenDropdown(null)}>
-      <div style={{background:"#111827",borderBottom:"2px solid #f59e0b",padding:isMobile?"0 8px":"0 20px",display:"flex",alignItems:"stretch",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 12px rgba(0,0,0,0.4)",flexWrap:isMobile?"wrap":"nowrap"}}>
-        {/* Left: brand (desktop only) + mode selector */}
-        <div style={{display:"flex",alignItems:"stretch",gap:0,flexShrink:0}}>
-          {!isMobile&&(
-            <div style={{display:"flex",alignItems:"center",padding:"12px 20px 12px 0",borderRight:"1px solid #1e3a5f",marginRight:8}}>
-              <div style={{fontSize:16,fontWeight:700,color:"#f8fafc",letterSpacing:"-0.02em",fontStyle:"italic"}}><span style={{color:"#3b82f6"}}>NHL</span> <span style={{color:"#f59e0b"}}>Player Cards</span></div>
-            </div>
-          )}
-          <div style={{display:"flex",alignItems:"center",padding:isMobile?"0 6px 0 0":"0 16px",borderRight:isMobile?"none":"1px solid #1e3a5f"}}>
-            <select value={modeId} onChange={e=>setModeId(e.target.value)}
-              style={{padding:isMobile?"6px 10px":"8px 14px",background:"linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%)",color:"#fff",border:"none",borderRadius:8,fontSize:isMobile?11:12,fontWeight:700,cursor:"pointer",outline:"none",boxShadow:"0 2px 8px rgba(0,0,0,0.2)"}}>
-              {MODES.map(m=><option key={m.id} value={m.id} style={{background:"#0f172a",color:"#f8fafc"}}>{m.label}</option>)}
-            </select>
-          </div>
-        </div>
-        {/* Tabs */}
-        {isMobile?(
-          // Mobile: scroll container + dropdown as siblings so overflowX doesn't clip dropdown
-          <div style={{position:"relative",flex:1,overflow:"visible"}} onClick={e=>e.stopPropagation()}>
-            <div style={{display:"flex",alignItems:"stretch",overflowX:"auto",msOverflowStyle:"none",scrollbarWidth:"none"}}>
-              {TABS.map(t=>(
-                <button key={t.id}
-                  onClick={()=>t.dropdown?setOpenDropdown(openDropdown===t.id?null:t.id):setTab(t.id)&&setOpenDropdown(null)}
-                  style={{padding:"10px 10px",fontSize:11,fontWeight:isTabActive(t.id)?700:600,letterSpacing:"0.04em",whiteSpace:"nowrap",background:isTabActive(t.id)?"rgba(245,158,11,0.1)":"transparent",color:isTabActive(t.id)?"#f59e0b":"#94a3b8",border:"none",borderBottom:isTabActive(t.id)?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,fontFamily:"inherit",flexShrink:0}}
-                >
-                  {t.label.toUpperCase()}
-                  {t.dropdown&&<span style={{fontSize:8,marginLeft:2,display:"inline-block",transform:openDropdown===t.id?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>▼</span>}
-                </button>
-              ))}
-            </div>
-            {openDropdown&&(()=>{
-              const activeTb=TABS.find(t=>t.id===openDropdown);
-              if(!activeTb?.dropdown)return null;
-              return(
-                <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#1e293b",border:"1px solid #f59e0b",borderTop:"none",borderRadius:"0 0 10px 10px",boxShadow:"0 12px 32px rgba(0,0,0,0.5)",overflow:"hidden",zIndex:300}}>
-                  {activeTb.dropdown.map((sub,idx)=>(
-                    <button key={sub.id} onClick={()=>{setTab(sub.id);setOpenDropdown(null);}}
-                      style={{width:"100%",padding:"16px 20px",fontSize:15,fontWeight:tab===sub.id?700:500,color:tab===sub.id?"#f59e0b":"#cbd5e1",background:tab===sub.id?"rgba(245,158,11,0.15)":"transparent",border:"none",borderBottom:idx<activeTb.dropdown.length-1?"1px solid #334155":"none",cursor:"pointer",textAlign:"left",fontFamily:"inherit",display:"block"}}
-                    >{sub.label}</button>
-                  ))}
-                </div>
-              );
-            })()}
-          </div>
-        ):(
-          // Desktop: absolutely centered, dropdown inside each tab
-          <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"stretch",height:"100%"}}>
-            {TABS.map(t=>(
-              <div key={t.id} style={{position:"relative",display:"flex",alignItems:"stretch"}} onClick={e=>e.stopPropagation()}>
-                <button
-                  onClick={()=>t.dropdown?setOpenDropdown(openDropdown===t.id?null:t.id):setTab(t.id)&&setOpenDropdown(null)}
-                  style={{padding:"16px 18px",fontSize:12,fontWeight:isTabActive(t.id)?700:600,letterSpacing:"0.04em",whiteSpace:"nowrap",background:isTabActive(t.id)?"rgba(245,158,11,0.1)":"transparent",color:isTabActive(t.id)?"#f59e0b":"#94a3b8",border:"none",borderBottom:isTabActive(t.id)?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,fontFamily:"inherit"}}
-                >
-                  {t.label.toUpperCase()}
-                  {t.dropdown&&<span style={{fontSize:8,marginLeft:2,display:"inline-block",transform:openDropdown===t.id?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>▼</span>}
-                </button>
-                {t.dropdown&&openDropdown===t.id&&(
-                  <div style={{position:"absolute",top:"100%",left:0,background:"#1e293b",border:"1px solid #f59e0b",borderRadius:10,boxShadow:"0 12px 32px rgba(0,0,0,0.5)",minWidth:140,overflow:"hidden",zIndex:200}}>
-                    {t.dropdown.map((sub,idx)=>(
-                      <button key={sub.id} onClick={()=>{setTab(sub.id);setOpenDropdown(null);}}
-                        style={{width:"100%",padding:"12px 18px",fontSize:13,fontWeight:tab===sub.id?700:500,color:tab===sub.id?"#f59e0b":"#cbd5e1",background:tab===sub.id?"rgba(245,158,11,0.15)":"transparent",border:"none",borderBottom:idx<t.dropdown.length-1?"1px solid #334155":"none",cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all 0.15s"}}
-                        onMouseEnter={e=>{if(tab!==sub.id)e.target.style.background="rgba(59,130,246,0.1)"}}
-                        onMouseLeave={e=>{if(tab!==sub.id)e.target.style.background="transparent"}}
-                      >{sub.label}</button>
-                    ))}
-                  </div>
-                )}
-              </div>
+      {/* ── what to show ── */}
+      {view !== "about" && (
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 12px", padding: mobile ? "10px 12px" : "12px 24px",
+                      borderBottom: `1px solid ${t.divider}` }}>
+          <Segmented t={t} value={kind} onChange={setKind} options={[["skaters", "Skaters"], ["goalies", "Goalies"]]} />
+          <select value={y ?? ""} onChange={e => setSeason(+e.target.value)} style={input} aria-label="Season">
+            {[...(meta.data?.seasons || [])].reverse().map(s => (
+              <option key={s.season} value={s.season}>{s.label}{s.in_progress ? " (in progress)" : ""}</option>
             ))}
-          </div>
-        )}
-        {/* Right: player selector + position filter + stats */}
-        <div style={{display:"flex",alignItems:"center",gap:isMobile?8:16,padding:isMobile?"6px 4px":"12px 0",marginLeft:isMobile?0:"auto",width:isMobile?"100%":"auto",borderTop:isMobile?"1px solid #1e3a5f":"none",flexWrap:"wrap"}}>
-          {(tab==="skater"||tab==="goalie")&&(
-            <SearchableSelect
-              value={tab==="goalie"?selectedGoalie||"":selectedSkater||""}
-              options={tab==="goalie"?goalieOpts:skaterOpts}
-              onChange={name=>tab==="goalie"?setSelectedGoalie(name):setSelectedSkater(name)}
-              placeholder={`Search ${tab==="goalie"?"goalie":"skater"}…`}
-              style={{padding:"8px 12px",background:"#0f172a",border:"1px solid #1e3a5f",borderRadius:6,color:"#f8fafc",fontSize:13,flex:isMobile?"1 1 100%":"1 1 280px",minWidth:isMobile?0:220,maxWidth:isMobile?"100%":420}}
-            />
+          </select>
+          <Segmented t={t} value={v} onChange={setV} options={VERSIONS.map(x => [x.id, x.label])} />
+          {view === "player" && (
+            <>
+              <select value={team} onChange={e => setTeam(e.target.value)} style={input} aria-label="Team">
+                <option value="">All teams</option>{teams.map(x => <option key={x} value={x}>{x}</option>)}
+              </select>
+              <SearchableSelect value={current?.player_id ?? ""} options={options}
+                onChange={id => setPicked(s => ({ ...s, [kind]: id }))}
+                placeholder={`Search ${kind === "goalies" ? "goalie" : "skater"}…`}
+                style={{ ...input, flex: mobile ? "1 1 100%" : "1 1 240px", minWidth: mobile ? 0 : 220, maxWidth: mobile ? "100%" : 380 }} />
+              <Segmented t={t} value={pctStyle} onChange={setPctStyle} options={[["boxes", "Boxes"], ["bars", "Bars"]]} />
+            </>
           )}
-          {tab==="skater_lb"&&(
-            <div style={{display:"flex",gap:4}}>
-              {[["F","Fwd"],["D","Def"],["","All"]].map(([v,l])=>(
-                <button key={v} onClick={()=>setPosFilter(v)} style={{padding:isMobile?"6px 10px":"6px 14px",fontSize:11,fontWeight:posFilter===v?700:500,background:posFilter===v?"rgba(245,158,11,0.15)":"transparent",color:posFilter===v?"#f59e0b":"#94a3b8",border:"1px solid #1e3a5f",borderRadius:6,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
-              ))}
-            </div>
-          )}
-          {!isMobile&&<div style={{fontSize:10,color:"#64748b",letterSpacing:"0.03em",borderLeft:"1px solid #1e3a5f",paddingLeft:16}}>{mode} | {skaters.length} skaters | {goalies.length} goalies</div>}
         </div>
-      </div>
+      )}
 
+      {/* ── content ── */}
       {error ? (
-        <div style={{color:"#f59e0b",padding:60,textAlign:"center",fontSize:14,lineHeight:1.8}}>
-          Failed to load data: {error}<br/><br/>
-          <span style={{color:"#94a3b8",fontSize:12}}>Run: python3 hockey_pipeline.py ./data all ./output</span>
+        <div style={{ color: t.accent, padding: 60, textAlign: "center", fontSize: 14, lineHeight: 1.8 }}>
+          Could not load the NHL data ({error}).<br />
+          <span style={{ color: t.textMuted, fontSize: 12 }}>The files in public/nhl/ are written by the nightly run: see nhl/README.md.</span>
         </div>
-      ) : (!data||loading) ? (
-        <div style={{color:"#64748b",padding:60,textAlign:"center",fontSize:14}}>Loading {curMode.label}...</div>
+      ) : view === "about" ? (
+        <About meta={meta.data} t={t} />
+      ) : !file.data || !meta.data ? (
+        <div style={{ color: t.textFaint, padding: 60, textAlign: "center", fontSize: 14 }}>Loading{y != null ? ` ${seasonLabel(y)}` : ""}…</div>
+      ) : view === "player" ? (
+        <div style={{ padding: mobile ? "14px 10px 40px" : "24px 24px 60px" }}>
+          <PlayerCard p={current} kind={kind} v={v} season={y} seasonDone={file.data.season_done} zRef={file.data.z_ref}
+            history={history.data} seasons={seasons} inProgressSeason={inProgressSeason} wide={wide} pctStyle={pctStyle} />
+        </div>
       ) : (
-        <div style={{padding:isMobile?"12px 24px":24,maxWidth:tab.includes("lb")?1200:640,margin:"0 auto"}}>
-          {tab==="skater"&&<><Card player={curSkater} type="skater" trends={data.skater_trends} mode={mode} headshots={headshots} logos={logos}/><WeightTable player={curSkater} type="skater"/></>}
-          {tab==="goalie"&&<><Card player={curGoalie} type="goalie" trends={data.goalie_trends} mode={mode} headshots={headshots} logos={logos}/><WeightTable player={curGoalie} type="goalie"/></>}
-          {tab==="skater_lb"&&<HockeyLeaderboard players={filteredSkaters} columns={SK_COLS} sortDefault="overall_pctile"/>}
-          {tab==="goalie_lb"&&<HockeyLeaderboard players={goalies} columns={GL_COLS} sortDefault="overall_pctile"/>}
+        <div style={{ padding: mobile ? "14px 10px 40px" : "20px 24px 60px", maxWidth: 1560, margin: "0 auto" }}>
+          <div style={{ fontSize: 12, color: t.textMuted, fontWeight: 600, marginBottom: 12 }}>
+            {team ? `${team} · ` : ""}{seasonLabel(y)}{file.data.season_done < 1 ? " (in progress)" : ""} · {VERSIONS.find(x => x.id === v).long}
+          </div>
+          <Leaderboard key={kind} players={pool} kind={kind} v={v} teams={teams} team={team} onTeam={setTeam}
+            onPick={id => { setPicked(s => ({ ...s, [kind]: id })); setView("player"); window.scrollTo({ top: 0 }); }} />
         </div>
       )}
     </div>
   );
+}
+
+// ═══════════════════════════════════════════════════════════
+// ABOUT THE NUMBERS
+// ═══════════════════════════════════════════════════════════
+const GLOSSARY = [
+  ["WAR", "Wins above replacement. Every part of a player's game is converted to goals, compared with what a replacement-level player would give in the same minutes, and divided by the number of goals a win costs. It is a total, so playing more adds to it."],
+  ["Individual Impact", "The same value as a rate: goals above average per 60 minutes (skaters) or per game's worth of shots (goalies)."],
+  ["3-year and 1-year", "The 1-year version uses that season alone. The 3-year version adds the two seasons before it, weighted less, and reads as a typical season at the player's current level. A season in progress is blended in as it fills up."],
+  ["EV Offense, EV Defense", "A player's own effect on expected goals for and against at 5v5, after accounting for his linemates, his opponents, where his shifts start, the score and home ice."],
+  ["Power Play, Penalty Kill", "The same kind of isolated effect with the man advantage and while shorthanded."],
+  ["Finishing", "Goals scored above what his shots were expected to produce, together with his goal scoring."],
+  ["Playmaking", "Primary and secondary assists, weighted by situation. A card row; it is not added into WAR, because assists are already inside the on-ice ratings."],
+  ["Shooting results", "Goals above expected on a player's own shots."],
+  ["Setup results", "How much more often his teammates' shots go in than expected while he is on the ice. The expected-goals model sees the shot but not the pass, so this is where a passer's value shows up. The shooter is in the same model, so a goal above expected is credited once and shared."],
+  ["Penalties", "Minor penalties drawn minus taken, valued at what a power play is worth in goals."],
+  ["Competition, Teammates", "Context, not skill: the average quality of the opponents he faces and the linemates he plays with at 5v5."],
+  ["Goalies", "Goals saved above expected (GSAx) on every unblocked shot faced, split by situation and by shot danger, with an adjustment for the team in front of him and the shooters he faced; rebound control; and win probability added."],
+  ["Impact tiers", "Each season, players are ranked within their position and the ranks are cut by roster spots per team: three forwards to a line, two defensemen to a pair, one starter, and a 1B for every other team. Everyone below is Depth or Backup."],
+  ["Percentiles and z-scores", "Percentiles are within forwards, within defensemen, or among goalies, for players above the minutes or shots cutoff. A z-score is how many standard deviations a number sits from the league average among ranked players."],
+];
+
+function About({ meta, t }) {
+  const s = meta?.settings || {};
+  return (
+    <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 20px 60px", fontSize: 14, lineHeight: 1.65, color: t.textSecondary }}>
+      <div style={{ fontSize: 20, fontWeight: 800, color: t.text, marginBottom: 6 }}>About the numbers</div>
+      <p style={{ margin: "0 0 18px", color: t.textMuted }}>
+        Everything here is built from the NHL's play-by-play and shift charts: an expected-goals model for every unblocked shot,
+        then player ratings fitted on every stint of ice time. Regular season only, 2019-20 onward.
+        {meta ? ` Last updated ${meta.updated.slice(0, 10)}.` : ""}
+      </p>
+      <div style={{ display: "grid", rowGap: 14 }}>
+        {GLOSSARY.map(([term, text]) => (
+          <div key={term}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: t.text, letterSpacing: "0.03em" }}>{term}</div>
+            <div>{text}</div>
+          </div>
+        ))}
+      </div>
+      {meta && (
+        <p style={{ margin: "22px 0 0", fontSize: 12, color: t.textFaint }}>
+          In this build: {s.GPW ? `${Number(s.GPW).toFixed(2)} goals per win` : ""}{s.PEN_VALUE ? `; a minor penalty is worth ${Number(s.PEN_VALUE).toFixed(3)} goals` : ""}
+          {s.RESULTS_USED ? `; results component: ${s.RESULTS_USED}` : ""}{s.USE_SETUP === false ? "; setup results are switched off" : ""}.
+        </p>
+      )}
+    </div>
+  );
+}
+
+export default function HockeyApp() {
+  return <ThemeProvider><Hockey /></ThemeProvider>;
 }
