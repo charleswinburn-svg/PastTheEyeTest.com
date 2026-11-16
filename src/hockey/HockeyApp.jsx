@@ -145,20 +145,21 @@ function Hockey() {
 // ABOUT THE NUMBERS
 // ═══════════════════════════════════════════════════════════
 const GLOSSARY = [
-  ["WAR", "Wins above replacement. Every part of a player's game is converted to goals, compared with what a replacement-level player would give in the same minutes, and divided by the number of goals a win costs. It is a total, so playing more adds to it."],
-  ["Individual Impact", "The same value as a rate: goals above average per 60 minutes (skaters) or per game's worth of shots (goalies)."],
-  ["3-year and 1-year", "The 1-year version uses that season alone. The 3-year version adds the two seasons before it, weighted less, and reads as a typical season at the player's current level. A season in progress is blended in as it fills up."],
-  ["EV Offense, EV Defense", "A player's own effect on expected goals for and against at 5v5, after accounting for his linemates, his opponents, where his shifts start, the score and home ice."],
-  ["Power Play, Penalty Kill", "The same kind of isolated effect with the man advantage and while shorthanded."],
-  ["Finishing", "Goals scored above what his shots were expected to produce, together with his goal scoring."],
-  ["Playmaking", "Primary and secondary assists, weighted by situation. A card row; it is not added into WAR, because assists are already inside the on-ice ratings."],
-  ["Shooting results", "Goals above expected on a player's own shots."],
-  ["Setup results", "How much more often his teammates' shots go in than expected while he is on the ice. The expected-goals model sees the shot but not the pass, so this is where a passer's value shows up. The shooter is in the same model, so a goal above expected is credited once and shared."],
-  ["Penalties", "Minor penalties drawn minus taken, valued at what a power play is worth in goals."],
-  ["Competition, Teammates", "Context, not skill: the average quality of the opponents he faces and the linemates he plays with at 5v5."],
-  ["Goalies", "Goals saved above expected (GSAx) on every unblocked shot faced, split by situation and by shot danger, with an adjustment for the team in front of him and the shooters he faced; rebound control; and win probability added."],
-  ["Impact tiers", "Each season, players are ranked within their position and the ranks are cut by roster spots per team: three forwards to a line, two defensemen to a pair, one starter, and a 1B for every other team. Everyone below is Depth or Backup."],
-  ["Percentiles and z-scores", "Percentiles are within forwards, within defensemen, or among goalies, for players above the minutes or shots cutoff. A z-score is how many standard deviations a number sits from the league average among ranked players."],
+  ["WAR", "Short for Wins Above Replacement. It tells you how many extra wins a player gave his team compared to a guy you could call up from the minors. It adds up all season, so playing more games gets you a higher number. About six goals is worth one win."],
+  ["GAR and GAA", "These are WAR but in goals. GAR compares a player to that call-up guy. GAA compares him to an average NHL player. Average is harder to beat, so GAA is usually lower."],
+  ["Individual Impact", "This is how good a player is per minute. WAR goes up the more you play, and this one doesn't. A player who missed a lot of games can still score high here."],
+  ["3-year and 1-year", "1-year only counts this season. 3-year also counts the two seasons before, but the older ones count less. We think 3-year is the better guess at how good someone is right now. When a new season is just getting started we mix it in with last season, which is why you see a label like 2025-27."],
+  ["EV Offense, EV Defense", "At 5-on-5 there are ten skaters on the ice, and we know who all of them are. That lets us separate what one player did from what his linemates did. Offense is how much he helps his team get chances. Defense is how much he keeps the other team from getting them. We also account for who he played against and where his shifts started."],
+  ["Power Play, Penalty Kill", "Same thing as above but for the power play and the penalty kill."],
+  ["Finishing", "This shows if a player scores more than you'd expect from the shots he takes. It jumps around a lot from year to year."],
+  ["Playmaking", "This is based on assists. It shows up on the card but we don't add it to WAR, because the chances a passer creates are already counted in his other numbers."],
+  ["Shooting results", "The goals a player scored minus the goals his shots were expected to produce."],
+  ["Setup results", "Our model knows where a shot came from but it doesn't know about the pass before it. So we check if a player's teammates score more than expected when he is on the ice. If that keeps happening, he's probably setting them up well."],
+  ["Penalties", "Penalties drawn minus penalties taken. We turn that into goals based on how often power plays score."],
+  ["Competition, Teammates", "These two aren't about skill. Competition is how good his opponents usually are. Teammates is how good his linemates usually are."],
+  ["Goalies", "We know about how often each kind of shot goes in. If a goalie lets in fewer goals than that, he saved goals, and we call it GSAx. We split it up by how dangerous the shots were. We also adjust for the team in front of him."],
+  ["Impact tiers", "This is a label for how good a season was. The top group of forwards by WAR gets called first line, the next group second line, and it keeps going like that. Defensemen get pairs and goalies get starter, 1B or backup. It's based on value, so a guy who plays on the third line can still have a first line season."],
+  ["Percentiles and z-scores", "A percentile of 90 means a player was better than 90 percent of the players at his position. Players without enough games don't get ranked. A z-score shows how far a number is from average. Zero is average, 2 is really good, and negative means below average."],
 ];
 
 function About({ meta, t }) {
@@ -167,8 +168,10 @@ function About({ meta, t }) {
     <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 20px 60px", fontSize: 14, lineHeight: 1.65, color: t.textSecondary }}>
       <div style={{ fontSize: 20, fontWeight: 800, color: t.text, marginBottom: 6 }}>About the numbers</div>
       <p style={{ margin: "0 0 18px", color: t.textMuted }}>
-        Everything here is built from the NHL's play-by-play and shift charts: an expected-goals model for every unblocked shot,
-        then player ratings fitted on every stint of ice time. Regular season only, 2019-20 onward.
+        All of this comes from two things the NHL posts after every game. One is the play-by-play, which lists every shot and
+        where it was taken from. The other is the shift charts, which show who was on the ice. We use the shots to figure out
+        how likely each one was to go in. Then we use the shifts to see which players were out there when the good chances
+        happened. It only covers the regular season and it goes back to 2019-20.
         {meta ? ` Last updated ${meta.updated.slice(0, 10)}.` : ""}
       </p>
       <div style={{ display: "grid", rowGap: 14 }}>
@@ -181,8 +184,8 @@ function About({ meta, t }) {
       </div>
       {meta && (
         <p style={{ margin: "22px 0 0", fontSize: 12, color: t.textFaint }}>
-          In this build: {s.GPW ? `${Number(s.GPW).toFixed(2)} goals per win` : ""}{s.PEN_VALUE ? `; a minor penalty is worth ${Number(s.PEN_VALUE).toFixed(3)} goals` : ""}
-          {s.RESULTS_USED ? `; results component: ${s.RESULTS_USED}` : ""}{s.USE_SETUP === false ? "; setup results are switched off" : ""}.
+          {s.GPW ? `Right now one win is worth ${Number(s.GPW).toFixed(2)} goals` : ""}{s.GPW && s.PEN_VALUE ? ` and a minor penalty is worth ${Number(s.PEN_VALUE).toFixed(3)} goals.` : s.GPW ? "." : ""}
+          {s.USE_SETUP === false ? " Setup results are turned off for now because they didn't help predict next season." : ""}
         </p>
       )}
     </div>
