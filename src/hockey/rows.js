@@ -6,7 +6,7 @@ export const VERSIONS = [
   { id: "3y", label: "3-year", long: "3-year ratings (current value)" },
   { id: "1y", label: "1-year", long: "1-year ratings (this season only)" },
 ];
-export const POSITION_NAME = { C: "Centre", L: "Left wing", R: "Right wing", D: "Defense", G: "Goalie" };
+export const POSITION_NAME = { C: "Center", L: "Left wing", R: "Right wing", D: "Defense", G: "Goalie" };
 export const GROUP_NAME = { F: "forwards", D: "defensemen", G: "goalies" };
 
 // ── percentile rows: [label, percentile column, what it is] ──
