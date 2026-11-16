@@ -145,21 +145,21 @@ function Hockey() {
 // ABOUT THE NUMBERS
 // ═══════════════════════════════════════════════════════════
 const GLOSSARY = [
-  ["WAR", "Wins Above Replacement. It's the one-number answer to \"how much did this guy help his team win?\" We add up everything he does, turn it into goals, and compare that with what you'd get from the kind of player any team can call up or sign for nothing. Then we convert goals to wins; it takes roughly six goals to buy one. WAR is a running total, so someone who plays every night piles up more of it than an equally good player who misses half the year."],
-  ["GAR and GAA", "The same value as WAR, left in goals. GAR (goals above replacement) measures him against that freely available player. GAA (goals above average) measures him against an average NHLer, which is a tougher bar, so it's usually the smaller number."],
-  ["Individual Impact", "WAR rewards showing up. Impact asks a different question: how good is he per minute? It's goals above average per 60 minutes for skaters, and per game's worth of shots for goalies. A star who has been hurt can have a modest WAR and a huge Impact."],
-  ["3-year and 1-year", "1-year is this season and nothing else: what actually happened. 3-year blends in the two seasons before it, counting the older ones less, and is our best read on how good a player is right now. Early in a season the new games are mixed in a little at a time, which is why the current 3-year view carries both seasons in its name."],
-  ["EV Offense, EV Defense", "Hockey's hardest question: was he good, or were his linemates? For every stretch of 5-on-5 play we know all ten skaters on the ice, so we can make the math untangle it. What's left is each player's own push on scoring chances, for his team (offense) and against it (defense), after allowing for who he played with, who he played against, where his shifts started, the score, and home ice."],
-  ["Power Play, Penalty Kill", "The same untangling on special teams. Did the power play hum because of him, or was he along for the ride on a loaded first unit?"],
-  ["Finishing", "Does the puck go in more often than it should when he shoots? This looks at goals above expected alongside plain old goal scoring. Fair warning: over a single season, finishing is the streakiest thing we measure."],
-  ["Playmaking", "Primary and secondary assists, weighted by game situation. It gets a row on the card but isn't added into WAR. That's not a snub. The chances a passer creates already show up in his on-ice numbers, and counting them twice would be cheating."],
-  ["Shooting results", "The goals a player actually scored beyond what his shots were worth. This is how real pucks in the net get into WAR, and not only chances."],
-  ["Setup results", "The passer's version of the same thing. Our shot model can see where a shot came from, but it can't see the pass that set it up. So we ask: when he's on the ice, do his teammates' shots go in more than they should? If they do, year after year, he's probably the reason. The shooter is part of the same calculation, so nobody gets double credit for one goal."],
-  ["Penalties", "Drawing a penalty hands your team a power play. Taking one hands it to the other guys. This is minors drawn minus minors taken, priced at what a power play is really worth in goals."],
-  ["Competition, Teammates", "Context, not skill. How good are the players he usually lines up against, and the ones he usually lines up with? A high Competition number means the coach sends him out against top lines. A high Teammates number means he's had help."],
-  ["Goalies", "For every shot a goalie faces, we know roughly how often a shot like it goes in. Stop more than expected and you've saved goals; that's GSAx. We split it by situation and by how dangerous the shot was, then adjust for the team in front of him and the shooters he faced, because not every 30-shot night is the same. Rebound control and win probability added (the saves that swung games) get their own rows."],
-  ["Impact tiers", "A plain-English label for where a season ranks. Every team dresses three forwards to a line and two defensemen to a pair, so the league's top 96 or so forwards by WAR are \"first-liners\", the next 96 are \"second-liners\", and so on down. Goalies get Starter, 1B and Backup. It describes value, not where the coach played him: a third-line center can absolutely have a first-line season."],
-  ["Percentiles and z-scores", "A percentile ranks a player out of 100 against others at his position: 90 means better than 90% of them. Players who haven't played enough to judge aren't ranked. A z-score says how far from average a number is: 0 is dead average, 1 is clearly good, 2 is rare, 3 is almost nobody, and anything below zero is below average."],
+  ["WAR", "Short for Wins Above Replacement. It tells you how many extra wins a player gave his team compared to a guy you could call up from the minors. It adds up all season, so playing more games gets you a higher number. About six goals is worth one win."],
+  ["GAR and GAA", "These are WAR but in goals. GAR compares a player to that call-up guy. GAA compares him to an average NHL player. Average is harder to beat, so GAA is usually lower."],
+  ["Individual Impact", "This is how good a player is per minute. WAR goes up the more you play, and this one doesn't. A player who missed a lot of games can still score high here."],
+  ["3-year and 1-year", "1-year only counts this season. 3-year also counts the two seasons before, but the older ones count less. We think 3-year is the better guess at how good someone is right now. When a new season is just getting started we mix it in with last season, which is why you see a label like 2025-27."],
+  ["EV Offense, EV Defense", "At 5-on-5 there are ten skaters on the ice, and we know who all of them are. That lets us separate what one player did from what his linemates did. Offense is how much he helps his team get chances. Defense is how much he keeps the other team from getting them. We also account for who he played against and where his shifts started."],
+  ["Power Play, Penalty Kill", "Same thing as above but for the power play and the penalty kill."],
+  ["Finishing", "This shows if a player scores more than you'd expect from the shots he takes. It jumps around a lot from year to year."],
+  ["Playmaking", "This is based on assists. It shows up on the card but we don't add it to WAR, because the chances a passer creates are already counted in his other numbers."],
+  ["Shooting results", "The goals a player scored minus the goals his shots were expected to produce."],
+  ["Setup results", "Our model knows where a shot came from but it doesn't know about the pass before it. So we check if a player's teammates score more than expected when he is on the ice. If that keeps happening, he's probably setting them up well."],
+  ["Penalties", "Penalties drawn minus penalties taken. We turn that into goals based on how often power plays score."],
+  ["Competition, Teammates", "These two aren't about skill. Competition is how good his opponents usually are. Teammates is how good his linemates usually are."],
+  ["Goalies", "We know about how often each kind of shot goes in. If a goalie lets in fewer goals than that, he saved goals, and we call it GSAx. We split it up by how dangerous the shots were. We also adjust for the team in front of him."],
+  ["Impact tiers", "This is a label for how good a season was. The top group of forwards by WAR gets called first line, the next group second line, and it keeps going like that. Defensemen get pairs and goalies get starter, 1B or backup. It's based on value, so a guy who plays on the third line can still have a first line season."],
+  ["Percentiles and z-scores", "A percentile of 90 means a player was better than 90 percent of the players at his position. Players without enough games don't get ranked. A z-score shows how far a number is from average. Zero is average, 2 is really good, and negative means below average."],
 ];
 
 function About({ meta, t }) {
@@ -168,10 +168,10 @@ function About({ meta, t }) {
     <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 20px 60px", fontSize: 14, lineHeight: 1.65, color: t.textSecondary }}>
       <div style={{ fontSize: 20, fontWeight: 800, color: t.text, marginBottom: 6 }}>About the numbers</div>
       <p style={{ margin: "0 0 18px", color: t.textMuted }}>
-        Every number here starts from two things the NHL publishes for each game: the play-by-play (every shot, where it came
-        from, and what happened right before it) and the shift charts (who was on the ice, second by second). From the shots
-        we built an expected-goals model, which answers a simple question: how often does a shot like that go in? From the
-        shifts we work out who was really driving those chances. Regular season only, back to 2019-20.
+        All of this comes from two things the NHL posts after every game. One is the play-by-play, which lists every shot and
+        where it was taken from. The other is the shift charts, which show who was on the ice. We use the shots to figure out
+        how likely each one was to go in. Then we use the shifts to see which players were out there when the good chances
+        happened. It only covers the regular season and it goes back to 2019-20.
         {meta ? ` Last updated ${meta.updated.slice(0, 10)}.` : ""}
       </p>
       <div style={{ display: "grid", rowGap: 14 }}>
@@ -182,13 +182,10 @@ function About({ meta, t }) {
           </div>
         ))}
       </div>
-      <p style={{ margin: "22px 0 0", color: t.textMuted }}>
-        None of this replaces watching the games. It's here to help you get past the eye test, not to retire it.
-      </p>
       {meta && (
-        <p style={{ margin: "14px 0 0", fontSize: 12, color: t.textFaint }}>
-          Under the hood right now{s.GPW ? `: a win costs ${Number(s.GPW).toFixed(2)} goals` : ""}{s.PEN_VALUE ? `, and a minor penalty is worth ${Number(s.PEN_VALUE).toFixed(3)} goals` : ""}.
-          {s.USE_SETUP === false ? " Setup results are switched off in this run, because they did not help predict next season." : ""}
+        <p style={{ margin: "22px 0 0", fontSize: 12, color: t.textFaint }}>
+          {s.GPW ? `Right now one win is worth ${Number(s.GPW).toFixed(2)} goals` : ""}{s.GPW && s.PEN_VALUE ? ` and a minor penalty is worth ${Number(s.PEN_VALUE).toFixed(3)} goals.` : s.GPW ? "." : ""}
+          {s.USE_SETUP === false ? " Setup results are turned off for now because they didn't help predict next season." : ""}
         </p>
       )}
     </div>
