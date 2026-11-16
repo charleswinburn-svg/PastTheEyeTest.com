@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { TIERS, TIER_COLORS } from "./nhlColors.js";
 import { MEASURES, fixed } from "./rows.js";
 import { seasonLabel, seasonShort } from "./nhlData.js";
@@ -55,6 +55,7 @@ function niceTicks(lo, hi, want = 5) {
 export default function ImpactChart({ rows, cuts, pos, seasons, inProgress, measure, width, height = 300, big, t }) {
   const fs = big ? { tick: 12, point: 15, legend: 14, note: 12, sw: 14 } : { tick: 10, point: 12, legend: 11, note: 10, sw: 12 };
   const boxRef = useRef(null);
+  const clipId = "nhl-impact-" + useId().replace(/[^a-zA-Z0-9]/g, "");   // two charts can be on the page while saving
   const [hover, setHover] = useState(null);
   const M = MEASURES.find(x => x.id === measure) || MEASURES[0];
 
@@ -133,9 +134,9 @@ export default function ImpactChart({ rows, cuts, pos, seasons, inProgress, meas
         onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHover(null)}>
         <svg width={width} height={height} style={{ position: "absolute", inset: 0, display: "block" }}>
           <defs>
-            <clipPath id="nhl-impact-plot"><rect x={PAD.left} y={PAD.top} width={width - PAD.left - PAD.right} height={g.plotH} rx="6" /></clipPath>
+            <clipPath id={clipId}><rect x={PAD.left} y={PAD.top} width={width - PAD.left - PAD.right} height={g.plotH} rx="6" /></clipPath>
           </defs>
-          <g clipPath="url(#nhl-impact-plot)">
+          <g clipPath={`url(#${clipId})`}>
             <rect x={PAD.left} y={PAD.top} width={width - PAD.left - PAD.right} height={g.plotH} fill={t.inputBg} />
             {g.bands.map(b => <path key={b.name} d={b.d} fill={b.color} stroke={t.cardBg} strokeWidth="1.5" />)}
             {g.zeroY != null && <line x1={PAD.left} x2={width - PAD.right} y1={g.zeroY} y2={g.zeroY} stroke={t.cardBg} strokeOpacity="0.55" strokeDasharray="4 4" />}

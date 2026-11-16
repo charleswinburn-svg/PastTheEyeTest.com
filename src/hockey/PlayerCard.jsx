@@ -93,6 +93,18 @@ async function rasterizeSvgImages(root) {
   return () => swapped.forEach(([img, src]) => { img.src = src; });
 }
 
+// Wait until every image under `root` has loaded or failed (a headshot may swap to its
+// fallback address after failing, hence the second look), or until the time is up.
+async function imagesSettled(root, ms = 6000) {
+  const end = Date.now() + ms;
+  for (let pass = 0; pass < 2; pass++) {
+    while (Date.now() < end && [...root.querySelectorAll("img")].some(img => !img.complete)) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    await new Promise(r => setTimeout(r, 150));
+  }
+}
+
 // ═══════════════════════════════════════════════════════════
 // PERCENTILE ROWS: 100 boxes, the player's box raised
 // ═══════════════════════════════════════════════════════════
@@ -203,7 +215,7 @@ export function Segmented({ value, options, onChange, t, small }) {
 // ═══════════════════════════════════════════════════════════
 export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, history, seasons, inProgressSeason, wide, pctStyle }) {
   const { theme: t, isDark } = useTheme();
-  const cardRef = useRef(null);
+  const cardRef = useRef(null), captureRef = useRef(null);
   const [measure, setMeasure] = useState("WAR");
   const [saving, setSaving] = useState(false);
   const [showNumbers, setShowNumbers] = useState(false);
@@ -213,11 +225,7 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
   const group = GROUP_NAME[p.pos_group] || "skaters";
   const seasonText = periodLabel(season, v, seasonDone < 1 ? season : inProgressSeason);
   const version = VERSIONS.find(x => x.id === v);
-  const k = wide ? SIZES.wide : SIZES.narrow, width = k.width;
-  // Wide: two columns. Left holds the percentiles with the impact chart directly under them;
-  // right holds the WAR breakdown and the z-scores, spread to the same height. Narrow: one
-  // column in that same order.
-  const COL_GAP = 40, inner = width - 2 * k.pad, leftW = wide ? Math.round((inner - COL_GAP) * 0.62) : inner;
+  const width = (wide ? SIZES.wide : SIZES.narrow).width;
 
   const subtitle = [p.team, goalie ? "Goalie" : (POSITION_NAME[p.position] || p.position), seasonText,
     (goalie ? p.games : p.gp) ? `${whole(goalie ? p.games : p.gp)} GP` : null,
@@ -252,6 +260,13 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
     ? (p[`war_${v}_pct`] == null ? "Too few shots faced to be ranked in these percentiles." : null)
     : (p.active === false ? "Under the minutes cutoff this season, so he is not ranked in the 3-year percentiles." : null);
 
+  // The card itself, in either layout. Wide: two columns; left holds the percentiles with the
+  // impact chart directly under them, right holds the WAR breakdown and the z-scores, spread to
+  // the same height. Narrow: one column in that same order. It is a function of the layout
+  // because a phone shows the narrow card but saves the wide one (see `save`).
+  const face = (wide, ref) => {
+  const k = wide ? SIZES.wide : SIZES.narrow, width = k.width;
+  const COL_GAP = 40, inner = width - 2 * k.pad, leftW = wide ? Math.round((inner - COL_GAP) * 0.62) : inner;
   const percentiles = (
     <Section t={t} k={k} title={`Percentiles among ${group}`}>
       <PercentileRows p={p} rows={rows} style={pctStyle} isDark={isDark} t={t} k={k} />
@@ -287,13 +302,61 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
     </Section>
   );
 
+  return (
+    <div ref={ref} style={{ width, background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
+                                overflow: "hidden", boxShadow: `0 4px 24px ${t.shadow}` }}>
+      <CardHeader name={p.player} team={p.team} flag={p.flag} subtitle={subtitle} playerId={p.player_id} season={season} k={k} />
+      <div style={{ padding: `${k.pad - 4}px ${k.pad}px 6px`, fontFamily: NUM_FONT, color: t.text, display: "grid", rowGap: k.pad }}>
+        <div>
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${tiles.length}, 1fr)`, gap: wide ? 12 : 8 }}>
+            {tiles.map(([label, name, value, tip]) => (
+              <div key={label} title={tip} style={{ background: t.inputBg, border: `1px solid ${t.cardBorder}`, borderRadius: 10, padding: wide ? "12px 16px 11px" : "9px 12px 9px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, fontSize: k.tileLabel, fontWeight: 700,
+                              letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                  <span style={{ color: t.text, fontWeight: 800 }}>{label}</span>
+                  <span style={{ color: t.textFaint }}>{span}</span>
+                </div>
+                <div style={{ fontSize: k.tileValue, fontWeight: 800, color: t.text, lineHeight: 1.15, marginTop: 2 }}>{value}</div>
+                <div style={{ fontSize: k.tileLabel, fontWeight: 600, color: t.textMuted, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", marginTop: 12, fontSize: k.tier, fontWeight: 600, color: t.textMuted }}>
+            {p.tier_WAR && <span>Impact tier this season: <b style={{ color: t.text }}>{p.tier_WAR}</b></span>}
+            {notice && <span style={{ color: t.accent }}>{notice}</span>}
+          </div>
+        </div>
+        {wide ? (
+          <div style={{ display: "grid", gridTemplateColumns: `${leftW}px 1fr`, columnGap: COL_GAP, alignItems: "stretch" }}>
+            <div style={{ display: "grid", rowGap: k.pad, alignContent: "start" }}>{percentiles}{chart}</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: k.pad }}>{breakdown}{zscores}</div>
+          </div>
+        ) : <>{percentiles}{chart}{breakdown}{zscores}</>}
+      </div>
+      <div style={{ padding: `12px ${k.pad}px 14px`, display: "flex", justifyContent: "space-between", gap: 12, fontSize: k.foot,
+                    color: t.textFaint, fontFamily: NUM_FONT, fontWeight: 600 }}>
+        <span>{seasonText} | {version.long} | ranked among {group}</span>
+        <span style={{ fontStyle: "italic" }}>PastTheEyeTest</span>
+      </div>
+    </div>
+  );
+  };
+
+  const filename = `${p.player}_${seasonText.replace(/ \(.*\)/, "")}_${v}.png`.replace(/\s+/g, "_");
+  // The PNG is always the wide desktop card, whatever the screen. On a desktop that is the card
+  // on the page. On a narrower screen a wide copy is drawn off-screen while saving and that copy
+  // is captured, so a phone saves exactly the image a computer does.
   const save = async () => {
     if (saving) return;
     setSaving(true);
     try {
       if (document.fonts?.ready) await document.fonts.ready;
-      const restore = await rasterizeSvgImages(cardRef.current);
-      try { await saveCardAsPng(cardRef, `${p.player}_${seasonText.replace(/ \(.*\)/, "")}_${v}.png`.replace(/\s+/g, "_")); }
+      const ref = wide ? cardRef : captureRef;
+      for (let i = 0; i < 90 && !ref.current; i++) await new Promise(r => requestAnimationFrame(r));
+      if (!ref.current) return;
+      await imagesSettled(ref.current);
+      const restore = await rasterizeSvgImages(ref.current);
+      try { await saveCardAsPng(ref, filename); }
       finally { restore(); }
     } finally { setSaving(false); }
   };
@@ -303,43 +366,13 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
   return (
     <div>
       <FitToWidth designWidth={width}>
-        <div ref={cardRef} style={{ width, background: t.cardBg, borderRadius: 12, border: `1px solid ${t.cardBorder}`,
-                                    overflow: "hidden", boxShadow: `0 4px 24px ${t.shadow}` }}>
-          <CardHeader name={p.player} team={p.team} flag={p.flag} subtitle={subtitle} playerId={p.player_id} season={season} k={k} />
-          <div style={{ padding: `${k.pad - 4}px ${k.pad}px 6px`, fontFamily: NUM_FONT, color: t.text, display: "grid", rowGap: k.pad }}>
-            <div>
-              <div style={{ display: "grid", gridTemplateColumns: `repeat(${tiles.length}, 1fr)`, gap: wide ? 12 : 8 }}>
-                {tiles.map(([label, name, value, tip]) => (
-                  <div key={label} title={tip} style={{ background: t.inputBg, border: `1px solid ${t.cardBorder}`, borderRadius: 10, padding: wide ? "12px 16px 11px" : "9px 12px 9px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, fontSize: k.tileLabel, fontWeight: 700,
-                                  letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
-                      <span style={{ color: t.text, fontWeight: 800 }}>{label}</span>
-                      <span style={{ color: t.textFaint }}>{span}</span>
-                    </div>
-                    <div style={{ fontSize: k.tileValue, fontWeight: 800, color: t.text, lineHeight: 1.15, marginTop: 2 }}>{value}</div>
-                    <div style={{ fontSize: k.tileLabel, fontWeight: 600, color: t.textMuted, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", marginTop: 12, fontSize: k.tier, fontWeight: 600, color: t.textMuted }}>
-                {p.tier_WAR && <span>Impact tier this season: <b style={{ color: t.text }}>{p.tier_WAR}</b></span>}
-                {notice && <span style={{ color: t.accent }}>{notice}</span>}
-              </div>
-            </div>
-            {wide ? (
-              <div style={{ display: "grid", gridTemplateColumns: `${leftW}px 1fr`, columnGap: COL_GAP, alignItems: "stretch" }}>
-                <div style={{ display: "grid", rowGap: k.pad, alignContent: "start" }}>{percentiles}{chart}</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: k.pad }}>{breakdown}{zscores}</div>
-              </div>
-            ) : <>{percentiles}{chart}{breakdown}{zscores}</>}
-          </div>
-          <div style={{ padding: `12px ${k.pad}px 14px`, display: "flex", justifyContent: "space-between", gap: 12, fontSize: k.foot,
-                        color: t.textFaint, fontFamily: NUM_FONT, fontWeight: 600 }}>
-            <span>{seasonText} | {version.long} | ranked among {group}</span>
-            <span style={{ fontStyle: "italic" }}>PastTheEyeTest</span>
-          </div>
-        </div>
+        {face(wide, cardRef)}
       </FitToWidth>
+      {saving && !wide && (
+        <div aria-hidden="true" style={{ position: "fixed", left: -20000, top: 0, width: SIZES.wide.width, pointerEvents: "none" }}>
+          {face(true, captureRef)}
+        </div>
+      )}
 
       <div style={{ maxWidth: width, margin: "10px auto 0", display: "flex", justifyContent: "space-between", gap: 8, fontFamily: NUM_FONT }}>
         <button style={btn} onClick={() => setShowNumbers(s => !s)}>{showNumbers ? "Hide the numbers" : "Show the numbers"}</button>
