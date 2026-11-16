@@ -12269,7 +12269,7 @@
       "name": "Ildemaro Vargas",
       "player_id": 545121,
       "team": null,
-      "team_id": 693,
+      "team_id": null,
       "pa": 486,
       "categories": {
         "xSLG": {
@@ -15880,8 +15880,8 @@
     {
       "name": "Nathaniel Lowe",
       "player_id": 663993,
-      "team": "CLE",
-      "team_id": 114,
+      "team": null,
+      "team_id": null,
       "pa": 429,
       "categories": {
         "xSLG": {
@@ -18109,7 +18109,7 @@
           "display": "70.9"
         },
         "Fast Swing %": {
-          "pctile": 35.7,
+          "pctile": 35.5,
           "value": 0.1291,
           "display": "12.9"
         },
@@ -18316,8 +18316,8 @@
     {
       "name": "Lane Thomas",
       "player_id": 657041,
-      "team": "ATL",
-      "team_id": 144,
+      "team": null,
+      "team_id": null,
       "pa": 374,
       "categories": {
         "xSLG": {
@@ -19744,8 +19744,8 @@
     {
       "name": "Luis Rengifo",
       "player_id": 650859,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "pa": 354,
       "categories": {
         "xSLG": {
@@ -21844,8 +21844,8 @@
     {
       "name": "Rhys Hoskins",
       "player_id": 656555,
-      "team": null,
-      "team_id": null,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 317,
       "categories": {
         "xSLG": {
@@ -21929,7 +21929,7 @@
       "name": "Jes\u00fas S\u00e1nchez",
       "player_id": 660821,
       "team": null,
-      "team_id": 668,
+      "team_id": null,
       "pa": 315,
       "categories": {
         "xSLG": {
@@ -23104,8 +23104,8 @@
     {
       "name": "Tyler Freeman",
       "player_id": 671289,
-      "team": "ATL",
-      "team_id": 144,
+      "team": null,
+      "team_id": null,
       "pa": 288,
       "categories": {
         "xSLG": {
@@ -24700,8 +24700,8 @@
     {
       "name": "TJ Friedl",
       "player_id": 670770,
-      "team": null,
-      "team_id": null,
+      "team": "CIN",
+      "team_id": 113,
       "pa": 272,
       "categories": {
         "xSLG": {
@@ -25456,8 +25456,8 @@
     {
       "name": "Christian V\u00e1zquez",
       "player_id": 543877,
-      "team": "HOU",
-      "team_id": 117,
+      "team": null,
+      "team_id": null,
       "pa": 266,
       "categories": {
         "xSLG": {
@@ -29570,90 +29570,6 @@
       }
     },
     {
-      "name": "Max Clark",
-      "player_id": 703601,
-      "team": "DET",
-      "team_id": 116,
-      "pa": 206,
-      "categories": {
-        "xSLG": {
-          "pctile": 27.7,
-          "value": 0.345,
-          "display": "0.345"
-        },
-        "xwOBACON": {
-          "pctile": 46.2,
-          "value": 0.349,
-          "display": "0.349"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 33.5,
-          "value": 87.6,
-          "display": "87.6"
-        },
-        "90th % EV": {
-          "pctile": 20.2,
-          "value": 101.7,
-          "display": "101.7"
-        },
-        "Barrel %": {
-          "pctile": 5.2,
-          "value": 2.1,
-          "display": "2.1"
-        },
-        "Blasts/Contact": {
-          "pctile": 27.3,
-          "value": 0.1073,
-          "display": "10.7"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 64.9,
-          "value": 35.2,
-          "display": "35.2"
-        },
-        "Avg Bat Speed": {
-          "pctile": 75.1,
-          "value": 73.6825,
-          "display": "73.7"
-        },
-        "Fast Swing %": {
-          "pctile": 67.7,
-          "value": 0.3148,
-          "display": "31.5"
-        },
-        "Avg Swing Length": {
-          "pctile": 23.7,
-          "value": 7.5758,
-          "display": "7.6"
-        },
-        "Chase %": {
-          "pctile": 62.6,
-          "value": 28.6,
-          "display": "28.6"
-        },
-        "K%": {
-          "pctile": 63.2,
-          "value": 20.4,
-          "display": "20.4"
-        },
-        "Z-Contact%": {
-          "pctile": 91.2,
-          "value": 90.4,
-          "display": "90.4"
-        },
-        "Whiff %": {
-          "pctile": 91.6,
-          "value": 16.7,
-          "display": "16.7"
-        },
-        "BB%": {
-          "pctile": 51.4,
-          "value": 8.7,
-          "display": "8.7"
-        }
-      }
-    },
-    {
       "name": "Drew Romo",
       "player_id": 691011,
       "team": "CWS",
@@ -29738,10 +29654,94 @@
       }
     },
     {
+      "name": "Max Clark",
+      "player_id": 703601,
+      "team": "DET",
+      "team_id": 116,
+      "pa": 206,
+      "categories": {
+        "xSLG": {
+          "pctile": 27.7,
+          "value": 0.345,
+          "display": "0.345"
+        },
+        "xwOBACON": {
+          "pctile": 46.2,
+          "value": 0.349,
+          "display": "0.349"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 33.5,
+          "value": 87.6,
+          "display": "87.6"
+        },
+        "90th % EV": {
+          "pctile": 20.2,
+          "value": 101.7,
+          "display": "101.7"
+        },
+        "Barrel %": {
+          "pctile": 5.2,
+          "value": 2.1,
+          "display": "2.1"
+        },
+        "Blasts/Contact": {
+          "pctile": 27.3,
+          "value": 0.1073,
+          "display": "10.7"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 64.9,
+          "value": 35.2,
+          "display": "35.2"
+        },
+        "Avg Bat Speed": {
+          "pctile": 75.1,
+          "value": 73.6825,
+          "display": "73.7"
+        },
+        "Fast Swing %": {
+          "pctile": 67.7,
+          "value": 0.3148,
+          "display": "31.5"
+        },
+        "Avg Swing Length": {
+          "pctile": 23.7,
+          "value": 7.5758,
+          "display": "7.6"
+        },
+        "Chase %": {
+          "pctile": 62.6,
+          "value": 28.6,
+          "display": "28.6"
+        },
+        "K%": {
+          "pctile": 63.2,
+          "value": 20.4,
+          "display": "20.4"
+        },
+        "Z-Contact%": {
+          "pctile": 91.2,
+          "value": 90.4,
+          "display": "90.4"
+        },
+        "Whiff %": {
+          "pctile": 91.6,
+          "value": 16.7,
+          "display": "16.7"
+        },
+        "BB%": {
+          "pctile": 51.4,
+          "value": 8.7,
+          "display": "8.7"
+        }
+      }
+    },
+    {
       "name": "Ram\u00f3n Laureano",
       "player_id": 657656,
       "team": null,
-      "team_id": null,
+      "team_id": 671,
       "pa": 206,
       "categories": {
         "xSLG": {
@@ -30662,66 +30662,66 @@
       }
     },
     {
-      "name": "Petey Halpin",
-      "player_id": 690984,
-      "team": "CLE",
-      "team_id": 114,
+      "name": "Tommy White",
+      "player_id": 695720,
+      "team": "ATH",
+      "team_id": 133,
       "pa": 195,
       "categories": {
         "xSLG": {
-          "pctile": 49.0,
-          "value": 0.377,
-          "display": "0.377"
+          "pctile": 52.9,
+          "value": 0.383,
+          "display": "0.383"
         },
         "xwOBACON": {
-          "pctile": 35.1,
-          "value": 0.335,
-          "display": "0.335"
+          "pctile": 42.6,
+          "value": 0.344,
+          "display": "0.344"
         },
         "Avg Exit Velocity": {
-          "pctile": 8.0,
-          "value": 85.5,
-          "display": "85.5"
+          "pctile": 12.0,
+          "value": 85.9,
+          "display": "85.9"
         },
         "90th % EV": {
-          "pctile": 14.8,
-          "value": 101.2,
-          "display": "101.2"
+          "pctile": 25.2,
+          "value": 102.1,
+          "display": "102.1"
         },
         "Barrel %": {
-          "pctile": 31.8,
-          "value": 5.4,
-          "display": "5.4"
+          "pctile": 48.2,
+          "value": 7.1,
+          "display": "7.1"
         },
         "Blasts/Contact": {
-          "pctile": 25.2,
-          "value": 0.1042,
-          "display": "10.4"
+          "pctile": 29.5,
+          "value": 0.1119,
+          "display": "11.2"
         },
         "LA+SwtSpt%": {
-          "pctile": 86.5,
-          "value": 38.3,
-          "display": "38.3"
+          "pctile": 19.8,
+          "value": 30.3,
+          "display": "30.3"
         },
         "Avg Bat Speed": {
-          "pctile": 21.5,
-          "value": 69.7222,
-          "display": "69.7"
+          "pctile": 17.6,
+          "value": 69.2799,
+          "display": "69.3"
         },
         "Fast Swing %": {
-          "pctile": 13.5,
-          "value": 0.0444,
-          "display": "4.4"
+          "pctile": 35.1,
+          "value": 0.1275,
+          "display": "12.8"
         },
         "Avg Swing Length": {
-          "pctile": 75.5,
-          "value": 7.031,
-          "display": "7.0"
+          "pctile": 46.5,
+          "value": 7.3491,
+          "display": "7.3"
         },
         "Chase %": {
-          "pctile": 11.4,
-          "value": 38.6,
-          "display": "38.6"
+          "pctile": 4.5,
+          "value": 42.4,
+          "display": "42.4"
         },
         "K%": {
           "pctile": 79.4,
@@ -30729,19 +30729,19 @@
           "display": "17.9"
         },
         "Z-Contact%": {
-          "pctile": 23.9,
-          "value": 80.5,
-          "display": "80.5"
+          "pctile": 72.0,
+          "value": 87.0,
+          "display": "87.0"
         },
         "Whiff %": {
-          "pctile": 50.8,
-          "value": 25.1,
-          "display": "25.1"
+          "pctile": 70.5,
+          "value": 21.9,
+          "display": "21.9"
         },
         "BB%": {
-          "pctile": 9.5,
-          "value": 4.6,
-          "display": "4.6"
+          "pctile": 0.6,
+          "value": 2.6,
+          "display": "2.6"
         }
       }
     },
@@ -30830,66 +30830,66 @@
       }
     },
     {
-      "name": "Tommy White",
-      "player_id": 695720,
-      "team": "ATH",
-      "team_id": 133,
+      "name": "Petey Halpin",
+      "player_id": 690984,
+      "team": "CLE",
+      "team_id": 114,
       "pa": 195,
       "categories": {
         "xSLG": {
-          "pctile": 52.9,
-          "value": 0.383,
-          "display": "0.383"
+          "pctile": 49.0,
+          "value": 0.377,
+          "display": "0.377"
         },
         "xwOBACON": {
-          "pctile": 42.6,
-          "value": 0.344,
-          "display": "0.344"
+          "pctile": 35.1,
+          "value": 0.335,
+          "display": "0.335"
         },
         "Avg Exit Velocity": {
-          "pctile": 12.0,
-          "value": 85.9,
-          "display": "85.9"
+          "pctile": 8.0,
+          "value": 85.5,
+          "display": "85.5"
         },
         "90th % EV": {
-          "pctile": 25.2,
-          "value": 102.1,
-          "display": "102.1"
+          "pctile": 14.8,
+          "value": 101.2,
+          "display": "101.2"
         },
         "Barrel %": {
-          "pctile": 48.2,
-          "value": 7.1,
-          "display": "7.1"
+          "pctile": 31.8,
+          "value": 5.4,
+          "display": "5.4"
         },
         "Blasts/Contact": {
-          "pctile": 29.5,
-          "value": 0.1119,
-          "display": "11.2"
+          "pctile": 25.2,
+          "value": 0.1042,
+          "display": "10.4"
         },
         "LA+SwtSpt%": {
-          "pctile": 19.8,
-          "value": 30.3,
-          "display": "30.3"
+          "pctile": 86.5,
+          "value": 38.3,
+          "display": "38.3"
         },
         "Avg Bat Speed": {
-          "pctile": 17.6,
-          "value": 69.2799,
-          "display": "69.3"
+          "pctile": 21.5,
+          "value": 69.7222,
+          "display": "69.7"
         },
         "Fast Swing %": {
-          "pctile": 35.1,
-          "value": 0.1275,
-          "display": "12.8"
+          "pctile": 13.5,
+          "value": 0.0444,
+          "display": "4.4"
         },
         "Avg Swing Length": {
-          "pctile": 46.5,
-          "value": 7.3491,
-          "display": "7.3"
+          "pctile": 75.5,
+          "value": 7.031,
+          "display": "7.0"
         },
         "Chase %": {
-          "pctile": 4.5,
-          "value": 42.4,
-          "display": "42.4"
+          "pctile": 11.4,
+          "value": 38.6,
+          "display": "38.6"
         },
         "K%": {
           "pctile": 79.4,
@@ -30897,19 +30897,19 @@
           "display": "17.9"
         },
         "Z-Contact%": {
-          "pctile": 72.0,
-          "value": 87.0,
-          "display": "87.0"
+          "pctile": 23.9,
+          "value": 80.5,
+          "display": "80.5"
         },
         "Whiff %": {
-          "pctile": 70.5,
-          "value": 21.9,
-          "display": "21.9"
+          "pctile": 50.8,
+          "value": 25.1,
+          "display": "25.1"
         },
         "BB%": {
-          "pctile": 0.6,
-          "value": 2.6,
-          "display": "2.6"
+          "pctile": 9.5,
+          "value": 4.6,
+          "display": "4.6"
         }
       }
     },
@@ -31252,8 +31252,8 @@
     {
       "name": "Isiah Kiner-Falefa",
       "player_id": 643396,
-      "team": null,
-      "team_id": null,
+      "team": "BOS",
+      "team_id": 111,
       "pa": 183,
       "categories": {
         "xSLG": {
@@ -31336,8 +31336,8 @@
     {
       "name": "Weston Wilson",
       "player_id": 642215,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "pa": 183,
       "categories": {
         "xSLG": {
@@ -31414,6 +31414,90 @@
           "pctile": 64.7,
           "value": 9.8,
           "display": "9.8"
+        }
+      }
+    },
+    {
+      "name": "Brett Bateman",
+      "player_id": 703520,
+      "team": "TOR",
+      "team_id": 141,
+      "pa": 181,
+      "categories": {
+        "xSLG": {
+          "pctile": 25.2,
+          "value": 0.338,
+          "display": "0.338"
+        },
+        "xwOBACON": {
+          "pctile": 39.1,
+          "value": 0.34,
+          "display": "0.340"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 4.1,
+          "value": 84.7,
+          "display": "84.7"
+        },
+        "90th % EV": {
+          "pctile": 3.2,
+          "value": 98.9,
+          "display": "98.9"
+        },
+        "Barrel %": {
+          "pctile": 3.0,
+          "value": 1.6,
+          "display": "1.6"
+        },
+        "Blasts/Contact": {
+          "pctile": 2.8,
+          "value": 0.0526,
+          "display": "5.3"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 60.9,
+          "value": 34.9,
+          "display": "34.9"
+        },
+        "Avg Bat Speed": {
+          "pctile": 4.7,
+          "value": 67.8755,
+          "display": "67.9"
+        },
+        "Fast Swing %": {
+          "pctile": 6.0,
+          "value": 0.0269,
+          "display": "2.7"
+        },
+        "Avg Swing Length": {
+          "pctile": 83.4,
+          "value": 6.9567,
+          "display": "7.0"
+        },
+        "Chase %": {
+          "pctile": 64.5,
+          "value": 28.3,
+          "display": "28.3"
+        },
+        "K%": {
+          "pctile": 71.2,
+          "value": 19.3,
+          "display": "19.3"
+        },
+        "Z-Contact%": {
+          "pctile": 96.6,
+          "value": 92.2,
+          "display": "92.2"
+        },
+        "Whiff %": {
+          "pctile": 96.6,
+          "value": 14.7,
+          "display": "14.7"
+        },
+        "BB%": {
+          "pctile": 66.0,
+          "value": 9.9,
+          "display": "9.9"
         }
       }
     },
@@ -31502,86 +31586,86 @@
       }
     },
     {
-      "name": "Brett Bateman",
-      "player_id": 703520,
+      "name": "Yohendrick Pi\u00f1ango",
+      "player_id": 682818,
       "team": "TOR",
       "team_id": 141,
-      "pa": 181,
+      "pa": 180,
       "categories": {
         "xSLG": {
-          "pctile": 25.2,
-          "value": 0.338,
-          "display": "0.338"
+          "pctile": 62.4,
+          "value": 0.398,
+          "display": "0.398"
         },
         "xwOBACON": {
-          "pctile": 39.1,
-          "value": 0.34,
-          "display": "0.340"
+          "pctile": 68.6,
+          "value": 0.383,
+          "display": "0.383"
         },
         "Avg Exit Velocity": {
-          "pctile": 4.1,
-          "value": 84.7,
-          "display": "84.7"
+          "pctile": 86.0,
+          "value": 90.9,
+          "display": "90.9"
         },
         "90th % EV": {
-          "pctile": 3.2,
-          "value": 98.9,
-          "display": "98.9"
+          "pctile": 86.5,
+          "value": 106.8,
+          "display": "106.8"
         },
         "Barrel %": {
-          "pctile": 3.0,
-          "value": 1.6,
-          "display": "1.6"
+          "pctile": 56.3,
+          "value": 8.0,
+          "display": "8.0"
         },
         "Blasts/Contact": {
-          "pctile": 2.8,
-          "value": 0.0526,
-          "display": "5.3"
+          "pctile": 84.1,
+          "value": 0.1743,
+          "display": "17.4"
         },
         "LA+SwtSpt%": {
-          "pctile": 60.9,
-          "value": 34.9,
-          "display": "34.9"
+          "pctile": 64.9,
+          "value": 35.2,
+          "display": "35.2"
         },
         "Avg Bat Speed": {
-          "pctile": 4.7,
-          "value": 67.8755,
-          "display": "67.9"
+          "pctile": 92.5,
+          "value": 75.595,
+          "display": "75.6"
         },
         "Fast Swing %": {
-          "pctile": 6.0,
-          "value": 0.0269,
-          "display": "2.7"
+          "pctile": 92.3,
+          "value": 0.5741,
+          "display": "57.4"
         },
         "Avg Swing Length": {
-          "pctile": 83.4,
-          "value": 6.9567,
-          "display": "7.0"
+          "pctile": 64.7,
+          "value": 7.1493,
+          "display": "7.1"
         },
         "Chase %": {
-          "pctile": 64.5,
-          "value": 28.3,
-          "display": "28.3"
+          "pctile": 23.7,
+          "value": 35.2,
+          "display": "35.2"
         },
         "K%": {
-          "pctile": 71.2,
-          "value": 19.3,
-          "display": "19.3"
+          "pctile": 37.6,
+          "value": 24.4,
+          "display": "24.4"
         },
         "Z-Contact%": {
-          "pctile": 96.6,
-          "value": 92.2,
-          "display": "92.2"
+          "pctile": 21.7,
+          "value": 80.0,
+          "display": "80.0"
         },
         "Whiff %": {
-          "pctile": 96.6,
-          "value": 14.7,
-          "display": "14.7"
+          "pctile": 47.5,
+          "value": 25.6,
+          "display": "25.6"
         },
         "BB%": {
-          "pctile": 66.0,
-          "value": 9.9,
-          "display": "9.9"
+          "pctile": 22.8,
+          "value": 6.1,
+          "display": "6.1"
         }
       }
     },
@@ -31754,86 +31838,86 @@
       }
     },
     {
-      "name": "Yohendrick Pi\u00f1ango",
-      "player_id": 682818,
-      "team": "TOR",
-      "team_id": 141,
-      "pa": 180,
+      "name": "Wenceel P\u00e9rez",
+      "player_id": 672761,
+      "team": "DET",
+      "team_id": 116,
+      "pa": 175,
       "categories": {
         "xSLG": {
-          "pctile": 62.4,
-          "value": 0.398,
-          "display": "0.398"
+          "pctile": 29.5,
+          "value": 0.348,
+          "display": "0.348"
         },
         "xwOBACON": {
-          "pctile": 68.6,
-          "value": 0.383,
-          "display": "0.383"
+          "pctile": 6.0,
+          "value": 0.286,
+          "display": "0.286"
         },
         "Avg Exit Velocity": {
-          "pctile": 86.0,
-          "value": 90.9,
-          "display": "90.9"
+          "pctile": 26.7,
+          "value": 87.2,
+          "display": "87.2"
         },
         "90th % EV": {
-          "pctile": 86.5,
-          "value": 106.8,
-          "display": "106.8"
+          "pctile": 26.7,
+          "value": 102.2,
+          "display": "102.2"
         },
         "Barrel %": {
-          "pctile": 56.3,
-          "value": 8.0,
-          "display": "8.0"
+          "pctile": 52.5,
+          "value": 7.6,
+          "display": "7.6"
         },
         "Blasts/Contact": {
-          "pctile": 84.1,
-          "value": 0.1743,
-          "display": "17.4"
+          "pctile": 52.0,
+          "value": 0.1366,
+          "display": "13.7"
         },
         "LA+SwtSpt%": {
-          "pctile": 64.9,
-          "value": 35.2,
-          "display": "35.2"
+          "pctile": 0.9,
+          "value": 23.5,
+          "display": "23.5"
         },
         "Avg Bat Speed": {
-          "pctile": 92.5,
-          "value": 75.595,
-          "display": "75.6"
+          "pctile": 40.0,
+          "value": 71.3549,
+          "display": "71.4"
         },
         "Fast Swing %": {
-          "pctile": 92.3,
-          "value": 0.5741,
-          "display": "57.4"
+          "pctile": 44.9,
+          "value": 0.1805,
+          "display": "18.1"
         },
         "Avg Swing Length": {
-          "pctile": 64.7,
-          "value": 7.1493,
-          "display": "7.1"
+          "pctile": 79.1,
+          "value": 6.9953,
+          "display": "7.0"
         },
         "Chase %": {
-          "pctile": 23.7,
-          "value": 35.2,
-          "display": "35.2"
+          "pctile": 59.4,
+          "value": 29.1,
+          "display": "29.1"
         },
         "K%": {
-          "pctile": 37.6,
-          "value": 24.4,
-          "display": "24.4"
+          "pctile": 83.9,
+          "value": 16.6,
+          "display": "16.6"
         },
         "Z-Contact%": {
-          "pctile": 21.7,
-          "value": 80.0,
-          "display": "80.0"
+          "pctile": 75.3,
+          "value": 87.6,
+          "display": "87.6"
         },
         "Whiff %": {
-          "pctile": 47.5,
-          "value": 25.6,
-          "display": "25.6"
+          "pctile": 86.9,
+          "value": 18.2,
+          "display": "18.2"
         },
         "BB%": {
-          "pctile": 22.8,
-          "value": 6.1,
-          "display": "6.1"
+          "pctile": 42.8,
+          "value": 8.0,
+          "display": "8.0"
         }
       }
     },
@@ -31918,90 +32002,6 @@
           "pctile": 70.3,
           "value": 10.3,
           "display": "10.3"
-        }
-      }
-    },
-    {
-      "name": "Wenceel P\u00e9rez",
-      "player_id": 672761,
-      "team": "DET",
-      "team_id": 116,
-      "pa": 175,
-      "categories": {
-        "xSLG": {
-          "pctile": 29.5,
-          "value": 0.348,
-          "display": "0.348"
-        },
-        "xwOBACON": {
-          "pctile": 6.0,
-          "value": 0.286,
-          "display": "0.286"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 26.7,
-          "value": 87.2,
-          "display": "87.2"
-        },
-        "90th % EV": {
-          "pctile": 26.7,
-          "value": 102.2,
-          "display": "102.2"
-        },
-        "Barrel %": {
-          "pctile": 52.5,
-          "value": 7.6,
-          "display": "7.6"
-        },
-        "Blasts/Contact": {
-          "pctile": 52.0,
-          "value": 0.1366,
-          "display": "13.7"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 0.9,
-          "value": 23.5,
-          "display": "23.5"
-        },
-        "Avg Bat Speed": {
-          "pctile": 40.0,
-          "value": 71.3549,
-          "display": "71.4"
-        },
-        "Fast Swing %": {
-          "pctile": 44.9,
-          "value": 0.1805,
-          "display": "18.1"
-        },
-        "Avg Swing Length": {
-          "pctile": 79.1,
-          "value": 6.9953,
-          "display": "7.0"
-        },
-        "Chase %": {
-          "pctile": 59.4,
-          "value": 29.1,
-          "display": "29.1"
-        },
-        "K%": {
-          "pctile": 83.9,
-          "value": 16.6,
-          "display": "16.6"
-        },
-        "Z-Contact%": {
-          "pctile": 75.3,
-          "value": 87.6,
-          "display": "87.6"
-        },
-        "Whiff %": {
-          "pctile": 86.9,
-          "value": 18.2,
-          "display": "18.2"
-        },
-        "BB%": {
-          "pctile": 42.8,
-          "value": 8.0,
-          "display": "8.0"
         }
       }
     },
@@ -32260,8 +32260,8 @@
     {
       "name": "James Outman",
       "player_id": 681546,
-      "team": null,
-      "team_id": null,
+      "team": "DET",
+      "team_id": 116,
       "pa": 170,
       "categories": {
         "xSLG": {
@@ -32510,86 +32510,86 @@
       }
     },
     {
-      "name": "George Lombard Jr.",
-      "player_id": 806146,
-      "team": "NYY",
-      "team_id": 147,
+      "name": "Drew Cavanaugh",
+      "player_id": 701852,
+      "team": "SF",
+      "team_id": 137,
       "pa": 166,
       "categories": {
         "xSLG": {
-          "pctile": 55.5,
-          "value": 0.388,
-          "display": "0.388"
+          "pctile": 24.7,
+          "value": 0.337,
+          "display": "0.337"
         },
         "xwOBACON": {
-          "pctile": 64.9,
-          "value": 0.378,
-          "display": "0.378"
+          "pctile": 66.2,
+          "value": 0.381,
+          "display": "0.381"
         },
         "Avg Exit Velocity": {
-          "pctile": 25.2,
-          "value": 87.1,
-          "display": "87.1"
+          "pctile": 5.6,
+          "value": 85.2,
+          "display": "85.2"
         },
         "90th % EV": {
-          "pctile": 44.3,
-          "value": 103.6,
-          "display": "103.6"
+          "pctile": 22.6,
+          "value": 101.9,
+          "display": "101.9"
         },
         "Barrel %": {
-          "pctile": 58.1,
-          "value": 8.2,
-          "display": "8.2"
+          "pctile": 20.6,
+          "value": 4.1,
+          "display": "4.1"
         },
         "Blasts/Contact": {
-          "pctile": 21.1,
-          "value": 0.099,
-          "display": "9.9"
+          "pctile": 18.5,
+          "value": 0.0947,
+          "display": "9.5"
         },
         "LA+SwtSpt%": {
-          "pctile": 44.5,
-          "value": 33.3,
-          "display": "33.3"
+          "pctile": 98.7,
+          "value": 42.9,
+          "display": "42.9"
         },
         "Avg Bat Speed": {
-          "pctile": 55.7,
-          "value": 72.2973,
-          "display": "72.3"
+          "pctile": 14.2,
+          "value": 69.0886,
+          "display": "69.1"
         },
         "Fast Swing %": {
-          "pctile": 58.7,
-          "value": 0.2622,
-          "display": "26.2"
+          "pctile": 12.3,
+          "value": 0.0417,
+          "display": "4.2"
         },
         "Avg Swing Length": {
-          "pctile": 39.4,
-          "value": 7.4045,
-          "display": "7.4"
+          "pctile": 95.7,
+          "value": 6.6349,
+          "display": "6.6"
         },
         "Chase %": {
-          "pctile": 71.2,
-          "value": 27.2,
-          "display": "27.2"
+          "pctile": 71.8,
+          "value": 27.0,
+          "display": "27.0"
         },
         "K%": {
-          "pctile": 26.5,
-          "value": 26.5,
-          "display": "26.5"
+          "pctile": 14.2,
+          "value": 30.1,
+          "display": "30.1"
         },
         "Z-Contact%": {
-          "pctile": 38.1,
-          "value": 82.5,
-          "display": "82.5"
+          "pctile": 31.2,
+          "value": 81.6,
+          "display": "81.6"
         },
         "Whiff %": {
-          "pctile": 47.5,
-          "value": 25.6,
-          "display": "25.6"
+          "pctile": 27.1,
+          "value": 29.2,
+          "display": "29.2"
         },
         "BB%": {
-          "pctile": 21.1,
-          "value": 6.0,
-          "display": "6.0"
+          "pctile": 77.6,
+          "value": 10.8,
+          "display": "10.8"
         }
       }
     },
@@ -32678,86 +32678,86 @@
       }
     },
     {
-      "name": "Drew Cavanaugh",
-      "player_id": 701852,
-      "team": "SF",
-      "team_id": 137,
+      "name": "George Lombard Jr.",
+      "player_id": 806146,
+      "team": "NYY",
+      "team_id": 147,
       "pa": 166,
       "categories": {
         "xSLG": {
-          "pctile": 24.7,
-          "value": 0.337,
-          "display": "0.337"
+          "pctile": 55.5,
+          "value": 0.388,
+          "display": "0.388"
         },
         "xwOBACON": {
-          "pctile": 66.2,
-          "value": 0.381,
-          "display": "0.381"
+          "pctile": 64.9,
+          "value": 0.378,
+          "display": "0.378"
         },
         "Avg Exit Velocity": {
-          "pctile": 5.6,
-          "value": 85.2,
-          "display": "85.2"
+          "pctile": 25.2,
+          "value": 87.1,
+          "display": "87.1"
         },
         "90th % EV": {
-          "pctile": 22.6,
-          "value": 101.9,
-          "display": "101.9"
+          "pctile": 44.3,
+          "value": 103.6,
+          "display": "103.6"
         },
         "Barrel %": {
-          "pctile": 20.6,
-          "value": 4.1,
-          "display": "4.1"
+          "pctile": 58.1,
+          "value": 8.2,
+          "display": "8.2"
         },
         "Blasts/Contact": {
-          "pctile": 18.5,
-          "value": 0.0947,
-          "display": "9.5"
+          "pctile": 21.1,
+          "value": 0.099,
+          "display": "9.9"
         },
         "LA+SwtSpt%": {
-          "pctile": 98.7,
-          "value": 42.9,
-          "display": "42.9"
+          "pctile": 44.5,
+          "value": 33.3,
+          "display": "33.3"
         },
         "Avg Bat Speed": {
-          "pctile": 14.2,
-          "value": 69.0886,
-          "display": "69.1"
+          "pctile": 55.7,
+          "value": 72.2973,
+          "display": "72.3"
         },
         "Fast Swing %": {
-          "pctile": 12.3,
-          "value": 0.0417,
-          "display": "4.2"
+          "pctile": 58.7,
+          "value": 0.2622,
+          "display": "26.2"
         },
         "Avg Swing Length": {
-          "pctile": 95.7,
-          "value": 6.6349,
-          "display": "6.6"
+          "pctile": 39.4,
+          "value": 7.4045,
+          "display": "7.4"
         },
         "Chase %": {
-          "pctile": 71.8,
-          "value": 27.0,
-          "display": "27.0"
+          "pctile": 71.2,
+          "value": 27.2,
+          "display": "27.2"
         },
         "K%": {
-          "pctile": 14.2,
-          "value": 30.1,
-          "display": "30.1"
+          "pctile": 26.5,
+          "value": 26.5,
+          "display": "26.5"
         },
         "Z-Contact%": {
-          "pctile": 31.2,
-          "value": 81.6,
-          "display": "81.6"
+          "pctile": 38.1,
+          "value": 82.5,
+          "display": "82.5"
         },
         "Whiff %": {
-          "pctile": 27.1,
-          "value": 29.2,
-          "display": "29.2"
+          "pctile": 47.5,
+          "value": 25.6,
+          "display": "25.6"
         },
         "BB%": {
-          "pctile": 77.6,
-          "value": 10.8,
-          "display": "10.8"
+          "pctile": 21.1,
+          "value": 6.0,
+          "display": "6.0"
         }
       }
     },
@@ -32930,90 +32930,6 @@
       }
     },
     {
-      "name": "Daniel Susac",
-      "player_id": 691740,
-      "team": "SF",
-      "team_id": 137,
-      "pa": 161,
-      "categories": {
-        "xSLG": {
-          "pctile": 43.4,
-          "value": 0.369,
-          "display": "0.369"
-        },
-        "xwOBACON": {
-          "pctile": 47.1,
-          "value": 0.351,
-          "display": "0.351"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 15.3,
-          "value": 86.3,
-          "display": "86.3"
-        },
-        "90th % EV": {
-          "pctile": 32.9,
-          "value": 102.7,
-          "display": "102.7"
-        },
-        "Barrel %": {
-          "pctile": 31.2,
-          "value": 5.3,
-          "display": "5.3"
-        },
-        "Blasts/Contact": {
-          "pctile": 18.1,
-          "value": 0.0935,
-          "display": "9.3"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 97.6,
-          "value": 42.1,
-          "display": "42.1"
-        },
-        "Avg Bat Speed": {
-          "pctile": 11.4,
-          "value": 68.7278,
-          "display": "68.7"
-        },
-        "Fast Swing %": {
-          "pctile": 11.4,
-          "value": 0.0393,
-          "display": "3.9"
-        },
-        "Avg Swing Length": {
-          "pctile": 34.6,
-          "value": 7.4563,
-          "display": "7.5"
-        },
-        "Chase %": {
-          "pctile": 5.6,
-          "value": 41.8,
-          "display": "41.8"
-        },
-        "K%": {
-          "pctile": 52.0,
-          "value": 22.4,
-          "display": "22.4"
-        },
-        "Z-Contact%": {
-          "pctile": 81.5,
-          "value": 88.6,
-          "display": "88.6"
-        },
-        "Whiff %": {
-          "pctile": 58.5,
-          "value": 23.8,
-          "display": "23.8"
-        },
-        "BB%": {
-          "pctile": 11.2,
-          "value": 5.0,
-          "display": "5.0"
-        }
-      }
-    },
-    {
       "name": "John Rave",
       "player_id": 670231,
       "team": "KC",
@@ -33094,6 +33010,90 @@
           "pctile": 76.1,
           "value": 10.6,
           "display": "10.6"
+        }
+      }
+    },
+    {
+      "name": "Daniel Susac",
+      "player_id": 691740,
+      "team": "SF",
+      "team_id": 137,
+      "pa": 161,
+      "categories": {
+        "xSLG": {
+          "pctile": 43.4,
+          "value": 0.369,
+          "display": "0.369"
+        },
+        "xwOBACON": {
+          "pctile": 47.1,
+          "value": 0.351,
+          "display": "0.351"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 15.3,
+          "value": 86.3,
+          "display": "86.3"
+        },
+        "90th % EV": {
+          "pctile": 32.9,
+          "value": 102.7,
+          "display": "102.7"
+        },
+        "Barrel %": {
+          "pctile": 31.2,
+          "value": 5.3,
+          "display": "5.3"
+        },
+        "Blasts/Contact": {
+          "pctile": 18.1,
+          "value": 0.0935,
+          "display": "9.3"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 97.6,
+          "value": 42.1,
+          "display": "42.1"
+        },
+        "Avg Bat Speed": {
+          "pctile": 11.4,
+          "value": 68.7278,
+          "display": "68.7"
+        },
+        "Fast Swing %": {
+          "pctile": 11.4,
+          "value": 0.0393,
+          "display": "3.9"
+        },
+        "Avg Swing Length": {
+          "pctile": 34.6,
+          "value": 7.4563,
+          "display": "7.5"
+        },
+        "Chase %": {
+          "pctile": 5.6,
+          "value": 41.8,
+          "display": "41.8"
+        },
+        "K%": {
+          "pctile": 52.0,
+          "value": 22.4,
+          "display": "22.4"
+        },
+        "Z-Contact%": {
+          "pctile": 81.5,
+          "value": 88.6,
+          "display": "88.6"
+        },
+        "Whiff %": {
+          "pctile": 58.5,
+          "value": 23.8,
+          "display": "23.8"
+        },
+        "BB%": {
+          "pctile": 11.2,
+          "value": 5.0,
+          "display": "5.0"
         }
       }
     },
@@ -33856,8 +33856,8 @@
     {
       "name": "Jake Meyers",
       "player_id": 676694,
-      "team": "HOU",
-      "team_id": 117,
+      "team": null,
+      "team_id": null,
       "pa": 153,
       "categories": {
         "xSLG": {
@@ -33934,90 +33934,6 @@
           "pctile": 26.0,
           "value": 6.5,
           "display": "6.5"
-        }
-      }
-    },
-    {
-      "name": "Drew Millas",
-      "player_id": 686452,
-      "team": "WSH",
-      "team_id": 120,
-      "pa": 152,
-      "categories": {
-        "xSLG": {
-          "pctile": 3.9,
-          "value": 0.282,
-          "display": "0.282"
-        },
-        "xwOBACON": {
-          "pctile": 7.3,
-          "value": 0.291,
-          "display": "0.291"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 1.3,
-          "value": 83.6,
-          "display": "83.6"
-        },
-        "90th % EV": {
-          "pctile": 2.8,
-          "value": 98.7,
-          "display": "98.7"
-        },
-        "Barrel %": {
-          "pctile": 13.1,
-          "value": 3.2,
-          "display": "3.2"
-        },
-        "Blasts/Contact": {
-          "pctile": 2.4,
-          "value": 0.0476,
-          "display": "4.8"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 56.3,
-          "value": 34.4,
-          "display": "34.4"
-        },
-        "Avg Bat Speed": {
-          "pctile": 6.5,
-          "value": 68.1414,
-          "display": "68.1"
-        },
-        "Fast Swing %": {
-          "pctile": 10.1,
-          "value": 0.036,
-          "display": "3.6"
-        },
-        "Avg Swing Length": {
-          "pctile": 65.4,
-          "value": 7.146,
-          "display": "7.1"
-        },
-        "Chase %": {
-          "pctile": 61.7,
-          "value": 28.8,
-          "display": "28.8"
-        },
-        "K%": {
-          "pctile": 38.3,
-          "value": 24.3,
-          "display": "24.3"
-        },
-        "Z-Contact%": {
-          "pctile": 61.5,
-          "value": 85.7,
-          "display": "85.7"
-        },
-        "Whiff %": {
-          "pctile": 61.3,
-          "value": 23.3,
-          "display": "23.3"
-        },
-        "BB%": {
-          "pctile": 56.6,
-          "value": 9.2,
-          "display": "9.2"
         }
       }
     },
@@ -34106,6 +34022,90 @@
       }
     },
     {
+      "name": "Drew Millas",
+      "player_id": 686452,
+      "team": "WSH",
+      "team_id": 120,
+      "pa": 152,
+      "categories": {
+        "xSLG": {
+          "pctile": 3.9,
+          "value": 0.282,
+          "display": "0.282"
+        },
+        "xwOBACON": {
+          "pctile": 7.3,
+          "value": 0.291,
+          "display": "0.291"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 1.3,
+          "value": 83.6,
+          "display": "83.6"
+        },
+        "90th % EV": {
+          "pctile": 2.8,
+          "value": 98.7,
+          "display": "98.7"
+        },
+        "Barrel %": {
+          "pctile": 13.1,
+          "value": 3.2,
+          "display": "3.2"
+        },
+        "Blasts/Contact": {
+          "pctile": 2.4,
+          "value": 0.0476,
+          "display": "4.8"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 56.3,
+          "value": 34.4,
+          "display": "34.4"
+        },
+        "Avg Bat Speed": {
+          "pctile": 6.5,
+          "value": 68.1414,
+          "display": "68.1"
+        },
+        "Fast Swing %": {
+          "pctile": 10.1,
+          "value": 0.036,
+          "display": "3.6"
+        },
+        "Avg Swing Length": {
+          "pctile": 65.4,
+          "value": 7.146,
+          "display": "7.1"
+        },
+        "Chase %": {
+          "pctile": 61.7,
+          "value": 28.8,
+          "display": "28.8"
+        },
+        "K%": {
+          "pctile": 38.3,
+          "value": 24.3,
+          "display": "24.3"
+        },
+        "Z-Contact%": {
+          "pctile": 61.5,
+          "value": 85.7,
+          "display": "85.7"
+        },
+        "Whiff %": {
+          "pctile": 61.3,
+          "value": 23.3,
+          "display": "23.3"
+        },
+        "BB%": {
+          "pctile": 56.6,
+          "value": 9.2,
+          "display": "9.2"
+        }
+      }
+    },
+    {
       "name": "Dustin Harris",
       "player_id": 687957,
       "team": "SD",
@@ -34153,7 +34153,7 @@
           "display": "66.8"
         },
         "Fast Swing %": {
-          "pctile": 8.0,
+          "pctile": 8.2,
           "value": 0.0312,
           "display": "3.1"
         },
@@ -34186,90 +34186,6 @@
           "pctile": 32.5,
           "value": 7.2,
           "display": "7.2"
-        }
-      }
-    },
-    {
-      "name": "Jimmy Crooks",
-      "player_id": 699625,
-      "team": "STL",
-      "team_id": 138,
-      "pa": 149,
-      "categories": {
-        "xSLG": {
-          "pctile": 61.7,
-          "value": 0.397,
-          "display": "0.397"
-        },
-        "xwOBACON": {
-          "pctile": 73.5,
-          "value": 0.391,
-          "display": "0.391"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 91.0,
-          "value": 91.7,
-          "display": "91.7"
-        },
-        "90th % EV": {
-          "pctile": 68.6,
-          "value": 105.1,
-          "display": "105.1"
-        },
-        "Barrel %": {
-          "pctile": 82.2,
-          "value": 11.6,
-          "display": "11.6"
-        },
-        "Blasts/Contact": {
-          "pctile": 69.5,
-          "value": 0.1515,
-          "display": "15.2"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 83.9,
-          "value": 37.9,
-          "display": "37.9"
-        },
-        "Avg Bat Speed": {
-          "pctile": 48.8,
-          "value": 71.9016,
-          "display": "71.9"
-        },
-        "Fast Swing %": {
-          "pctile": 49.7,
-          "value": 0.2063,
-          "display": "20.6"
-        },
-        "Avg Swing Length": {
-          "pctile": 63.0,
-          "value": 7.1647,
-          "display": "7.2"
-        },
-        "Chase %": {
-          "pctile": 19.6,
-          "value": 36.3,
-          "display": "36.3"
-        },
-        "K%": {
-          "pctile": 7.3,
-          "value": 32.2,
-          "display": "32.2"
-        },
-        "Z-Contact%": {
-          "pctile": 6.2,
-          "value": 75.6,
-          "display": "75.6"
-        },
-        "Whiff %": {
-          "pctile": 8.2,
-          "value": 34.2,
-          "display": "34.2"
-        },
-        "BB%": {
-          "pctile": 21.1,
-          "value": 6.0,
-          "display": "6.0"
         }
       }
     },
@@ -34349,6 +34265,90 @@
           "pctile": 72.3,
           "value": 21.6,
           "display": "21.6"
+        },
+        "BB%": {
+          "pctile": 21.1,
+          "value": 6.0,
+          "display": "6.0"
+        }
+      }
+    },
+    {
+      "name": "Jimmy Crooks",
+      "player_id": 699625,
+      "team": "STL",
+      "team_id": 138,
+      "pa": 149,
+      "categories": {
+        "xSLG": {
+          "pctile": 61.7,
+          "value": 0.397,
+          "display": "0.397"
+        },
+        "xwOBACON": {
+          "pctile": 73.5,
+          "value": 0.391,
+          "display": "0.391"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 91.0,
+          "value": 91.7,
+          "display": "91.7"
+        },
+        "90th % EV": {
+          "pctile": 68.6,
+          "value": 105.1,
+          "display": "105.1"
+        },
+        "Barrel %": {
+          "pctile": 82.2,
+          "value": 11.6,
+          "display": "11.6"
+        },
+        "Blasts/Contact": {
+          "pctile": 69.5,
+          "value": 0.1515,
+          "display": "15.2"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 83.9,
+          "value": 37.9,
+          "display": "37.9"
+        },
+        "Avg Bat Speed": {
+          "pctile": 48.8,
+          "value": 71.9016,
+          "display": "71.9"
+        },
+        "Fast Swing %": {
+          "pctile": 49.7,
+          "value": 0.2063,
+          "display": "20.6"
+        },
+        "Avg Swing Length": {
+          "pctile": 63.0,
+          "value": 7.1647,
+          "display": "7.2"
+        },
+        "Chase %": {
+          "pctile": 19.6,
+          "value": 36.3,
+          "display": "36.3"
+        },
+        "K%": {
+          "pctile": 7.3,
+          "value": 32.2,
+          "display": "32.2"
+        },
+        "Z-Contact%": {
+          "pctile": 6.2,
+          "value": 75.6,
+          "display": "75.6"
+        },
+        "Whiff %": {
+          "pctile": 8.2,
+          "value": 34.2,
+          "display": "34.2"
         },
         "BB%": {
           "pctile": 21.1,
@@ -34696,8 +34696,8 @@
     {
       "name": "Adam Frazier",
       "player_id": 624428,
-      "team": "LAA",
-      "team_id": 108,
+      "team": null,
+      "team_id": null,
       "pa": 147,
       "categories": {
         "xSLG": {
@@ -34948,8 +34948,8 @@
     {
       "name": "LaMonte Wade Jr.",
       "player_id": 664774,
-      "team": "HOU",
-      "team_id": 117,
+      "team": null,
+      "team_id": null,
       "pa": 146,
       "categories": {
         "xSLG": {
@@ -35026,6 +35026,90 @@
           "pctile": 91.8,
           "value": 13.0,
           "display": "13.0"
+        }
+      }
+    },
+    {
+      "name": "Max Kepler",
+      "player_id": 596146,
+      "team": null,
+      "team_id": null,
+      "pa": 145,
+      "categories": {
+        "xSLG": {
+          "pctile": 24.1,
+          "value": 0.336,
+          "display": "0.336"
+        },
+        "xwOBACON": {
+          "pctile": 19.8,
+          "value": 0.313,
+          "display": "0.313"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 51.6,
+          "value": 88.7,
+          "display": "88.7"
+        },
+        "90th % EV": {
+          "pctile": 59.6,
+          "value": 104.5,
+          "display": "104.5"
+        },
+        "Barrel %": {
+          "pctile": 55.1,
+          "value": 7.8,
+          "display": "7.8"
+        },
+        "Blasts/Contact": {
+          "pctile": 55.1,
+          "value": 0.139,
+          "display": "13.9"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 37.6,
+          "value": 32.4,
+          "display": "32.4"
+        },
+        "Avg Bat Speed": {
+          "pctile": 46.0,
+          "value": 71.7051,
+          "display": "71.7"
+        },
+        "Fast Swing %": {
+          "pctile": 42.2,
+          "value": 0.1653,
+          "display": "16.5"
+        },
+        "Avg Swing Length": {
+          "pctile": 36.3,
+          "value": 7.4396,
+          "display": "7.4"
+        },
+        "Chase %": {
+          "pctile": 15.5,
+          "value": 37.3,
+          "display": "37.3"
+        },
+        "K%": {
+          "pctile": 53.8,
+          "value": 22.1,
+          "display": "22.1"
+        },
+        "Z-Contact%": {
+          "pctile": 54.0,
+          "value": 84.7,
+          "display": "84.7"
+        },
+        "Whiff %": {
+          "pctile": 45.6,
+          "value": 25.9,
+          "display": "25.9"
+        },
+        "BB%": {
+          "pctile": 37.0,
+          "value": 7.6,
+          "display": "7.6"
         }
       }
     },
@@ -35114,86 +35198,86 @@
       }
     },
     {
-      "name": "Max Kepler",
-      "player_id": 596146,
-      "team": "AZ",
-      "team_id": 109,
-      "pa": 145,
+      "name": "Kyle Teel",
+      "player_id": 691019,
+      "team": "CWS",
+      "team_id": 145,
+      "pa": 144,
       "categories": {
         "xSLG": {
-          "pctile": 24.1,
-          "value": 0.336,
-          "display": "0.336"
+          "pctile": 47.3,
+          "value": 0.375,
+          "display": "0.375"
         },
         "xwOBACON": {
-          "pctile": 19.8,
-          "value": 0.313,
-          "display": "0.313"
+          "pctile": 91.0,
+          "value": 0.431,
+          "display": "0.431"
         },
         "Avg Exit Velocity": {
-          "pctile": 51.6,
-          "value": 88.7,
-          "display": "88.7"
+          "pctile": 9.9,
+          "value": 85.7,
+          "display": "85.7"
         },
         "90th % EV": {
-          "pctile": 59.6,
-          "value": 104.5,
-          "display": "104.5"
+          "pctile": 60.9,
+          "value": 104.6,
+          "display": "104.6"
         },
         "Barrel %": {
-          "pctile": 55.1,
-          "value": 7.8,
-          "display": "7.8"
+          "pctile": 81.5,
+          "value": 11.4,
+          "display": "11.4"
         },
         "Blasts/Contact": {
-          "pctile": 55.1,
-          "value": 0.139,
-          "display": "13.9"
+          "pctile": 37.2,
+          "value": 0.1212,
+          "display": "12.1"
         },
         "LA+SwtSpt%": {
-          "pctile": 37.6,
-          "value": 32.4,
-          "display": "32.4"
+          "pctile": 96.8,
+          "value": 41.4,
+          "display": "41.4"
         },
         "Avg Bat Speed": {
-          "pctile": 46.0,
-          "value": 71.7051,
-          "display": "71.7"
+          "pctile": 52.7,
+          "value": 72.1134,
+          "display": "72.1"
         },
         "Fast Swing %": {
-          "pctile": 42.2,
-          "value": 0.1653,
-          "display": "16.5"
+          "pctile": 64.9,
+          "value": 0.2915,
+          "display": "29.1"
         },
         "Avg Swing Length": {
-          "pctile": 36.3,
-          "value": 7.4396,
-          "display": "7.4"
+          "pctile": 87.1,
+          "value": 6.9017,
+          "display": "6.9"
         },
         "Chase %": {
-          "pctile": 15.5,
-          "value": 37.3,
-          "display": "37.3"
+          "pctile": 44.7,
+          "value": 31.3,
+          "display": "31.3"
         },
         "K%": {
-          "pctile": 53.8,
-          "value": 22.1,
-          "display": "22.1"
+          "pctile": 2.6,
+          "value": 35.4,
+          "display": "35.4"
         },
         "Z-Contact%": {
-          "pctile": 54.0,
-          "value": 84.7,
-          "display": "84.7"
+          "pctile": 8.8,
+          "value": 76.8,
+          "display": "76.8"
         },
         "Whiff %": {
-          "pctile": 45.6,
-          "value": 25.9,
-          "display": "25.9"
+          "pctile": 5.6,
+          "value": 35.6,
+          "display": "35.6"
         },
         "BB%": {
-          "pctile": 37.0,
-          "value": 7.6,
-          "display": "7.6"
+          "pctile": 93.1,
+          "value": 13.2,
+          "display": "13.2"
         }
       }
     },
@@ -35278,90 +35362,6 @@
           "pctile": 86.2,
           "value": 11.8,
           "display": "11.8"
-        }
-      }
-    },
-    {
-      "name": "Kyle Teel",
-      "player_id": 691019,
-      "team": "CWS",
-      "team_id": 145,
-      "pa": 144,
-      "categories": {
-        "xSLG": {
-          "pctile": 47.3,
-          "value": 0.375,
-          "display": "0.375"
-        },
-        "xwOBACON": {
-          "pctile": 91.0,
-          "value": 0.431,
-          "display": "0.431"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 9.9,
-          "value": 85.7,
-          "display": "85.7"
-        },
-        "90th % EV": {
-          "pctile": 60.9,
-          "value": 104.6,
-          "display": "104.6"
-        },
-        "Barrel %": {
-          "pctile": 81.5,
-          "value": 11.4,
-          "display": "11.4"
-        },
-        "Blasts/Contact": {
-          "pctile": 37.2,
-          "value": 0.1212,
-          "display": "12.1"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 96.8,
-          "value": 41.4,
-          "display": "41.4"
-        },
-        "Avg Bat Speed": {
-          "pctile": 52.7,
-          "value": 72.1134,
-          "display": "72.1"
-        },
-        "Fast Swing %": {
-          "pctile": 64.9,
-          "value": 0.2915,
-          "display": "29.1"
-        },
-        "Avg Swing Length": {
-          "pctile": 87.1,
-          "value": 6.9017,
-          "display": "6.9"
-        },
-        "Chase %": {
-          "pctile": 44.7,
-          "value": 31.3,
-          "display": "31.3"
-        },
-        "K%": {
-          "pctile": 2.6,
-          "value": 35.4,
-          "display": "35.4"
-        },
-        "Z-Contact%": {
-          "pctile": 8.8,
-          "value": 76.8,
-          "display": "76.8"
-        },
-        "Whiff %": {
-          "pctile": 5.6,
-          "value": 35.6,
-          "display": "35.6"
-        },
-        "BB%": {
-          "pctile": 93.1,
-          "value": 13.2,
-          "display": "13.2"
         }
       }
     },
@@ -36374,90 +36374,6 @@
       }
     },
     {
-      "name": "Kaelen Culpepper",
-      "player_id": 701785,
-      "team": "MIN",
-      "team_id": 142,
-      "pa": 128,
-      "categories": {
-        "xSLG": {
-          "pctile": 30.8,
-          "value": 0.351,
-          "display": "0.351"
-        },
-        "xwOBACON": {
-          "pctile": 31.6,
-          "value": 0.33,
-          "display": "0.330"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 29.9,
-          "value": 87.4,
-          "display": "87.4"
-        },
-        "90th % EV": {
-          "pctile": 13.3,
-          "value": 101.1,
-          "display": "101.1"
-        },
-        "Barrel %": {
-          "pctile": 14.8,
-          "value": 3.4,
-          "display": "3.4"
-        },
-        "Blasts/Contact": {
-          "pctile": 13.3,
-          "value": 0.0877,
-          "display": "8.8"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 68.4,
-          "value": 35.6,
-          "display": "35.6"
-        },
-        "Avg Bat Speed": {
-          "pctile": 74.8,
-          "value": 73.6734,
-          "display": "73.7"
-        },
-        "Fast Swing %": {
-          "pctile": 72.5,
-          "value": 0.3628,
-          "display": "36.3"
-        },
-        "Avg Swing Length": {
-          "pctile": 51.6,
-          "value": 7.2953,
-          "display": "7.3"
-        },
-        "Chase %": {
-          "pctile": 4.3,
-          "value": 42.8,
-          "display": "42.8"
-        },
-        "K%": {
-          "pctile": 54.8,
-          "value": 21.9,
-          "display": "21.9"
-        },
-        "Z-Contact%": {
-          "pctile": 69.7,
-          "value": 86.8,
-          "display": "86.8"
-        },
-        "Whiff %": {
-          "pctile": 43.2,
-          "value": 26.4,
-          "display": "26.4"
-        },
-        "BB%": {
-          "pctile": 11.0,
-          "value": 4.7,
-          "display": "4.7"
-        }
-      }
-    },
-    {
       "name": "Joey Bart",
       "player_id": 663698,
       "team": "CWS",
@@ -36538,6 +36454,90 @@
           "pctile": 16.8,
           "value": 5.5,
           "display": "5.5"
+        }
+      }
+    },
+    {
+      "name": "Kaelen Culpepper",
+      "player_id": 701785,
+      "team": "MIN",
+      "team_id": 142,
+      "pa": 128,
+      "categories": {
+        "xSLG": {
+          "pctile": 30.8,
+          "value": 0.351,
+          "display": "0.351"
+        },
+        "xwOBACON": {
+          "pctile": 31.6,
+          "value": 0.33,
+          "display": "0.330"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 29.9,
+          "value": 87.4,
+          "display": "87.4"
+        },
+        "90th % EV": {
+          "pctile": 13.3,
+          "value": 101.1,
+          "display": "101.1"
+        },
+        "Barrel %": {
+          "pctile": 14.8,
+          "value": 3.4,
+          "display": "3.4"
+        },
+        "Blasts/Contact": {
+          "pctile": 13.3,
+          "value": 0.0877,
+          "display": "8.8"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 68.4,
+          "value": 35.6,
+          "display": "35.6"
+        },
+        "Avg Bat Speed": {
+          "pctile": 74.8,
+          "value": 73.6734,
+          "display": "73.7"
+        },
+        "Fast Swing %": {
+          "pctile": 72.5,
+          "value": 0.3628,
+          "display": "36.3"
+        },
+        "Avg Swing Length": {
+          "pctile": 51.6,
+          "value": 7.2953,
+          "display": "7.3"
+        },
+        "Chase %": {
+          "pctile": 4.3,
+          "value": 42.8,
+          "display": "42.8"
+        },
+        "K%": {
+          "pctile": 54.8,
+          "value": 21.9,
+          "display": "21.9"
+        },
+        "Z-Contact%": {
+          "pctile": 69.7,
+          "value": 86.8,
+          "display": "86.8"
+        },
+        "Whiff %": {
+          "pctile": 43.2,
+          "value": 26.4,
+          "display": "26.4"
+        },
+        "BB%": {
+          "pctile": 11.0,
+          "value": 4.7,
+          "display": "4.7"
         }
       }
     },
@@ -36710,86 +36710,86 @@
       }
     },
     {
-      "name": "Shay Whitcomb",
-      "player_id": 694376,
-      "team": "HOU",
-      "team_id": 117,
+      "name": "Pavin Smith",
+      "player_id": 656976,
+      "team": "AZ",
+      "team_id": 109,
       "pa": 122,
       "categories": {
         "xSLG": {
-          "pctile": 46.7,
-          "value": 0.374,
-          "display": "0.374"
+          "pctile": 14.0,
+          "value": 0.318,
+          "display": "0.318"
         },
         "xwOBACON": {
-          "pctile": 52.7,
-          "value": 0.358,
-          "display": "0.358"
+          "pctile": 13.5,
+          "value": 0.305,
+          "display": "0.305"
         },
         "Avg Exit Velocity": {
-          "pctile": 18.9,
-          "value": 86.7,
-          "display": "86.7"
+          "pctile": 33.5,
+          "value": 87.6,
+          "display": "87.6"
         },
         "90th % EV": {
-          "pctile": 65.8,
-          "value": 104.9,
-          "display": "104.9"
+          "pctile": 46.5,
+          "value": 103.8,
+          "display": "103.8"
         },
         "Barrel %": {
-          "pctile": 77.8,
-          "value": 10.8,
-          "display": "10.8"
+          "pctile": 26.0,
+          "value": 4.7,
+          "display": "4.7"
         },
         "Blasts/Contact": {
-          "pctile": 42.4,
-          "value": 0.1269,
-          "display": "12.7"
+          "pctile": 29.2,
+          "value": 0.1118,
+          "display": "11.2"
         },
         "LA+SwtSpt%": {
-          "pctile": 72.0,
-          "value": 36.1,
-          "display": "36.1"
+          "pctile": 0.9,
+          "value": 23.5,
+          "display": "23.5"
         },
         "Avg Bat Speed": {
-          "pctile": 36.1,
-          "value": 71.0852,
-          "display": "71.1"
+          "pctile": 35.7,
+          "value": 71.0251,
+          "display": "71.0"
         },
         "Fast Swing %": {
-          "pctile": 39.8,
-          "value": 0.1522,
-          "display": "15.2"
+          "pctile": 31.8,
+          "value": 0.1134,
+          "display": "11.3"
         },
         "Avg Swing Length": {
-          "pctile": 19.4,
-          "value": 7.6093,
-          "display": "7.6"
+          "pctile": 37.0,
+          "value": 7.434,
+          "display": "7.4"
         },
         "Chase %": {
-          "pctile": 26.0,
-          "value": 34.6,
-          "display": "34.6"
+          "pctile": 68.0,
+          "value": 27.7,
+          "display": "27.7"
         },
         "K%": {
-          "pctile": 18.1,
-          "value": 28.7,
-          "display": "28.7"
+          "pctile": 63.0,
+          "value": 20.5,
+          "display": "20.5"
         },
         "Z-Contact%": {
-          "pctile": 88.6,
-          "value": 90.0,
-          "display": "90.0"
+          "pctile": 76.6,
+          "value": 87.8,
+          "display": "87.8"
         },
         "Whiff %": {
-          "pctile": 36.3,
-          "value": 27.5,
-          "display": "27.5"
+          "pctile": 82.2,
+          "value": 19.7,
+          "display": "19.7"
         },
         "BB%": {
-          "pctile": 1.9,
-          "value": 3.3,
-          "display": "3.3"
+          "pctile": 64.7,
+          "value": 9.8,
+          "display": "9.8"
         }
       }
     },
@@ -36878,86 +36878,86 @@
       }
     },
     {
-      "name": "Pavin Smith",
-      "player_id": 656976,
-      "team": "AZ",
-      "team_id": 109,
+      "name": "Shay Whitcomb",
+      "player_id": 694376,
+      "team": "HOU",
+      "team_id": 117,
       "pa": 122,
       "categories": {
         "xSLG": {
-          "pctile": 14.0,
-          "value": 0.318,
-          "display": "0.318"
+          "pctile": 46.7,
+          "value": 0.374,
+          "display": "0.374"
         },
         "xwOBACON": {
-          "pctile": 13.5,
-          "value": 0.305,
-          "display": "0.305"
+          "pctile": 52.7,
+          "value": 0.358,
+          "display": "0.358"
         },
         "Avg Exit Velocity": {
-          "pctile": 33.5,
-          "value": 87.6,
-          "display": "87.6"
+          "pctile": 18.9,
+          "value": 86.7,
+          "display": "86.7"
         },
         "90th % EV": {
-          "pctile": 46.5,
-          "value": 103.8,
-          "display": "103.8"
+          "pctile": 65.8,
+          "value": 104.9,
+          "display": "104.9"
         },
         "Barrel %": {
-          "pctile": 26.0,
-          "value": 4.7,
-          "display": "4.7"
+          "pctile": 77.8,
+          "value": 10.8,
+          "display": "10.8"
         },
         "Blasts/Contact": {
-          "pctile": 29.2,
-          "value": 0.1118,
-          "display": "11.2"
+          "pctile": 42.4,
+          "value": 0.1269,
+          "display": "12.7"
         },
         "LA+SwtSpt%": {
-          "pctile": 0.9,
-          "value": 23.5,
-          "display": "23.5"
+          "pctile": 72.0,
+          "value": 36.1,
+          "display": "36.1"
         },
         "Avg Bat Speed": {
-          "pctile": 35.7,
-          "value": 71.0251,
-          "display": "71.0"
+          "pctile": 36.1,
+          "value": 71.0852,
+          "display": "71.1"
         },
         "Fast Swing %": {
-          "pctile": 31.8,
-          "value": 0.1134,
-          "display": "11.3"
+          "pctile": 39.8,
+          "value": 0.1522,
+          "display": "15.2"
         },
         "Avg Swing Length": {
-          "pctile": 37.0,
-          "value": 7.434,
-          "display": "7.4"
+          "pctile": 19.4,
+          "value": 7.6093,
+          "display": "7.6"
         },
         "Chase %": {
-          "pctile": 68.0,
-          "value": 27.7,
-          "display": "27.7"
+          "pctile": 26.0,
+          "value": 34.6,
+          "display": "34.6"
         },
         "K%": {
-          "pctile": 63.0,
-          "value": 20.5,
-          "display": "20.5"
+          "pctile": 18.1,
+          "value": 28.7,
+          "display": "28.7"
         },
         "Z-Contact%": {
-          "pctile": 76.6,
-          "value": 87.8,
-          "display": "87.8"
+          "pctile": 88.6,
+          "value": 90.0,
+          "display": "90.0"
         },
         "Whiff %": {
-          "pctile": 82.2,
-          "value": 19.7,
-          "display": "19.7"
+          "pctile": 36.3,
+          "value": 27.5,
+          "display": "27.5"
         },
         "BB%": {
-          "pctile": 64.7,
-          "value": 9.8,
-          "display": "9.8"
+          "pctile": 1.9,
+          "value": 3.3,
+          "display": "3.3"
         }
       }
     },
@@ -37046,90 +37046,6 @@
       }
     },
     {
-      "name": "Sean Murphy",
-      "player_id": 669221,
-      "team": "ATL",
-      "team_id": 144,
-      "pa": 121,
-      "categories": {
-        "xSLG": {
-          "pctile": 20.9,
-          "value": 0.332,
-          "display": "0.332"
-        },
-        "xwOBACON": {
-          "pctile": 44.5,
-          "value": 0.347,
-          "display": "0.347"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 37.0,
-          "value": 87.8,
-          "display": "87.8"
-        },
-        "90th % EV": {
-          "pctile": 71.0,
-          "value": 105.4,
-          "display": "105.4"
-        },
-        "Barrel %": {
-          "pctile": 58.1,
-          "value": 8.2,
-          "display": "8.2"
-        },
-        "Blasts/Contact": {
-          "pctile": 92.0,
-          "value": 0.1901,
-          "display": "19.0"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 4.5,
-          "value": 26.0,
-          "display": "26.0"
-        },
-        "Avg Bat Speed": {
-          "pctile": 58.9,
-          "value": 72.5022,
-          "display": "72.5"
-        },
-        "Fast Swing %": {
-          "pctile": 64.7,
-          "value": 0.2908,
-          "display": "29.1"
-        },
-        "Avg Swing Length": {
-          "pctile": 7.5,
-          "value": 7.8741,
-          "display": "7.9"
-        },
-        "Chase %": {
-          "pctile": 28.0,
-          "value": 34.3,
-          "display": "34.3"
-        },
-        "K%": {
-          "pctile": 13.3,
-          "value": 30.6,
-          "display": "30.6"
-        },
-        "Z-Contact%": {
-          "pctile": 25.6,
-          "value": 80.8,
-          "display": "80.8"
-        },
-        "Whiff %": {
-          "pctile": 15.5,
-          "value": 31.9,
-          "display": "31.9"
-        },
-        "BB%": {
-          "pctile": 55.1,
-          "value": 9.1,
-          "display": "9.1"
-        }
-      }
-    },
-    {
       "name": "Joey Loperfido",
       "player_id": 694388,
       "team": "HOU",
@@ -37210,6 +37126,90 @@
           "pctile": 84.5,
           "value": 11.6,
           "display": "11.6"
+        }
+      }
+    },
+    {
+      "name": "Sean Murphy",
+      "player_id": 669221,
+      "team": "ATL",
+      "team_id": 144,
+      "pa": 121,
+      "categories": {
+        "xSLG": {
+          "pctile": 20.9,
+          "value": 0.332,
+          "display": "0.332"
+        },
+        "xwOBACON": {
+          "pctile": 44.5,
+          "value": 0.347,
+          "display": "0.347"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 37.0,
+          "value": 87.8,
+          "display": "87.8"
+        },
+        "90th % EV": {
+          "pctile": 71.0,
+          "value": 105.4,
+          "display": "105.4"
+        },
+        "Barrel %": {
+          "pctile": 58.1,
+          "value": 8.2,
+          "display": "8.2"
+        },
+        "Blasts/Contact": {
+          "pctile": 92.0,
+          "value": 0.1901,
+          "display": "19.0"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 4.5,
+          "value": 26.0,
+          "display": "26.0"
+        },
+        "Avg Bat Speed": {
+          "pctile": 58.9,
+          "value": 72.5022,
+          "display": "72.5"
+        },
+        "Fast Swing %": {
+          "pctile": 64.7,
+          "value": 0.2908,
+          "display": "29.1"
+        },
+        "Avg Swing Length": {
+          "pctile": 7.5,
+          "value": 7.8741,
+          "display": "7.9"
+        },
+        "Chase %": {
+          "pctile": 28.0,
+          "value": 34.3,
+          "display": "34.3"
+        },
+        "K%": {
+          "pctile": 13.3,
+          "value": 30.6,
+          "display": "30.6"
+        },
+        "Z-Contact%": {
+          "pctile": 25.6,
+          "value": 80.8,
+          "display": "80.8"
+        },
+        "Whiff %": {
+          "pctile": 15.5,
+          "value": 31.9,
+          "display": "31.9"
+        },
+        "BB%": {
+          "pctile": 55.1,
+          "value": 9.1,
+          "display": "9.1"
         }
       }
     },
@@ -37634,90 +37634,6 @@
       }
     },
     {
-      "name": "Josh Rojas",
-      "player_id": 668942,
-      "team": null,
-      "team_id": null,
-      "pa": 115,
-      "categories": {
-        "xSLG": {
-          "pctile": 1.1,
-          "value": 0.261,
-          "display": "0.261"
-        },
-        "xwOBACON": {
-          "pctile": 0.2,
-          "value": 0.229,
-          "display": "0.229"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 14.2,
-          "value": 86.1,
-          "display": "86.1"
-        },
-        "90th % EV": {
-          "pctile": 3.9,
-          "value": 99.4,
-          "display": "99.4"
-        },
-        "Barrel %": {
-          "pctile": 1.5,
-          "value": 1.1,
-          "display": "1.1"
-        },
-        "Blasts/Contact": {
-          "pctile": 6.2,
-          "value": 0.0724,
-          "display": "7.2"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 29.2,
-          "value": 31.5,
-          "display": "31.5"
-        },
-        "Avg Bat Speed": {
-          "pctile": 11.8,
-          "value": 68.7439,
-          "display": "68.7"
-        },
-        "Fast Swing %": {
-          "pctile": 8.8,
-          "value": 0.0326,
-          "display": "3.3"
-        },
-        "Avg Swing Length": {
-          "pctile": 50.3,
-          "value": 7.3094,
-          "display": "7.3"
-        },
-        "Chase %": {
-          "pctile": 50.5,
-          "value": 30.4,
-          "display": "30.4"
-        },
-        "K%": {
-          "pctile": 89.2,
-          "value": 14.8,
-          "display": "14.8"
-        },
-        "Z-Contact%": {
-          "pctile": 90.1,
-          "value": 90.3,
-          "display": "90.3"
-        },
-        "Whiff %": {
-          "pctile": 84.1,
-          "value": 19.2,
-          "display": "19.2"
-        },
-        "BB%": {
-          "pctile": 8.0,
-          "value": 4.3,
-          "display": "4.3"
-        }
-      }
-    },
-    {
       "name": "Juan Brito",
       "player_id": 682877,
       "team": "CIN",
@@ -37798,6 +37714,90 @@
           "pctile": 22.8,
           "value": 6.1,
           "display": "6.1"
+        }
+      }
+    },
+    {
+      "name": "Josh Rojas",
+      "player_id": 668942,
+      "team": "KC",
+      "team_id": 118,
+      "pa": 115,
+      "categories": {
+        "xSLG": {
+          "pctile": 1.1,
+          "value": 0.261,
+          "display": "0.261"
+        },
+        "xwOBACON": {
+          "pctile": 0.2,
+          "value": 0.229,
+          "display": "0.229"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 14.2,
+          "value": 86.1,
+          "display": "86.1"
+        },
+        "90th % EV": {
+          "pctile": 3.9,
+          "value": 99.4,
+          "display": "99.4"
+        },
+        "Barrel %": {
+          "pctile": 1.5,
+          "value": 1.1,
+          "display": "1.1"
+        },
+        "Blasts/Contact": {
+          "pctile": 6.2,
+          "value": 0.0724,
+          "display": "7.2"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 29.2,
+          "value": 31.5,
+          "display": "31.5"
+        },
+        "Avg Bat Speed": {
+          "pctile": 11.8,
+          "value": 68.7439,
+          "display": "68.7"
+        },
+        "Fast Swing %": {
+          "pctile": 8.8,
+          "value": 0.0326,
+          "display": "3.3"
+        },
+        "Avg Swing Length": {
+          "pctile": 50.3,
+          "value": 7.3094,
+          "display": "7.3"
+        },
+        "Chase %": {
+          "pctile": 50.5,
+          "value": 30.4,
+          "display": "30.4"
+        },
+        "K%": {
+          "pctile": 89.2,
+          "value": 14.8,
+          "display": "14.8"
+        },
+        "Z-Contact%": {
+          "pctile": 90.1,
+          "value": 90.3,
+          "display": "90.3"
+        },
+        "Whiff %": {
+          "pctile": 84.1,
+          "value": 19.2,
+          "display": "19.2"
+        },
+        "BB%": {
+          "pctile": 8.0,
+          "value": 4.3,
+          "display": "4.3"
         }
       }
     },
@@ -38054,90 +38054,6 @@
       }
     },
     {
-      "name": "Everson Pereira",
-      "player_id": 677592,
-      "team": "STL",
-      "team_id": 138,
-      "pa": 111,
-      "categories": {
-        "xSLG": {
-          "pctile": 64.1,
-          "value": 0.4,
-          "display": "0.400"
-        },
-        "xwOBACON": {
-          "pctile": 81.3,
-          "value": 0.404,
-          "display": "0.404"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 47.7,
-          "value": 88.5,
-          "display": "88.5"
-        },
-        "90th % EV": {
-          "pctile": 65.8,
-          "value": 104.9,
-          "display": "104.9"
-        },
-        "Barrel %": {
-          "pctile": 88.4,
-          "value": 12.7,
-          "display": "12.7"
-        },
-        "Blasts/Contact": {
-          "pctile": 75.7,
-          "value": 0.1587,
-          "display": "15.9"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 92.5,
-          "value": 39.7,
-          "display": "39.7"
-        },
-        "Avg Bat Speed": {
-          "pctile": 82.4,
-          "value": 74.2923,
-          "display": "74.3"
-        },
-        "Fast Swing %": {
-          "pctile": 85.6,
-          "value": 0.4712,
-          "display": "47.1"
-        },
-        "Avg Swing Length": {
-          "pctile": 2.6,
-          "value": 8.0198,
-          "display": "8.0"
-        },
-        "Chase %": {
-          "pctile": 15.1,
-          "value": 37.4,
-          "display": "37.4"
-        },
-        "K%": {
-          "pctile": 4.3,
-          "value": 33.3,
-          "display": "33.3"
-        },
-        "Z-Contact%": {
-          "pctile": 14.6,
-          "value": 78.4,
-          "display": "78.4"
-        },
-        "Whiff %": {
-          "pctile": 2.6,
-          "value": 37.8,
-          "display": "37.8"
-        },
-        "BB%": {
-          "pctile": 15.5,
-          "value": 5.4,
-          "display": "5.4"
-        }
-      }
-    },
-    {
       "name": "Harrison Bader",
       "player_id": 664056,
       "team": "SF",
@@ -38218,6 +38134,90 @@
           "pctile": 3.9,
           "value": 3.6,
           "display": "3.6"
+        }
+      }
+    },
+    {
+      "name": "Everson Pereira",
+      "player_id": 677592,
+      "team": "STL",
+      "team_id": 138,
+      "pa": 111,
+      "categories": {
+        "xSLG": {
+          "pctile": 64.1,
+          "value": 0.4,
+          "display": "0.400"
+        },
+        "xwOBACON": {
+          "pctile": 81.3,
+          "value": 0.404,
+          "display": "0.404"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 47.7,
+          "value": 88.5,
+          "display": "88.5"
+        },
+        "90th % EV": {
+          "pctile": 65.8,
+          "value": 104.9,
+          "display": "104.9"
+        },
+        "Barrel %": {
+          "pctile": 88.4,
+          "value": 12.7,
+          "display": "12.7"
+        },
+        "Blasts/Contact": {
+          "pctile": 75.7,
+          "value": 0.1587,
+          "display": "15.9"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 92.5,
+          "value": 39.7,
+          "display": "39.7"
+        },
+        "Avg Bat Speed": {
+          "pctile": 82.4,
+          "value": 74.2923,
+          "display": "74.3"
+        },
+        "Fast Swing %": {
+          "pctile": 85.6,
+          "value": 0.4712,
+          "display": "47.1"
+        },
+        "Avg Swing Length": {
+          "pctile": 2.6,
+          "value": 8.0198,
+          "display": "8.0"
+        },
+        "Chase %": {
+          "pctile": 15.1,
+          "value": 37.4,
+          "display": "37.4"
+        },
+        "K%": {
+          "pctile": 4.3,
+          "value": 33.3,
+          "display": "33.3"
+        },
+        "Z-Contact%": {
+          "pctile": 14.6,
+          "value": 78.4,
+          "display": "78.4"
+        },
+        "Whiff %": {
+          "pctile": 2.6,
+          "value": 37.8,
+          "display": "37.8"
+        },
+        "BB%": {
+          "pctile": 15.5,
+          "value": 5.4,
+          "display": "5.4"
         }
       }
     },
@@ -38474,90 +38474,6 @@
       }
     },
     {
-      "name": "Austin Hays",
-      "player_id": 669720,
-      "team": "SD",
-      "team_id": 135,
-      "pa": 105,
-      "categories": {
-        "xSLG": {
-          "pctile": 52.9,
-          "value": 0.383,
-          "display": "0.383"
-        },
-        "xwOBACON": {
-          "pctile": 71.2,
-          "value": 0.388,
-          "display": "0.388"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 31.6,
-          "value": 87.5,
-          "display": "87.5"
-        },
-        "90th % EV": {
-          "pctile": 38.9,
-          "value": 103.2,
-          "display": "103.2"
-        },
-        "Barrel %": {
-          "pctile": 20.6,
-          "value": 4.1,
-          "display": "4.1"
-        },
-        "Blasts/Contact": {
-          "pctile": 50.5,
-          "value": 0.1349,
-          "display": "13.5"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 62.6,
-          "value": 35.1,
-          "display": "35.1"
-        },
-        "Avg Bat Speed": {
-          "pctile": 65.6,
-          "value": 72.9368,
-          "display": "72.9"
-        },
-        "Fast Swing %": {
-          "pctile": 56.8,
-          "value": 0.2527,
-          "display": "25.3"
-        },
-        "Avg Swing Length": {
-          "pctile": 53.8,
-          "value": 7.2729,
-          "display": "7.3"
-        },
-        "Chase %": {
-          "pctile": 17.4,
-          "value": 36.6,
-          "display": "36.6"
-        },
-        "K%": {
-          "pctile": 31.0,
-          "value": 25.7,
-          "display": "25.7"
-        },
-        "Z-Contact%": {
-          "pctile": 9.5,
-          "value": 76.9,
-          "display": "76.9"
-        },
-        "Whiff %": {
-          "pctile": 9.2,
-          "value": 33.8,
-          "display": "33.8"
-        },
-        "BB%": {
-          "pctile": 5.4,
-          "value": 3.8,
-          "display": "3.8"
-        }
-      }
-    },
-    {
       "name": "Christopher Morel",
       "player_id": 666624,
       "team": "NYM",
@@ -38638,6 +38554,90 @@
           "pctile": 18.3,
           "value": 5.7,
           "display": "5.7"
+        }
+      }
+    },
+    {
+      "name": "Austin Hays",
+      "player_id": 669720,
+      "team": "SD",
+      "team_id": 135,
+      "pa": 105,
+      "categories": {
+        "xSLG": {
+          "pctile": 52.9,
+          "value": 0.383,
+          "display": "0.383"
+        },
+        "xwOBACON": {
+          "pctile": 71.2,
+          "value": 0.388,
+          "display": "0.388"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 31.6,
+          "value": 87.5,
+          "display": "87.5"
+        },
+        "90th % EV": {
+          "pctile": 38.9,
+          "value": 103.2,
+          "display": "103.2"
+        },
+        "Barrel %": {
+          "pctile": 20.6,
+          "value": 4.1,
+          "display": "4.1"
+        },
+        "Blasts/Contact": {
+          "pctile": 50.5,
+          "value": 0.1349,
+          "display": "13.5"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 62.6,
+          "value": 35.1,
+          "display": "35.1"
+        },
+        "Avg Bat Speed": {
+          "pctile": 65.6,
+          "value": 72.9368,
+          "display": "72.9"
+        },
+        "Fast Swing %": {
+          "pctile": 56.8,
+          "value": 0.2527,
+          "display": "25.3"
+        },
+        "Avg Swing Length": {
+          "pctile": 53.8,
+          "value": 7.2729,
+          "display": "7.3"
+        },
+        "Chase %": {
+          "pctile": 17.4,
+          "value": 36.6,
+          "display": "36.6"
+        },
+        "K%": {
+          "pctile": 31.0,
+          "value": 25.7,
+          "display": "25.7"
+        },
+        "Z-Contact%": {
+          "pctile": 9.5,
+          "value": 76.9,
+          "display": "76.9"
+        },
+        "Whiff %": {
+          "pctile": 9.2,
+          "value": 33.8,
+          "display": "33.8"
+        },
+        "BB%": {
+          "pctile": 5.4,
+          "value": 3.8,
+          "display": "3.8"
         }
       }
     },
@@ -38810,90 +38810,6 @@
       }
     },
     {
-      "name": "Jhonny Pereda",
-      "player_id": 640902,
-      "team": "SEA",
-      "team_id": 136,
-      "pa": 101,
-      "categories": {
-        "xSLG": {
-          "pctile": 62.4,
-          "value": 0.398,
-          "display": "0.398"
-        },
-        "xwOBACON": {
-          "pctile": 71.2,
-          "value": 0.388,
-          "display": "0.388"
-        },
-        "Avg Exit Velocity": {
-          "pctile": 73.1,
-          "value": 90.0,
-          "display": "90.0"
-        },
-        "90th % EV": {
-          "pctile": 40.4,
-          "value": 103.3,
-          "display": "103.3"
-        },
-        "Barrel %": {
-          "pctile": 10.8,
-          "value": 2.9,
-          "display": "2.9"
-        },
-        "Blasts/Contact": {
-          "pctile": 45.4,
-          "value": 0.1295,
-          "display": "12.9"
-        },
-        "LA+SwtSpt%": {
-          "pctile": 99.8,
-          "value": 46.5,
-          "display": "46.5"
-        },
-        "Avg Bat Speed": {
-          "pctile": 31.6,
-          "value": 70.7868,
-          "display": "70.8"
-        },
-        "Fast Swing %": {
-          "pctile": 19.6,
-          "value": 0.0615,
-          "display": "6.1"
-        },
-        "Avg Swing Length": {
-          "pctile": 46.7,
-          "value": 7.3461,
-          "display": "7.3"
-        },
-        "Chase %": {
-          "pctile": 86.5,
-          "value": 24.2,
-          "display": "24.2"
-        },
-        "K%": {
-          "pctile": 68.4,
-          "value": 19.8,
-          "display": "19.8"
-        },
-        "Z-Contact%": {
-          "pctile": 19.8,
-          "value": 79.7,
-          "display": "79.7"
-        },
-        "Whiff %": {
-          "pctile": 67.5,
-          "value": 22.3,
-          "display": "22.3"
-        },
-        "BB%": {
-          "pctile": 52.7,
-          "value": 8.9,
-          "display": "8.9"
-        }
-      }
-    },
-    {
       "name": "Blake Perkins",
       "player_id": 663368,
       "team": "CLE",
@@ -38974,6 +38890,90 @@
           "pctile": 66.0,
           "value": 9.9,
           "display": "9.9"
+        }
+      }
+    },
+    {
+      "name": "Jhonny Pereda",
+      "player_id": 640902,
+      "team": "SEA",
+      "team_id": 136,
+      "pa": 101,
+      "categories": {
+        "xSLG": {
+          "pctile": 62.4,
+          "value": 0.398,
+          "display": "0.398"
+        },
+        "xwOBACON": {
+          "pctile": 71.2,
+          "value": 0.388,
+          "display": "0.388"
+        },
+        "Avg Exit Velocity": {
+          "pctile": 73.1,
+          "value": 90.0,
+          "display": "90.0"
+        },
+        "90th % EV": {
+          "pctile": 40.4,
+          "value": 103.3,
+          "display": "103.3"
+        },
+        "Barrel %": {
+          "pctile": 10.8,
+          "value": 2.9,
+          "display": "2.9"
+        },
+        "Blasts/Contact": {
+          "pctile": 45.4,
+          "value": 0.1295,
+          "display": "12.9"
+        },
+        "LA+SwtSpt%": {
+          "pctile": 99.8,
+          "value": 46.5,
+          "display": "46.5"
+        },
+        "Avg Bat Speed": {
+          "pctile": 31.6,
+          "value": 70.7868,
+          "display": "70.8"
+        },
+        "Fast Swing %": {
+          "pctile": 19.6,
+          "value": 0.0615,
+          "display": "6.1"
+        },
+        "Avg Swing Length": {
+          "pctile": 46.7,
+          "value": 7.3461,
+          "display": "7.3"
+        },
+        "Chase %": {
+          "pctile": 86.5,
+          "value": 24.2,
+          "display": "24.2"
+        },
+        "K%": {
+          "pctile": 68.4,
+          "value": 19.8,
+          "display": "19.8"
+        },
+        "Z-Contact%": {
+          "pctile": 19.8,
+          "value": 79.7,
+          "display": "79.7"
+        },
+        "Whiff %": {
+          "pctile": 67.5,
+          "value": 22.3,
+          "display": "22.3"
+        },
+        "BB%": {
+          "pctile": 52.7,
+          "value": 8.9,
+          "display": "8.9"
         }
       }
     },
@@ -40987,7 +40987,7 @@
       "name": "Andrew Kittredge",
       "player_id": 552640,
       "team": "BAL",
-      "team_id": null,
+      "team_id": 110,
       "ip": 48.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -41466,8 +41466,8 @@
     {
       "name": "Hoby Milner",
       "player_id": 571948,
-      "team": null,
-      "team_id": null,
+      "team": "SEA",
+      "team_id": 136,
       "ip": 42.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42027,7 +42027,7 @@
       "name": "Jason Adam",
       "player_id": 592094,
       "team": "SDP",
-      "team_id": null,
+      "team_id": 135,
       "ip": 34.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42347,7 +42347,7 @@
       "name": "Ryne Stanek",
       "player_id": 592773,
       "team": "STL",
-      "team_id": 138,
+      "team_id": null,
       "ip": 62.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -42666,8 +42666,8 @@
     {
       "name": "Trevor Williams",
       "player_id": 592866,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "ip": 28.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43227,7 +43227,7 @@
       "name": "Steven Okert",
       "player_id": 595345,
       "team": "HOU",
-      "team_id": 117,
+      "team_id": null,
       "ip": 67.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43307,7 +43307,7 @@
       "name": "Jakob Junis",
       "player_id": 596001,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 54.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43547,7 +43547,7 @@
       "name": "Scott Barlow",
       "player_id": 605130,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 118,
       "ip": 33.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -43706,8 +43706,8 @@
     {
       "name": "Michael Fulmer",
       "player_id": 605242,
-      "team": null,
-      "team_id": null,
+      "team": "NYY",
+      "team_id": 147,
       "ip": 13.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -44267,7 +44267,7 @@
       "name": "Jeffrey Springs",
       "player_id": 605488,
       "team": "ATH",
-      "team_id": null,
+      "team_id": 133,
       "ip": 142.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -45866,8 +45866,8 @@
     {
       "name": "Austin Voth",
       "player_id": 608723,
-      "team": null,
-      "team_id": null,
+      "team": "TEX",
+      "team_id": 140,
       "ip": 10.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -46746,8 +46746,8 @@
     {
       "name": "A.J. Minter",
       "player_id": 621345,
-      "team": null,
-      "team_id": null,
+      "team": "MIN",
+      "team_id": 142,
       "ip": 45.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -46827,7 +46827,7 @@
       "name": "Ryan Borucki",
       "player_id": 621366,
       "team": "SFG",
-      "team_id": 114,
+      "team_id": null,
       "ip": 23.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -48347,7 +48347,7 @@
       "name": "Raisel Iglesias",
       "player_id": 628452,
       "team": "ATL",
-      "team_id": 144,
+      "team_id": null,
       "ip": 60.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -48777,7 +48777,7 @@
           "display": "0.205"
         },
         "xSLG": {
-          "pctile": 87.2,
+          "pctile": 87.4,
           "value": 0.319,
           "display": "0.319"
         },
@@ -48827,7 +48827,7 @@
       "name": "Connor Brogdon",
       "player_id": 641401,
       "team": "CLE",
-      "team_id": 114,
+      "team_id": null,
       "ip": 16.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -49146,8 +49146,8 @@
     {
       "name": "Eric Lauer",
       "player_id": 641778,
-      "team": null,
-      "team_id": null,
+      "team": "LAD",
+      "team_id": 119,
       "ip": 108.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -49226,8 +49226,8 @@
     {
       "name": "Zack Littell",
       "player_id": 641793,
-      "team": null,
-      "team_id": null,
+      "team": "AZ",
+      "team_id": 109,
       "ip": 124.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -49947,7 +49947,7 @@
       "name": "Ryan Yarbrough",
       "player_id": 642232,
       "team": "NYY",
-      "team_id": null,
+      "team_id": 147,
       "ip": 63.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -50267,7 +50267,7 @@
       "name": "Jonathan Hern\u00e1ndez",
       "player_id": 642546,
       "team": "LAD",
-      "team_id": null,
+      "team_id": 667,
       "ip": 25.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -50587,7 +50587,7 @@
       "name": "Mark Leiter Jr.",
       "player_id": 643410,
       "team": "ATH",
-      "team_id": 133,
+      "team_id": null,
       "ip": 33.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51146,8 +51146,8 @@
     {
       "name": "Aaron Civale",
       "player_id": 650644,
-      "team": "CHC",
-      "team_id": 112,
+      "team": null,
+      "team_id": null,
       "ip": 111.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -51467,7 +51467,7 @@
       "name": "Jalen Beeks",
       "player_id": 656222,
       "team": "TEX",
-      "team_id": null,
+      "team_id": 140,
       "ip": 26.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -51707,7 +51707,7 @@
       "name": "Brock Burke",
       "player_id": 656271,
       "team": "CIN",
-      "team_id": 113,
+      "team_id": null,
       "ip": 74.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52027,7 +52027,7 @@
       "name": "Kevin Ginkel",
       "player_id": 656464,
       "team": "ARI",
-      "team_id": 109,
+      "team_id": null,
       "ip": 67.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -52986,8 +52986,8 @@
     {
       "name": "David Peterson",
       "player_id": 656849,
-      "team": null,
-      "team_id": null,
+      "team": "CHC",
+      "team_id": 112,
       "ip": 148.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -53307,7 +53307,7 @@
       "name": "Ryan Thompson",
       "player_id": 657044,
       "team": "ARI",
-      "team_id": 109,
+      "team_id": null,
       "ip": 40.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -53467,7 +53467,7 @@
       "name": "Peter Strzelecki",
       "player_id": 657265,
       "team": "STL",
-      "team_id": null,
+      "team_id": 138,
       "ip": 14.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -54267,7 +54267,7 @@
       "name": "Jos\u00e9 Suarez",
       "player_id": 660761,
       "team": null,
-      "team_id": 696,
+      "team_id": null,
       "ip": 61.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -54507,7 +54507,7 @@
       "name": "Enyel De Los Santos",
       "player_id": 660853,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 71.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -55466,8 +55466,8 @@
     {
       "name": "Casey Mize",
       "player_id": 663554,
-      "team": null,
-      "team_id": null,
+      "team": "SD",
+      "team_id": 135,
       "ip": 131.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -55706,8 +55706,8 @@
     {
       "name": "Bailey Falter",
       "player_id": 663559,
-      "team": "ATL",
-      "team_id": 144,
+      "team": null,
+      "team_id": null,
       "ip": 13.0,
       "vaa_pitch_type": null,
       "categories": {
@@ -56427,7 +56427,7 @@
       "name": "Patrick Sandoval",
       "player_id": 663776,
       "team": "BOS",
-      "team_id": null,
+      "team_id": 111,
       "ip": 70.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57146,8 +57146,8 @@
     {
       "name": "Richard Lovelady",
       "player_id": 663992,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "ip": 35.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57307,7 +57307,7 @@
       "name": "Pete Fairbanks",
       "player_id": 664126,
       "team": "MIA",
-      "team_id": null,
+      "team_id": 146,
       "ip": 41.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57467,7 +57467,7 @@
       "name": "JT Brubaker",
       "player_id": 664141,
       "team": "SFG",
-      "team_id": null,
+      "team_id": 137,
       "ip": 60.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -57866,8 +57866,8 @@
     {
       "name": "Jos\u00e9 Urquidy",
       "player_id": 664353,
-      "team": "PHI",
-      "team_id": 143,
+      "team": null,
+      "team_id": null,
       "ip": 36.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -58106,8 +58106,8 @@
     {
       "name": "Justin Lawrence",
       "player_id": 664875,
-      "team": null,
-      "team_id": null,
+      "team": "WSH",
+      "team_id": 120,
       "ip": 34.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -59627,7 +59627,7 @@
       "name": "John King",
       "player_id": 667463,
       "team": "MIA",
-      "team_id": null,
+      "team_id": 140,
       "ip": 49.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -62267,7 +62267,7 @@
       "name": "CJ Van Eyk",
       "player_id": 669310,
       "team": "TOR",
-      "team_id": null,
+      "team_id": 141,
       "ip": 11.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -62507,7 +62507,7 @@
       "name": "Cole Henry",
       "player_id": 669371,
       "team": "WSN",
-      "team_id": 120,
+      "team_id": null,
       "ip": 13.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -63787,7 +63787,7 @@
       "name": "Jason Alexander",
       "player_id": 669920,
       "team": "HOU",
-      "team_id": null,
+      "team_id": 117,
       "ip": 18.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -64346,8 +64346,8 @@
     {
       "name": "John Schreiber",
       "player_id": 670167,
-      "team": "NYY",
-      "team_id": 147,
+      "team": null,
+      "team_id": null,
       "ip": 60.1,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -67707,7 +67707,7 @@
       "name": "Ryan Walker",
       "player_id": 676254,
       "team": "SFG",
-      "team_id": 137,
+      "team_id": 158,
       "ip": 32.2,
       "vaa_pitch_type": null,
       "categories": {
@@ -68297,7 +68297,7 @@
           "display": "0.219"
         },
         "xSLG": {
-          "pctile": 87.2,
+          "pctile": 87.4,
           "value": 0.319,
           "display": "0.319"
         },
@@ -68507,7 +68507,7 @@
       "name": "PJ Poulin",
       "player_id": 676571,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 36.2,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -68987,7 +68987,7 @@
       "name": "Tom Cosgrove",
       "player_id": 676680,
       "team": "WSN",
-      "team_id": null,
+      "team_id": 120,
       "ip": 16.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -71257,9 +71257,9 @@
           "display": "0.240"
         },
         "xSLG": {
-          "pctile": 87.5,
-          "value": 0.318,
-          "display": "0.318"
+          "pctile": 87.4,
+          "value": 0.319,
+          "display": "0.319"
         },
         "xwOBA": {
           "pctile": 87.4,
@@ -71786,8 +71786,8 @@
     {
       "name": "Simeon Woods Richardson",
       "player_id": 680573,
-      "team": "SEA",
-      "team_id": 136,
+      "team": null,
+      "team_id": null,
       "ip": 66.0,
       "vaa_pitch_type": "FF",
       "categories": {
@@ -76697,9 +76697,9 @@
           "display": "0.253"
         },
         "xSLG": {
-          "pctile": 12.3,
-          "value": 0.469,
-          "display": "0.469"
+          "pctile": 12.6,
+          "value": 0.468,
+          "display": "0.468"
         },
         "xwOBA": {
           "pctile": 11.4,
@@ -78507,7 +78507,7 @@
       "name": "Bradley Blalock",
       "player_id": 687134,
       "team": "MIA",
-      "team_id": null,
+      "team_id": 146,
       "ip": 11.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -79707,7 +79707,7 @@
       "name": "Zak Kent",
       "player_id": 687849,
       "team": null,
-      "team_id": 695,
+      "team_id": null,
       "ip": 16.1,
       "vaa_pitch_type": null,
       "categories": {
@@ -80617,7 +80617,7 @@
           "display": "0.214"
         },
         "xSLG": {
-          "pctile": 87.2,
+          "pctile": 87.4,
           "value": 0.319,
           "display": "0.319"
         },
@@ -91136,6 +91136,6 @@
   "meta": {
     "min_pa": 100,
     "min_ip": 10,
-    "generated_at": "2026-11-15 14:01:39 UTC"
+    "generated_at": "2026-11-16 14:01:43 UTC"
   }
 }
