@@ -1,6 +1,10 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { getLogoUrl, getHeadshotUrl } from "./SharedComponents.jsx";
 import { useTheme } from "./ThemeContext.jsx";
+import { pctHex } from "../ui/colorScale.js";
+
+// The "faster" side is highlighted in the site scale's top color.
+const WIN = pctHex(90, true);
 
 // ── MLB Team primary colors ──
 const TEAM_COLORS = {
@@ -127,7 +131,7 @@ function drawRaceFrame(ctx, p1, p2, p1Prog, p2Prog, logo1, logo2, finished) {
 
     // Name
     ctx.textAlign = "left";
-    ctx.fillStyle = isWinner ? "#4ade80" : "#eee";
+    ctx.fillStyle = isWinner ? WIN : "#eee";
     ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(player.name, 110, y + 22);
 
@@ -138,7 +142,7 @@ function drawRaceFrame(ctx, p1, p2, p1Prog, p2Prog, logo1, logo2, finished) {
 
     // Winner badge
     if (isWinner) {
-      ctx.fillStyle = "#4ade80";
+      ctx.fillStyle = WIN;
       ctx.font = "bold 18px sans-serif";
       ctx.fillText("⚡ FASTER", 380, y + 50);
     }
@@ -179,7 +183,7 @@ function drawRaceFrame(ctx, p1, p2, p1Prog, p2Prog, logo1, logo2, finished) {
     ctx.arc(Math.min(ballX, trackR - 24), ty + 28, 22, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.strokeStyle = isWinner ? "#4ade80" : "#333";
+    ctx.strokeStyle = isWinner ? WIN : "#333";
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -355,9 +359,9 @@ function RaceComparison({ player1, player2, players }) {
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
           {logo && <img src={logo} alt="" style={{ width: 20, height: 20, objectFit: "contain" }} onError={e => e.target.style.display = "none"} />}
-          <span style={{ fontSize: 13, fontWeight: 700, color: isWinner ? "#4ade80" : "#ddd" }}>{player.name}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: isWinner ? WIN : "#ddd" }}>{player.name}</span>
           <span style={{ fontSize: 11, color: t.textMuted, fontFamily: "'DM Mono', monospace" }}>{player.avg_pitches_to_2k.toFixed(2)} pitches</span>
-          {isWinner && <span style={{ fontSize: 11, fontWeight: 700, color: "#4ade80" }}>⚡ FASTER</span>}
+          {isWinner && <span style={{ fontSize: 11, fontWeight: 700, color: WIN }}>⚡ FASTER</span>}
         </div>
         <div style={{ position: "relative", height: 44, borderRadius: 8, background: t.inputBg, border: `1px solid ${t.cardBorder}`, overflow: "hidden" }}>
           <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 3, background: "#f59e0b", zIndex: 1 }} />
@@ -372,7 +376,7 @@ function RaceComparison({ player1, player2, players }) {
             position: "absolute", left: `${Math.min(pos, 96)}%`, top: "50%",
             transform: "translate(-50%, -50%)",
             width: 34, height: 34, borderRadius: "50%",
-            background: color, border: `2px solid ${isWinner ? "#4ade80" : "#333"}`,
+            background: color, border: `2px solid ${isWinner ? WIN : "#333"}`,
             display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: `0 0 ${racing ? 12 : 4}px ${color}66`,
             transition: racing ? "none" : "left 0.3s", zIndex: 2,

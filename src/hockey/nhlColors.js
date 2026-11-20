@@ -1,35 +1,19 @@
-// Colours for the NHL tab. Everything is built from the site's percentile bins
-// (BIN_COLORS in baseball/SharedComponents.jsx): blue = below average, grey = average, red = above.
+// Colours for the NHL tab. Everything comes from the site-wide scale in
+// src/ui/colorScale.js: ice = below average, grey = average, fire = above.
+
+import { pctRgb, pctHex, inkOn as scaleInkOn } from "../ui/colorScale.js";
 
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 
-// Blue -> grey -> red through the bin colours, as a smooth scale for a 0-100 percentile.
-// The darkest blue disappears on a dark card, so the low end is lifted there.
-const stops = isDark => [
-  [0, isDark ? "#11509F" : "#08306B"], [17.5, "#2171B5"], [35, "#6BAED6"], [50, "#D9D9D9"],
-  [65, "#FC9272"], [82.5, "#FB6A4A"], [100, "#CB181D"],
-].map(([p, h]) => [p, hex(h)]);
-const STOPS = { true: stops(true), false: stops(false) };
-
-export function spectrumRgb(pct, isDark = true) {
-  const s = STOPS[!!isDark];
-  const p = Math.max(0, Math.min(100, pct));
-  let i = 1;
-  while (i < s.length - 1 && p > s[i][0]) i++;
-  const [p0, a] = s[i - 1], [p1, b] = s[i];
-  const u = (p - p0) / (p1 - p0);
-  return a.map((c, k) => Math.round(c + (b[k] - c) * u));
-}
+// Smooth scale for a 0-100 percentile (the low end is lifted on dark cards).
+export const spectrumRgb = (pct, isDark = true) => pctRgb(pct, isDark);
 export const spectrum = (pct, isDark) => `rgb(${spectrumRgb(pct, isDark).join(",")})`;
 
 // Black or white text, whichever reads better on a fill.
-export function inkOn(rgb) {
-  const [r, g, b] = rgb.map(c => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.3 ? "#111111" : "#ffffff";
-}
+export const inkOn = scaleInkOn;
 
-export const POSITIVE = "#CB181D";   // adds value
-export const NEGATIVE = "#2171B5";   // costs value
+export const POSITIVE = pctHex(88, true);    // adds value
+export const NEGATIVE = pctHex(15, false);   // costs value
 
 // Impact-by-season tier bands, best tier first: bold -> neutral -> bold.
 // Four for forwards (the four lines), three for defensemen (pairs) and goalies (roles).
@@ -39,10 +23,11 @@ export const TIERS = {
   D: ["1st pair", "2nd pair", "3rd pair", "Depth"],
   G: ["Starter (1)", "1B", "Backup"],
 };
+const TOP = pctHex(92, false), HIGH = pctHex(68, false), MID = pctHex(50, false), LOW = pctHex(32, false), BOTTOM = pctHex(12, false);
 export const TIER_COLORS = {
-  F: { "1st line": "#CB181D", "2nd line": "#FC9272", "3rd line": "#6BAED6", "4th line": "#2171B5" },
-  D: { "1st pair": "#CB181D", "2nd pair": "#BDBDBD", "3rd pair": "#2171B5" },
-  G: { "Starter (1)": "#CB181D", "1B": "#BDBDBD", "Backup": "#2171B5" },
+  F: { "1st line": TOP, "2nd line": HIGH, "3rd line": LOW, "4th line": BOTTOM },
+  D: { "1st pair": TOP, "2nd pair": MID, "3rd pair": BOTTOM },
+  G: { "Starter (1)": TOP, "1B": MID, "Backup": BOTTOM },
 };
 
 export function luminance(hexColor) {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { PlayerHeader, saveCardAsPng } from "./SharedComponents.jsx";
 import { DARK as t } from "./ThemeContext.jsx";
+import { cell, diffPct, readableOnCard } from "../ui/colorScale.js";
 
 // ── Merge 5° pipeline buckets into 10° display buckets ──
 // Pipeline has 12 buckets: ≤-10, -10/-5, -5/0, 0/5, 5/10, 10/15, 15/20, 20/25, 25/30, 30/35, 35/40, >40
@@ -42,17 +43,15 @@ function mergeBuckets(rawBuckets) {
 }
 
 
-// ── Summary-style coloring: green (above avg) → neutral → red (below avg) ──
+// ── Summary-style coloring on the site scale: fire (above avg) → neutral → ice (below avg) ──
+// bg/text: a filled cell and the ink that reads on it. fg: the scale color as text on
+// the chart's dark background.
 function evDiffColor(avgEv, leagueAvgEv) {
-  if (avgEv == null || leagueAvgEv == null) return { bg: "#2a2a2a", text: "#aaa" };
-  const diff = avgEv - leagueAvgEv;
-  const scale = 5; // ±5 mph = full saturation
-  let t = Math.max(-1, Math.min(1, diff / scale));
-  if (Math.abs(t) < 0.06) return { bg: "#2a2a2a", text: "#ccc" };
-  const s = (Math.abs(t) - 0.06) / 0.94;
-  const alpha = (0.35 + s * 0.65).toFixed(2);
-  if (t > 0) return { bg: `rgba(30,160,30,${alpha})`, text: "#fff" };
-  return { bg: `rgba(200,35,35,${alpha})`, text: "#fff" };
+  if (avgEv == null || leagueAvgEv == null) return { bg: "#2a2a2a", text: "#aaa", fg: "#aaa" };
+  const d = Math.max(-1, Math.min(1, (avgEv - leagueAvgEv) / 5)); // ±5 mph = full saturation
+  if (Math.abs(d) < 0.06) return { bg: "#2a2a2a", text: "#ccc", fg: "#ccc" };
+  const c = cell(diffPct(d), true, t.cardBg, 0.35, 1);
+  return { bg: c.bg, text: c.ink, fg: readableOnCard(c.solid, t) };
 }
 
 
@@ -397,7 +396,7 @@ function FanChart({ player, leagueAvg, seasonLabel }) {
       }
 
       // EV
-      const { text: evTc } = evDiffColor(b.avg_ev, lg?.avg_ev);
+      const { fg: evTc } = evDiffColor(b.avg_ev, lg?.avg_ev);
       ctx.fillStyle = b.avg_ev != null ? evTc : "#555";
       ctx.font = "bold 8px 'DM Mono', monospace, sans-serif";
       ctx.fillText(b.avg_ev != null ? b.avg_ev.toFixed(1) : "\u2014", tX + 186, ry);

@@ -1,12 +1,14 @@
 import { useState, useEffect, useId, useMemo, useRef } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
+import { pctHex, pctInk, readableOnCard } from "../ui/colorScale.js";
 
-// ── Percentile bin colors ──
-export const BIN_COLORS = {
-  "0-10": "#08306B", "10-25": "#2171B5", "25-45": "#6BAED6",
-  "45-55": "#D9D9D9", "55-75": "#FC9272", "75-90": "#FB6A4A", "90-100": "#CB181D",
-};
+// ── Percentile colors ──
+// Built on the site-wide scale in src/ui/colorScale.js. `binColor` is smooth (it
+// follows the scale exactly); BIN_COLORS keeps the old bin names, each set to the
+// scale at its bin's midpoint, for legends and the few places that name a bin.
+const BIN_MID = { "0-10": 5, "10-25": 17.5, "25-45": 35, "45-55": 50, "55-75": 65, "75-90": 82.5, "90-100": 95 };
+export const BIN_COLORS = Object.fromEntries(Object.entries(BIN_MID).map(([k, p]) => [k, pctHex(p, false)]));
 export const pctToBin = (p) => {
   if (p == null || !isFinite(p)) return "NA";
   if (p >= 90) return "90-100"; if (p >= 75) return "75-90";
@@ -19,11 +21,8 @@ export const pctToBin = (p) => {
 export const NUM_FONT = "'Pliant', sans-serif";
 export const NUM_WEIGHT = 700;
 
-export const binColor = (p) => BIN_COLORS[pctToBin(p)] || "#333";
-export const textOnBin = (p) => {
-  if (p == null) return "#aaa";
-  return (p < 25 || p >= 75) ? "#fff" : "#111";
-};
+export const binColor = (p) => (p == null || !isFinite(p) ? "#333" : pctHex(p, false));
+export const textOnBin = (p) => (p == null || !isFinite(p) ? "#aaa" : pctInk(p, false));
 
 // ── Projection deltas (projected − last season) ──
 // Read from the card's display strings so the change carries the stat's own units
@@ -208,7 +207,7 @@ export function adjSpread(cats, view) {
   return rms > 0 ? rms : null;
 }
 
-// Red (up) / blue (down) shade for a number, scaled by `spread`; null near zero.
+// Fire (up) / ice (down) shade for a number, scaled by `spread`; null near zero.
 export function projShade(x, spread) {
   if (x == null || !isFinite(x) || !spread) return null;
   const p = Math.max(0, Math.min(100, 50 + 20 * x / spread));
@@ -581,9 +580,7 @@ export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, 
           <div style={{
             fontSize: 8.5, fontStyle: "italic", fontWeight: 600, lineHeight: 1, marginTop: 1,
             // the deepest blue bin is unreadable as text on a dark card — lift it there
-            color: !delta.color ? t.textFaint
-              : delta.color === BIN_COLORS["0-10"] && hexLuminance(t.cardBg || t.bg) < 0.4 ? "#4F8FD6"
-              : delta.color,
+            color: readableOnCard(delta.color, t),
           }}>
             {delta.text}
           </div>

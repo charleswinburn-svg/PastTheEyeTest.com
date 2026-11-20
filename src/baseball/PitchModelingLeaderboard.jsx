@@ -3,6 +3,7 @@ import { useTheme } from "./ThemeContext.jsx";
 // binColor / textOnBin removed — Plus cells use plusCellStyle instead
 import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
 import { exportRowsAsCsv } from "./SharedComponents.jsx";
+import { cell as scaleCell, diffPct } from "../ui/colorScale.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PITCH MODELING LEADERBOARD
@@ -34,18 +35,14 @@ const METRICS = [
 const PITCH_COLS = ["FF", "SI", "FC", "SL", "ST", "SV", "CU", "KC", "CS", "CH", "SC", "FS", "FO", "KN"];
 
 // Plus-scale cell color relative to each column's own mean and stdev (computed from loaded data).
-const plusCellStyle = (v, mean, stdev) => {
+// On the site-wide scale (src/ui/colorScale.js): fire = above the column mean, ice = below.
+const plusCellStyle = (v, mean, stdev, theme) => {
   if (v == null || !isFinite(v) || !stdev) return {};
-  const z = (v - mean) / (2 * stdev);                // ±1 at ±2σ from column mean
-  const t = Math.max(0, Math.min(1, Math.abs(z)));
-  if (t < 0.05) return {};
-  const step = Math.min(4, Math.floor(t * 5));        // 5 shades per direction = 10 total
-  const alphas = [0.22, 0.38, 0.54, 0.70, 0.86];
-  const alpha = alphas[step];
-  const isGreen = z > 0;
-  const bg = isGreen ? `rgba(30,160,30,${alpha})` : `rgba(200,35,35,${alpha})`;
-  const textLight = isGreen ? "rgb(140,235,160)" : "rgb(255,150,160)";
-  return { background: bg, color: alpha > 0.55 ? "#ffffff" : textLight };
+  const z = Math.max(-1, Math.min(1, (v - mean) / (2 * stdev)));   // ±1 at ±2σ from column mean
+  if (Math.abs(z) < 0.05) return {};
+  const isDark = theme?.id !== "light";
+  const c = scaleCell(diffPct(z), isDark, theme?.cardBg, isDark ? 0.3 : 0.4, 0.95);
+  return c ? { background: c.bg, color: c.ink } : {};
 };
 
 export default function PitchModelingLeaderboard({ season, pitchers }) {
@@ -246,7 +243,7 @@ export default function PitchModelingLeaderboard({ season, pitchers }) {
                 const cell = (key, v) => {
                   if (v == null) return <td key={key} style={{ ...tdS, color: t.textFaintest }}>—</td>;
                   const { mean, stdev } = (key === "overall" ? colStats.Overall : colStats[key]) || {};
-                  const cs = plusCellStyle(v, mean ?? 100, stdev);
+                  const cs = plusCellStyle(v, mean ?? 100, stdev, t);
                   return (
                     <td key={key} style={{ ...tdS, ...cs, fontWeight: 600 }}>
                       {Math.round(v)}

@@ -21,15 +21,13 @@ const DARK = {
   textMuted: "#94a3b8",
   textFaint: "#64748b",
   textFaintest: "#475569",
-  accent: "#f59e0b",
+  // UI accent (tabs, borders, highlights). Ice blue so amber/orange is left to the
+  // value scale (src/ui/colorScale.js). The old amber was "#f59e0b" — swap back here.
+  accent: "#38BDF8",
+  brand: "#f59e0b",          // "Eye Test" in the logo
   accentSecondary: "#3b82f6",
   divider: "#1e3a5f",
   shadow: "rgba(0,0,0,0.5)",
-  // Summary eff colors
-  effGoodBg: (alpha) => `rgba(34,197,94,${alpha})`,
-  effBadBg: (alpha) => `rgba(239,68,68,${alpha})`,
-  effGoodText: null,
-  effBadText: null,
 };
 
 const LIGHT = {
@@ -52,15 +50,11 @@ const LIGHT = {
   textMuted: "#475569",
   textFaint: "#64748b",
   textFaintest: "#94a3b8",
-  accent: "#ea580c",
+  accent: "#0284C7",         // old amber/orange: "#ea580c"
+  brand: "#ea580c",
   accentSecondary: "#2563eb",
   divider: "#e2e8f0",
   shadow: "rgba(0,0,0,0.1)",
-  // Summary eff colors: text-only coloring, transparent bg
-  effGoodBg: () => "transparent",
-  effBadBg: () => "transparent",
-  effGoodText: (alpha) => `rgba(22,163,74,${Math.min(1, parseFloat(alpha) + 0.3).toFixed(2)})`,
-  effBadText: (alpha) => `rgba(220,38,38,${Math.min(1, parseFloat(alpha) + 0.3).toFixed(2)})`,
 };
 
 const ThemeContext = createContext({ theme: DARK, isDark: true, toggle: () => {} });

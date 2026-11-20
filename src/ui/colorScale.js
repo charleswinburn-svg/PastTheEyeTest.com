@@ -18,9 +18,11 @@ const even5 = hs => hs.map((h, i) => [i * 25, h]);
 export const PALETTES = {
   iceFire: {
     name: "Ice → Fire", diverging: true,
-    stops: [[0, "#0B3C5D"], [15, "#1F7FBF"], [30, "#5BC0EB"], [50, "#D6DEE6"],
-            [70, "#FFB561"], [85, "#FF8A00"], [100, "#FF5A00"]],
-    darkLift: "#1B5E8C",
+    // Ice: glacier blue → bright sky → pale cyan. Fire: pure oranges (hue ≈ 28–33°),
+    // stopping short of red so the top end reads orange, not red.
+    stops: [[0, "#075985"], [15, "#0EA5E9"], [32, "#7FE3F7"], [50, "#DCE6EC"],
+            [66, "#FFC27A"], [82, "#FF9A1F"], [100, "#FF7A00"]],
+    darkLift: "#0B78B5",
   },
   purpleGold:  { name: "Purple → gold",       diverging: true,  stops: even5(["#3B1C6E", "#8A6FC4", "#CFCFD4", "#F2B84B", "#C98A00"]), darkLift: "#5A3A99" },
   tealOrange:  { name: "Teal → orange",       diverging: true,  stops: even5(["#00535C", "#3FA7A8", "#D4D4D4", "#F28C4B", "#C4420F"]), darkLift: "#0B7A85" },
@@ -58,6 +60,19 @@ export function tint(color, alpha) {
   return `rgba(${rgb.map(Math.round).join(",")},${(+alpha).toFixed(2)})`;
 }
 
+// Text drawn in a scale color on a card: the deepest end is unreadable on a dark card,
+// so it is lifted toward white there (same idea as a palette's darkLift).
+export function readableOnCard(color, t) {
+  if (!color) return t.textFaint;
+  const m = color.startsWith("#")
+    ? hexRgb(color)
+    : (color.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  const lin = c => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const L = 0.2126 * lin(m[0]) + 0.7152 * lin(m[1]) + 0.0722 * lin(m[2]);
+  if (t.id === "dark" && L < 0.12) return rgbStr(m.map(c => Math.round(c + (255 - c) * 0.4)));
+  return color;
+}
+
 // Standard normal CDF (Abramowitz–Stegun 7.1.26), for turning a Plus stat into a percentile.
 function normCdf(z) {
   const x = Math.abs(z) / Math.SQRT2;
@@ -84,6 +99,9 @@ export function makeScale(key = ACTIVE_PALETTE) {
   };
   const ok = v => v != null && isFinite(v);
   const pctColor = (pct, isDark = true) => (ok(pct) ? rgbStr(pctRgb(pct, isDark)) : null);
+  // Hex form, for callers that append an alpha suffix (`${color}cc`) or parse hex.
+  const pctHex = (pct, isDark = true) =>
+    (ok(pct) ? "#" + pctRgb(pct, isDark).map(c => c.toString(16).padStart(2, "0")).join("") : null);
   const pctInk = (pct, isDark = true) => (ok(pct) ? inkOn(pctRgb(pct, isDark)) : null);
 
   // 100-centered Plus stats (league sd ≈ 10) → percentile → color.
@@ -122,7 +140,7 @@ export function makeScale(key = ACTIVE_PALETTE) {
 
   return {
     key, name: pal.name, diverging: pal.diverging, stops: pal.stops,
-    pctRgb, pctColor, pctInk, plusPct, plusColor, diffPct, diffColor, densityColor, cell,
+    pctRgb, pctColor, pctHex, pctInk, plusPct, plusColor, diffPct, diffColor, densityColor, cell,
     // Ends and middle, for signed bars and legends.
     positive: rgbStr(pctRgb(88, true)),
     negative: rgbStr(pctRgb(12, false)),
@@ -135,7 +153,7 @@ export function makeScale(key = ACTIVE_PALETTE) {
 const SCALE = makeScale(ACTIVE_PALETTE);
 export default SCALE;
 export const {
-  pctRgb, pctColor, pctInk, plusPct, plusColor, diffPct, diffColor, densityColor, cell,
+  pctRgb, pctColor, pctHex, pctInk, plusPct, plusColor, diffPct, diffColor, densityColor, cell,
 } = SCALE;
 export const POSITIVE = SCALE.positive;
 export const NEGATIVE = SCALE.negative;

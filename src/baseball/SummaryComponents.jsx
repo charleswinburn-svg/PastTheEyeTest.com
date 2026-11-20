@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PITCH_COLORS, PITCH_NAMES, HIT_COLORS } from "./mlbApi.js";
 import { useTheme } from "./ThemeContext.jsx";
 import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { pctRgb, plusPct, plusColor, diffPct, cell } from "../ui/colorScale.js";
 
 // ═══════════════════════════════════════════════════════════
 // MOVEMENT PLOT (Horizontal Break vs Induced Vertical Break)
@@ -507,12 +508,8 @@ function describeZone(pX, pZ, batSide) {
 
 function plusTextColor(val) {
   if (val == null || !isFinite(val)) return '#999';
-  const dist = Math.abs(val - 100);
-  if (dist < 0.5) return '#bbb';
-  const step = Math.min(4, Math.floor((dist - 0.5) / 5));
-  const greens = ['#a8e6ab', '#75d47a', '#45c44d', '#1db028', '#07991a'];
-  const reds   = ['#f0a8a8', '#e87272', '#da4040', '#cb1616', '#b50505'];
-  return val > 100 ? greens[step] : reds[step];
+  if (Math.abs(val - 100) < 0.5) return '#bbb';
+  return plusColor(val, true);   // tooltips sit on a dark background
 }
 
 function PitchTooltip({ pitch: p, pos, ptScores }) {
@@ -756,40 +753,26 @@ function effColor(val, metricKey, pitchType, avgSet) {
   if (!info.higher_better) diff = -diff;
   diff = Math.max(-1, Math.min(1, diff));
   if (Math.abs(diff) < 0.08) return null;
-  const t = (Math.abs(diff) - 0.08) / 0.92;
-  const alpha = (0.25 + t * 0.65).toFixed(2);
-  return diff > 0
-    ? `rgba(30,160,30,${alpha})`
-    : `rgba(200,35,35,${alpha})`;
+  return diffPct(diff);
 }
 
-// Uniform coloring: all pitch types graded relative to global mean=100, stdev=10.
-// All four metrics are now rescaled to the same distribution by the batch pipeline.
+// The cell helpers below return a position on the site scale (0 worst … 50 average …
+// 100 best), or null for "plain". PitchTable / StatBar turn that into a fill with `cell`.
 
-/// Plus-scale color: 5 discrete shades each side of 100, fixed 5-unit intervals.
-// Neutral: 99.5–100.5 | bands: ±0.5–5.5, ±5.5–10.5, ±10.5–15.5, ±15.5–20.5, >±20.5 (darkest)
+// Plus stats: all four metrics are rescaled to mean 100, sd 10 by the batch pipeline.
 function plusColorRaw(v) {
   if (v == null || !isFinite(v)) return null;
-  const dist = Math.abs(v - 100);
-  if (dist < 0.5) return null;
-  const step = Math.min(4, Math.floor((dist - 0.5) / 5));
-  const alphas = [0.22, 0.38, 0.54, 0.70, 0.86];
-  return v > 100
-    ? `rgba(30,160,30,${alphas[step]})`
-    : `rgba(200,35,35,${alphas[step]})`;
+  if (Math.abs(v - 100) < 0.5) return null;
+  return plusPct(v);
 }
 
-function statBarColor(val, avg, scale, higherBetter) {
-  if (val == null || avg == null) return { bg: "#2a2a2a", border: "#444" };
+function statBarPct(val, avg, scale, higherBetter) {
+  if (val == null || avg == null) return null;
   let diff = (val - avg) / scale;
   if (!higherBetter) diff = -diff;
   diff = Math.max(-1, Math.min(1, diff));
-  if (Math.abs(diff) < 0.05) return { bg: "#2a2a2a", border: "#444" };
-  const t = (Math.abs(diff) - 0.05) / 0.95;
-  const alpha = (0.3 + t * 0.7).toFixed(2);
-  const bAlpha = (0.4 + t * 0.6).toFixed(2);
-  if (diff > 0) return { bg: `rgba(30,160,30,${alpha})`, border: `rgba(30,160,30,${bAlpha})` };
-  return { bg: `rgba(200,35,35,${alpha})`, border: `rgba(200,35,35,${bAlpha})` };
+  if (Math.abs(diff) < 0.05) return null;
+  return diffPct(diff);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -801,17 +784,10 @@ export function StatBar({ stats }) {
     const th = stat.thresholds;
     const avg = (th[0] + th[2]) / 2;
     const scale = (th[2] - th[0]) / 2;
-    const raw = statBarColor(v, avg, scale, stat.good === "high");
-    if (isDark) return { ...raw, text: "#fff" };
-    // Light mode: colored text, white bg
-    const isGood = (stat.good === "high" ? v > avg : v < avg);
-    if (raw.bg === "#2a2a2a") return { bg: t.inputBg, border: t.inputBorder, text: t.text };
-    const alpha = raw.bg.match(/[\d.]+(?=\))/)?.[0] || "0.5";
-    const boosted = Math.min(1, parseFloat(alpha) + 0.3).toFixed(2);
-    return {
-      bg: t.cardBg, border: t.inputBorder,
-      text: isGood ? `rgba(5,120,40,${boosted})` : `rgba(180,15,15,${boosted})`,
-    };
+    const p = statBarPct(v, avg, scale, stat.good === "high");
+    const c = p == null ? null : cell(p, isDark, t.cardBg, 0.3, 1);
+    if (!c) return { bg: t.inputBg, border: t.inputBorder, text: t.text };
+    return { bg: c.bg, border: c.border, text: c.ink };
   };
 
   return (
@@ -877,21 +853,10 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
   // plusColorRaw produces alphas [0.22,0.38,0.54,0.70,0.86] for 5 intensity steps.
   // Dark mode: subtle tint + light text. Light mode: boosted solid fill + white text so
   // pills are clearly readable on a white/light background (original +0.10 boost was too faint).
-  const presentBg = (rawBg) => {
-    if (!rawBg) return {};
-    const isGreen = rawBg.includes("30,160,30");
-    const alpha = parseFloat(rawBg.match(/[\d.]+(?=\))/)?.[0] || "0.5");
-
-    if (isDark) {
-      const bgAlpha = Math.min(0.92, alpha + 0.10).toFixed(2);
-      const tint = isGreen ? `rgba(40,185,65,${bgAlpha})` : `rgba(225,55,60,${bgAlpha})`;
-      return { background: tint, color: "#ffffff", isPill: true };
-    }
-
-    const bgAlpha = Math.min(0.96, alpha + 0.30).toFixed(2);
-    const tint = isGreen ? `rgba(22,163,74,${bgAlpha})` : `rgba(220,38,38,${bgAlpha})`;
-    const textColor = parseFloat(bgAlpha) > 0.58 ? "#ffffff" : "#000000";
-    return { background: tint, color: textColor, isPill: true };
+  // `pct` is a position on the site scale (see plusColorRaw / effColor), or null.
+  const presentBg = (pct) => {
+    const c = pct == null ? null : cell(pct, isDark, t.cardBg, isDark ? 0.3 : 0.45, 0.95);
+    return c ? { background: c.bg, color: c.ink, isPill: true } : {};
   };
 
   const getCellStyle = (key, value, pitchType) => {
@@ -911,11 +876,7 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
         const scale = key === "zonePct" ? 6.0 : 8.0;
         let diff = (value - lgVal) / scale;
         diff = Math.max(-1, Math.min(1, diff));
-        if (Math.abs(diff) >= 0.08) {
-          const s = (Math.abs(diff) - 0.08) / 0.92;
-          const alpha = (0.25 + s * 0.65).toFixed(2);
-          rawBg = diff > 0 ? `rgba(30,160,30,${alpha})` : `rgba(200,35,35,${alpha})`;
-        }
+        if (Math.abs(diff) >= 0.08) rawBg = diffPct(diff);
       }
     }
     if (!rawBg) rawBg = effColor(value, EFF_KEYS[key], pitchType, avgSet);
@@ -1210,16 +1171,15 @@ function ownBaseline(overallVal) {
   return b;
 }
 
-// Green-to-red cell coloring against baseline per bucket
-function cellBg(val, avg, higherGood, scale = 5) {
+// Cell coloring against baseline per bucket, on the site scale → { bg, ink } or null
+function cellBg(val, avg, higherGood, scale = 5, t) {
   if (val == null || avg == null) return null;
   let diff = (val - avg) / scale;
   if (!higherGood) diff = -diff;
   diff = Math.max(-1, Math.min(1, diff));
   if (Math.abs(diff) < 0.05) return null;
-  const intensity = (Math.abs(diff) - 0.05) / 0.95;
-  const alpha = 0.25 + intensity * 0.6;
-  return diff > 0 ? `rgba(30,160,30,${alpha})` : `rgba(200,35,35,${alpha})`;
+  const isDark = t?.id !== "light";
+  return cell(diffPct(diff), isDark, t?.cardBg, 0.25, 0.85);
 }
 
 // Common table styles — dynamic sizing
@@ -1267,9 +1227,9 @@ function CountTable({ title, rows, showColor, labels, keys, size = 14 }) {
                 {bucketKeys.map(k => {
                   const v = row.values[k];
                   const avg = row.lgAvg ? row.lgAvg[k] : null;
-                  const bg = showColor && avg != null ? cellBg(v, avg, row.higherGood ?? true, row.scale ?? 5) : null;
+                  const c = showColor && avg != null ? cellBg(v, avg, row.higherGood ?? true, row.scale ?? 5, t) : null;
                   return (
-                    <td key={k} style={{ ...s.tdS, background: bg || "transparent", fontWeight: bg ? 700 : 500 }}>
+                    <td key={k} style={{ ...s.tdS, background: c ? c.bg : "transparent", ...(c ? { color: c.ink } : {}), fontWeight: c ? 700 : 500 }}>
                       {v != null ? (row.fmt === "ev" ? v.toFixed(1) : v.toFixed(1) + "%") : "—"}
                     </td>
                   );
@@ -1487,56 +1447,24 @@ export function renderHeatmapCanvas(pitches, xMin, xMax, zMin, zMax, canvasW, ca
   const ctx = canvas.getContext("2d");
   const imgData = ctx.createImageData(cols, rows);
 
-  // blue → white → red (Savant style)
-  const stops = [
-    [0.0,  [30, 80, 180]],
-    [0.15, [60, 140, 210]],
-    [0.3,  [120, 190, 220]],
-    [0.5,  [200, 210, 220]],
-    [0.65, [220, 180, 140]],
-    [0.8,  [220, 120, 80]],
-    [1.0,  [200, 40, 40]],
-  ];
+  // Density on the site scale: sparse = ice, dense = fire. 101-entry lookup table.
+  const lut = Array.from({ length: 101 }, (_, i) => pctRgb(i, false));
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const val = grid[r][c];
       if (val <= maxVal * 0.02) continue; // skip near-zero for perf
       const t = Math.min(val / maxVal, 1);
-      let lo = stops[0], hi = stops[stops.length - 1];
-      for (let i = 0; i < stops.length - 1; i++) {
-        if (t >= stops[i][0] && t <= stops[i + 1][0]) { lo = stops[i]; hi = stops[i + 1]; break; }
-      }
-      const f = hi[0] === lo[0] ? 0 : (t - lo[0]) / (hi[0] - lo[0]);
+      const rgb = lut[Math.round(t * 100)];
       const idx = (r * cols + c) * 4;
-      imgData.data[idx]     = Math.round(lo[1][0] + f * (hi[1][0] - lo[1][0]));
-      imgData.data[idx + 1] = Math.round(lo[1][1] + f * (hi[1][1] - lo[1][1]));
-      imgData.data[idx + 2] = Math.round(lo[1][2] + f * (hi[1][2] - lo[1][2]));
+      imgData.data[idx]     = rgb[0];
+      imgData.data[idx + 1] = rgb[1];
+      imgData.data[idx + 2] = rgb[2];
       imgData.data[idx + 3] = Math.round(Math.min(t * 3, 1) * 200); // fade edges
     }
   }
   ctx.putImageData(imgData, 0, 0);
   return canvas.toDataURL();
-}
-
-function heatColor(val, max) {
-  if (val <= 0 || max <= 0) return "transparent";
-  const t = Math.min(val / max, 1);
-  const stops = [
-    [0.0, [40, 60, 180]],
-    [0.15, [40, 170, 200]],
-    [0.35, [50, 180, 80]],
-    [0.6, [240, 200, 40]],
-    [1.0, [220, 45, 45]],
-  ];
-  let lo = stops[0], hi = stops[stops.length - 1];
-  for (let i = 0; i < stops.length - 1; i++) {
-    if (t >= stops[i][0] && t <= stops[i + 1][0]) { lo = stops[i]; hi = stops[i + 1]; break; }
-  }
-  const f = hi[0] === lo[0] ? 0 : (t - lo[0]) / (hi[0] - lo[0]);
-  const rgb = lo[1].map((v, i) => Math.round(v + f * (hi[1][i] - v)));
-  const alpha = 0.35 + t * 0.6;
-  return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha.toFixed(2)})`;
 }
 
 // ═══════════════════════════════════════════════════════════

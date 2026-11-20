@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "./ThemeContext.jsx";
-import { binColor, textOnBin, NUM_FONT, BIN_COLORS, hexLuminance, projViewDef, useProjView, ProjViewSelect, projShow, projShade } from "./SharedComponents.jsx";
+import { binColor, textOnBin, NUM_FONT, projViewDef, useProjView, ProjViewSelect, projShow, projShade } from "./SharedComponents.jsx";
+import { readableOnCard } from "../ui/colorScale.js";
 
 // LEADERBOARD → "{year} Movers": who the projection moves, and why.
 // Every projected value is split by the build scripts into three parts ("parts"):
@@ -193,9 +194,8 @@ export default function ProjectionMovers({ projSeason }) {
 function MoverTable({ title, rows, lastYear, year, reg, view }) {
   const def = projViewDef(view);
   const { theme: t } = useTheme();
-  // the deepest blue bin is unreadable as text on a dark card — lift it there (same as the cards)
-  const deltaColor = (c) => (!c ? t.textFaint
-    : c === BIN_COLORS["0-10"] && hexLuminance(t.cardBg || t.bg) < 0.4 ? "#4F8FD6" : c);
+  // the deepest end of the scale is unreadable as text on a dark card — lifted there (same as the cards)
+  const deltaColor = (c) => readableOnCard(c, t);
   const th = { padding: "6px 5px", fontSize: 10, fontWeight: 700, color: t.textFaint, textTransform: "uppercase",
                letterSpacing: "0.06em", borderBottom: `1px solid ${t.tableHeaderBorder}`, textAlign: "right", whiteSpace: "nowrap" };
   const td = { padding: "5px 5px", fontSize: 12, color: t.textSecondary, textAlign: "right", fontFamily: NUM_FONT, whiteSpace: "nowrap" };

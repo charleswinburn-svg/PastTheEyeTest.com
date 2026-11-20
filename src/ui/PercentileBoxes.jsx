@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
-import SCALE from "./colorScale.js";
+import SCALE, { readableOnCard } from "./colorScale.js";
 
 // ═══════════════════════════════════════════════════════════
 // PERCENTILE BOXES: 100 small boxes, the player's box raised
@@ -42,22 +42,6 @@ export function BoxStrip({ pct, isDark, t, row = 28, box = 8, num = 12, num3 = 1
 function inkFor(rgb) {
   const [r, g, b] = rgb.map(c => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
   return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.3 ? "#111111" : "#ffffff";
-}
-
-// Text in a scale color on a card: the deepest end of the scale is unreadable on a dark
-// card, so it is lifted there (same idea as the scale's own darkLift).
-export function readableOnCard(color, t) {
-  if (!color) return t.textFaint;
-  const m = color.startsWith("#")
-    ? [1, 3, 5].map(i => parseInt(color.slice(i, i + 2), 16))
-    : (color.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
-  const lum = c => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
-  const L = 0.2126 * lum(m[0]) + 0.7152 * lum(m[1]) + 0.0722 * lum(m[2]);
-  if (t.id === "dark" && L < 0.09) {
-    const up = m.map(c => Math.round(c + (255 - c) * 0.4));
-    return `rgb(${up.join(",")})`;
-  }
-  return color;
 }
 
 export default function PercentileBoxes({
