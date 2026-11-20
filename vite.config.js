@@ -1,17 +1,36 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// PTET_PROXY_VIA: send the API proxies through another deployment of this site instead
-// of straight to MLB/NHL. MLB refuses some datacenter IPs (the droplet gets 406s), so a
-// preview on the droplet can borrow the live site's Vercel rewrites (vercel.json):
+// PTET_PROXY_VIA (optional, normally unneeded): send the API proxies through another
+// deployment of this site instead of straight to MLB/NHL, e.g. the live site's Vercel
+// rewrites (vercel.json), if a machine's IP is ever refused:
 //   PTET_PROXY_VIA=https://www.pasttheeyetest.com npx vite preview --host 127.0.0.1 --port 4173
 // Unset (the default), every proxy goes direct, as before.
 const VIA = (process.env.PTET_PROXY_VIA || '').replace(/\/+$/, '');
 
+// The dev/preview proxy forwards the browser's own headers by default. MLB's bot filter
+// answers a server-side request that claims to be Chrome (user-agent, sec-ch-ua,
+// sec-fetch-*, cookies) with 406, while a plain request from the same machine gets 200.
+// So strip those and send a neutral client, like curl. Vercel's rewrites don't use this file.
+const BROWSER_HEADERS = [
+  'user-agent', 'cookie', 'origin', 'referer', 'accept-language',
+  'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform',
+  'sec-fetch-site', 'sec-fetch-mode', 'sec-fetch-dest', 'sec-fetch-user',
+  'priority', 'dnt', 'upgrade-insecure-requests',
+];
+const scrubBrowserHeaders = (proxy) => {
+  proxy.on('proxyReq', (proxyReq) => {
+    for (const h of BROWSER_HEADERS) proxyReq.removeHeader(h);
+    proxyReq.setHeader('user-agent', 'ptet-preview/1.0');
+    proxyReq.setHeader('accept', '*/*');
+  });
+};
+
 const proxyTo = (prefix, target) => (VIA
   // Keep the prefix: the other deployment's own rewrites forward /mlb-api/... etc.
-  ? { target: VIA, changeOrigin: true }
-  : { target, changeOrigin: true, rewrite: (path) => path.replace(new RegExp(`^${prefix}`), '') });
+  ? { target: VIA, changeOrigin: true, configure: scrubBrowserHeaders }
+  : { target, changeOrigin: true, configure: scrubBrowserHeaders,
+      rewrite: (path) => path.replace(new RegExp(`^${prefix}`), '') });
 
 export default defineConfig({
   plugins: [react()],
