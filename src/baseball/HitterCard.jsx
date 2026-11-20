@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
+import { PercentileBoxRow, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle, useISwingNew, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import HitterDistributions from "./HitterDistributions.jsx";
 import SimilarPlayers from "./SimilarPlayers.jsx";
@@ -196,7 +196,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                 const sh = isProjection && !isDateRange
                   ? projShow(cat, projView, projPools?.hitters?.[label], projPools?.hitterLower?.has(label)) : null;
                 return (
-                  <BubblePercentileBar
+                  <PercentileBoxRow
                     key={label}
                     label={label}
                     pctile={sh ? sh.pctile : cat.pctile}
@@ -236,7 +236,7 @@ export default function HitterCard({ player, season, isAAA = false, dateFrom = "
                   const sh = isProjection && seasonFallback && m
                     ? projShow(m, projView, projPools?.xrv?.[label], false) : null;
                   return (
-                    <BubblePercentileBar
+                    <PercentileBoxRow
                       key={label}
                       label={label}
                       pctile={sh ? sh.pctile : (m?.pctile ?? null)}

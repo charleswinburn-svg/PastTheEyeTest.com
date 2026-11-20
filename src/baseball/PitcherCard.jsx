@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
+import { PercentileBoxRow, PlayerHeader, saveCardAsPng, binColor, textOnBin, useBio, buildBioSubtitle, NUM_FONT, NUM_WEIGHT, adjSpread, projShow, projViewDef, projLine, useProjView, ProjViewSelect, useProjPools } from "./SharedComponents.jsx";
 import RollingChart from "./RollingChart.jsx";
 import PitcherArsenal from "./PitcherArsenal.jsx";
 import SimilarPlayers from "./SimilarPlayers.jsx";
@@ -279,7 +279,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
                 const sh = isProjection && !isDateRange
                   ? projShow(cat, projView, projPools?.pitchers?.[label], projPools?.pitcherLower?.has(label)) : null;
                 return (
-                  <BubblePercentileBar
+                  <PercentileBoxRow
                     key={label}
                     label={label}
                     pctile={sh ? sh.pctile : cat.pctile}
@@ -434,11 +434,11 @@ function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gr
               letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}>{label}</div>
+            {/* Pro+ tile: a rounded square, matching the raised box in the percentile rows */}
             <div style={{
-              width: 56, height: 56, borderRadius: "50%",
+              width: 56, height: 56, borderRadius: 11,
               background: fill,
-              border: `2px solid ${t.cardBg}`,
-              boxShadow: pctile != null ? "0 2px 6px rgba(0,0,0,0.25)" : "none",
+              boxShadow: pctile != null ? `0 0 0 2px ${t.cardBg}, 0 2px 6px rgba(0,0,0,0.25)` : `0 0 0 2px ${t.cardBg}`,
               display: "flex", flexDirection: "column",
               alignItems: "center", justifyContent: "center",
               transition: "background 0.3s ease",

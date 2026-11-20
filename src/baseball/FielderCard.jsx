@@ -1,6 +1,6 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
-import { BubblePercentileBar, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
+import { PercentileBoxRow, PlayerHeader, saveCardAsPng, useBio, buildBioSubtitle } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import FramingZoneDiagram from "./FramingZoneDiagram.jsx";
 import ABSChallengeDiagram from "./ABSChallengeDiagram.jsx";
@@ -161,7 +161,7 @@ export default function FielderCard({ player, season, fieldingData }) {
     <div key={sec.name}>
       <SectionHeader name={sec.name} first={i === 0} />
       {sec.rows.map(({ m, cat }) => (
-        <BubblePercentileBar
+        <PercentileBoxRow
           key={m.key}
           label={m.label}
           labelWidth={150}

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
 import { NUM_FONT, BubblePercentileBar, saveCardAsPng } from "../baseball/SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
+import { BoxStrip } from "../ui/PercentileBoxes.jsx";
 import ImpactChart from "./ImpactChart.jsx";
 import { spectrum, spectrumRgb, inkOn, luminance, POSITIVE, NEGATIVE } from "./nhlColors.js";
 import {
@@ -108,32 +109,9 @@ async function imagesSettled(root, ms = 6000) {
 // ═══════════════════════════════════════════════════════════
 // PERCENTILE ROWS: 100 boxes, the player's box raised
 // ═══════════════════════════════════════════════════════════
-// The raised box is a square exactly as tall as the row, so it is as large as it can be
-// without touching the rows above and below. The strip of small boxes is inset by half a
-// square on each side, so the square never hangs over an edge at the 1st or 100th percentile.
+// The strip is the site-wide shared one (src/ui/PercentileBoxes.jsx), sized for this card.
 function SpectrumRow({ pct, isDark, t, k }) {
-  const ROW = k.row, BOX = k.box;
-  const here = pct == null ? null : Math.min(99, Math.max(0, Math.floor(pct)));
-  const cells = useMemo(() => Array.from({ length: 100 }, (_, i) => (
-    <div key={i} style={{ flex: 1, height: BOX, borderRadius: 1.5,
-                          background: here == null ? t.textFaintest : spectrum(i + 0.5, isDark),
-                          opacity: here == null ? 0.28 : 0.5 }} />
-  )), [here == null, isDark, t.textFaintest, BOX]);
-  const rgb = here == null ? null : spectrumRgb(here + 0.5, isDark);
-  return (
-    <div style={{ position: "relative", height: ROW }}>
-      <div style={{ position: "absolute", left: ROW / 2, right: ROW / 2, top: (ROW - BOX) / 2, display: "flex", gap: 1 }}>{cells}</div>
-      {here != null && (
-        <div style={{
-          position: "absolute", top: 0, left: `calc((100% - ${ROW}px) * ${(here + 0.5) / 100})`, width: ROW, height: ROW,
-          borderRadius: Math.round(ROW / 5), background: `rgb(${rgb.join(",")})`, color: inkOn(rgb), boxShadow: `0 0 0 2px ${t.cardBg}`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: pct >= 99.5 ? k.num3 : k.num, fontWeight: 800, lineHeight: 1 }}>
-          {Math.round(pct)}
-        </div>
-      )}
-    </div>
-  );
+  return <BoxStrip pct={pct} isDark={isDark} t={t} row={k.row} box={k.box} num={k.num} num3={k.num3} />;
 }
 
 function PercentileRows({ p, rows, style, isDark, t, k }) {

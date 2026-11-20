@@ -2,6 +2,7 @@ import { useState, useEffect, useId, useMemo, useRef } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
 import { useTheme } from "./ThemeContext.jsx";
 import { pctHex, pctInk, readableOnCard } from "../ui/colorScale.js";
+import PercentileBoxes from "../ui/PercentileBoxes.jsx";
 
 // ── Percentile colors ──
 // Built on the site-wide scale in src/ui/colorScale.js. `binColor` is smooth (it
@@ -480,7 +481,16 @@ export function getLogoUrl(teamAbbr, teamId) {
 
 
 // ═══════════════════════════════════════════════════════════
-// BUBBLE PERCENTILE BAR
+// PERCENTILE BOX ROW (the MLB cards' percentile rows)
+// ═══════════════════════════════════════════════════════════
+// The NHL-style 100-box strip (src/ui/PercentileBoxes.jsx) with the same props as
+// BubblePercentileBar, so either can be dropped in.
+export function PercentileBoxRow({ badge = false, ...props }) {
+  return <PercentileBoxes {...props} badge={badge ? <NewBadge /> : null} />;
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUBBLE PERCENTILE BAR (kept for the NHL "Bars" switch and the soccer tab)
 // ═══════════════════════════════════════════════════════════
 
 export function BubblePercentileBar({ label, pctile, display, labelWidth = 110, badge = false, delta = null }) {
