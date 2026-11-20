@@ -1,30 +1,65 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // ═══════════════════════════════════════════════════════════
 // TINY HISTORY-API ROUTER
 // ═══════════════════════════════════════════════════════════
-// Routes: /  ·  /mlb  ·  /nhl  ·  /posts/:slug  ·  /palette (dev preview).
-// vercel.json already rewrites unknown paths to index.html, and `vite preview` /
-// `vite` do the same, so a refresh on any route works.
+// Routes: /  ·  /posts/:slug  ·  /mlb/...  ·  /nhl/...  ·  /palette (dev preview).
+// The MLB / NHL section paths live in src/nav/navConfig.js. vercel.json rewrites
+// unknown paths to index.html, and `vite` / `vite preview` do the same, so a refresh
+// on any route works. Query strings carry the view's state (player, season, …).
 
 const listeners = new Set();
+const notify = () => listeners.forEach(f => f());
 
-export function navigate(to, { replace = false } = {}) {
+const normalize = p => p.replace(/\/+$/, "") || "/";
+
+// Go to `to` (path plus optional ?query). push by default; replace for redirects and
+// state tweaks. Scrolls to the top unless `scroll: false`.
+export function navigate(to, { replace = false, scroll = true } = {}) {
   if (to === window.location.pathname + window.location.search) return;
   window.history[replace ? "replaceState" : "pushState"](null, "", to);
-  listeners.forEach(f => f());
-  window.scrollTo(0, 0);
+  notify();
+  if (scroll) window.scrollTo(0, 0);
 }
 
-export function usePath() {
-  const [path, setPath] = useState(window.location.pathname);
+// Patch the current query string: null / "" removes a key. Replaces the history entry
+// by default (so picking players doesn't flood the back button) and never scrolls.
+export function setQuery(patch, { replace = true } = {}) {
+  const u = new URL(window.location.href);
+  for (const [k, v] of Object.entries(patch)) {
+    if (v == null || v === "") u.searchParams.delete(k);
+    else u.searchParams.set(k, String(v));
+  }
+  navigate(u.pathname + u.search, { replace, scroll: false });
+}
+
+function useLocationRaw() {
+  const read = () => ({ path: normalize(window.location.pathname), search: window.location.search });
+  const [loc, setLoc] = useState(read);
   useEffect(() => {
-    const update = () => setPath(window.location.pathname);
+    const update = () => setLoc(prev => {
+      const next = read();
+      return next.path === prev.path && next.search === prev.search ? prev : next;
+    });
     listeners.add(update);
     window.addEventListener("popstate", update);
     return () => { listeners.delete(update); window.removeEventListener("popstate", update); };
   }, []);
-  return path.replace(/\/+$/, "") || "/";
+  return loc;
+}
+
+// { path, query } with query as a plain object of strings.
+export function useLocation() {
+  const loc = useLocationRaw();
+  return useMemo(() => ({
+    path: loc.path,
+    search: loc.search,
+    query: Object.fromEntries(new URLSearchParams(loc.search)),
+  }), [loc.path, loc.search]);
+}
+
+export function usePath() {
+  return useLocationRaw().path;
 }
 
 // A normal <a href> (so open-in-new-tab and copy-link work) that navigates in-app on a plain click.

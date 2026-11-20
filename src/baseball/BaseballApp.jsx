@@ -12,7 +12,12 @@ import StuffWaterfall from "./StuffWaterfall.jsx";
 import ProjectionMovers from "./ProjectionMovers.jsx";
 import RangeView from "./RangeView.jsx";
 import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv, NewBadge, useISwingNew, getHeadshotUrl, getLogoUrl } from "./SharedComponents.jsx";
-import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
+import { useTheme } from "./ThemeContext.jsx";
+import { useLocation, navigate, setQuery } from "../router.jsx";
+import { Toolbar } from "../nav/Toolbar.jsx";
+import {
+  MLB_SEASONS, PROJ_SEASON, PROJ_TABS, DEFAULT_MLB_SEASON, LATEST_MLB_SEASON, mlbLeafForPath, mlbLeafForTab, mlbSeasonFrom,
+} from "../nav/navConfig.js";
 import { inkOnColor } from "../ui/colorScale.js";
 
 // ── Mobile breakpoint ──
@@ -55,70 +60,11 @@ function deduplicatePlayers(players) {
   return [...byKey.values()];
 }
 
-const SEASONS = ["2027P", "2026", "2025", "2024", "2023"];
-// Projection season ("2027P") if one is listed — enables the Movers leaderboard.
-const PROJ_SEASON = SEASONS.find(x => String(x).endsWith("P")) || null;
-// Tabs that have a projection version; everything else is crossed out while the
-// projection season is selected.
-const PROJ_TABS = new Set(["hitter", "pitcher", "hitter_lb", "hitter_xrv_lb", "pitcher_lb",
-                           "proj_movers", "proj_ci_hitters", "proj_ci_pitchers"]);
-const PROJ_OFF_TITLE = "Not available for 2027 projections";
+// Seasons, the projection rules and the section list live in src/nav/navConfig.js
+// (shared with the sidebar). The section, season and player are in the URL.
+const SEASONS = MLB_SEASONS;
 // The site opens on this player's projected card.
 const DEFAULT_PLAYER = "Shohei Ohtani";
-
-const TABS = [
-  {
-    id: "hitter",
-    label: "HITTERS",
-    dropdown: [
-      { id: "hitter",     label: "MLB" },
-      { id: "hitter_aaa", label: "AAA" },
-    ],
-  },
-  {
-    id: "pitcher",
-    label: "PITCHERS",
-    dropdown: [
-      { id: "pitcher",     label: "MLB" },
-      { id: "pitcher_aaa", label: "AAA" },
-    ],
-  },
-  { id: "fielder",    label: "FIELDER CARD" },
-  {
-    id: "summaries",
-    label: "SUMMARIES",
-    dropdown: [
-      { id: "pitcher_game", label: "Pitcher Game" },
-      { id: "pitcher_season", label: "Pitcher Season" },
-      { id: "pitcher_plinko", label: "Pitcher Plinko" },
-      { id: "hitter_plinko", label: "Hitter Plinko" },
-      { id: "hitter_iswing", label: "Hitter iSwing+", isNew: true },
-      { id: "pitcher_stuff_wf", label: "Pitcher Stuff+", isNew: true },
-    ]
-  },
-  {
-    id: "leaderboard",
-    label: "LEADERBOARD",
-    dropdown: [
-      { id: "hitter_lb",  label: "Hitter" },
-      { id: "hitter_xrv_lb", label: "Hitter xRV" },
-      { id: "pitcher_lb", label: "Pitcher" },
-      { id: "pitch_modeling_lb", label: "Pitch Modeling" },
-      ...(PROJ_SEASON ? [{ id: "proj_movers", label: `${PROJ_SEASON.slice(0, 4)} Movers`, isNew: true }] : []),
-    ]
-  },
-  ...(PROJ_SEASON ? [{
-    id: "ranges",
-    label: `${PROJ_SEASON.slice(0, 4)} RANGES`,
-    dropdown: [
-      { id: "proj_ci_hitters", label: "Hitter Confidence Intervals", isNew: true },
-      { id: "proj_ci_pitchers", label: "Pitcher Confidence Intervals", isNew: true },
-    ],
-  }] : []),
-  { id: "team_plots", label: "TEAM PLOTS" },
-  { id: "race2k",     label: "RACE TO 2K" },
-  { id: "evla",       label: "EV/LA FAN" },
-];
 
 
 // Ordered xRV/600 PA metric labels for the hitter xRV leaderboard (mirrors the
@@ -155,11 +101,17 @@ function BaseballApp() {
   const [trends, setTrends] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [season, setSeason] = useState(PROJ_SEASON || "2026");
-  const [tab, setTab] = useState("hitter");
-  const [summarySubTab, setSummarySubTab] = useState("pitcher_game");
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);   // mobile ≡ tab menu
+  // Section (path), season (?season=) and card player (?player=) come from the URL.
+  const loc = useLocation();
+  const tab = mlbLeafForPath(loc.path)?.id || "hitter";
+  const season = mlbSeasonFrom(loc.query);
+  // Changing section keeps the season and drops the old section's own query (player…).
+  const setTab = (id, { replace = false } = {}) => {
+    const leaf = mlbLeafForTab(id);
+    if (leaf) navigate(leaf.path + (season !== DEFAULT_MLB_SEASON ? `?season=${season}` : ""), { replace });
+  };
+  const seasonPicked = useRef(false);   // the last season change came from the season dropdown
+  const setSeason = (s) => { seasonPicked.current = true; setQuery({ season: s === DEFAULT_MLB_SEASON ? null : s }); };
   const [selectedHitter, setSelectedHitter] = useState(DEFAULT_PLAYER);
   const [selectedPitcher, setSelectedPitcher] = useState(DEFAULT_PLAYER);
   const [iswingData, setIswingData] = useState(null);
@@ -374,6 +326,37 @@ function BaseballApp() {
   const curAaaHitter  = useMemo(() => aaaHittersFull.find(h => h.displayName === selectedHitter)  || null, [aaaHittersFull, selectedHitter]);
   const curAaaPitcher = useMemo(() => aaaPitchersFull.find(p => p.displayName === selectedPitcher) || null, [aaaPitchersFull, selectedPitcher]);
 
+  // ── Card player ⇄ URL (?player=<MLBAM id>) on the hitter / pitcher / fielder sections ──
+  const cardKind = (tab === "pitcher" || tab === "pitcher_aaa") ? "pitcher"
+    : (tab === "hitter" || tab === "hitter_aaa") ? "hitter" : tab === "fielder" ? "fielder" : null;
+  const isAaaTab = tab.endsWith("_aaa");
+  const cardList = cardKind === "pitcher" ? (isAaaTab ? aaaPitchersFull : pitchersFull)
+    : cardKind === "hitter" ? (isAaaTab ? aaaHittersFull : hittersFull)
+    : cardKind === "fielder" ? fielders : null;
+  const cardName = cardKind === "pitcher" ? selectedPitcher : cardKind === "hitter" ? selectedHitter : cardKind === "fielder" ? selectedFielder : null;
+  const cardNameOf = p => (cardKind === "fielder" ? p.name : p.displayName);
+  const urlPlayer = cardKind ? (loc.query.player || null) : null;
+  const urlApplied = useRef(null);   // "<tab>:<season>:<id>" already reflected in the selection
+  // URL → selection (on load, back/forward, a pasted link), once that list has loaded.
+  useEffect(() => {
+    if (!cardKind || !urlPlayer || !cardList?.length) return;
+    const key = `${tab}:${season}:${urlPlayer}`;
+    if (urlApplied.current === key) return;
+    urlApplied.current = key;
+    const found = cardList.find(p => String(p.player_id) === String(urlPlayer));
+    if (!found || cardNameOf(found) === cardName) return;
+    (cardKind === "pitcher" ? setSelectedPitcher : cardKind === "hitter" ? setSelectedHitter : setSelectedFielder)(cardNameOf(found));
+  }, [cardKind, urlPlayer, cardList, tab, season]);  // eslint-disable-line react-hooks/exhaustive-deps
+  // Selection → URL (replace, so picking players doesn't flood the back button).
+  useEffect(() => {
+    if (!cardKind || !cardList?.length || !cardName) return;
+    if (urlPlayer && urlApplied.current !== `${tab}:${season}:${urlPlayer}`) return;   // a linked player is still being applied
+    const cur = cardList.find(p => cardNameOf(p) === cardName);
+    if (cur?.player_id == null || String(cur.player_id) === String(urlPlayer || "")) return;
+    urlApplied.current = `${tab}:${season}:${cur.player_id}`;
+    setQuery({ player: cur.player_id });
+  }, [cardKind, cardList, cardName, tab, season]);  // eslint-disable-line react-hooks/exhaustive-deps
+
   const pipelineReady = data && !loading && !error;
   const aaaReady = !!aaaData;
 
@@ -383,279 +366,26 @@ function BaseballApp() {
   const isHitterTab    = (id) => id === "hitter" || id === "hitter_aaa";
   const isPitcherTab   = (id) => id === "pitcher" || id === "pitcher_aaa";
   const isLeaderboardTab = (id) => ["hitter_lb", "hitter_xrv_lb", "pitcher_lb", "pitch_modeling_lb", "proj_movers"].includes(id);
-  const isTabActive = (tabId) => {
-    if (tabId === "summaries") return isSummaryTab(tab);
-    if (tabId === "leaderboard") return isLeaderboardTab(tab);
-    if (tabId === "ranges") return tab === "proj_ci_hitters" || tab === "proj_ci_pitchers";
-    if (tabId === "hitter") return isHitterTab(tab);
-    if (tabId === "pitcher") return isPitcherTab(tab);
-    return tab === tabId;
-  };
-
-  // Projection season: tabs/items with no projection version are crossed out and inert.
+  // Projection season: sections with no projection version are off (dimmed in the sidebar).
   const isProjSeason = season === PROJ_SEASON;
-  const isOff = (id) => isProjSeason && !PROJ_TABS.has(id);
-  const isTabOff = (tb) => tb.dropdown ? tb.dropdown.every(sub => isOff(sub.id)) : isOff(tb.id);
-  const offStyle = { opacity: 0.35, textDecoration: "line-through", cursor: "not-allowed" };
-  const offProps = (off) => off ? { title: PROJ_OFF_TITLE, "aria-disabled": true } : {};
-  // Switching to the projection season from a tab it doesn't have → the hitter card.
+  // A section with no projection version under the projection season: picking the
+  // projection season in the dropdown → the hitter card (as before); arriving at the
+  // section otherwise (a link, the sidebar) → open it in the latest real season.
   useEffect(() => {
-    if (isProjSeason && !PROJ_TABS.has(tab)) { setTab("hitter"); setOpenDropdown(null); }
-  }, [season]);
-
-  // Handle tab click with dropdown support
-  const handleTabClick = (tb, e) => {
-    if (isTabOff(tb)) { e?.stopPropagation(); return; }
-    if (tb.dropdown) {
-      e.stopPropagation();
-      setOpenDropdown(openDropdown === tb.id ? null : tb.id);
-    } else {
-      setTab(tb.id);
-      setOpenDropdown(null);
-    }
-  };
-
-  // Handle dropdown item click
-  const handleDropdownSelect = (subItem) => {
-    if (isOff(subItem.id)) return;
-    setTab(subItem.id);
-    setSummarySubTab(subItem.id);
-    setOpenDropdown(null);
-  };
-
-  // Close dropdown / mobile menu when clicking outside
-  const handleBackdropClick = () => {
-    setOpenDropdown(null);
-    setMenuOpen(false);
-  };
+    const picked = seasonPicked.current;
+    seasonPicked.current = false;
+    if (!isProjSeason || PROJ_TABS.has(tab)) return;
+    if (picked) setTab("hitter", { replace: true });
+    else setQuery({ season: LATEST_MLB_SEASON });
+  }, [season, tab]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const winWidth = useWindowWidth();
-  // The desktop tab row (8 tabs) is ~1045px wide, so it clumps/overflows on phones
-  // in BOTH orientations (portrait ~390, landscape ~670-930) and on tablets. Collapse
-  // the whole nav to the ≡ menu below 1100px. Above that the bar also collapses
-  // whenever the tabs + the controls on the right don't actually fit (browser zoom,
-  // long player names, an extra tab) — measured, so it never overlaps at any zoom.
-  const navRowRef = useRef(null);
-  const navTabsRef = useRef(null);
-  const navRightRef = useRef(null);
-  const [collapseBelow, setCollapseBelow] = useState(0);   // window width that last didn't fit
-  const isMobile = winWidth < Math.max(1100, collapseBelow);
-  useLayoutEffect(() => {
-    if (isMobile) return;
-    const row = navRowRef.current, tabsEl = navTabsRef.current, right = navRightRef.current;
-    if (!row || !tabsEl || !right) return;
-    const check = () => {
-      const cs = getComputedStyle(row);
-      const avail = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-      if (tabsEl.scrollWidth + right.offsetWidth + 24 > avail) setCollapseBelow(window.innerWidth + 1);
-    };
-    check();
-    const ro = new ResizeObserver(check);
-    ro.observe(row); ro.observe(right);
-    return () => ro.disconnect();
-  }, [isMobile, tab, season]);
-
-  // Label of the currently-selected tab (parent · sub) for the collapsed mobile bar.
-  const activeParentTab = TABS.find(tb => tb.id === tab || tb.dropdown?.some(s => s.id === tab));
-  const activeSubTab = activeParentTab?.dropdown?.find(s => s.id === tab);
-  const activeMenuLabel = activeParentTab
-    ? (activeSubTab ? `${activeParentTab.label} · ${activeSubTab.label}` : activeParentTab.label)
-    : "";
+  const isMobile = winWidth < 700;
 
   return (
-    <div style={{ minHeight: "100vh", background: t.bg, transition: "background 0.3s" }} onClick={handleBackdropClick}>
-      {/* ── Full-Width Navigation Bar ── */}
-      <div ref={navRowRef} style={{
-        background: t.headerBgSolid || t.headerBg,
-        borderBottom: `2px solid ${t.accent}`,
-        padding: isMobile ? "0 8px" : "0 24px",
-        display: "flex",
-        alignItems: "stretch",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        transition: "background 0.3s",
-        boxShadow: `0 2px 12px ${t.shadow}`,
-        flexWrap: isMobile ? "wrap" : "nowrap",
-      }}>
-        {/* Tab Navigation */}
-        {isMobile ? (
-          // Mobile: the 8 tabs (+ their dropdown options) don't fit a phone row, so
-          // collapse them into a top-right ≡ menu that lists every tab and option.
-          <div style={{ position: "relative", width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }} onClick={e => e.stopPropagation()}>
-            <span style={{ flex: "1 1 auto", minWidth: 0, fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", color: t.accent, whiteSpace: "nowrap", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {activeMenuLabel}
-            </span>
-            <button
-              onClick={() => setMenuOpen(o => !o)}
-              aria-label="Open navigation menu"
-              aria-expanded={menuOpen}
-              style={{
-                marginLeft: "auto", flexShrink: 0,
-                // Plain block button + fixed-size SVG: Safari doesn't stretch flex
-                // children inside <button>, which collapsed the old span bars to 0px
-                // wide and made the menu button invisible on iPhone.
-                display: "block", WebkitAppearance: "none", appearance: "none",
-                width: 42, height: 38, minWidth: 42, padding: 0, lineHeight: 0,
-                background: menuOpen ? (t.id === "dark" ? "rgba(245,158,11,0.12)" : "rgba(234,88,12,0.1)") : "transparent",
-                border: `1px solid ${menuOpen ? t.accent : "transparent"}`, borderRadius: 8, cursor: "pointer",
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              <svg width="26" height="20" viewBox="0 0 26 20" aria-hidden="true" style={{ display: "block", margin: "0 auto" }}>
-                {[2, 10, 18].map(y => (
-                  <line key={y} x1="1.5" y1={y} x2="24.5" y2={y} stroke={t.accent} strokeWidth="2.5" strokeLinecap="round" />
-                ))}
-              </svg>
-            </button>
-            {menuOpen && (
-              <div style={{
-                position: "absolute", top: "100%", left: 0, right: 0,
-                background: t.cardBg,
-                border: `1px solid ${t.accent}`, borderTop: "none",
-                borderRadius: "0 0 10px 10px",
-                boxShadow: `0 12px 32px ${t.shadow}`,
-                zIndex: 300, maxHeight: "72vh", overflowY: "auto",
-              }}>
-                {TABS.map(tb => (
-                  tb.dropdown ? (
-                    <div key={tb.id}>
-                      <div {...offProps(isTabOff(tb))} style={{ padding: "10px 18px 4px", fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textFaint, ...(isTabOff(tb) ? offStyle : {}), cursor: "default" }}>
-                        {tb.label}
-                      </div>
-                      {tb.dropdown.map(sub => (
-                        <button
-                          key={sub.id}
-                          onClick={() => { if (isOff(sub.id)) return; handleDropdownSelect(sub); setMenuOpen(false); }}
-                          {...offProps(isOff(sub.id))}
-                          style={{
-                            display: "block", width: "100%", textAlign: "left",
-                            padding: "10px 18px 10px 30px", fontSize: 14,
-                            fontWeight: tab === sub.id ? 700 : 500,
-                            color: tab === sub.id ? t.accent : t.textSecondary,
-                            background: tab === sub.id ? (t.id === "dark" ? "rgba(245,158,11,0.12)" : "rgba(234,88,12,0.08)") : "transparent",
-                            border: "none", cursor: "pointer", fontFamily: "inherit",
-                            ...(isOff(sub.id) ? offStyle : {}),
-                          }}
-                        >
-                          {sub.label}
-                          {sub.isNew && <NewBadge style={{ pointerEvents: "none" }} />}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <button
-                      key={tb.id}
-                      onClick={() => { if (isOff(tb.id)) return; setTab(tb.id); setOpenDropdown(null); setMenuOpen(false); }}
-                      {...offProps(isOff(tb.id))}
-                      style={{
-                        display: "block", width: "100%", textAlign: "left",
-                        padding: "12px 18px", fontSize: 14, fontWeight: isTabActive(tb.id) ? 700 : 600,
-                        letterSpacing: "0.04em", textTransform: "uppercase",
-                        color: isTabActive(tb.id) ? t.accent : t.textSecondary,
-                        background: isTabActive(tb.id) ? (t.id === "dark" ? "rgba(245,158,11,0.12)" : "rgba(234,88,12,0.08)") : "transparent",
-                        border: "none", cursor: "pointer", fontFamily: "inherit",
-                        ...(isOff(tb.id) ? offStyle : {}),
-                      }}
-                    >
-                      {tb.label}
-                    </button>
-                  )
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          // Desktop: centered in the space left of the controls (a flex item, so it can
-          // never slide under them); dropdown inside each tab's relative container
-          <div style={{ flex: "1 1 auto", minWidth: 0, display: "flex", justifyContent: "center", alignItems: "stretch" }}>
-          <div ref={navTabsRef} style={{ display: "flex", alignItems: "stretch", flexShrink: 0 }}>
-            {TABS.map(tb => (
-              <div key={tb.id} style={{ position: "relative", display: "flex", alignItems: "stretch" }} onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={(e) => handleTabClick(tb, e)}
-                  {...offProps(isTabOff(tb))}
-                  style={{
-                    // scales a little with the window so more widths fit before collapsing
-                    padding: "16px clamp(9px, 0.95vw, 18px)",
-                    fontSize: "clamp(11px, 0.72vw, 12px)",
-                    fontWeight: isTabActive(tb.id) ? 700 : 600,
-                    letterSpacing: "0.05em",
-                    whiteSpace: "nowrap",
-                    color: isTabActive(tb.id) ? t.accent : t.textMuted,
-                    background: isTabActive(tb.id) ? (t.id === "dark" ? "rgba(245,158,11,0.1)" : "rgba(234,88,12,0.08)") : "transparent",
-                    border: "none",
-                    borderBottom: isTabActive(tb.id) ? `3px solid ${t.accent}` : "3px solid transparent",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    fontFamily: "inherit",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    ...(isTabOff(tb) ? offStyle : {}),
-                  }}
-                >
-                  {tb.label}
-                  {tb.dropdown && (
-                    <span style={{ fontSize: 8, marginLeft: 2, transform: openDropdown === tb.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>▼</span>
-                  )}
-                </button>
-                {tb.dropdown && openDropdown === tb.id && (
-                  <div style={{
-                    position: "absolute", top: "100%", left: 0,
-                    background: t.cardBg,
-                    border: `1px solid ${t.accent}`,
-                    borderRadius: 10,
-                    boxShadow: `0 12px 32px ${t.shadow}`,
-                    minWidth: 160,
-                    overflow: "hidden",
-                    zIndex: 200,
-                  }}>
-                    {tb.dropdown.map((sub, idx) => (
-                      <button
-                        key={sub.id}
-                        onClick={() => handleDropdownSelect(sub)}
-                        {...offProps(isOff(sub.id))}
-                        style={{
-                          width: "100%",
-                          padding: "12px 18px",
-                          fontSize: 13,
-                          fontWeight: tab === sub.id ? 700 : 500,
-                          color: tab === sub.id ? t.accent : t.textSecondary,
-                          background: tab === sub.id ? (t.id === "dark" ? "rgba(245,158,11,0.15)" : "rgba(234,88,12,0.1)") : "transparent",
-                          border: "none",
-                          borderBottom: idx < tb.dropdown.length - 1 ? `1px solid ${t.tableBorder}` : "none",
-                          cursor: "pointer",
-                          textAlign: "left",
-                          fontFamily: "inherit",
-                          transition: "all 0.15s",
-                          ...(isOff(sub.id) ? offStyle : {}),
-                        }}
-                        onMouseEnter={(e) => { if (tab !== sub.id && !isOff(sub.id)) e.target.style.background = t.id === "dark" ? "rgba(59,130,246,0.1)" : "rgba(37,99,235,0.05)"; }}
-                        onMouseLeave={(e) => { if (tab !== sub.id) e.target.style.background = "transparent"; }}
-                      >
-                        {sub.label}
-                        {sub.isNew && <NewBadge style={{ pointerEvents: "none" }} />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          </div>
-        )}
-
-        {/* Right: Season selector, player selector, theme toggle, stats */}
-        <div ref={navRightRef} style={{
-          display: "flex", alignItems: "center", gap: isMobile ? 8 : 16,
-          marginLeft: isMobile ? 0 : "auto",
-          flexShrink: isMobile ? 1 : 0,
-          width: isMobile ? "100%" : "auto",
-          padding: isMobile ? "6px 4px" : 0,
-          borderTop: isMobile ? `1px solid ${t.divider}` : "none",
-          flexWrap: isMobile ? "wrap" : "nowrap",
-        }}>
+    <div style={{ background: t.bg, transition: "background 0.3s" }}>
+      {/* Season + player search render in the site's top bar (src/nav/Toolbar.jsx). */}
+      <Toolbar>
           {/* Season Selector */}
           <select
             value={season}
@@ -713,11 +443,7 @@ function BaseballApp() {
               }}
             />
           )}
-
-          <ThemeToggle />
-
-        </div>
-      </div>
+      </Toolbar>
 
       {/* ── Date-range bar (hitter/pitcher cards) ── */}
       {(isHitterTab(tab) || isPitcherTab(tab)) && !isProjSeason && (
@@ -866,7 +592,8 @@ function BaseballApp() {
           )
         )}
         {isSummaryTab(tab) && tab !== "hitter_iswing" && tab !== "pitcher_stuff_wf" && (
-          <Summaries season={season} initialSubTab={summarySubTab} />
+          <Summaries season={season} initialSubTab={tab} urlState={loc.query}
+            onUrlState={u => setQuery({ type: u.type === "S" ? null : u.type, player: u.player, game: u.game, from: u.from, to: u.to })} />
         )}
         {tab === "hitter_iswing" && (
           <ISwingWaterfall season={season} hitters={hittersFull} />

@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { ThemeProvider, useTheme, ThemeToggle } from "../baseball/ThemeContext.jsx";
+import { useTheme } from "../baseball/ThemeContext.jsx";
+import { useLocation, navigate, setQuery } from "../router.jsx";
+import { Toolbar } from "../nav/Toolbar.jsx";
+import { nhlLeafForPath, NHL_DEFAULT_PATH } from "../nav/navConfig.js";
 import { SearchableSelect, NUM_FONT } from "../baseball/SharedComponents.jsx";
 import PlayerCard, { Segmented } from "./PlayerCard.jsx";
 import Leaderboard from "./Leaderboard.jsx";
@@ -23,19 +26,27 @@ function useWindowWidth() {
   return w;
 }
 
-const VIEWS = [["player", "Player card"], ["leaderboard", "Leaderboard"], ["about", "About the numbers"]];
 
 function Hockey() {
   const { theme: t } = useTheme();
   const winW = useWindowWidth();
   const mobile = winW < 700, wide = winW >= 1100;
 
-  const [view, setView] = useState("player");
-  const [kind, setKind] = useState("skaters");
-  const [season, setSeason] = useState(null);
-  const [v, setV] = useState("3y");
-  const [team, setTeam] = useState("");
-  const [picked, setPicked] = useState({ skaters: null, goalies: null });
+  // View (path) and filters / player (query) come from the URL, so every card and
+  // leaderboard state can be linked: /nhl/player?kind=goalies&id=8478048&season=2025&v=1y
+  const loc = useLocation();
+  const q = loc.query;
+  const view = nhlLeafForPath(loc.path)?.id || "player";
+  const kind = q.kind === "goalies" ? "goalies" : "skaters";
+  const season = q.season && /^\d+$/.test(q.season) ? +q.season : null;
+  const v = VERSIONS.some(x => x.id === q.v) ? q.v : "3y";
+  const team = q.team || "";
+  const pickedId = q.id && /^\d+$/.test(q.id) ? +q.id : null;
+  const setKind = k => setQuery({ kind: k === "skaters" ? null : k, id: null, team: null });
+  const setSeason = n => setQuery({ season: n });
+  const setV = x => setQuery({ v: x === "3y" ? null : x });
+  const setTeam = x => setQuery({ team: x || null });
+  const pick = id => setQuery({ id });
   const [pctStyle, setPctStyle] = useState("boxes");
 
   const meta = useNhl("meta.json");
@@ -48,7 +59,7 @@ function Hockey() {
   const players = useMemo(() => toObjects(file.data), [file.data]);
   const teams = useMemo(() => [...new Set(players.map(p => p.team).filter(Boolean))].sort(), [players]);
   const pool = useMemo(() => (team ? players.filter(p => p.team === team) : players), [players, team]);
-  const current = useMemo(() => pool.find(p => p.player_id === picked[kind]) || pool[0] || null, [pool, picked, kind]);
+  const current = useMemo(() => pool.find(p => p.player_id === pickedId) || pool[0] || null, [pool, pickedId]);
   const options = useMemo(() => [...pool].sort((a, b) => a.player.localeCompare(b.player)).map(p => ({
     value: p.player_id, label: p.player, sublabel: `${p.team}${p.position ? " · " + p.position : " · G"}`,
     image: headshotUrl(p.player_id, p.team, y), logo: logoUrl(p.team),
@@ -60,37 +71,12 @@ function Hockey() {
                   color: t.text, fontSize: 12, outline: "none", fontFamily: "inherit", fontWeight: 600 };
 
   return (
-    <div style={{ minHeight: "100vh", background: t.bg, color: t.text, fontFamily: NUM_FONT }}>
-      {/* ── views ── */}
-      <div style={{ background: t.cardBg, borderBottom: `2px solid ${t.accent}`, padding: mobile ? "0 8px" : "0 20px",
-                    display: "flex", alignItems: "stretch", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-        <div style={{ display: "flex", alignItems: "stretch", overflowX: "auto" }}>
-          {!mobile && (
-            <div style={{ display: "flex", alignItems: "center", padding: "12px 20px 12px 0", borderRight: `1px solid ${t.divider}`, marginRight: 8,
-                          fontSize: 16, fontWeight: 800, fontStyle: "italic", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
-              <span style={{ color: t.accentSecondary }}>NHL</span>&nbsp;<span style={{ color: t.accent }}>Player Ratings</span>
-            </div>
-          )}
-          {VIEWS.map(([id, label]) => (
-            <button key={id} onClick={() => setView(id)}
-              style={{ padding: mobile ? "11px 10px" : "15px 18px", fontSize: mobile ? 11 : 12, fontWeight: view === id ? 800 : 600, letterSpacing: "0.04em",
-                       textTransform: "uppercase", whiteSpace: "nowrap", fontFamily: "inherit", cursor: "pointer", border: "none",
-                       background: view === id ? `${t.accent}1a` : "transparent", color: view === id ? t.accent : t.textMuted,
-                       borderBottom: view === id ? `3px solid ${t.accent}` : "3px solid transparent" }}>
-              {label}
-            </button>
-          ))}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0" }}>
-          {meta.data && !mobile && <span style={{ fontSize: 10, color: t.textFaint, fontWeight: 600 }}>Updated {meta.data.updated.slice(0, 10)}</span>}
-          <ThemeToggle />
-        </div>
-      </div>
-
-      {/* ── what to show ── */}
-      {view !== "about" && (
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 12px", padding: mobile ? "10px 12px" : "12px 24px",
-                      borderBottom: `1px solid ${t.divider}` }}>
+    <div style={{ background: t.bg, color: t.text, fontFamily: NUM_FONT }}>
+      {/* Filters render in the site's top bar (src/nav/Toolbar.jsx); on phones they stay in the page. */}
+      {view !== "about" && (() => {
+        const filters = (
+          <>
+            {meta.data && !mobile && <span style={{ fontSize: 10.5, color: t.textFaint, fontWeight: 600, whiteSpace: "nowrap" }}>Updated {meta.data.updated.slice(0, 10)}</span>}
           <Segmented t={t} value={kind} onChange={setKind} options={[["skaters", "Skaters"], ["goalies", "Goalies"]]} />
           <select value={y ?? ""} onChange={e => setSeason(+e.target.value)} style={input} aria-label="Season">
             {[...(meta.data?.seasons || [])].reverse().map(s => (
@@ -104,14 +90,18 @@ function Hockey() {
                 <option value="">All teams</option>{teams.map(x => <option key={x} value={x}>{x}</option>)}
               </select>
               <SearchableSelect value={current?.player_id ?? ""} options={options}
-                onChange={id => setPicked(s => ({ ...s, [kind]: id }))}
+                onChange={id => pick(id)}
                 placeholder={`Search ${kind === "goalies" ? "goalie" : "skater"}…`}
                 style={{ ...input, flex: mobile ? "1 1 100%" : "1 1 240px", minWidth: mobile ? 0 : 220, maxWidth: mobile ? "100%" : 380 }} />
               <Segmented t={t} value={pctStyle} onChange={setPctStyle} options={[["boxes", "Boxes"], ["bars", "Bars"]]} />
             </>
           )}
-        </div>
-      )}
+          </>
+        );
+        return mobile
+          ? <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 10px", padding: "10px 12px", borderBottom: `1px solid ${t.divider}` }}>{filters}</div>
+          : <Toolbar>{filters}</Toolbar>;
+      })()}
 
       {/* ── content ── */}
       {error ? (
@@ -134,7 +124,10 @@ function Hockey() {
             {team ? `${team} · ` : ""}{periodLabel(y, v, inProgressSeason)} · {VERSIONS.find(x => x.id === v).long}
           </div>
           <Leaderboard key={kind} players={pool} kind={kind} v={v} teams={teams} team={team} onTeam={setTeam}
-            onPick={id => { setPicked(s => ({ ...s, [kind]: id })); setView("player"); window.scrollTo({ top: 0 }); }} />
+            onPick={id => {
+              const u = new URLSearchParams(loc.search); u.set("id", id);
+              navigate(`${NHL_DEFAULT_PATH}?${u}`);
+            }} />
         </div>
       )}
     </div>

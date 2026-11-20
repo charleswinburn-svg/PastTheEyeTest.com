@@ -37,17 +37,22 @@ const dateRangeSuffix = (from, to) => {
   return ` — through ${fmtDate(to)}`;
 };
 
-export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
+// urlState: { type, player, game, from, to } from the page URL (a linked Summary);
+// onUrlState(state) is called when they change, so the URL follows the selection.
+export default function Summaries({ season, initialSubTab = "pitcher_game", urlState = null, onUrlState = null }) {
   const { theme: t } = useTheme();
-  
+
   const [subTab, setSubTab] = useState(initialSubTab);
-  
-  // Update subTab when initialSubTab changes from parent (dropdown selection)
+
+  // Update subTab when initialSubTab changes from parent (sidebar selection)
   useEffect(() => {
     setSubTab(initialSubTab);
   }, [initialSubTab]);
-  
-  const [seasonType, setSeasonType] = useState("S");
+
+  const [seasonType, setSeasonType] = useState(() => (["S", "W", "R", "P", "E"].includes(urlState?.type) ? urlState.type : "S"));
+  // A linked game / player / date range is applied once the lists it needs have loaded.
+  const pendingUrl = useRef(urlState && (urlState.player || urlState.game)
+    ? { player: urlState.player || null, game: urlState.game || null, from: urlState.from || "", to: urlState.to || "" } : null);
   const [level, setLevel] = useState("MLB"); // "MLB" | "AAA" | "FCL"
   const [players, setPlayers] = useState(null);
   const [loadingPlayers, setLoadingPlayers] = useState(false);
@@ -1024,6 +1029,51 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
     }
     return pitchPlus;
   }, [leaderboardPlus, pitchPlus, isGame, dateFrom, dateTo, pitchOverrides, typeOverrides]);
+
+  // ── Linked Summary (URL) → selection, step by step as the lists load ──
+  useEffect(() => {   // game view: pick the game
+    const p = pendingUrl.current;
+    if (!p?.game || !isGame || !games.length) return;
+    const g = games.find(x => String(x.gamePk) === String(p.game));
+    p.game = null;
+    if (g) setSelectedGame(g); else p.player = null;   // game not in this list → stop restoring
+  }, [games, isGame]);
+  useEffect(() => {   // game view: pick the player from that game
+    const p = pendingUrl.current;
+    if (!p?.player || p.game || !isGame || !gamePlayers.length) return;
+    const pl = gamePlayers.find(x => String(x.id) === String(p.player));
+    p.player = null;
+    if (pl) setSelectedPlayer(pl);
+  }, [gamePlayers, isGame]);  // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {   // season view: pick the player (dates follow once it's selected)
+    const p = pendingUrl.current;
+    if (!p?.player || isGame || !playerList.length) return;
+    const pl = playerList.find(x => String(x.id) === String(p.player));
+    p.player = null;
+    if (pl) { p.dates = true; setSelectedPlayer(pl); }
+  }, [playerList, isGame]);  // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {   // after the player-change reset of the date range
+    const p = pendingUrl.current;
+    if (!p?.dates || !selectedPlayer) return;
+    if (p.from) setDateFrom(p.from);
+    if (p.to) setDateTo(p.to);
+    pendingUrl.current = null;
+  }, [selectedPlayer?.id]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Selection → URL ──
+  useEffect(() => {
+    if (!onUrlState) return;
+    const p = pendingUrl.current;
+    if (p && (p.game || p.player || p.dates)) return;   // still restoring a linked Summary
+    if (p) pendingUrl.current = null;
+    onUrlState({
+      type: seasonType,
+      player: selectedPlayer?.id ?? null,
+      game: isGame ? (selectedGame?.gamePk ?? null) : null,
+      from: !isGame ? (dateFrom || null) : null,
+      to: !isGame ? (dateTo || null) : null,
+    });
+  }, [seasonType, selectedPlayer?.id, selectedGame?.gamePk, dateFrom, dateTo, isGame]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{ padding: "16px 20px" }}>
