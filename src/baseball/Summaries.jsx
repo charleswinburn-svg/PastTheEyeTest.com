@@ -1364,7 +1364,9 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
   // Side-panel options either slot can show (built from this Summary's own pitches).
   const sharedPanel = (kind) => (
     kind === "release" ? <SummaryReleasePanel pitches={data.pitches} player={player} season={season} width={260} height={400} />
-    : kind === "stuffViolin" ? <StuffViolinPanel pitches={data.pitches} perPitchScores={perPitchScores} pitchKey={pitchKey} width={260} height={400} />
+    : kind === "stuffViolin" ? <StuffViolinPanel pitches={data.pitches} perPitchScores={perPitchScores} pitchKey={pitchKey}
+        playerId={player?.id} season={season} isAAA={isAAA}
+        fullSeason={!isGame && seasonType === "R" && !dateFrom && !dateTo} width={260} height={400} />
     : null
   );
   const sharedOptions = (

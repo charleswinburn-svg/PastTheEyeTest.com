@@ -5,6 +5,7 @@ import { ReleaseDiagram } from "./SimilarityFigures.jsx";
 import { loadSimilarityPool } from "./similarity.js";
 import { PITCH_COLORS, PITCH_NAMES } from "./mlbApi.js";
 import { gaussianKde } from "./kde.js";
+import { loadDist } from "./PitcherDistributions.jsx";
 import { plusColor, plusPct, readableOnCard } from "../ui/colorScale.js";
 
 // ═══════════════════════════════════════════════════════════
@@ -106,45 +107,97 @@ export function SummaryReleasePanel({ pitches, player, season, width = 260, heig
 // Every violin shares one axis and one gradient, so a pitch's color is its Stuff+ on the
 // site scale: ice below 100, fire above. Rows run most-thrown first. A tick marks each
 // type's median and the number on the right is its mean.
-export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, width = 260, height = 400 }) {
+// Full regular season: drawn at once from the pipeline's precomputed per-pitcher Stuff+
+// distributions (pitcher_grade_dist_{year}.json, the file the pitcher card's
+// distributions use), each pitch type's vs-LHH and vs-RHH curves weighted by how often
+// this Summary's pitches of that type went to each side. Games and date ranges (and
+// pitchers missing from the file) use the per-pitch scores from the Pitch+ API instead.
+export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId = null, season = null, isAAA = false,
+                                   fullSeason = false, width = 260, height = 400 }) {
   const { theme: t, isDark } = useTheme();
   const gid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
 
-  const rows = useMemo(() => {
-    if (!perPitchScores || !pitchKey) return null;
+  const [dist, setDist] = useState(undefined);   // undefined = loading, null = not available
+  useEffect(() => {
+    let cancelled = false;
+    if (!fullSeason || !playerId || !season) { setDist(null); return; }
+    setDist(undefined);
+    loadDist(String(season).slice(0, 4), isAAA)
+      .then(all => {
+        if (cancelled) return;
+        const stuff = all?.[String(playerId)]?.stuff;
+        setDist(stuff ? { meta: all.meta || {}, stuff } : null);
+      })
+      .catch(() => { if (!cancelled) setDist(null); });
+    return () => { cancelled = true; };
+  }, [fullSeason, playerId, season, isAAA]);
+
+  const model = useMemo(() => {
+    const counts = {};
+    for (const p of pitches || []) {
+      const k = p.pitchType;
+      if (!k || k === "UN") continue;
+      const c = (counts[k] ||= { n: 0, L: 0, R: 0 });
+      c.n++;
+      if (p.batSide === "L") c.L++; else if (p.batSide === "R") c.R++;
+    }
+    const byUse = Object.keys(counts).sort((a, b) => counts[b].n - counts[a].n);
+
+    if (dist) {
+      const lo = isNum(dist.meta.xLo) ? dist.meta.xLo : 70, hi = isNum(dist.meta.xHi) ? dist.meta.xHi : 130;
+      const series = [];
+      for (const k of byUse) {
+        const L = dist.stuff.L?.[k], R = dist.stuff.R?.[k];
+        if (!L && !R) continue;
+        let wL = L ? counts[k].L : 0, wR = R ? counts[k].R : 0;
+        if (!wL && !wR) { wL = L ? 1 : 0; wR = R ? 1 : 0; }
+        const len = (L || R).length;
+        const dens = Array.from({ length: len }, (_, j) => (wL * (L?.[j] || 0) + wR * (R?.[j] || 0)) / (wL + wR));
+        series.push({ k, n: counts[k].n, dens, ...gridStats(dens, lo, hi) });
+      }
+      if (series.length) return { lo, hi, series, source: "season" };
+    }
+
+    if (!perPitchScores || !pitchKey) return null;   // still scoring
     const by = {};
     for (const p of pitches || []) {
       const k = p.pitchType;
       if (!k || k === "UN") continue;
       const s = perPitchScores.get(pitchKey(p))?.stuff;
-      if (!isNum(s)) continue;
-      (by[k] ||= []).push(s);
+      if (isNum(s)) (by[k] ||= []).push(s);
     }
-    return Object.entries(by).map(([k, vals]) => ({ k, vals })).sort((a, b) => b.vals.length - a.vals.length);
-  }, [pitches, perPitchScores, pitchKey]);
+    const ks = Object.keys(by).sort((a, b) => by[b].length - by[a].length);
+    if (!ks.length) return { series: [] };
+    // Shared axis: 2nd–98th percentile of every pitch, always including 70–130, in steps of 10.
+    const all = ks.flatMap(k => by[k]).sort((a, b) => a - b);
+    const q = f => all[Math.min(all.length - 1, Math.max(0, Math.round(f * (all.length - 1))))];
+    const lo = Math.min(70, Math.floor(q(0.02) / 10) * 10);
+    const hi = Math.max(130, Math.ceil(q(0.98) / 10) * 10);
+    const series = ks.map(k => {
+      const vals = by[k];
+      const dens = vals.length >= 3 ? gaussianKde(vals, lo, hi, 72) : null;
+      return { k, n: vals.length, dens, dots: dens ? null : vals, mean: mean(vals), median: median(vals) };
+    });
+    return { lo, hi, series, source: "pitches" };
+  }, [pitches, perPitchScores, pitchKey, dist]);
 
-  if (!rows) return <Note t={t} height={height}>Scoring pitches for Stuff+…</Note>;
-  if (!rows.length) return <Note t={t} height={height}>No per-pitch Stuff+ for these pitches.</Note>;
+  if (fullSeason && dist === undefined && !model) return <Note t={t} height={height}>Loading season Stuff+…</Note>;
+  if (!model) return <Note t={t} height={height}>Scoring pitches for Stuff+…</Note>;
+  if (!model.series.length) return <Note t={t} height={height}>No Stuff+ for these pitches.</Note>;
 
-  // Shared axis: covers 2nd–98th percentile of every pitch, always includes 100, in steps of 10.
-  const all = rows.flatMap(r => r.vals).sort((a, b) => a - b);
-  const q = f => all[Math.min(all.length - 1, Math.max(0, Math.round(f * (all.length - 1))))];
-  const lo = Math.min(70, Math.floor(q(0.02) / 10) * 10);
-  const hi = Math.max(130, Math.ceil(q(0.98) / 10) * 10);
-
+  const { lo, hi, series } = model;
   const LABEL_W = 62, VALUE_W = 30, TOP = 30, BOTTOM = 28;
   const x0 = LABEL_W, x1 = width - VALUE_W - 4;
   const X = v => x0 + (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (x1 - x0);
-  const rowH = Math.min(56, (height - TOP - BOTTOM) / rows.length);
-  const N = 72;
+  const rowH = Math.min(56, (height - TOP - BOTTOM) / series.length);
   const ticks = [];
   const step = hi - lo > 100 ? 40 : 20;
   for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) ticks.push(v);
   const gradStops = Array.from({ length: 13 }, (_, i) => lo + (hi - lo) * i / 12);
   const txt = { fontSize: 9, fill: t.textFaint, fontFamily: "inherit" };
   // Few pitch types: rows keep their max height and the block is centred in the panel.
-  const plotTop = TOP + Math.max(0, (height - TOP - BOTTOM - rowH * rows.length) / 2);
-  const plotBottom = plotTop + rowH * rows.length;
+  const plotTop = TOP + Math.max(0, (height - TOP - BOTTOM - rowH * series.length) / 2);
+  const plotBottom = plotTop + rowH * series.length;
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} style={{ display: "block" }}>
@@ -164,15 +217,13 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, width = 26
               strokeWidth={v === 100 ? 1 : 0.6} strokeDasharray={v === 100 ? "3 3" : undefined} />
       ))}
 
-      {rows.map(({ k, vals }, i) => {
+      {series.map(({ k, n, dens, dots, mean: m, median: med }, i) => {
         const cy = plotTop + rowH * (i + 0.5);
         const half = rowH * 0.42;
-        const dens = vals.length >= 3 ? gaussianKde(vals, lo, hi, N) : null;
-        const m = mean(vals), med = median(vals);
         let path = null;
         if (dens) {
           const peak = Math.max(...dens) || 1;
-          const xs = dens.map((_, j) => X(lo + (hi - lo) * j / (N - 1)));
+          const xs = dens.map((_, j) => X(lo + (hi - lo) * j / (dens.length - 1)));
           const up = dens.map((d, j) => `${xs[j].toFixed(1)},${(cy - (d / peak) * half).toFixed(1)}`);
           const dn = dens.map((d, j) => `${xs[j].toFixed(1)},${(cy + (d / peak) * half).toFixed(1)}`).reverse();
           path = `M ${up.join(" L ")} L ${dn.join(" L ")} Z`;
@@ -184,17 +235,19 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, width = 26
             <text x={15} y={cy - 1} style={{ fontSize: 10, fontWeight: 700, fill: t.text, fontFamily: "inherit" }}>
               {name.length > 9 ? k : name}
             </text>
-            <text x={15} y={cy + 10} style={{ ...txt, fontFamily: NUM_FONT }}>{vals.length} pitch{vals.length === 1 ? "" : "es"}</text>
+            <text x={15} y={cy + 10} style={{ ...txt, fontFamily: NUM_FONT }}>{n} pitch{n === 1 ? "" : "es"}</text>
             {path ? (
               <path d={path} fill={`url(#vg-${gid})`} stroke={isDark ? "rgba(255,255,255,0.25)" : "rgba(15,23,42,0.25)"} strokeWidth={0.6} />
             ) : (
-              vals.map((v, j) => <circle key={j} cx={X(v)} cy={cy} r={3} fill={plusColor(v, isDark)} />)
+              (dots || []).map((v, j) => <circle key={j} cx={X(v)} cy={cy} r={3} fill={plusColor(v, isDark)} />)
             )}
-            <line x1={X(med)} x2={X(med)} y1={cy - half * 0.7} y2={cy + half * 0.7} stroke={isDark ? "#0b1220" : "#0f172a"} strokeWidth={2} />
-            <text x={width - 2} y={cy + 4} textAnchor="end"
-                  style={{ fontSize: 12, fontWeight: NUM_WEIGHT, fontFamily: NUM_FONT, fill: plusPct(m) > 45 && plusPct(m) < 55 ? t.textSecondary : readableOnCard(plusColor(m, isDark), t) }}>
-              {Math.round(m)}
-            </text>
+            {isNum(med) && <line x1={X(med)} x2={X(med)} y1={cy - half * 0.7} y2={cy + half * 0.7} stroke={isDark ? "#0b1220" : "#0f172a"} strokeWidth={2} />}
+            {isNum(m) && (
+              <text x={width - 2} y={cy + 4} textAnchor="end"
+                    style={{ fontSize: 12, fontWeight: NUM_WEIGHT, fontFamily: NUM_FONT, fill: plusPct(m) > 45 && plusPct(m) < 55 ? t.textSecondary : readableOnCard(plusColor(m, isDark), t) }}>
+                {Math.round(m)}
+              </text>
+            )}
           </g>
         );
       })}
@@ -202,7 +255,24 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, width = 26
       {ticks.map(v => (
         <text key={v} x={X(v)} y={plotBottom + 12} textAnchor="middle" style={{ ...txt, fontFamily: NUM_FONT }}>{v}</text>
       ))}
-      <text x={(x0 + x1) / 2} y={plotBottom + 23} textAnchor="middle" style={txt}>Stuff+ (per pitch) · tick = median · right = mean</text>
+      <text x={(x0 + x1) / 2} y={plotBottom + 23} textAnchor="middle" style={txt}>
+        Stuff+ {model.source === "season" ? "(season distribution)" : "(per pitch)"} · tick = median · right = mean
+      </text>
     </svg>
   );
+}
+
+// Mean and median of a density sampled on an even grid over [lo, hi].
+function gridStats(dens, lo, hi) {
+  const n = dens.length, xs = dens.map((_, j) => lo + (hi - lo) * j / (n - 1));
+  const tot = dens.reduce((s, d) => s + d, 0);
+  if (!(tot > 0)) return { mean: null, median: null };
+  const m = dens.reduce((s, d, j) => s + d * xs[j], 0) / tot;
+  let acc = 0, med = xs[n - 1];
+  for (let j = 0; j < n; j++) {
+    const next = acc + dens[j];
+    if (next >= tot / 2) { med = j ? xs[j - 1] + (xs[j] - xs[j - 1]) * ((tot / 2 - acc) / dens[j]) : xs[0]; break; }
+    acc = next;
+  }
+  return { mean: m, median: med };
 }

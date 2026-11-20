@@ -18,11 +18,14 @@ const even5 = hs => hs.map((h, i) => [i * 25, h]);
 export const PALETTES = {
   iceFire: {
     name: "Ice → Fire", diverging: true,
-    // Bad = glacier ice: the darkest ice that still reads as ice, not blue (cyan hue
-    // ≈ 192°, kept low-saturation). It fades evenly through frost to warm peach, then
-    // builds to a strong pure orange (hue ≈ 28–33°, short of red) at the top.
-    stops: [[0, "#86C8D7"], [18, "#A5D8E3"], [36, "#CDE9F0"], [50, "#E8EDF0"],
-            [64, "#FFD9AE"], [80, "#FFAD52"], [100, "#FF7A00"]],
+    // Bad = glacier ice (cyan hue ≈ 192°), fading evenly through frost to warm peach,
+    // then building to a strong pure orange (hue ≈ 28–33°, short of red) at the top.
+    // Same hues in both themes, saturated; light mode is a deeper set so the ice and
+    // the pale middle still read on a white card.
+    stops: [[0, "#5EC3DA"], [18, "#8AD3E5"], [36, "#BCE6F1"], [50, "#E2E8EC"],
+            [64, "#FFC791"], [80, "#FF9B33"], [100, "#FF7300"]],
+    stopsLight: [[0, "#2FA6C4"], [18, "#5DBFD8"], [36, "#9AD7E7"], [50, "#CDD6DD"],
+                 [64, "#FFB061"], [80, "#FF8A14"], [100, "#EE6A00"]],
   },
   purpleGold:  { name: "Purple → gold",       diverging: true,  stops: even5(["#3B1C6E", "#8A6FC4", "#CFCFD4", "#F2B84B", "#C98A00"]), darkLift: "#5A3A99" },
   tealOrange:  { name: "Teal → orange",       diverging: true,  stops: even5(["#00535C", "#3FA7A8", "#D4D4D4", "#F28C4B", "#C4420F"]), darkLift: "#0B7A85" },
@@ -47,6 +50,13 @@ export const ACTIVE_PALETTE = "iceFire";
 export function inkOn(rgb) {
   const [r, g, b] = rgb.map(c => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
   return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.3 ? "#111111" : "#ffffff";
+}
+
+// inkOn for any color string ("#rrggbb", "#rrggbbaa" ignoring alpha, "rgb(...)").
+export function inkOnColor(color, fallback = "#ffffff") {
+  if (!color || typeof color !== "string") return fallback;
+  const rgb = color.startsWith("#") ? hexRgb(color.slice(0, 7)) : (color.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  return rgb.length === 3 && rgb.every(Number.isFinite) ? inkOn(rgb) : fallback;
 }
 
 // Any color string or rgb array → rgba() at the given alpha.
@@ -105,7 +115,7 @@ function normCdf(z) {
 
 export function makeScale(key = ACTIVE_PALETTE) {
   const pal = PALETTES[key] || PALETTES[ACTIVE_PALETTE];
-  const build = isDark => pal.stops.map(([p, h], i) => {
+  const build = isDark => (!isDark && pal.stopsLight ? pal.stopsLight : pal.stops).map(([p, h], i) => {
     if (i === 0 && isDark && pal.darkLift) h = pal.darkLift;
     if (i === 0 && !isDark && pal.lightLift) h = pal.lightLift;
     return [p, hexRgb(h)];

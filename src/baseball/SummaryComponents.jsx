@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { PITCH_COLORS, PITCH_NAMES, HIT_COLORS } from "./mlbApi.js";
 import { useTheme } from "./ThemeContext.jsx";
 import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
-import { pctRgb, plusPct, plusColor, diffPct, cell } from "../ui/colorScale.js";
+import { pctRgb, plusPct, plusColor, diffPct, cell, inkOnColor } from "../ui/colorScale.js";
+
+// Hex `fg` laid over hex `bg` at `alpha` → hex (for picking text color on translucent fills).
+function mixOver(fg, bg, alpha) {
+  const p = h => [1, 3, 5].map(i => parseInt(String(h).slice(i, i + 2), 16) || 0);
+  const a = p(fg), b = p(bg);
+  return "#" + a.map((c, i) => Math.round(c * alpha + b[i] * (1 - alpha)).toString(16).padStart(2, "0")).join("");
+}
 
 // ═══════════════════════════════════════════════════════════
 // MOVEMENT PLOT (Horizontal Break vs Induced Vertical Break)
@@ -305,7 +312,7 @@ export function ReclassifyModal({ target, onPick, onClose }) {
                 style={{
                   padding: "10px 6px",
                   background: PITCH_COLORS[pt] || "#888",
-                  color: "#fff",
+                  color: inkOnColor(PITCH_COLORS[pt] || "#888"),
                   border: isCurrent ? `2px solid ${t.text}` : "2px solid transparent",
                   borderRadius: 6,
                   fontWeight: 800,
@@ -538,7 +545,7 @@ function PitchTooltip({ pitch: p, pos, ptScores }) {
       boxShadow: '0 6px 20px rgba(0,0,0,0.7)',
     }}>
       <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ background: color, color: '#fff', borderRadius: 3, padding: '1px 6px', fontSize: 10 }}>{p.pitchType}</span>
+        <span style={{ background: color, color: inkOnColor(color), borderRadius: 3, padding: '1px 6px', fontSize: 10 }}>{p.pitchType}</span>
         <span style={{ color: '#eee' }}>{name}</span>
       </div>
       {p.velo != null && (
@@ -609,7 +616,7 @@ function MovementPitchTooltip({ pitch: p, pos, ptScores }) {
       boxShadow: '0 6px 20px rgba(0,0,0,0.7)',
     }}>
       <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ background: color, color: '#fff', borderRadius: 3, padding: '1px 6px', fontSize: 10 }}>{p.pitchType}</span>
+        <span style={{ background: color, color: inkOnColor(color), borderRadius: 3, padding: '1px 6px', fontSize: 10 }}>{p.pitchType}</span>
         <span style={{ color: '#eee' }}>{name}</span>
       </div>
       {p.velo != null && (
@@ -808,7 +815,7 @@ export function StatBar({ stats }) {
             <div style={{ fontSize: 14, fontWeight: 700, color: text, fontFamily: "'Pliant', sans-serif" }}>
               {formatted}
             </div>
-            <div style={{ fontSize: 9, color: t.text, marginTop: 2, fontWeight: 600, letterSpacing: "0.02em", opacity: 0.7 }}>{s.label}</div>
+            <div style={{ fontSize: 9, color: text, marginTop: 2, fontWeight: 600, letterSpacing: "0.02em", opacity: 0.75 }}>{s.label}</div>
           </div>
         );
       })}
@@ -920,7 +927,7 @@ export function PitchTable({ rows, leagueAvgs, isAAA, pitchPlus, onTypeClick = n
                       style={{
                         padding: "7px 6px", textAlign: "center",
                         borderBottom: `1px solid ${t.tableBorder}`,
-                        color: "#fff", fontWeight: 800,
+                        color: inkOnColor(row.color), fontWeight: 800,
                         background: row.color, borderRadius: 4, minWidth: 90,
                         letterSpacing: "0.02em",
                         cursor: clickable ? "pointer" : "default",
@@ -1519,7 +1526,8 @@ function MiniZone({ pitches, pitchType, color, size, isGame, ptScores }) {
       <svg width={w} height={h} style={{ display: "block" }}>
         <rect x={0} y={0} width={w} height={h} fill={bgFill} rx={3} />
         <rect x={0} y={0} width={w} height={labelH} fill={color + "70"} rx={3} />
-        <text x={w / 2} y={11} textAnchor="middle" fill="#fff" fontSize={10} fontWeight={700}>{abbr}</text>
+        {/* label strip is the pitch color at ~44% over the panel: pick ink for that blend */}
+        <text x={w / 2} y={11} textAnchor="middle" fill={inkOnColor(mixOver(color, bgFill, 0.44))} fontSize={10} fontWeight={700}>{abbr}</text>
         <rect x={zoneL} y={zoneT} width={zoneW} height={zoneH}
           fill="none" stroke={zoneStroke} strokeWidth={1} />
         <polygon points={hpPts} fill="none" stroke={zoneStroke} strokeWidth={0.8} />

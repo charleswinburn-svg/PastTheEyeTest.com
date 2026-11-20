@@ -13,6 +13,7 @@ import ProjectionMovers from "./ProjectionMovers.jsx";
 import RangeView from "./RangeView.jsx";
 import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelect, exportRowsAsCsv, NewBadge, useISwingNew, getHeadshotUrl, getLogoUrl } from "./SharedComponents.jsx";
 import { ThemeProvider, useTheme, ThemeToggle } from "./ThemeContext.jsx";
+import { inkOnColor } from "../ui/colorScale.js";
 
 // ── Mobile breakpoint ──
 function useWindowWidth() {
@@ -662,7 +663,7 @@ function BaseballApp() {
             style={{
               padding: "8px 16px", 
               background: `linear-gradient(135deg, ${t.accentSecondary || t.accent} 0%, ${t.accent} 100%)`,
-              color: "#fff",
+              color: inkOnColor(t.accent),
               border: "none", 
               borderRadius: 8, 
               fontSize: 13, 

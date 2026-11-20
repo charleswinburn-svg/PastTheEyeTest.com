@@ -12,7 +12,7 @@ const PITCH_PLUS_API = "https://api.pasttheeyetest.com";
 // AAA has its own file (pitcher_grade_dist_aaa_{season}.json: AAA pitches on the
 // MLB scale), never mixed with the MLB one.
 const distCache = new Map(); // "mlb-2026" / "aaa-2026" -> Promise<map|null>
-function loadDist(season, isAAA) {
+export function loadDist(season, isAAA) {
   const key = `${isAAA ? "aaa" : "mlb"}-${season}`;
   if (!distCache.has(key)) {
     distCache.set(key, fetch(`/pitcher_grade_dist${isAAA ? "_aaa" : ""}_${season}.json`)

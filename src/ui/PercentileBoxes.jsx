@@ -20,7 +20,7 @@ export function BoxStrip({ pct, isDark, t, row = 28, box = 8, num = 12, num3 = 1
   const cells = useMemo(() => Array.from({ length: 100 }, (_, i) => (
     <div key={i} style={{ flex: 1, height: box, borderRadius: 1.5,
                           background: here == null ? t.textFaintest : scale.pctColor(i + 0.5, isDark),
-                          opacity: here == null ? 0.28 : 0.5 }} />
+                          opacity: here == null ? 0.28 : isDark ? 0.5 : 0.75 }} />
   )), [here == null, isDark, t.textFaintest, box, scale]);
   const rgb = here == null ? null : scale.pctRgb(here + 0.5, isDark);
   return (
