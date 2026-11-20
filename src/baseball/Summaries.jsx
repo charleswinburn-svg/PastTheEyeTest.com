@@ -1199,6 +1199,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game" }) {
           season={currentSeason} seasonType={seasonType}
           isGame={isGame} isAAA={isMinor}
           leagueAvgs={effectiveLeagueAvgs} pitchPlus={effectivePitchPlus}
+          seasonGrades={pitchOverrides.size === 0 && typeOverrides.size === 0 ? leaderboardPlus : null}
           perPitchScores={perPitchScores} pitchKey={pitchKey}
           reclassifyMode={reclassifyMode}
           dateFrom={dateFrom} dateTo={dateTo}
@@ -1284,7 +1285,7 @@ function PlinkoCard({ player, season, seasonType, isAAA, isPitcher, children, da
   );
 }
 
-function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, perPitchScores, pitchKey, reclassifyMode = false, onPitchClick = null, onTypeClick = null, dateFrom = "", dateTo = "" }) {
+function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, seasonGrades = null, perPitchScores, pitchKey, reclassifyMode = false, onPitchClick = null, onTypeClick = null, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const pitchRows = useMemo(() => aggregateByPitchType(data.pitches), [data.pitches]);
@@ -1366,7 +1367,8 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
     kind === "release" ? <SummaryReleasePanel pitches={data.pitches} player={player} season={season} width={260} height={400} />
     : kind === "stuffViolin" ? <StuffViolinPanel pitches={data.pitches} perPitchScores={perPitchScores} pitchKey={pitchKey}
         playerId={player?.id} season={season} isAAA={isAAA}
-        fullSeason={!isGame && seasonType === "R" && !dateFrom && !dateTo} width={260} height={400} />
+        fullSeason={!isGame && seasonType === "R" && !dateFrom && !dateTo}
+        tableGrades={pitchPlus} seasonGrades={seasonGrades} width={260} height={400} />
     : null
   );
   const sharedOptions = (

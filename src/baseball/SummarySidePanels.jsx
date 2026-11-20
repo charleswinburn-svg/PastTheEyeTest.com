@@ -113,7 +113,7 @@ export function SummaryReleasePanel({ pitches, player, season, width = 260, heig
 // this Summary's pitches of that type went to each side. Games and date ranges (and
 // pitchers missing from the file) use the per-pitch scores from the Pitch+ API instead.
 export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId = null, season = null, isAAA = false,
-                                   fullSeason = false, width = 260, height = 400 }) {
+                                   fullSeason = false, tableGrades = null, seasonGrades = null, width = 260, height = 400 }) {
   const { theme: t, isDark } = useTheme();
   const gid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
 
@@ -185,7 +185,22 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId =
   if (!model) return <Note t={t} height={height}>Scoring pitches for Stuff+…</Note>;
   if (!model.series.length) return <Note t={t} height={height}>No Stuff+ for these pitches.</Note>;
 
-  const { lo, hi, series } = model;
+  // Match the pitch table exactly: each violin is centred on the Stuff+ the table shows
+  // for that pitch type, and the tick and number are that value. The table grades the
+  // pitcher's average on the league-rescaled scale, while these curves are individual
+  // pitches on the natural per-pitch scale, so their raw means differ by a few points.
+  // The shape is the real spread of individual pitches, moved to sit on the table's value.
+  const tableOf = (k) => {
+    const v = tableGrades?.[k]?.stuffPlus ?? seasonGrades?.[k]?.stuff;
+    return isNum(v) ? v : null;
+  };
+  const series = model.series.map(s => {
+    const c = tableOf(s.k);
+    return { ...s, shift: c != null && isNum(s.mean) ? c - s.mean : 0, value: c ?? s.mean, fromTable: c != null };
+  });
+  const minShift = Math.min(0, ...series.map(s => s.shift)), maxShift = Math.max(0, ...series.map(s => s.shift));
+  const lo = Math.min(70, Math.floor((model.lo + minShift) / 10) * 10);
+  const hi = Math.max(130, Math.ceil((model.hi + maxShift) / 10) * 10);
   const LABEL_W = 62, VALUE_W = 30, TOP = 30, BOTTOM = 28;
   const x0 = LABEL_W, x1 = width - VALUE_W - 4;
   const X = v => x0 + (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (x1 - x0);
@@ -217,13 +232,13 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId =
               strokeWidth={v === 100 ? 1 : 0.6} strokeDasharray={v === 100 ? "3 3" : undefined} />
       ))}
 
-      {series.map(({ k, n, dens, dots, mean: m, median: med }, i) => {
+      {series.map(({ k, n, dens, dots, shift, value: m }, i) => {
         const cy = plotTop + rowH * (i + 0.5);
         const half = rowH * 0.42;
         let path = null;
         if (dens) {
           const peak = Math.max(...dens) || 1;
-          const xs = dens.map((_, j) => X(lo + (hi - lo) * j / (dens.length - 1)));
+          const xs = dens.map((_, j) => X(model.lo + (model.hi - model.lo) * j / (dens.length - 1) + shift));
           const up = dens.map((d, j) => `${xs[j].toFixed(1)},${(cy - (d / peak) * half).toFixed(1)}`);
           const dn = dens.map((d, j) => `${xs[j].toFixed(1)},${(cy + (d / peak) * half).toFixed(1)}`).reverse();
           path = `M ${up.join(" L ")} L ${dn.join(" L ")} Z`;
@@ -239,13 +254,13 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId =
             {path ? (
               <path d={path} fill={`url(#vg-${gid})`} stroke={isDark ? "rgba(255,255,255,0.25)" : "rgba(15,23,42,0.25)"} strokeWidth={0.6} />
             ) : (
-              (dots || []).map((v, j) => <circle key={j} cx={X(v)} cy={cy} r={3} fill={plusColor(v, isDark)} />)
+              (dots || []).map((v, j) => <circle key={j} cx={X(v + shift)} cy={cy} r={3} fill={plusColor(v + shift, isDark)} />)
             )}
-            {isNum(med) && <line x1={X(med)} x2={X(med)} y1={cy - half * 0.7} y2={cy + half * 0.7} stroke={isDark ? "#0b1220" : "#0f172a"} strokeWidth={2} />}
+            {isNum(m) && <line x1={X(m)} x2={X(m)} y1={cy - half * 0.7} y2={cy + half * 0.7} stroke={isDark ? "#0b1220" : "#0f172a"} strokeWidth={2} />}
             {isNum(m) && (
               <text x={width - 2} y={cy + 4} textAnchor="end"
                     style={{ fontSize: 12, fontWeight: NUM_WEIGHT, fontFamily: NUM_FONT, fill: plusPct(m) > 45 && plusPct(m) < 55 ? t.textSecondary : readableOnCard(plusColor(m, isDark), t) }}>
-                {Math.round(m)}
+                {m.toFixed(0)}
               </text>
             )}
           </g>
@@ -256,7 +271,7 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId =
         <text key={v} x={X(v)} y={plotBottom + 12} textAnchor="middle" style={{ ...txt, fontFamily: NUM_FONT }}>{v}</text>
       ))}
       <text x={(x0 + x1) / 2} y={plotBottom + 23} textAnchor="middle" style={txt}>
-        {model.source === "season" ? "Season Stuff+" : "Per-pitch Stuff+"} · tick = median · right = mean
+        {series.some(s => s.fromTable) ? "Tick & number = table Stuff+ · shape = each pitch" : "Per-pitch Stuff+ · tick & number = mean"}
       </text>
     </svg>
   );

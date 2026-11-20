@@ -22,9 +22,9 @@ export const PALETTES = {
     // then building to a strong pure orange (hue ≈ 28–33°, short of red) at the top.
     // Same hues in both themes, saturated; light mode is a deeper set so the ice and
     // the pale middle still read on a white card.
-    stops: [[0, "#5EC3DA"], [18, "#8AD3E5"], [36, "#BCE6F1"], [50, "#E2E8EC"],
+    stops: [[0, "#2BAFD4"], [18, "#5AC7E2"], [36, "#9DE0F1"], [50, "#E2E8EC"],
             [64, "#FFC791"], [80, "#FF9B33"], [100, "#FF7300"]],
-    stopsLight: [[0, "#2FA6C4"], [18, "#5DBFD8"], [36, "#9AD7E7"], [50, "#CDD6DD"],
+    stopsLight: [[0, "#1E94B8"], [18, "#35B4D4"], [36, "#81D0E4"], [50, "#CDD6DD"],
                  [64, "#FFB061"], [80, "#FF8A14"], [100, "#EE6A00"]],
   },
   purpleGold:  { name: "Purple → gold",       diverging: true,  stops: even5(["#3B1C6E", "#8A6FC4", "#CFCFD4", "#F2B84B", "#C98A00"]), darkLift: "#5A3A99" },
