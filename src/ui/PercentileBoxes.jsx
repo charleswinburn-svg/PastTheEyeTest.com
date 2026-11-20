@@ -1,0 +1,97 @@
+import { useMemo } from "react";
+import { useTheme } from "../baseball/ThemeContext.jsx";
+import SCALE from "./colorScale.js";
+
+// ═══════════════════════════════════════════════════════════
+// PERCENTILE BOXES: 100 small boxes, the player's box raised
+// ═══════════════════════════════════════════════════════════
+// The raised box is a square exactly as tall as the row, so it is as large as it can be
+// without touching the rows above and below. The strip of small boxes is inset by half a
+// square on each side, so the square never hangs over an edge at the 1st or 100th percentile.
+//
+// `BoxStrip` is the strip alone (the NHL card lays it out in its own grid).
+// `PercentileBoxes` is a full row (label · strip · value) with the same props and
+// height as the old BubblePercentileBar, so the MLB cards can swap one for the other.
+
+const NUM_FONT = "'Pliant', sans-serif";
+
+export function BoxStrip({ pct, isDark, t, row = 28, box = 8, num = 12, num3 = 10, scale = SCALE }) {
+  const here = pct == null || !isFinite(pct) ? null : Math.min(99, Math.max(0, Math.floor(pct)));
+  const cells = useMemo(() => Array.from({ length: 100 }, (_, i) => (
+    <div key={i} style={{ flex: 1, height: box, borderRadius: 1.5,
+                          background: here == null ? t.textFaintest : scale.pctColor(i + 0.5, isDark),
+                          opacity: here == null ? 0.28 : 0.5 }} />
+  )), [here == null, isDark, t.textFaintest, box, scale]);
+  const rgb = here == null ? null : scale.pctRgb(here + 0.5, isDark);
+  return (
+    <div style={{ position: "relative", height: row }}>
+      <div style={{ position: "absolute", left: row / 2, right: row / 2, top: (row - box) / 2, display: "flex", gap: 1 }}>{cells}</div>
+      {here != null && (
+        <div style={{
+          position: "absolute", top: 0, left: `calc((100% - ${row}px) * ${(here + 0.5) / 100})`, width: row, height: row,
+          borderRadius: Math.round(row / 5), background: `rgb(${rgb.join(",")})`, color: inkFor(rgb), boxShadow: `0 0 0 2px ${t.cardBg}`,
+          display: "flex", alignItems: "center", justifyContent: "center", fontFamily: NUM_FONT,
+          fontSize: pct >= 99.5 ? num3 : num, fontWeight: 800, lineHeight: 1 }}>
+          {Math.round(pct)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function inkFor(rgb) {
+  const [r, g, b] = rgb.map(c => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.3 ? "#111111" : "#ffffff";
+}
+
+// Text in a scale color on a card: the deepest end of the scale is unreadable on a dark
+// card, so it is lifted there (same idea as the scale's own darkLift).
+export function readableOnCard(color, t) {
+  if (!color) return t.textFaint;
+  const m = color.startsWith("#")
+    ? [1, 3, 5].map(i => parseInt(color.slice(i, i + 2), 16))
+    : (color.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  const lum = c => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const L = 0.2126 * lum(m[0]) + 0.7152 * lum(m[1]) + 0.0722 * lum(m[2]);
+  if (t.id === "dark" && L < 0.09) {
+    const up = m.map(c => Math.round(c + (255 - c) * 0.4));
+    return `rgb(${up.join(",")})`;
+  }
+  return color;
+}
+
+export default function PercentileBoxes({
+  label, pctile, display, labelWidth = 110, badge = null, delta = null,
+  theme, isDark: isDarkProp, scale = SCALE, row = 28, valueWidth = 48,
+}) {
+  const ctx = useTheme();
+  const t = theme || ctx.theme;
+  const isDark = isDarkProp ?? (theme ? theme.id === "dark" : ctx.isDark);
+  const has = pctile != null && isFinite(pctile);
+  return (
+    <div style={{ display: "flex", alignItems: "center", marginBottom: 6, width: "100%", gap: 8 }}>
+      <div style={{ width: labelWidth, textAlign: "right", fontSize: 11, fontWeight: 500, color: t.text, flexShrink: 0, lineHeight: 1.2 }}>
+        {label}
+        {badge}
+      </div>
+      <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+        <BoxStrip pct={has ? pctile : null} isDark={isDark} t={t} row={row} box={Math.round(row * 0.3)}
+                  num={Math.round(row * 0.43)} num3={Math.round(row * 0.36)} scale={scale} />
+        {!has && (
+          <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: t.textFaintest, fontStyle: "italic" }}>
+            N/A
+          </div>
+        )}
+      </div>
+      <div style={{ width: valueWidth, textAlign: "right", fontSize: 11, fontWeight: 700, color: has ? t.textSecondary : t.textFaintest,
+                    fontFamily: NUM_FONT, whiteSpace: "nowrap", flexShrink: 0 }}>
+        {display || "—"}
+        {delta && (
+          <div style={{ fontSize: 8.5, fontStyle: "italic", fontWeight: 600, lineHeight: 1, marginTop: 1, color: readableOnCard(delta.color, t) }}>
+            {delta.text}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

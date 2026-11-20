@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import HockeyApp from "./hockey/HockeyApp.jsx";
 import BaseballApp from "./baseball/BaseballApp.jsx";
+
+// Dev-only color scale preview at /palette (not linked from the nav).
+const PalettePreview = lazy(() => import("./ui/PalettePreview.jsx"));
 // World Cup tab hidden for now; src/soccer stays in the repo to bring it back.
 
 const SPORTS = [
@@ -10,6 +13,10 @@ const SPORTS = [
 
 export default function App() {
   const [sport, setSport] = useState("baseball");
+
+  if (window.location.pathname.replace(/\/+$/, "") === "/palette") {
+    return <Suspense fallback={null}><PalettePreview /></Suspense>;
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0f1a" }}>
