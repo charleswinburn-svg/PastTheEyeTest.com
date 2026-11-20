@@ -12,7 +12,7 @@ import {
   RollingVeloChart, PlatoonUsageBars, ReclassifyModal,
 } from "./SummaryComponents.jsx";
 import PlinkoView from "./PlinkoViews.jsx";
-import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance, SearchableSelect } from "./SharedComponents.jsx";
+import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance, SearchableSelect, PlayerHeader } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { SummaryReleasePanel, StuffViolinPanel } from "./SummarySidePanels.jsx";
 
@@ -1606,33 +1606,17 @@ function SummaryHeader({ player, subtitle, seasonType, isAAA }) {
   // MLB parent org, but keep the actual (minor-league) team logo. MLB unchanged.
   const parentOrgId = useParentOrgId(player, isAAA);
   const parentColor = parentOrgId != null ? TEAM_ID_TO_PRIMARY[parentOrgId] : null;
-  const headshot = player.id ? `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,h_213,c_thumb,g_face,q_auto:best/v1/people/${player.id}/headshot/67/current` : null;
   const logo = getLogoUrl(player.team, player.teamId);
   const flag = (!isAAA && seasonType === "W") ? getWbcFlag(player.team) : null;
   const showFlag = seasonType === "W" ? (flag || null) : null;
   const showLogo = seasonType === "W" ? (!flag ? logo : null) : logo;
 
-  const bgColor = parentColor || MLB_TEAM_PRIMARY[player.team] || "#1e293b";
-  const light = hexLuminance(bgColor) > 0.179;
-  const textColor = light ? "#111111" : "#ffffff";
-  const subColor = light ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.72)";
-  const ringColor = light ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.25)";
-  const initColor = light ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.2)";
-
+  // The shared card banner (SharedComponents.jsx), with this Summary's color/logo/flag rules.
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px 14px", gap: 20, background: bgColor }}>
-      <div style={{ width: 72, height: 72, borderRadius: "50%", background: ringColor, overflow: "hidden", flexShrink: 0, border: `2px solid ${ringColor}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-        <span style={{ fontSize: 22, fontWeight: 700, color: initColor, position: "absolute" }}>{player.name ? player.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : ""}</span>
-        {headshot && <img src={headshot} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 1 }} onError={e => { e.target.style.display = "none"; }} />}
-      </div>
-      <div style={{ flex: 1, textAlign: "center" }}>
-        <div style={{ fontSize: 24, fontWeight: 800, color: textColor, letterSpacing: "-0.02em" }}>{player.name}</div>
-        <div style={{ fontSize: 12, color: subColor, marginTop: 4, letterSpacing: "0.06em", fontStyle: "italic", fontWeight: 600, textTransform: "uppercase" }}>{subtitle}</div>
-      </div>
-      <div style={{ width: 80, height: 80, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {showLogo && <img src={showLogo} alt={player.team} style={{ width: 80, height: 80, objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }} onError={e => { e.target.style.display = "none"; }} />}
-        {!showLogo && showFlag && <span style={{ fontSize: 48, lineHeight: 1 }}>{showFlag}</span>}
-      </div>
-    </div>
+    <PlayerHeader
+      name={player.name} team={player.team} teamId={player.teamId} playerId={player.id}
+      subtitle={subtitle} bgColor={parentColor || undefined}
+      logo={showLogo || null} flag={showFlag}
+    />
   );
 }

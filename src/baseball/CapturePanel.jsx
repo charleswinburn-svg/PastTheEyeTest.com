@@ -43,7 +43,7 @@ export default function CapturePanel({
           <div data-ptet-capture-only="" style={{ display: "none" }}>
             <PlayerHeader
               name={player.name} team={player.team} teamId={player.team_id}
-              season={season} playerId={player.player_id} subtitle={subtitle}
+              season={season} playerId={player.player_id} subtitle={subtitle} size="md"
             />
           </div>
         )}

@@ -464,9 +464,11 @@ export const TEAM_IDS = {
 // Normalize: trim, uppercase, strip dots ("S.F." → "SF").
 const normAbbr = (s) => (s || "").toString().trim().toUpperCase().replace(/\./g, "");
 
-export function getHeadshotUrl(playerId) {
+// `px`: requested image size (213 default; the big card headers ask for 360 so the
+// 128 px headshot stays sharp on high-DPI screens).
+export function getHeadshotUrl(playerId, px = 213) {
   if (!playerId) return null;
-  return `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,h_213,c_thumb,g_face,q_auto:best/v1/people/${playerId}/headshot/67/current`;
+  return `/mlb-photos/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_${px},h_${px},c_thumb,g_face,q_auto:best/v1/people/${playerId}/headshot/67/current`;
 }
 
 // Resolve a team logo URL. Tries the abbreviation map first, then falls back
@@ -634,31 +636,41 @@ export function useFallbackTeamId(playerId, needed) {
   return tid;
 }
 
-export function PlayerHeader({ name, team, teamId, season, playerId, subtitle }) {
-  const headshot = getHeadshotUrl(playerId);
-  const directLogo = getLogoUrl(team, teamId);
-  const fallbackTeamId = useFallbackTeamId(playerId, !directLogo);
-  const logo = directLogo || getLogoUrl(null, fallbackTeamId);
+// Card / Summary banner: headshot · name + subtitle · team logo (or WBC flag).
+// size "lg" (default) for full cards and Summaries, "md" for the narrow 460 px panels.
+// Optional: bgColor (e.g. a minor leaguer's parent-org color), logo (a URL to use, or
+// null for none; omitted = the team's logo), flag (an emoji shown when there's no logo).
+const HEADER_SIZES = {
+  lg: { img: 128, logo: 128, name: 36, sub: 15, init: 38, pad: "22px 28px 20px", gap: 24, px: 360 },
+  md: { img: 92,  logo: 92,  name: 26, sub: 12.5, init: 28, pad: "16px 20px 14px", gap: 16, px: 213 },
+};
 
-  const bgColor = MLB_TEAM_PRIMARY[team] || "#1e293b";
+export function PlayerHeader({ name, team, teamId, season, playerId, subtitle, size = "lg", bgColor: bgOverride, logo: logoProp, flag = null }) {
+  const S = HEADER_SIZES[size] || HEADER_SIZES.lg;
+  const headshot = getHeadshotUrl(playerId, S.px);
+  const directLogo = logoProp !== undefined ? logoProp : getLogoUrl(team, teamId);
+  const fallbackTeamId = useFallbackTeamId(playerId, logoProp === undefined && !directLogo);
+  const logo = directLogo || (logoProp === undefined ? getLogoUrl(null, fallbackTeamId) : null);
+
+  const bgColor = bgOverride || MLB_TEAM_PRIMARY[team] || "#1e293b";
   const light = hexLuminance(bgColor) > 0.179;
   const textColor = light ? "#111111" : "#ffffff";
-  const subColor = light ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.72)";
+  const subColor = light ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.75)";
   const ringColor = light ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.25)";
   const initColor = light ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.2)";
 
   return (
     <div style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "16px 20px 14px", gap: 16, background: bgColor,
+      padding: S.pad, gap: S.gap, background: bgColor,
     }}>
       {/* Headshot */}
       <div style={{
-        width: 72, height: 72, borderRadius: "50%", background: ringColor,
-        overflow: "hidden", border: `2px solid ${ringColor}`, flexShrink: 0, position: "relative",
+        width: S.img, height: S.img, borderRadius: "50%", background: ringColor,
+        overflow: "hidden", border: `3px solid ${ringColor}`, flexShrink: 0, position: "relative",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
-        <span style={{ fontSize: 22, fontWeight: 700, color: initColor, position: "absolute" }}>
+        <span style={{ fontSize: S.init, fontWeight: 700, color: initColor, position: "absolute" }}>
           {name ? name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : ""}
         </span>
         {headshot && (
@@ -670,23 +682,25 @@ export function PlayerHeader({ name, team, teamId, season, playerId, subtitle })
       </div>
 
       {/* Name + subtitle */}
-      <div style={{ flex: 1, textAlign: "center" }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: textColor, letterSpacing: "-0.02em" }}>
+      <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+        <div style={{ fontSize: S.name, fontWeight: 800, color: textColor, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
           {name}
         </div>
-        <div style={{ fontSize: 11, color: subColor, marginTop: 4, letterSpacing: "0.06em", fontStyle: "italic", fontWeight: 600, textTransform: "uppercase" }}>
+        <div style={{ fontSize: S.sub, color: subColor, marginTop: Math.round(S.sub * 0.5), letterSpacing: "0.05em", fontStyle: "italic", fontWeight: 600, textTransform: "uppercase" }}>
           {subtitle || `${team ? `${team} | ` : ""}${season} Season`}
         </div>
       </div>
 
-      {/* Logo */}
-      <div style={{ width: 72, height: 72, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {logo && (
+      {/* Logo (or flag) */}
+      <div style={{ width: S.logo, height: S.logo, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {logo ? (
           <img src={logo} alt={team}
-            style={{ width: 72, height: 72, objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }}
+            style={{ width: S.logo, height: S.logo, objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }}
             onError={e => { e.target.style.display = "none"; }}
           />
-        )}
+        ) : flag ? (
+          <span style={{ fontSize: Math.round(S.logo * 0.62), lineHeight: 1 }}>{flag}</span>
+        ) : null}
       </div>
     </div>
   );
