@@ -256,7 +256,7 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId =
         <text key={v} x={X(v)} y={plotBottom + 12} textAnchor="middle" style={{ ...txt, fontFamily: NUM_FONT }}>{v}</text>
       ))}
       <text x={(x0 + x1) / 2} y={plotBottom + 23} textAnchor="middle" style={txt}>
-        Stuff+ {model.source === "season" ? "(season distribution)" : "(per pitch)"} · tick = median · right = mean
+        {model.source === "season" ? "Season Stuff+" : "Per-pitch Stuff+"} · tick = median · right = mean
       </text>
     </svg>
   );
