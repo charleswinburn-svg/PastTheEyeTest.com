@@ -37,6 +37,28 @@ Comprehensive reference for the project across both repos. Use this when startin
 | `baseball_pipeline.py` | Generates `public/baseball_data_{year}.json` from FG + Savant |
 | `fangraphs_cookies.txt` | Browser-exported cookies for FG Cloudflare bypass |
 
+### Routes, colors and posts
+
+- **Routes** (`src/router.jsx`, `src/App.jsx`): `/` Articles and Updates · `/mlb` · `/nhl` ·
+  `/posts/<slug>` · `/palette` (hidden color-scale preview). One `ThemeProvider` in `App.jsx`.
+- **One color scale** (`src/ui/colorScale.js`): every value color (percentiles, Plus stats,
+  stat-vs-average cells, heatmaps, NHL tiers) comes from `ACTIVE_PALETTE` (Ice → Fire: glacier ice
+  = worst, frost = average, orange = best). `binColor`/`textOnBin`/`BIN_COLORS` and `nhlColors.js`
+  are built on it. Change the stops there and the whole site follows; `/palette` shows the result.
+  The UI accent (tabs, borders) is `accent` in `ThemeContext.jsx` (ice blue; amber kept as `brand`).
+- **Percentile rows** use the 100-box strip (`src/ui/PercentileBoxes.jsx`, via `PercentileBoxRow`).
+- **Summaries side panels** (`src/baseball/SummarySidePanels.jsx`): "Release point" and
+  "Stuff+ by pitch (violin)" options in the left/right dropdowns.
+
+#### Posting an article or update
+
+1. Copy `src/content/posts/_TEMPLATE.md` to `src/content/posts/YYYY-MM-DD-your-slug.md`
+   (the URL becomes `/posts/your-slug`).
+2. Fill in the front matter: `title`, `type` (`article` = card with its own page, `update` = shown
+   in full in the Updates feed), `summary`, optional `tags`, `cover`, `pinned: true`. Remove `draft: true`.
+3. Write Markdown below it. Images go in `public/posts/your-slug/` and are linked as `/posts/your-slug/x.png`.
+4. Commit. The next build includes it (posts are bundled at build time).
+
 ### Data files in `public/`
 
 | File | Source | Refresh |

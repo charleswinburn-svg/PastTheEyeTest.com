@@ -174,6 +174,7 @@ function About({ t }) {
   );
 }
 
+// The ThemeProvider lives in App.jsx (one theme for the whole site).
 export default function HockeyApp() {
-  return <ThemeProvider><Hockey /></ThemeProvider>;
+  return <Hockey />;
 }

@@ -10,10 +10,11 @@
     "test:similarity": "node scripts/test_similarity.mjs"
   },
   "dependencies": {
+    "html2canvas": "^1.4.1",
+    "marked": "^12.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^2.12.0",
-    "html2canvas": "^1.4.1"
+    "recharts": "^2.12.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

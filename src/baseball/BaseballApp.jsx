@@ -143,13 +143,9 @@ const TEAM_LEAGUE = {
 // Display order for the primary-position filter.
 const POS_ORDER = ["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "OF", "DH", "P", "—"];
 
-// ── Wrapped export with ThemeProvider ──
+// The ThemeProvider lives in App.jsx (one theme for the whole site).
 export default function BaseballAppWrapper() {
-  return (
-    <ThemeProvider>
-      <BaseballApp />
-    </ThemeProvider>
-  );
+  return <BaseballApp />;
 }
 
 function BaseballApp() {
