@@ -66,7 +66,8 @@ export const postBySlug = slug => POSTS.find(p => p.slug === slug) || null;
 marked.setOptions({ gfm: true, breaks: false });
 export const renderMarkdown = md => marked.parse(md || "");
 
-export function formatDate(d) {
+// "Nov 20, 2026", or with `long` "November 20, 2026".
+export function formatDate(d, long = false) {
   const dt = new Date(`${d}T12:00:00Z`);
-  return isNaN(dt) ? d : dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  return isNaN(dt) ? d : dt.toLocaleDateString("en-US", { month: long ? "long" : "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }

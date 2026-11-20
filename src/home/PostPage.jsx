@@ -1,30 +1,29 @@
 import { useEffect, useMemo } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
-import SCALE from "../ui/colorScale.js";
 import { Link } from "../router.jsx";
-import Prose from "./Prose.jsx";
+import Prose, { SERIF, SANS } from "./Prose.jsx";
 import { POSTS, postBySlug, renderMarkdown, formatDate } from "./posts.js";
 
-const SERIF = "'Playfair Display', Georgia, serif";
+const MEASURE = 680;
 
 export default function PostPage({ slug }) {
-  const { theme: t, isDark } = useTheme();
+  const { theme: t } = useTheme();
   const post = postBySlug(slug);
   const html = useMemo(() => (post ? renderMarkdown(post.body) : ""), [post]);
   useEffect(() => {
-    document.title = post ? `${post.title} · Past The Eye Test` : "Post not found · Past The Eye Test";
+    document.title = post ? `${post.title} | Past The Eye Test` : "Post not found | Past The Eye Test";
   }, [post]);
 
   const back = (
-    <Link to="/" style={{ fontSize: 13, fontWeight: 700, color: t.accent, textDecoration: "none" }}>← All posts</Link>
+    <Link to="/" style={{ fontFamily: SANS, fontSize: 14, color: t.textMuted, textDecoration: "none" }}>← Articles and Updates</Link>
   );
 
   if (!post) {
     return (
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 16px" }}>
+      <div style={{ maxWidth: MEASURE, margin: "0 auto", padding: "40px 20px" }}>
         {back}
-        <h1 style={{ fontFamily: SERIF, fontSize: 34, color: t.text, margin: "18px 0 8px" }}>Post not found</h1>
-        <p style={{ color: t.textMuted }}>It may have been renamed or taken down.</p>
+        <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 34, color: t.text, margin: "28px 0 10px" }}>Post not found</h1>
+        <p style={{ fontFamily: SERIF, fontSize: 19, color: t.textSecondary }}>It may have been renamed or taken down.</p>
       </div>
     );
   }
@@ -33,38 +32,40 @@ export default function PostPage({ slug }) {
   const i = POSTS.indexOf(post);
   const newer = i > 0 ? POSTS[i - 1] : null;
   const older = i < POSTS.length - 1 ? POSTS[i + 1] : null;
+  const meta = [post.type === "update" ? "Update" : "Article", formatDate(post.date, true),
+                post.type === "article" ? `${post.minutes} min read` : null].filter(Boolean);
 
   return (
-    <article style={{ maxWidth: 720, margin: "0 auto", padding: "28px 16px 64px" }}>
+    <article style={{ maxWidth: MEASURE, margin: "0 auto", padding: "32px 20px 72px" }}>
       {back}
-      <header style={{ margin: "22px 0 26px" }}>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: t.accent, marginBottom: 10 }}>
-          {post.type === "update" ? "Update" : "Article"}
-        </div>
-        <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 5vw, 44px)", lineHeight: 1.12, color: t.text, letterSpacing: "-0.02em" }}>{post.title}</h1>
-        {post.summary && <p style={{ fontSize: 18, lineHeight: 1.55, color: t.textSecondary, margin: "12px 0 0" }}>{post.summary}</p>}
-        <div style={{ fontSize: 13, color: t.textFaint, margin: "14px 0 0", display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span>{formatDate(post.date)}</span>
-          {post.type === "article" && <><span aria-hidden>·</span><span>{post.minutes} min read</span></>}
-          {post.tags.length > 0 && <><span aria-hidden>·</span><span>{post.tags.join(", ")}</span></>}
-        </div>
-        <div style={{ height: 3, width: 120, borderRadius: 2, background: SCALE.gradient(isDark, 10), margin: "20px 0 0" }} />
+      <header style={{ margin: "36px 0 0", paddingBottom: 28, borderBottom: `1px solid ${t.divider}` }}>
+        <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: "clamp(31px, 5vw, 42px)", lineHeight: 1.14,
+                     letterSpacing: "-0.012em", color: t.text, fontVariantNumeric: "lining-nums" }}>
+          {post.title}
+        </h1>
+        {post.summary && (
+          <p style={{ fontFamily: SERIF, fontSize: 21, lineHeight: 1.45, color: t.textMuted, margin: "14px 0 0" }}>{post.summary}</p>
+        )}
+        <p style={{ fontFamily: SANS, fontSize: 14, color: t.textFaint, margin: "20px 0 0", letterSpacing: 0 }}>
+          {meta.join("  ·  ")}
+          {post.tags.length > 0 && <span style={{ color: t.textFaint }}>{"  ·  "}{post.tags.join(", ")}</span>}
+        </p>
       </header>
-      {post.cover && <img src={post.cover} alt="" style={{ width: "100%", borderRadius: 12, margin: "0 0 26px", display: "block" }} />}
-      <Prose html={html} />
-      <nav style={{ display: "flex", justifyContent: "space-between", gap: 16, marginTop: 44, paddingTop: 18, borderTop: `1px solid ${t.divider}`, flexWrap: "wrap" }}>
-        {older ? <NavLink t={t} post={older} label="← Older" /> : <span />}
-        {newer ? <NavLink t={t} post={newer} label="Newer →" align="right" /> : <span />}
+      {post.cover && <img src={post.cover} alt="" style={{ width: "100%", display: "block", margin: "28px 0 0", borderRadius: 2 }} />}
+      <div style={{ marginTop: 30 }}><Prose html={html} /></div>
+      <nav style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 56, paddingTop: 20, borderTop: `1px solid ${t.divider}` }}>
+        <div>{older && <NavLink t={t} post={older} label="Previous" />}</div>
+        <div style={{ textAlign: "right" }}>{newer && <NavLink t={t} post={newer} label="Next" />}</div>
       </nav>
     </article>
   );
 }
 
-function NavLink({ t, post, label, align = "left" }) {
+function NavLink({ t, post, label }) {
   return (
-    <Link to={`/posts/${post.slug}`} style={{ textDecoration: "none", textAlign: align, maxWidth: 320, display: "grid", gap: 3 }}>
-      <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textFaint }}>{label}</span>
-      <span style={{ fontSize: 15, fontWeight: 700, color: t.text, lineHeight: 1.35 }}>{post.title}</span>
+    <Link to={`/posts/${post.slug}`} style={{ textDecoration: "none", display: "inline-grid", gap: 4 }}>
+      <span style={{ fontFamily: SANS, fontSize: 13, color: t.textFaint }}>{label}</span>
+      <span style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: t.text }}>{post.title}</span>
     </Link>
   );
 }
