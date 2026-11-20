@@ -108,7 +108,9 @@ export function ReleaseDiagram({ p, accent, width = 360 }) {
   const uni = (hasTeam && MLB_TEAM_PRIMARY[teamKey]) || "#1f2a44";
   let trim = (hasTeam && MLB_TEAM_SECONDARY[teamKey]) || "#c8ced8";
   if (trim.toLowerCase() === uni.toLowerCase()) trim = "#e5e7eb";
-  const S = 34;                     // px per ft (±5.3 ft across: room for 4.5 ft release sides)
+  // px per ft: 34 at the usual widths (±5.3 ft across: room for 4.5 ft release sides);
+  // narrower panels (the 260 px Summaries slot) scale down so wide releases still fit.
+  const S = Math.min(34, width / 10.6);
   const Z0 = -1.1;                  // ft at the bottom edge (room for the slope)
   const H = 10.0;                   // ft of height shown (headroom for over-the-top releases)
   const height = Math.round(H * S);

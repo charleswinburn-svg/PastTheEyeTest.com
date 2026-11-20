@@ -14,6 +14,7 @@ import {
 import PlinkoView from "./PlinkoViews.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance, SearchableSelect } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
+import { SummaryReleasePanel, StuffViolinPanel } from "./SummarySidePanels.jsx";
 
 const SEASON_TYPES = [
   { id: "S", label: "Spring Training" },
@@ -1360,6 +1361,18 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
   const saveCard = async () => {
     await saveCardAsPng(cardRef, `${player.name.replace(/\s+/g, "_")}_pitching_${isGame ? "game" : "season"}.png`);
   };
+  // Side-panel options either slot can show (built from this Summary's own pitches).
+  const sharedPanel = (kind) => (
+    kind === "release" ? <SummaryReleasePanel pitches={data.pitches} player={player} season={season} width={260} height={400} />
+    : kind === "stuffViolin" ? <StuffViolinPanel pitches={data.pitches} perPitchScores={perPitchScores} pitchKey={pitchKey} width={260} height={400} />
+    : null
+  );
+  const sharedOptions = (
+    <>
+      <option value="release">Release point</option>
+      <option value="stuffViolin">Stuff+ by pitch (violin)</option>
+    </>
+  );
   return (
     <div>
       {/* Panel selectors live OUTSIDE cardRef so they don't appear in the saved PNG */}
@@ -1383,6 +1396,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             <option value="zones">Zones — vs LHB</option>
             <option value="zonesAll">Zones — overall</option>
             <option value="velo">Velocity — by pitch #{!isGame ? " / outing" : ""}</option>
+            {sharedOptions}
           </select>
         </label>
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
@@ -1401,6 +1415,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             <option value="zones">Zones — vs RHB</option>
             <option value="zonesAll">Zones — overall</option>
             <option value="platoon">Usage — by platoon</option>
+            {sharedOptions}
           </select>
         </label>
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", cursor: "pointer" }}
@@ -1416,13 +1431,13 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
         <StatBar stats={stats} />
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 4px 0", gap: 4 }}>
           <div style={{ width: 260 }}>
-            {leftPanel === "zones" ? (
+            {sharedPanel(leftPanel) || (leftPanel === "zones" ? (
               <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "L")} side="L" width={260} isGame={isGame} pitchPlus={pitchPlus} />
             ) : leftPanel === "zonesAll" ? (
               <LocationZonePanel pitches={data.pitches} side="ALL" width={260} isGame={isGame} pitchPlus={pitchPlus} />
             ) : (
               <RollingVeloChart pitches={data.pitches} mode={isGame ? "game" : "season"} width={260} height={400} />
-            )}
+            ))}
           </div>
           <MovementPlot
             pitches={data.pitches}
@@ -1436,13 +1451,13 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
             pitchKey={pitchKey}
           />
           <div style={{ width: 260 }}>
-            {rightPanel === "zones" ? (
+            {sharedPanel(rightPanel) || (rightPanel === "zones" ? (
               <LocationZonePanel pitches={data.pitches.filter(p => p.batSide === "R")} side="R" width={260} isGame={isGame} pitchPlus={pitchPlus} />
             ) : rightPanel === "zonesAll" ? (
               <LocationZonePanel pitches={data.pitches} side="ALL" width={260} isGame={isGame} pitchPlus={pitchPlus} />
             ) : (
               <PlatoonUsageBars pitches={data.pitches} pitchPlus={pitchPlus} width={260} height={400} />
-            )}
+            ))}
           </div>
         </div>
         <PitchTypeLegend types={[...new Set(data.pitches.map(p => p.pitchType))].filter(t => t !== "UN")} />
