@@ -65,9 +65,10 @@ export default function PostPage({ slug }) {
 // Share the post to X. X builds a picture card from the link (the post's page carries a
 // large-image card, scripts/socialPages.js). X's composer only previews a link that's
 // pasted in, not one handed over pre-filled, so "Post on X" copies the link and opens an
-// empty composer: paste (Ctrl+V / Cmd+V) and the card appears. The `?s=` code changes
-// whenever the post's card (title, picture, date) changes, so X always reads a fresh card
-// instead of one it saved earlier (X keeps a link's card for about a week).
+// empty composer: paste (Ctrl+V / Cmd+V) and the card appears. X saves a link's card the
+// first time it sees the link and reuses it for about a week, even if it had no picture
+// (e.g. it was looked up before the post went live). So every click makes a link X has
+// never seen: `?s=` is a code for the post's card plus a code for the moment of the click.
 function cardCode(post) {
   let h = 0x811c9dc5;
   for (const ch of `${post.title}|${post.shareImage || ""}|${post.date}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 0x01000193); }
@@ -85,20 +86,22 @@ async function copyText(text) {
 
 function ShareBar({ t, post }) {
   const [note, setNote] = useState("");
-  const url = `${SITE_URL}/posts/${post.slug}?s=${cardCode(post)}`;
+  const freshUrl = () => `${SITE_URL}/posts/${post.slug}?s=${cardCode(post)}${Date.now().toString(36).slice(-5)}`;
   const say = (msg, ms = 6000) => { setNote(msg); setTimeout(() => setNote(n => (n === msg ? "" : n)), ms); };
 
   const postOnX = async () => {
     // Copy while this page still has focus (the clipboard refuses a background tab), then
     // open X; the click's user activation still covers the new tab.
+    const url = freshUrl();
     const ok = await copyText(url);
     if (!ok) { window.prompt("Copy this link, then paste it into X:", url); return; }
     const win = window.open("https://x.com/compose/post", "_blank");
     if (win) win.opener = null;
-    say(win ? "Link copied. Paste it into X (Ctrl+V / ⌘V) and the picture card appears."
+    say(win ? "Link copied. Paste it into X (Ctrl+V / ⌘V) and wait for the picture card before posting."
             : "Link copied. Open X and paste it (Ctrl+V / ⌘V) to get the picture card.");
   };
   const copy = async () => {
+    const url = freshUrl();
     if (await copyText(url)) say("Link copied.", 2000);
     else window.prompt("Copy this link:", url);
   };
