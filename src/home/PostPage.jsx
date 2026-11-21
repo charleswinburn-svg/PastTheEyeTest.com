@@ -62,13 +62,21 @@ export default function PostPage({ slug }) {
   );
 }
 
-// Share the post to X. The link X gets is the post's public URL; its page carries a
-// large-image card (scripts/socialPages.js), so X shows the share picture and title,
-// and hides the link itself when it's the last thing in the post.
+// Share the post to X. X builds a picture card from the link (the post's page carries a
+// large-image card, scripts/socialPages.js), so the composer opens with only the link:
+// post it as is and X shows just the card, not the link text. The `?s=` code changes
+// whenever the post's card (title, picture, date) changes, so X always reads a fresh card
+// instead of one it saved earlier (X keeps a link's card for about a week).
+function cardCode(post) {
+  let h = 0x811c9dc5;
+  for (const ch of `${post.title}|${post.shareImage || ""}|${post.date}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0).toString(36).slice(0, 6);
+}
+
 function ShareBar({ t, post }) {
   const [copied, setCopied] = useState(false);
-  const url = `${SITE_URL}/posts/${post.slug}`;
-  const intent = `https://x.com/intent/post?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(url)}`;
+  const url = `${SITE_URL}/posts/${post.slug}?s=${cardCode(post)}`;
+  const intent = `https://x.com/intent/post?url=${encodeURIComponent(url)}`;
   const copy = async () => {
     try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1800); }
     catch { window.prompt("Copy this link:", url); }
