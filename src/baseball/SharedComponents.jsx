@@ -641,8 +641,8 @@ export function useFallbackTeamId(playerId, needed) {
 // Optional: bgColor (e.g. a minor leaguer's parent-org color), logo (a URL to use, or
 // null for none; omitted = the team's logo), flag (an emoji shown when there's no logo).
 const HEADER_SIZES = {
-  lg: { img: 100, logo: 100, name: 42, sub: 19, init: 30, pad: "18px 24px 16px", gap: 20, px: 300 },
-  md: { img: 80,  logo: 80,  name: 30, sub: 15, init: 24, pad: "14px 18px 12px", gap: 14, px: 213 },
+  lg: { img: 100, logo: 100, name: 35, sub: 16, init: 30, pad: "18px 24px 16px", gap: 20, px: 300 },
+  md: { img: 80,  logo: 80,  name: 26, sub: 13.5, init: 24, pad: "14px 18px 12px", gap: 14, px: 213 },
 };
 
 export function PlayerHeader({ name, team, teamId, season, playerId, subtitle, size = "lg", bgColor: bgOverride, logo: logoProp, flag = null }) {
