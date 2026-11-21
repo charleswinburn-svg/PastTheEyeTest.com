@@ -3,7 +3,8 @@ title: Full pasttheeyetest.com UI/UX Changes
 date: 2026-11-21
 type: update
 tags: [site]
-preview: /posts/ui-ux-changes/tolle-season-summary.png
+preview: /posts/ui-ux-changes/share.jpg
+share: /posts/ui-ux-changes/share.jpg
 ---
 
 As you can see, [pasttheeyetest.com](https://www.pasttheeyetest.com) looks very different. Over the past month or so, I have been deciding on the next steps to take in terms of branding. I had not changed the UI at all since the launch of the JavaScript-integrated version of my site, so I decided to make some changes. Here are all of them.

@@ -8,13 +8,14 @@ import { POSTS, formatDate } from "./posts.js";
 // HOME: "Articles and Updates"
 // ═══════════════════════════════════════════════════════════
 // An editorial index: serif headlines and decks, small sans dates, hairline rules.
-// Articles on the left (newest first), updates in a narrower column on the right.
+// Articles on the left (newest first), updates on the right: two equal columns, and every
+// post shown as the same preview card (its 1200×630 share picture, the one X shows).
 
 const CSS = `
-.ptet-home-cols { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+.ptet-home-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
 .ptet-headline-link:hover .ptet-headline { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
-.ptet-update-card img { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.ptet-update-card:hover img { transform: translateY(-2px); }
+.ptet-preview-card img { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.ptet-preview-card:hover img { transform: translateY(-2px); }
 @media (max-width: 900px) { .ptet-home-cols { grid-template-columns: minmax(0, 1fr); gap: 40px; } }
 `;
 
@@ -32,53 +33,30 @@ function Dateline({ t, post }) {
   return <div style={{ fontFamily: SANS, fontSize: 13, color: t.textFaint }}>{bits.join("  ·  ")}</div>;
 }
 
-function ArticleItem({ post, t, lead = false }) {
+// One preview card for articles and updates alike: date, title, the share picture at
+// 1200×630, the opening lines (clamped), and a prompt. The whole card opens the post.
+function PreviewCard({ post, t }) {
   return (
-    <Link to={`/posts/${post.slug}`} className="ptet-headline-link"
-          style={{ display: "block", textDecoration: "none", color: "inherit", padding: lead ? "18px 0 28px" : "20px 0",
-                   borderBottom: `1px solid ${t.divider}` }}>
-      {post.previewImage && (
-        <img src={post.previewImage} alt="" style={{ width: "100%", aspectRatio: lead ? "1200 / 630" : "16 / 9", objectFit: "cover",
-                                                     display: "block", marginBottom: 14, borderRadius: 2 }} />
-      )}
-      <h3 className="ptet-headline" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: lead ? 32 : 23, lineHeight: 1.18,
-                                             letterSpacing: "-0.01em", color: t.text }}>
+    <Link to={`/posts/${post.slug}`} className="ptet-headline-link ptet-preview-card"
+          style={{ display: "block", textDecoration: "none", color: "inherit", padding: "18px 0 22px", borderBottom: `1px solid ${t.divider}` }}>
+      <Dateline t={t} post={post} />
+      <div className="ptet-headline" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 23, lineHeight: 1.22, letterSpacing: "-0.01em",
+                                              color: t.text, margin: "6px 0 12px" }}>
         {post.title}
-      </h3>
+      </div>
+      {post.shareImage && (
+        <img src={post.shareImage} alt="" loading="lazy"
+             style={{ display: "block", width: "100%", aspectRatio: "1200 / 630", objectFit: "cover",
+                      borderRadius: 4, marginBottom: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.2)" }} />
+      )}
       {(post.summary || post.excerpt) && (
-        <p style={{ fontFamily: SERIF, fontSize: lead ? 19 : 17, lineHeight: 1.5, color: t.textMuted, margin: "8px 0 10px",
+        <p style={{ fontFamily: SERIF, fontSize: 16, lineHeight: 1.55, color: t.textSecondary, margin: 0,
                     display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {post.summary || post.excerpt}
         </p>
       )}
-      <Dateline t={t} post={post} />
-    </Link>
-  );
-}
-
-// A preview card: date, title, the first image, the opening lines (clamped), and a
-// prompt. The whole card opens the full update on its own page.
-function UpdateItem({ post, t }) {
-  return (
-    <Link to={`/posts/${post.slug}`} className="ptet-headline-link ptet-update-card"
-          style={{ display: "block", textDecoration: "none", color: "inherit", padding: "18px 0", borderBottom: `1px solid ${t.divider}` }}>
-      <Dateline t={t} post={post} />
-      <div className="ptet-headline" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, lineHeight: 1.3, color: t.text, margin: "6px 0 10px" }}>
-        {post.title}
-      </div>
-      {post.previewImage && (
-        <img src={post.previewImage} alt="" loading="lazy"
-             style={{ display: "block", width: "100%", aspectRatio: "16 / 9", objectFit: "cover", objectPosition: "top",
-                      borderRadius: 4, marginBottom: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.2)" }} />
-      )}
-      {(post.summary || post.excerpt) && (
-        <p style={{ fontFamily: SERIF, fontSize: 15.5, lineHeight: 1.55, color: t.textSecondary, margin: 0,
-                    display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {post.summary || post.excerpt}
-        </p>
-      )}
       <div style={{ fontFamily: SANS, fontSize: 13, fontWeight: 600, color: t.accent, marginTop: 10 }}>
-        Read the full update →
+        {post.type === "update" ? "Read the full update →" : "Read the full article →"}
       </div>
     </Link>
   );
@@ -107,8 +85,8 @@ export default function HomePage() {
       <div className="ptet-home-cols">
         <section>
           <SectionTitle t={t}>Articles</SectionTitle>
-          {lead && lead.type === "update" ? <UpdateItem post={lead} t={t} /> : lead ? <ArticleItem post={lead} t={t} lead /> : null}
-          {rest.map(p => <ArticleItem key={p.slug} post={p} t={t} />)}
+          {lead && <PreviewCard post={lead} t={t} />}
+          {rest.map(p => <PreviewCard key={p.slug} post={p} t={t} />)}
           {!lead && (
             <p style={{ fontFamily: SERIF, fontSize: 17, color: t.textMuted, padding: "20px 0" }}>No articles yet.</p>
           )}
@@ -116,7 +94,7 @@ export default function HomePage() {
         <aside>
           <SectionTitle t={t}>Updates</SectionTitle>
           {updates.length
-            ? updates.map(p => <UpdateItem key={p.slug} post={p} t={t} />)
+            ? updates.map(p => <PreviewCard key={p.slug} post={p} t={t} />)
             : <p style={{ fontFamily: SERIF, fontSize: 17, color: t.textMuted, padding: "20px 0" }}>No updates yet.</p>}
         </aside>
       </div>
