@@ -59,6 +59,8 @@ const CSS = `
   font-family: ${SANS}; font-size: 14px; line-height: 1.4; font-variant-numeric: lining-nums tabular-nums;
   border-collapse: collapse; display: block; overflow-x: auto; max-width: 100%; margin: 1.4em 0 1.6em;
 }
+/* <table class="centered"> sits in the middle of the column instead of on the left. */
+.ptet-prose table.centered { width: fit-content; margin-left: auto; margin-right: auto; }
 .ptet-prose thead th { font-weight: 600; color: var(--p-head); border-bottom: 1px solid var(--p-head); }
 .ptet-prose th, .ptet-prose td { padding: 7px 14px 7px 0; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--p-rule); }
 .ptet-prose th[align="right"], .ptet-prose td[align="right"] { text-align: right; padding: 7px 0 7px 18px; }

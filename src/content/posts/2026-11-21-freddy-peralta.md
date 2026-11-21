@@ -57,14 +57,17 @@ Peralta with TBR: 33° arm angle, 5.1’ release height, **3.4’ toward the 3B 
 
 These factors, paired with slightly more velo and an iVB boost from Tropicana Field, gave him a very noticeable overall boost in Stuff+ from NYM to TBR.
 
-| Pitch | Stuff+ with NYM | Stuff+ with TBR |
-|---|:---:|:---:|
-| 4-Seam | 99 | **105** |
-| Changeup | **104** | 103 |
-| Curveball | 101 | **102** |
-| Sweeper | 111 | **115** |
-| Slider | 105 | N/A |
-| **Overall** | 101 | **105** |
+<table class="centered">
+  <thead><tr><th>Pitch</th><th align="center">Stuff+ with NYM</th><th align="center">Stuff+ with TBR</th></tr></thead>
+  <tbody>
+    <tr><td>4-Seam</td><td align="center">99</td><td align="center"><strong>105</strong></td></tr>
+    <tr><td>Changeup</td><td align="center"><strong>104</strong></td><td align="center">103</td></tr>
+    <tr><td>Curveball</td><td align="center">101</td><td align="center"><strong>102</strong></td></tr>
+    <tr><td>Sweeper</td><td align="center">111</td><td align="center"><strong>115</strong></td></tr>
+    <tr><td>Slider</td><td align="center">105</td><td align="center">N/A</td></tr>
+    <tr><td><strong>Overall</strong></td><td align="center">101</td><td align="center"><strong>105</strong></td></tr>
+  </tbody>
+</table>
 
 <figure>
   <div class="fig-pair">
