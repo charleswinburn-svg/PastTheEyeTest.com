@@ -1102,19 +1102,33 @@ export async function fetchSavantPlayerSeason(playerId, season, type = "batter")
 
 // Per-pitch Statcast CSV for a single player within a date window.
 // start/end are "YYYY-MM-DD" strings; empty string means no bound.
+// Savant's statcast_search filters dates with game_date_gt / game_date_lt (both
+// inclusive, as in savant_fetch.py). It silently ignores start_date / end_date, which
+// this used to send, so every "date range" came back as the whole season. The rows are
+// also filtered by game_date here, so a window can never leak other games.
 export async function fetchSavantPlayerDateRange(playerId, season, type = "batter", start = "", end = "") {
   const lookupParam = type === "pitcher" ? "pitchers_lookup%5B%5D" : "batters_lookup%5B%5D";
   let url =
     `/savant-api/statcast_search/csv?all=true&type=details` +
     `&hfSea=${season}%7C&hfGT=R%7C` +
     `&player_type=${type}&${lookupParam}=${playerId}`;
-  if (start) url += `&start_date=${start}`;
-  if (end) url += `&end_date=${end}`;
+  if (start) url += `&game_date_gt=${start}`;
+  if (end) url += `&game_date_lt=${end}`;
   const r = await fetch(url);
   if (!r.ok) return [];
   const text = await r.text();
   if (!text || text.length < 50) return [];
-  return parseCSV(text);
+  return filterRowsByDate(parseCSV(text), start, end);
+}
+
+// Keep rows whose game_date (YYYY-MM-DD) is within [start, end]; empty bound = open.
+export function filterRowsByDate(rows, start = "", end = "") {
+  if (!start && !end) return rows;
+  return rows.filter(r => {
+    const d = String(r.game_date || "").slice(0, 10);
+    if (!d) return true;   // no date on the row: keep (can't judge)
+    return (!start || d >= start) && (!end || d <= end);
+  });
 }
 
 function parseCSV(text) {
