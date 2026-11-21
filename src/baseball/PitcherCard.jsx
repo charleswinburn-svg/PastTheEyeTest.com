@@ -407,8 +407,8 @@ function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gr
     <div style={{
       display: "grid",
       gridTemplateColumns: "repeat(4, 1fr)",
-      gap: 8,
-      padding: "10px 16px 6px",
+      gap: 14,
+      padding: "18px 20px 16px",
       borderBottom: `1px solid ${t.divider}`,
     }}>
       <style>{`
@@ -426,17 +426,17 @@ function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gr
         const txt = pctile != null ? textOnBin(pctile) : t.textFaintest;
         return (
           <div key={key} style={{
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
           }}>
             <div style={{
-              fontSize: 10, fontWeight: 800,
+              fontSize: 12.5, fontWeight: 800,
               color: t.text,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}>{label}</div>
             {/* Pro+ tile: a rounded square, matching the raised box in the percentile rows */}
             <div style={{
-              width: 56, height: 56, borderRadius: 11,
+              width: 84, height: 84, borderRadius: 16,
               background: fill,
               boxShadow: pctile != null ? `0 0 0 2px ${t.cardBg}, 0 2px 6px rgba(0,0,0,0.25)` : `0 0 0 2px ${t.cardBg}`,
               display: "flex", flexDirection: "column",
@@ -445,15 +445,15 @@ function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gr
             }}>
               {isLoading ? (
                 <div style={{
-                  width: 22, height: 22,
-                  border: `2px solid ${t.divider}`,
+                  width: 30, height: 30,
+                  border: `3px solid ${t.divider}`,
                   borderTopColor: t.text,
                   borderRadius: "50%",
                   animation: "ptet-spin 0.9s linear infinite",
                 }} />
               ) : (
                 <div style={{
-                  fontSize: 18, fontWeight: 800,
+                  fontSize: 28, fontWeight: 800,
                   color: txt,
                   fontFamily: NUM_FONT,
                   lineHeight: 1,
@@ -463,7 +463,7 @@ function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gr
               )}
             </div>
             <div style={{
-              fontSize: 9, fontWeight: NUM_WEIGHT,
+              fontSize: 11.5, fontWeight: NUM_WEIGHT,
               color: pctile != null ? t.textSecondary : t.textFaintest,
               fontFamily: NUM_FONT,
               letterSpacing: "0.02em",
@@ -476,7 +476,7 @@ function ProBubblesRow({ data, theme, deltaSpreads = null, projView = "full", gr
             {deltaSpreads && sh?.line != null && value != null && (() => {
               const d = projLine(gradeCat(m), sh, projView, deltaSpreads[`grade:${key}`]);
               return d && (
-                <div style={{ fontSize: 9, fontStyle: "italic", fontWeight: 600, lineHeight: 1,
+                <div style={{ fontSize: 11, fontStyle: "italic", fontWeight: 600, lineHeight: 1,
                   color: d.color || t.textFaint, fontFamily: NUM_FONT }}>{d.text}</div>
               );
             })()}

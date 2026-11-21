@@ -296,7 +296,7 @@ export default function PitchModelingCard({ player, season, isAAA = false, dateF
                       <span style={{ fontSize: 10, color: t.textFaint, fontFamily: NUM_FONT, fontWeight: NUM_WEIGHT }}>{ty.n} pitches</span>
                     </div>
                     {ty.rows.map(r => (
-                      <PercentileBoxRow key={r.key} label={r.label} pctile={r.pctile} display={r.display} labelWidth={140} />
+                      <PercentileBoxRow key={r.key} label={r.label} pctile={r.pctile} display={r.display} labelWidth={168} />
                     ))}
                   </div>
                 ))}

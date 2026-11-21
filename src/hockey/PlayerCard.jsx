@@ -18,11 +18,11 @@ const SITE_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
 // Every size on the card, for the two layouts. "wide" is the two-column card on a desktop;
 // "narrow" is the single column used on tablets and phones (then scaled to fit by FitToWidth).
 const SIZES = {
-  wide:   { width: 1320, pad: 28, name: 38, sub: 15, img: 128, flag: 26, tileLabel: 12, tileValue: 36, tier: 14, section: 14,
-            row: 44, box: 16, rowGap: 6, label: 17, labelW: 172, valueW: 86, num: 23, num3: 19,
+  wide:   { width: 1320, pad: 28, name: 32, sub: 14, img: 104, flag: 22, tileLabel: 12, tileValue: 36, tier: 14, section: 14,
+            row: 50, box: 18, rowGap: 11, label: 18, labelW: 180, valueW: 90, num: 26, num3: 21,
             bar: 24, barGap: 15, barLabelW: 208, barValueW: 62, chartH: 310, foot: 12 },
-  narrow: { width: 640, pad: 20, name: 28, sub: 13, img: 96, flag: 20, tileLabel: 10, tileValue: 26, tier: 12, section: 12,
-            row: 34, box: 10, rowGap: 5, label: 14, labelW: 128, valueW: 62, num: 18, num3: 14,
+  narrow: { width: 640, pad: 20, name: 25, sub: 12, img: 80, flag: 18, tileLabel: 10, tileValue: 26, tier: 12, section: 12,
+            row: 40, box: 12, rowGap: 9, label: 15, labelW: 136, valueW: 66, num: 20, num3: 16,
             bar: 18, barGap: 8, barLabelW: 164, barValueW: 52, chartH: 290, foot: 10 },
 };
 

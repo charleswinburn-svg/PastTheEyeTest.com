@@ -164,7 +164,7 @@ export default function FielderCard({ player, season, fieldingData }) {
         <PercentileBoxRow
           key={m.key}
           label={m.label}
-          labelWidth={150}
+          labelWidth={180}
           pctile={cat.pctile}
           display={cat.display}
         />

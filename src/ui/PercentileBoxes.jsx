@@ -45,16 +45,18 @@ function inkFor(rgb) {
 }
 
 export default function PercentileBoxes({
-  label, pctile, display, labelWidth = 110, badge = null, delta = null,
-  theme, isDark: isDarkProp, scale = SCALE, row = 28, valueWidth = 48,
+  label, pctile, display, labelWidth = 134, badge = null, delta = null,
+  theme, isDark: isDarkProp, scale = SCALE, row = 38, valueWidth = 64,
 }) {
   const ctx = useTheme();
   const t = theme || ctx.theme;
   const isDark = isDarkProp ?? (theme ? theme.id === "dark" : ctx.isDark);
   const has = pctile != null && isFinite(pctile);
+  // Everything scales with the row height (38 px by default), with generous spacing.
+  const fLabel = Math.round(row * 0.355 * 10) / 10, fValue = Math.round(row * 0.38 * 10) / 10;
   return (
-    <div style={{ display: "flex", alignItems: "center", marginBottom: 6, width: "100%", gap: 8 }}>
-      <div style={{ width: labelWidth, textAlign: "right", fontSize: 11, fontWeight: 500, color: t.text, flexShrink: 0, lineHeight: 1.2 }}>
+    <div style={{ display: "flex", alignItems: "center", marginBottom: Math.round(row * 0.3), width: "100%", gap: Math.round(row * 0.32) }}>
+      <div style={{ width: labelWidth, textAlign: "right", fontSize: fLabel, fontWeight: 500, color: t.text, flexShrink: 0, lineHeight: 1.2 }}>
         {label}
         {badge}
       </div>
@@ -62,16 +64,16 @@ export default function PercentileBoxes({
         <BoxStrip pct={has ? pctile : null} isDark={isDark} t={t} row={row} box={Math.round(row * 0.3)}
                   num={Math.round(row * 0.43)} num3={Math.round(row * 0.36)} scale={scale} />
         {!has && (
-          <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: t.textFaintest, fontStyle: "italic" }}>
+          <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: fLabel - 1, color: t.textFaintest, fontStyle: "italic" }}>
             N/A
           </div>
         )}
       </div>
-      <div style={{ width: valueWidth, textAlign: "right", fontSize: 11, fontWeight: 700, color: has ? t.textSecondary : t.textFaintest,
+      <div style={{ width: valueWidth, textAlign: "right", fontSize: fValue, fontWeight: 700, color: has ? t.textSecondary : t.textFaintest,
                     fontFamily: NUM_FONT, whiteSpace: "nowrap", flexShrink: 0 }}>
         {display || "—"}
         {delta && (
-          <div style={{ fontSize: 8.5, fontStyle: "italic", fontWeight: 600, lineHeight: 1, marginTop: 1, color: readableOnCard(delta.color, t) }}>
+          <div style={{ fontSize: Math.round(row * 0.28 * 10) / 10, fontStyle: "italic", fontWeight: 600, lineHeight: 1, marginTop: 2, color: readableOnCard(delta.color, t) }}>
             {delta.text}
           </div>
         )}
