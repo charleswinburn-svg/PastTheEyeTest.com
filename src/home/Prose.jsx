@@ -38,6 +38,14 @@ const CSS = `
 .ptet-prose li::marker { color: var(--p-muted); }
 .ptet-prose blockquote { margin: 1.5em 0; padding: 0 0 0 1.1em; border-left: 2px solid var(--p-rule); color: var(--p-muted); font-style: italic; }
 .ptet-prose img { display: block; max-width: 100%; height: auto; margin: 1.6em auto; border-radius: 2px; }
+/* Figures: image + small caption underneath (write <figure><img …><figcaption>…</figcaption></figure>). */
+.ptet-prose figure { margin: 1.4em 0 1.7em; text-align: center; }
+.ptet-prose figure img { margin: 0 auto; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,0.22); }
+.ptet-prose figcaption { font-family: ${SANS}; font-size: 12.5px; line-height: 1.45; color: var(--p-muted); margin: 0.75em auto 0; max-width: 34em; }
+.ptet-prose.compact figure { margin: 1em 0 1.3em; }
+.ptet-prose.compact figcaption { font-size: 11.5px; margin-top: 0.55em; }
+.ptet-prose ul + figure, .ptet-prose ol + figure { margin-top: 1.1em; }
+.ptet-prose li > p { margin: 0 0 0.6em; }
 .ptet-prose code { font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82em; background: var(--p-code); padding: 0.1em 0.3em; border-radius: 3px; }
 .ptet-prose pre { background: var(--p-code); padding: 14px 16px; border-radius: 4px; overflow-x: auto; margin: 0 0 1.3em; line-height: 1.5; }
 .ptet-prose pre code { background: none; padding: 0; font-size: 0.8em; }
