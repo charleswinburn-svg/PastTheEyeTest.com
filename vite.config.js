@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import http from 'node:http';
 import https from 'node:https';
+import { socialPagesPlugin, socialPagesPreviewPlugin } from './scripts/socialPages.js';
 
 // ── API pass-through for `vite` (dev) and `vite preview` ───────────────────
 // Mirrors the vercel.json rewrites (/mlb-api/... → statsapi.mlb.com/..., etc.).
@@ -146,7 +147,7 @@ const apiPlugin = {
 };
 
 export default defineConfig({
-  plugins: [react(), apiPlugin],
+  plugins: [react(), apiPlugin, socialPagesPlugin(), socialPagesPreviewPlugin()],
   server: {
     port: 5173,
     // The dev server watches the whole project by default. On the droplet that

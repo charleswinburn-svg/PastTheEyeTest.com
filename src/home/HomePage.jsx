@@ -37,17 +37,18 @@ function ArticleItem({ post, t, lead = false }) {
     <Link to={`/posts/${post.slug}`} className="ptet-headline-link"
           style={{ display: "block", textDecoration: "none", color: "inherit", padding: lead ? "18px 0 28px" : "20px 0",
                    borderBottom: `1px solid ${t.divider}` }}>
-      {post.cover && (
-        <img src={post.cover} alt="" style={{ width: "100%", aspectRatio: lead ? "16 / 8" : "16 / 9", objectFit: "cover",
-                                              display: "block", marginBottom: 14, borderRadius: 2 }} />
+      {post.previewImage && (
+        <img src={post.previewImage} alt="" style={{ width: "100%", aspectRatio: lead ? "1200 / 630" : "16 / 9", objectFit: "cover",
+                                                     display: "block", marginBottom: 14, borderRadius: 2 }} />
       )}
       <h3 className="ptet-headline" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: lead ? 32 : 23, lineHeight: 1.18,
                                              letterSpacing: "-0.01em", color: t.text }}>
         {post.title}
       </h3>
-      {post.summary && (
-        <p style={{ fontFamily: SERIF, fontSize: lead ? 19 : 17, lineHeight: 1.5, color: t.textMuted, margin: "8px 0 10px" }}>
-          {post.summary}
+      {(post.summary || post.excerpt) && (
+        <p style={{ fontFamily: SERIF, fontSize: lead ? 19 : 17, lineHeight: 1.5, color: t.textMuted, margin: "8px 0 10px",
+                    display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {post.summary || post.excerpt}
         </p>
       )}
       <Dateline t={t} post={post} />

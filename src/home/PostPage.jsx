@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
 import { Link } from "../router.jsx";
 import Prose, { SERIF, SANS } from "./Prose.jsx";
-import { POSTS, postBySlug, renderMarkdown, formatDate } from "./posts.js";
+import { POSTS, postBySlug, renderMarkdown, formatDate, SITE_URL } from "./posts.js";
 
 const MEASURE = 680;
 
@@ -53,11 +53,40 @@ export default function PostPage({ slug }) {
       </header>
       {post.cover && <img src={post.cover} alt="" style={{ width: "100%", display: "block", margin: "28px 0 0", borderRadius: 2 }} />}
       <div style={{ marginTop: 30 }}><Prose html={html} /></div>
+      <ShareBar t={t} post={post} />
       <nav style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 56, paddingTop: 20, borderTop: `1px solid ${t.divider}` }}>
         <div>{older && <NavLink t={t} post={older} label="Previous" />}</div>
         <div style={{ textAlign: "right" }}>{newer && <NavLink t={t} post={newer} label="Next" />}</div>
       </nav>
     </article>
+  );
+}
+
+// Share the post to X. The link X gets is the post's public URL; its page carries a
+// large-image card (scripts/socialPages.js), so X shows the share picture and title,
+// and hides the link itself when it's the last thing in the post.
+function ShareBar({ t, post }) {
+  const [copied, setCopied] = useState(false);
+  const url = `${SITE_URL}/posts/${post.slug}`;
+  const intent = `https://x.com/intent/post?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(url)}`;
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1800); }
+    catch { window.prompt("Copy this link:", url); }
+  };
+  const btn = { fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "8px 14px", borderRadius: 8, cursor: "pointer",
+                textDecoration: "none", border: `1px solid ${t.inputBorder}`, background: t.inputBg, color: t.text,
+                display: "inline-flex", alignItems: "center", gap: 8 };
+  return (
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginTop: 40 }}>
+      <span style={{ fontFamily: SANS, fontSize: 14, color: t.textMuted, marginRight: 4 }}>Share</span>
+      <a href={intent} target="_blank" rel="noopener noreferrer" style={btn}>
+        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+        Post on X
+      </a>
+      <button type="button" onClick={copy} style={btn}>{copied ? "Link copied" : "Copy link"}</button>
+    </div>
   );
 }
 

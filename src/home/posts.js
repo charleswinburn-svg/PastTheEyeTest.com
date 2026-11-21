@@ -1,4 +1,6 @@
 import { marked } from "marked";
+import { parsePost } from "./postParse.js";
+export { SITE_URL } from "./postParse.js";
 
 // ═══════════════════════════════════════════════════════════
 // POSTS: markdown files in src/content/posts/, bundled at build time
@@ -12,6 +14,8 @@ import { marked } from "marked";
 //   cover:   /posts/some-slug/cover.png   (optional; images go in public/posts/<slug>/).
 //   preview: /posts/some-slug/thumb.png   (optional; the Home thumbnail. Defaults to the
 //            cover, else the post's first image.)
+//   share:   /posts/some-slug/share.jpg   (optional; the picture in the X card, best at
+//            1200x630: see scripts/make_share_image.py. Defaults to the preview.)
 //   tags:    [mlb, pitch-plus]
 //   pinned:  true   (shown first on Home)
 //   draft:   true   (left off the site)
@@ -19,53 +23,6 @@ import { marked } from "marked";
 // Files whose name starts with "_" (like _TEMPLATE.md) are ignored.
 
 const files = import.meta.glob("../content/posts/*.md", { query: "?raw", import: "default", eager: true });
-
-function parseValue(v) {
-  v = v.trim();
-  if (/^\[.*\]$/.test(v)) return v.slice(1, -1).split(",").map(s => parseValue(s)).filter(s => s !== "");
-  if (v === "true") return true;
-  if (v === "false") return false;
-  if (/^(["']).*\1$/.test(v)) return v.slice(1, -1);
-  return v;
-}
-
-export function parsePost(raw, filename) {
-  const m = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
-  const meta = {};
-  if (m) {
-    for (const line of m[1].split("\n")) {
-      const i = line.indexOf(":");
-      if (i > 0) meta[line.slice(0, i).trim()] = parseValue(line.slice(i + 1));
-    }
-  }
-  const body = m ? m[2] : raw;
-  const base = filename.replace(/^.*\//, "").replace(/\.md$/, "");
-  const dm = base.match(/^(\d{4}-\d{2}-\d{2})-(.+)$/);
-  const slug = meta.slug || (dm ? dm[2] : base);
-  const date = String(meta.date || (dm ? dm[1] : ""));
-  const type = meta.type === "update" ? "update" : "article";
-  const words = body.split(/\s+/).filter(Boolean).length;
-  // Preview for the home page: the first paragraph as plain text, and the first image.
-  const firstPara = body.split(/\n\s*\n/).map(b => b.trim())
-    .find(b => b && !b.startsWith("<") && !b.startsWith("#") && !b.startsWith("|") && !b.startsWith("!["));
-  const excerpt = (firstPara || "")
-    .replace(/^[-*]\s+/gm, "")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/[*_`>]/g, "")
-    .replace(/\s+/g, " ").trim();
-  const img = body.match(/<img[^>]*\ssrc="([^"]+)"/) || body.match(/!\[[^\]]*\]\(([^)\s]+)/);
-  return {
-    slug, date, type, body, excerpt, previewImage: meta.preview || meta.cover || (img ? img[1] : null),
-    title: meta.title || slug.replace(/-/g, " "),
-    summary: meta.summary || "",
-    cover: meta.cover || null,
-    tags: Array.isArray(meta.tags) ? meta.tags : meta.tags ? [meta.tags] : [],
-    pinned: meta.pinned === true,
-    draft: meta.draft === true,
-    minutes: Math.max(1, Math.round(words / 230)),
-  };
-}
 
 export const POSTS = Object.entries(files)
   .filter(([path]) => !/\/_[^/]*$/.test(path))

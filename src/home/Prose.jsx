@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
 
 // ═══════════════════════════════════════════════════════════
@@ -46,6 +46,11 @@ const CSS = `
 .ptet-prose.compact figure { margin: 1em 0 1.3em; }
 .ptet-prose.compact figcaption { font-size: 11.5px; margin-top: 0.55em; }
 .ptet-prose ul + figure, .ptet-prose ol + figure { margin-top: 1.1em; }
+/* Two images side by side under one caption: <figure><div class="fig-pair"><img …><img …></div><figcaption>…</figcaption></figure> */
+/* Each image's flex-grow is set to its aspect ratio once it loads (see Prose below), so a pair always
+   shares one height and fills the width together. */
+.ptet-prose .fig-pair { display: flex; gap: 8px; align-items: flex-start; }
+.ptet-prose .fig-pair img { flex: 1 1 0; min-width: 0; width: auto; margin: 0; }
 .ptet-prose li > p { margin: 0 0 0.6em; }
 .ptet-prose code { font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82em; background: var(--p-code); padding: 0.1em 0.3em; border-radius: 3px; }
 .ptet-prose pre { background: var(--p-code); padding: 14px 16px; border-radius: 4px; overflow-x: auto; margin: 0 0 1.3em; line-height: 1.5; }
@@ -75,6 +80,13 @@ const CSS = `
 
 export default function Prose({ html, compact = false }) {
   const { theme: t } = useTheme();
+  const ref = useRef(null);
+  // Side-by-side images: grow each in proportion to its width/height, so the pair is one height.
+  useEffect(() => {
+    const imgs = ref.current?.querySelectorAll(".fig-pair img") || [];
+    const fit = (img) => { if (img.naturalWidth) img.style.flexGrow = String(img.naturalWidth / img.naturalHeight); };
+    imgs.forEach(img => { fit(img); img.addEventListener("load", () => fit(img)); });
+  }, [html]);
   const [zoom, setZoom] = useState(null);   // { src, alt, caption } while an image is enlarged
   const vars = {
     "--p-head": t.text, "--p-body": t.textSecondary, "--p-muted": t.textMuted,
@@ -101,7 +113,7 @@ export default function Prose({ html, compact = false }) {
   return (
     <>
       <style>{CSS}</style>
-      <div className={`ptet-prose${compact ? " compact" : ""}`} style={vars} onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />
+      <div ref={ref} className={`ptet-prose${compact ? " compact" : ""}`} style={vars} onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />
       {zoom && (
         <div className="ptet-lightbox" role="dialog" aria-modal="true" aria-label={zoom.alt || "Image"} onClick={() => setZoom(null)}>
           <button type="button" className="ptet-lightbox-close" aria-label="Close" onClick={() => setZoom(null)}>×</button>

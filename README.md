@@ -64,6 +64,11 @@ Comprehensive reference for the project across both repos. Use this when startin
    in full in the Updates feed), `summary`, optional `tags`, `cover`, `pinned: true`. Remove `draft: true`.
 3. Write Markdown below it. Images go in `public/posts/your-slug/` and are linked as `/posts/your-slug/x.png`.
 4. Commit. The next build includes it (posts are bundled at build time).
+5. **X card:** `share: /posts/your-slug/share.jpg` (1200×630) is the picture X shows when the link is
+   posted. Make one from the lead photo with `python3 scripts/make_share_image.py <photo> <share.jpg>`.
+   The build (`scripts/socialPages.js`) writes `dist/posts/<slug>/index.html` with the post's
+   og:/twitter: tags, and `vercel.json` serves it for `/posts/<slug>`. Share with the post's
+   **Post on X** button, or paste the link at the end of an X post: X shows the card and hides the link.
 
 ### Data files in `public/`
 
