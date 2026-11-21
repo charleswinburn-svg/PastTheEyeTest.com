@@ -291,7 +291,7 @@ export default function PitcherCard({ player, season, allPitchers, isAAA = false
             )}
           </div>
           {/* Right column — pitch arsenal figures (none for projections) */}
-          {!isProjection && <div style={{ flex: "1 1 360px", minWidth: 300 }}>
+          {!isProjection && <div style={{ flex: "1 1 360px", minWidth: 300, display: "flex", flexDirection: "column" }}>
             <PitcherArsenal
               playerId={player.player_id}
               season={season}

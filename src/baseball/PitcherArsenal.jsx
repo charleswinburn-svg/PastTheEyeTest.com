@@ -1,6 +1,5 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect } from "react";
-import { MovementPlot, PitchTypeLegend } from "./SummaryComponents.jsx";
 import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
 import {
   PITCH_COLORS, PITCH_NAMES,
@@ -263,7 +262,7 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
   const types = rows.map(r => r.type);
 
   const box = { padding: "0 2px 4px" };
-  const heading = { fontSize: 9, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textMuted, marginBottom: 2, textAlign: "center" };
+  const heading = { fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: t.textMuted, marginBottom: 6, textAlign: "center" };
 
   if (loading) {
     return (
@@ -284,22 +283,21 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      {/* ── Top: movement (centered in the panel) ── */}
+    // Fills the right column top to bottom (the card's columns are equal height), so the
+    // three blocks spread out instead of leaving empty space under the table.
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 10, height: "100%", flex: 1 }}>
+      {/* ── Top: movement, one dot per pitch type (centered in the panel) ── */}
       <div style={box}>
         <div style={heading}>Pitch Movement</div>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <MovementPlot pitches={movement} width={320} height={215} maxPitches={160} />
-        </div>
-        <PitchTypeLegend types={types} />
+        <ArsenalMovement movement={movement} rows={rows} theme={t} />
       </div>
 
       {/* ── Middle: usage pies vs LHB / RHB ── */}
       <div style={box}>
         <div style={heading}>Pitch Usage</div>
         <div style={{ display: "flex", justifyContent: "space-around", gap: 8 }}>
-          <UsagePie label="vs LHB" counts={usage?.L} theme={t} />
-          <UsagePie label="vs RHB" counts={usage?.R} theme={t} />
+          <UsagePie label="vs LHB" counts={usage?.L} theme={t} size={92} />
+          <UsagePie label="vs RHB" counts={usage?.R} theme={t} size={92} />
         </div>
       </div>
 
@@ -309,6 +307,97 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
         <ArsenalTable rows={rows} theme={t} isAAA={isAAA} />
       </div>
     </div>
+  );
+}
+
+// ── Movement: one dot per pitch type ─────────────────────────────────────────
+// Each pitch type sits at its average horizontal / induced vertical break (inches, the
+// same convention as the summaries' MovementPlot), with the dot's AREA proportional to
+// how many of that pitch he threw. Equal scale on both axes; labelled with name + usage.
+function ArsenalMovement({ movement, rows, theme: t }) {
+  const acc = {};
+  for (const m of movement || []) {
+    if (!m.pitchType || !isFinite(m.hBreak) || !isFinite(m.vBreak)) continue;
+    const a = (acc[m.pitchType] ||= { h: 0, v: 0, k: 0 });
+    a.h += m.hBreak; a.v += m.vBreak; a.k++;
+  }
+  const total = rows.reduce((s, r) => s + (r.n || 0), 0) || 1;
+  const dots = rows
+    .filter(r => acc[r.type]?.k)
+    .map(r => ({ ...r, h: acc[r.type].h / acc[r.type].k, v: acc[r.type].v / acc[r.type].k, share: (r.n || 0) / total }));
+  if (!dots.length) return <div style={{ color: t.textFaint, fontSize: 11, textAlign: "center", padding: 30 }}>No movement data.</div>;
+
+  // Square plot, ±25 in by default, widened in steps of 5 if a pitch sits outside.
+  const reach = Math.max(25, ...dots.map(d => Math.ceil((Math.max(Math.abs(d.h), Math.abs(d.v)) + 6) / 5) * 5));
+  const W = 440, H = 340, padL = 40, padB = 34, padT = 8, padR = 12;
+  const side = Math.min(W - padL - padR, H - padT - padB);
+  const x0 = padL + (W - padL - padR - side) / 2, y0 = padT;
+  const X = h => x0 + ((h + reach) / (2 * reach)) * side;
+  const Y = v => y0 + ((reach - v) / (2 * reach)) * side;
+  const maxN = Math.max(...dots.map(d => d.n || 0)) || 1;
+  const R = n => 6 + 22 * Math.sqrt((n || 0) / maxN);   // area ∝ count
+  const ticks = [];
+  for (let g = -Math.floor(reach / 10) * 10; g <= reach; g += 10) ticks.push(g);
+
+  // Labels (name + usage) go below the dot, else above / right / left: the first spot
+  // that doesn't cover another dot or label and stays inside the plot.
+  const LH = 25, cw = 6.4;
+  const placed = [];
+  const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const circleHits = (rect, c) => {
+    const nx = Math.max(rect.x, Math.min(c.cx, rect.x + rect.w)), ny = Math.max(rect.y, Math.min(c.cy, rect.y + rect.h));
+    return (nx - c.cx) ** 2 + (ny - c.cy) ** 2 < (c.r + 1) ** 2;
+  };
+  const circles = dots.map(d => ({ type: d.type, cx: X(d.h), cy: Y(d.v), r: R(d.n) }));
+  const labelPos = {};
+  for (const d of [...dots].sort((a, b) => b.n - a.n)) {
+    const c = circles.find(k => k.type === d.type);
+    const w = Math.max(d.name.length, 4) * cw + 6;
+    const cands = [
+      { x: c.cx - w / 2, y: c.cy + c.r + 2 }, { x: c.cx - w / 2, y: c.cy - c.r - 2 - LH },
+      { x: c.cx + c.r + 4, y: c.cy - LH / 2 }, { x: c.cx - c.r - 4 - w, y: c.cy - LH / 2 },
+    ].map(o => ({ ...o, w, h: LH }));
+    const ok = r => r.x >= x0 && r.x + r.w <= x0 + side && r.y >= y0 && r.y + r.h <= y0 + side
+      && !placed.some(q => hits(r, q)) && !circles.some(k => k.type !== d.type && circleHits(r, k));
+    const pick = cands.find(ok) || cands[0];
+    placed.push(pick);
+    labelPos[d.type] = pick;
+  }
+  const tick = { fontSize: 10, fill: t.textFaint, fontFamily: NUM_FONT };
+  const dark = t.id === "dark";
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", maxWidth: W, margin: "0 auto" }}>
+      <rect x={x0} y={y0} width={side} height={side} fill={dark ? "rgba(255,255,255,0.025)" : "rgba(15,23,42,0.03)"} rx={4} />
+      {ticks.map(g => (
+        <g key={g}>
+          <line x1={X(g)} x2={X(g)} y1={y0} y2={y0 + side} stroke={g === 0 ? t.textFaint : t.divider} strokeWidth={g === 0 ? 1 : 0.6} strokeDasharray={g === 0 ? "4 4" : undefined} />
+          <line x1={x0} x2={x0 + side} y1={Y(g)} y2={Y(g)} stroke={g === 0 ? t.textFaint : t.divider} strokeWidth={g === 0 ? 1 : 0.6} strokeDasharray={g === 0 ? "4 4" : undefined} />
+          <text x={X(g)} y={y0 + side + 14} textAnchor="middle" style={tick}>{g}"</text>
+          <text x={x0 - 6} y={Y(g) + 3.5} textAnchor="end" style={tick}>{g}"</text>
+        </g>
+      ))}
+      <text x={x0 + side / 2} y={H - 4} textAnchor="middle" style={{ fontSize: 11, fill: t.textMuted }}>Horizontal break (in)</text>
+      <text x={11} y={y0 + side / 2} textAnchor="middle" transform={`rotate(-90 11 ${y0 + side / 2})`} style={{ fontSize: 11, fill: t.textMuted }}>Induced vertical break (in)</text>
+      {/* biggest first, so smaller pitches sit on top */}
+      {[...dots].sort((a, b) => b.n - a.n).map(d => {
+        const r = R(d.n), cx = X(d.h), cy = Y(d.v);
+        const L = labelPos[d.type], lx = L.x + L.w / 2;
+        return (
+          <g key={d.type}>
+            <circle cx={cx} cy={cy} r={r} fill={d.color} fillOpacity={0.88} stroke={t.cardBg} strokeWidth={2} />
+            <text x={lx} y={L.y + 11} textAnchor="middle"
+                  style={{ fontSize: 11.5, fontWeight: 700, fill: t.text, paintOrder: "stroke", stroke: t.cardBg, strokeWidth: 3 }}>
+              {d.name}
+            </text>
+            <text x={lx} y={L.y + 23} textAnchor="middle"
+                  style={{ fontSize: 10.5, fontWeight: NUM_WEIGHT, fontFamily: NUM_FONT, fill: t.textMuted, paintOrder: "stroke", stroke: t.cardBg, strokeWidth: 3 }}>
+              {Math.round(d.share * 100)}%
+            </text>
+          </g>
+        );
+      })}
+    </svg>
   );
 }
 
@@ -331,7 +420,7 @@ function UsagePie({ label, counts, theme, size = 70 }) {
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: t.textMuted }}>{label}</div>
+      <div style={{ fontSize: 11.5, fontWeight: 700, color: t.textMuted }}>{label}</div>
       {total > 0 ? (
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           {entries.length === 1 ? (
@@ -364,10 +453,10 @@ function ArsenalTable({ rows, theme, isAAA }) {
     { key: "zonePct", label: "Zone",  fmt: v => v == null ? "—" : `${Math.round(v)}%` },
     { key: "kPct",    label: "K",     fmt: v => v == null ? "—" : `${Math.round(v)}%` },
   ];
-  const th = { fontSize: 8, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.03em", padding: "1px 3px", textAlign: "right" };
+  const th = { fontSize: 9.5, fontWeight: 700, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.03em", padding: "2px 4px 4px", textAlign: "right" };
   // Mirror the percentile-bar fonts: pitch name in the sans label font, numbers in bold Pliant.
-  const nameTd = { fontSize: 11, fontWeight: 500, color: t.text, padding: "1px 3px", textAlign: "left", whiteSpace: "nowrap", width: "1%" };
-  const td = { fontSize: 11, fontWeight: NUM_WEIGHT, color: t.textSecondary, padding: "1px 3px", textAlign: "right", fontFamily: NUM_FONT, whiteSpace: "nowrap" };
+  const nameTd = { fontSize: 12.5, fontWeight: 500, color: t.text, padding: "3px 4px", textAlign: "left", whiteSpace: "nowrap", width: "1%" };
+  const td = { fontSize: 12.5, fontWeight: NUM_WEIGHT, color: t.textSecondary, padding: "3px 4px", textAlign: "right", fontFamily: NUM_FONT, whiteSpace: "nowrap" };
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 300 }}>
