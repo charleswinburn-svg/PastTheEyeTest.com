@@ -1,6 +1,7 @@
 import { useTheme } from "./ThemeContext.jsx";
 import { useState, useEffect } from "react";
 import { NUM_FONT, NUM_WEIGHT } from "./SharedComponents.jsx";
+import { inkOnColor } from "../ui/colorScale.js";
 import {
   PITCH_COLORS, PITCH_NAMES,
   fetchSavantPlayerSeason, fetchSavantPlayerDateRange,
@@ -313,7 +314,8 @@ export default function PitcherArsenal({ playerId, season, isAAA = false, dateFr
 // ── Movement: one dot per pitch type ─────────────────────────────────────────
 // Each pitch type sits at its average horizontal / induced vertical break (inches, the
 // same convention as the summaries' MovementPlot), with the dot's AREA proportional to
-// how many of that pitch he threw. Equal scale on both axes; labelled with name + usage.
+// how many of that pitch he threw. Equal scale on both axes. No labels: the colored
+// pitch chips in the arsenal table below are the key.
 function ArsenalMovement({ movement, rows, theme: t }) {
   const acc = {};
   for (const m of movement || []) {
@@ -339,30 +341,6 @@ function ArsenalMovement({ movement, rows, theme: t }) {
   const ticks = [];
   for (let g = -Math.floor(reach / 10) * 10; g <= reach; g += 10) ticks.push(g);
 
-  // Labels (name + usage) go below the dot, else above / right / left: the first spot
-  // that doesn't cover another dot or label and stays inside the plot.
-  const LH = 25, cw = 6.4;
-  const placed = [];
-  const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-  const circleHits = (rect, c) => {
-    const nx = Math.max(rect.x, Math.min(c.cx, rect.x + rect.w)), ny = Math.max(rect.y, Math.min(c.cy, rect.y + rect.h));
-    return (nx - c.cx) ** 2 + (ny - c.cy) ** 2 < (c.r + 1) ** 2;
-  };
-  const circles = dots.map(d => ({ type: d.type, cx: X(d.h), cy: Y(d.v), r: R(d.n) }));
-  const labelPos = {};
-  for (const d of [...dots].sort((a, b) => b.n - a.n)) {
-    const c = circles.find(k => k.type === d.type);
-    const w = Math.max(d.name.length, 4) * cw + 6;
-    const cands = [
-      { x: c.cx - w / 2, y: c.cy + c.r + 2 }, { x: c.cx - w / 2, y: c.cy - c.r - 2 - LH },
-      { x: c.cx + c.r + 4, y: c.cy - LH / 2 }, { x: c.cx - c.r - 4 - w, y: c.cy - LH / 2 },
-    ].map(o => ({ ...o, w, h: LH }));
-    const ok = r => r.x >= x0 && r.x + r.w <= x0 + side && r.y >= y0 && r.y + r.h <= y0 + side
-      && !placed.some(q => hits(r, q)) && !circles.some(k => k.type !== d.type && circleHits(r, k));
-    const pick = cands.find(ok) || cands[0];
-    placed.push(pick);
-    labelPos[d.type] = pick;
-  }
   const tick = { fontSize: 10, fill: t.textFaint, fontFamily: NUM_FONT };
   const dark = t.id === "dark";
 
@@ -382,18 +360,11 @@ function ArsenalMovement({ movement, rows, theme: t }) {
       {/* biggest first, so smaller pitches sit on top */}
       {[...dots].sort((a, b) => b.n - a.n).map(d => {
         const r = R(d.n), cx = X(d.h), cy = Y(d.v);
-        const L = labelPos[d.type], lx = L.x + L.w / 2;
         return (
           <g key={d.type}>
-            <circle cx={cx} cy={cy} r={r} fill={d.color} fillOpacity={0.88} stroke={t.cardBg} strokeWidth={2} />
-            <text x={lx} y={L.y + 11} textAnchor="middle"
-                  style={{ fontSize: 11.5, fontWeight: 700, fill: t.text, paintOrder: "stroke", stroke: t.cardBg, strokeWidth: 3 }}>
-              {d.name}
-            </text>
-            <text x={lx} y={L.y + 23} textAnchor="middle"
-                  style={{ fontSize: 10.5, fontWeight: NUM_WEIGHT, fontFamily: NUM_FONT, fill: t.textMuted, paintOrder: "stroke", stroke: t.cardBg, strokeWidth: 3 }}>
-              {Math.round(d.share * 100)}%
-            </text>
+            <circle cx={cx} cy={cy} r={r} fill={d.color} fillOpacity={0.9} stroke={t.cardBg} strokeWidth={2}>
+              <title>{`${d.name}: ${Math.round(d.share * 100)}% (${d.n})`}</title>
+            </circle>
           </g>
         );
       })}
@@ -473,8 +444,11 @@ function ArsenalTable({ rows, theme, isAAA }) {
             return (
               <tr key={r.type} style={{ borderTop: i ? `1px solid ${t.divider}` : "none" }}>
                 <td style={nameTd}>
-                  <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: r.color, marginRight: 5 }} />
-                  {r.name}
+                  {/* Pitch-colored chip, as in the Summaries table; also the movement plot's key. */}
+                  <span style={{ display: "inline-block", minWidth: 84, padding: "3px 9px", borderRadius: 5, background: r.color,
+                                 color: inkOnColor(r.color), fontWeight: 700, fontSize: 12, textAlign: "center", letterSpacing: "0.01em" }}>
+                    {r.name}
+                  </span>
                 </td>
                 <td style={td}>{totalN ? Math.round((r.n / totalN) * 100) : 0}%</td>
                 {cols.map(c => <td key={c.key} style={td}>{c.fmt(r[c.key])}</td>)}
