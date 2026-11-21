@@ -113,7 +113,8 @@ export function SummaryReleasePanel({ pitches, player, season, width = 260, heig
 // this Summary's pitches of that type went to each side. Games and date ranges (and
 // pitchers missing from the file) use the per-pitch scores from the Pitch+ API instead.
 export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId = null, season = null, isAAA = false,
-                                   fullSeason = false, tableGrades = null, seasonGrades = null, width = 260, height = 400 }) {
+                                   fullSeason = false, tableGrades = null, seasonGrades = null, scoring = null,
+                                   width = 260, height = 400 }) {
   const { theme: t, isDark } = useTheme();
   const gid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
 
@@ -182,6 +183,15 @@ export function StuffViolinPanel({ pitches, perPitchScores, pitchKey, playerId =
   }, [pitches, perPitchScores, pitchKey, dist]);
 
   if (fullSeason && dist === undefined && !model) return <Note t={t} height={height}>Loading season Stuff+…</Note>;
+  if (!model && scoring?.status === "error") return (
+    <Note t={t} height={height}>
+      <span>Couldn't reach the Pitch+ model to score these pitches.<br />
+        <button type="button" onClick={scoring.retry}
+          style={{ marginTop: 8, padding: "3px 12px", fontSize: 11, fontWeight: 600, borderRadius: 5, cursor: "pointer",
+                   background: t.inputBg, color: t.text, border: `1px solid ${t.inputBorder}` }}>Retry</button>
+      </span>
+    </Note>
+  );
   if (!model) return <Note t={t} height={height}>Scoring pitches for Stuff+…</Note>;
   if (!model.series.length) return <Note t={t} height={height}>No Stuff+ for these pitches.</Note>;
 

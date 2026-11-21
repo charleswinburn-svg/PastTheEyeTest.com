@@ -15,6 +15,7 @@ import PlinkoView from "./PlinkoViews.jsx";
 import { getHeadshotUrl, getLogoUrl, TEAM_IDS, saveCardAsPng, norm, MLB_TEAM_PRIMARY, hexLuminance, SearchableSelect, PlayerHeader } from "./SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { SummaryReleasePanel, StuffViolinPanel } from "./SummarySidePanels.jsx";
+import { scoreAggregate } from "./pitchPlusClient.js";
 
 const SEASON_TYPES = [
   { id: "S", label: "Spring Training" },
@@ -75,6 +76,10 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
   const [baselineAvgs, setBaselineAvgs] = useState(null);
   const [pitchPlus, setPitchPlus] = useState(null);
   const [perPitchScores, setPerPitchScores] = useState(null);
+  // Live scoring status for the table and violin: idle | loading | ok | error. Bumping
+  // scoreNonce (the Retry button) re-runs the scoring effect.
+  const [scoreStatus, setScoreStatus] = useState("idle");
+  const [scoreNonce, setScoreNonce] = useState(0);
   const [leaderboardPlus, setLeaderboardPlus] = useState(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo,   setDateTo]   = useState("");
@@ -766,11 +771,18 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
   // AAA fall back to MLB Stats API data (season view is overridden by leaderboard anyway).
   useEffect(() => {
     let cancelled = false;
+    const ctrl = new AbortController();
     (async () => {
       if (!isPitcher || !enrichedData?.pitches?.length || !selectedPlayer) {
-        setPitchPlus(null);
+        setPitchPlus(null); setPerPitchScores(null); setScoreStatus("idle");
         return;
       }
+      // Clear the old grades (they belong to the previous pitches) and wait for the
+      // inputs to settle: a date range change re-filters the pitches a few times in a
+      // row, and each one would otherwise send a few thousand pitches to the API.
+      setPitchPlus(null); setPerPitchScores(null); setScoreStatus("loading");
+      await new Promise(r => setTimeout(r, 350));
+      if (cancelled) return;
 
       let pitcherHand = selectedPlayer.pitchHand?.code;
       if (pitcherHand !== "L" && pitcherHand !== "R") {
@@ -834,14 +846,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
         };
       };
 
-      const post = (pitches) => {
-        if (!pitches.length) return Promise.resolve(null);
-        return fetch("https://api.pasttheeyetest.com/score_aggregate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pitches }),
-        }).then(r => r.ok ? r.json() : null).catch(() => null);
-      };
+      // One request at a time, retried on failure, cached (see pitchPlusClient.js).
+      const post = (pitches) => scoreAggregate(pitches, { signal: ctrl.signal });
 
       const runScoring = async (allPitches, lPitches, rPitches, sourcePitches) => {
         const aliasedToOrig = {};
@@ -852,8 +858,17 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
         // Platoon splits come from the same scoring as the table (by_pitch_type_stand),
         // so they always average back to the overall grade. Older API builds don't
         // return them; only then score the L-only / R-only subsets separately.
-        const allData = await post(allPitches);
+        let allData;
+        try {
+          allData = await post(allPitches);
+        } catch (e) {
+          if (cancelled || e?.name === "AbortError") return;
+          console.warn("[Pitch+] Scoring failed:", e?.message || e);
+          setPitchPlus(null); setPerPitchScores(null); setScoreStatus("error");
+          return;
+        }
         if (cancelled) return;
+        if (!allData?.by_pitch_type) { setPitchPlus(null); setScoreStatus("error"); return; }
         const stand = allData?.by_pitch_type_stand;
         let byTypeL = {}, byTypeR = {};
         if (stand) {
@@ -862,7 +877,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
             if (sides.R) byTypeR[pt] = sides.R;
           }
         } else {
-          const [lData, rData] = await Promise.all([post(lPitches), post(rPitches)]);
+          const [lData, rData] = await Promise.all([post(lPitches), post(rPitches)].map(q => q.catch(() => null)));
           if (cancelled) return;
           byTypeL = lData?.by_pitch_type || {};
           byTypeR = rData?.by_pitch_type || {};
@@ -883,6 +898,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
         }
         console.log(`[Pitch+] Scored ${allPitches.length} pitches via /score_aggregate:`, out);
         setPitchPlus(out);
+        setScoreStatus("ok");
 
         // Build per-pitch scores Map (key = pitchKey(source pitch) → {stuff, loc, pitch})
         const pp = allData?.per_pitch;
@@ -929,7 +945,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
       const eligible = enrichedData.pitches.filter(
         p => p.velo != null && p.pX != null && p.pZ != null && p.pitchType !== "UN"
       );
-      if (!eligible.length) { setPitchPlus(null); return; }
+      if (!eligible.length) { setPitchPlus(null); setScoreStatus("idle"); return; }
 
       await runScoring(
         eligible.map(makePitch),
@@ -938,8 +954,8 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
         eligible,
       );
     })();
-    return () => { cancelled = true; };
-  }, [enrichedData, selectedPlayer, isPitcher, isMinor, savantData, isGame]);
+    return () => { cancelled = true; ctrl.abort(); };
+  }, [enrichedData, selectedPlayer, isPitcher, isMinor, savantData, isGame, scoreNonce]);
 
   // For Regular Season MLB, fetch pre-computed per-pitch-type Plus grades from /leaderboard.
   // Season view: these override live /score_aggregate values (leaderboard is authoritative).
@@ -1251,6 +1267,7 @@ export default function Summaries({ season, initialSubTab = "pitcher_game", urlS
           leagueAvgs={effectiveLeagueAvgs} pitchPlus={effectivePitchPlus}
           seasonGrades={pitchOverrides.size === 0 && typeOverrides.size === 0 ? leaderboardPlus : null}
           perPitchScores={perPitchScores} pitchKey={pitchKey}
+          scoring={{ status: scoreStatus, live: effectivePitchPlus === pitchPlus, retry: () => setScoreNonce(n => n + 1) }}
           reclassifyMode={reclassifyMode}
           dateFrom={dateFrom} dateTo={dateTo}
           onPitchClick={(p) => setReclassifyTarget({ kind: "single", pitch: p })}
@@ -1335,7 +1352,26 @@ function PlinkoCard({ player, season, seasonType, isAAA, isPitcher, children, da
   );
 }
 
-function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, seasonGrades = null, perPitchScores, pitchKey, reclassifyMode = false, onPitchClick = null, onTypeClick = null, dateFrom = "", dateTo = "" }) {
+// One line above the pitch table while the Pitch+ columns are being scored, or when
+// scoring failed (with a Retry). Only shown when the table is waiting on live scores.
+// data-html2canvas-ignore keeps it out of the saved PNG.
+function ScoringNotice({ scoring, t }) {
+  if (!scoring?.live || (scoring.status !== "loading" && scoring.status !== "error")) return null;
+  const err = scoring.status === "error";
+  return (
+    <div data-html2canvas-ignore="true" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10,
+                  padding: "4px 16px 6px", fontSize: 11, color: err ? t.text : t.textMuted }}>
+      <span>{err ? "Couldn't reach the Pitch+ model, so Stuff+ / Loc+ / Tun+ / Pitch+ are blank." : "Scoring pitches for Stuff+ / Loc+ / Tun+ / Pitch+…"}</span>
+      {err && (
+        <button type="button" onClick={scoring.retry}
+          style={{ padding: "2px 10px", fontSize: 11, fontWeight: 600, borderRadius: 5, cursor: "pointer",
+                   background: t.inputBg, color: t.text, border: `1px solid ${t.inputBorder}` }}>Retry</button>
+      )}
+    </div>
+  );
+}
+
+function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, leagueAvgs, pitchPlus, seasonGrades = null, perPitchScores, pitchKey, scoring = null, reclassifyMode = false, onPitchClick = null, onTypeClick = null, dateFrom = "", dateTo = "" }) {
   const { theme: t } = useTheme();
   const cardRef = useRef(null);
   const pitchRows = useMemo(() => aggregateByPitchType(data.pitches), [data.pitches]);
@@ -1418,7 +1454,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
     : kind === "stuffViolin" ? <StuffViolinPanel pitches={data.pitches} perPitchScores={perPitchScores} pitchKey={pitchKey}
         playerId={player?.id} season={season} isAAA={isAAA}
         fullSeason={!isGame && seasonType === "R" && !dateFrom && !dateTo}
-        tableGrades={pitchPlus} seasonGrades={seasonGrades} width={260} height={400} />
+        tableGrades={pitchPlus} seasonGrades={seasonGrades} scoring={scoring} width={260} height={400} />
     : null
   );
   const sharedOptions = (
@@ -1515,6 +1551,7 @@ function PitcherView({ data, player, game, season, seasonType, isGame, isAAA, le
           </div>
         </div>
         <PitchTypeLegend types={[...new Set(data.pitches.map(p => p.pitchType))].filter(t => t !== "UN")} />
+        <ScoringNotice scoring={scoring} t={t} />
         <PitchTable
           rows={pitchRows} leagueAvgs={leagueAvgs} isAAA={isAAA} pitchPlus={pitchPlus}
           onTypeClick={reclassifyMode ? onTypeClick : null}
