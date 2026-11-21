@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
 
 // ═══════════════════════════════════════════════════════════
@@ -59,18 +60,55 @@ const CSS = `
 .ptet-prose th[align="center"], .ptet-prose td[align="center"] { text-align: center; }
 .ptet-prose td { color: var(--p-body); }
 .ptet-prose hr { border: none; border-top: 1px solid var(--p-rule); margin: 2.2em 0; }
+.ptet-prose img { cursor: zoom-in; }
+.ptet-lightbox { position: fixed; inset: 0; z-index: 1000; background: rgba(5, 8, 15, 0.92); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px; padding: 24px; cursor: zoom-out; animation: ptet-lb-in 0.15s ease; }
+.ptet-lightbox img { max-width: 96vw; max-height: calc(100vh - 110px); object-fit: contain; border-radius: 4px;
+  box-shadow: 0 10px 60px rgba(0,0,0,0.6); }
+.ptet-lightbox figcaption { font-family: ${SANS}; font-size: 13.5px; line-height: 1.45; color: rgba(255,255,255,0.78);
+  text-align: center; max-width: 60em; }
+.ptet-lightbox-close { position: absolute; top: 14px; right: 16px; width: 40px; height: 40px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.12); color: #fff; font-size: 22px; line-height: 40px; cursor: pointer; }
+.ptet-lightbox-close:hover { background: rgba(255,255,255,0.22); }
+@keyframes ptet-lb-in { from { opacity: 0; } to { opacity: 1; } }
 `;
 
 export default function Prose({ html, compact = false }) {
   const { theme: t } = useTheme();
+  const [zoom, setZoom] = useState(null);   // { src, alt, caption } while an image is enlarged
   const vars = {
     "--p-head": t.text, "--p-body": t.textSecondary, "--p-muted": t.textMuted,
     "--p-link": t.textFaint, "--p-rule": t.divider, "--p-code": t.inputBg,
   };
+
+  // Click an image in the post → show it full screen (with its caption). Esc, a click
+  // anywhere or the × closes it; the page behind doesn't scroll while it's open.
+  const onClick = e => {
+    const img = e.target.closest?.("img");
+    if (!img || !e.currentTarget.contains(img)) return;
+    const caption = img.closest("figure")?.querySelector("figcaption")?.textContent || "";
+    setZoom({ src: img.currentSrc || img.src, alt: img.alt || "", caption });
+  };
+  useEffect(() => {
+    if (!zoom) return;
+    const onKey = e => { if (e.key === "Escape") setZoom(null); };
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [zoom]);
+
   return (
     <>
       <style>{CSS}</style>
-      <div className={`ptet-prose${compact ? " compact" : ""}`} style={vars} dangerouslySetInnerHTML={{ __html: html }} />
+      <div className={`ptet-prose${compact ? " compact" : ""}`} style={vars} onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />
+      {zoom && (
+        <div className="ptet-lightbox" role="dialog" aria-modal="true" aria-label={zoom.alt || "Image"} onClick={() => setZoom(null)}>
+          <button type="button" className="ptet-lightbox-close" aria-label="Close" onClick={() => setZoom(null)}>×</button>
+          <img src={zoom.src} alt={zoom.alt} />
+          {zoom.caption && <figcaption>{zoom.caption}</figcaption>}
+        </div>
+      )}
     </>
   );
 }
