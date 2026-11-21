@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
 import { Link } from "../router.jsx";
-import Prose, { SERIF, SANS } from "./Prose.jsx";
-import { POSTS, renderMarkdown, formatDate } from "./posts.js";
+import { SERIF, SANS } from "./Prose.jsx";
+import { POSTS, formatDate } from "./posts.js";
 
 // ═══════════════════════════════════════════════════════════
 // HOME: "Articles and Updates"
@@ -13,6 +13,8 @@ import { POSTS, renderMarkdown, formatDate } from "./posts.js";
 const CSS = `
 .ptet-home-cols { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 56px; align-items: start; }
 .ptet-headline-link:hover .ptet-headline { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+.ptet-update-card img { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.ptet-update-card:hover img { transform: translateY(-2px); }
 @media (max-width: 900px) { .ptet-home-cols { grid-template-columns: minmax(0, 1fr); gap: 40px; } }
 `;
 
@@ -53,15 +55,31 @@ function ArticleItem({ post, t, lead = false }) {
   );
 }
 
+// A preview card: date, title, the first image, the opening lines (clamped), and a
+// prompt. The whole card opens the full update on its own page.
 function UpdateItem({ post, t }) {
   return (
-    <div style={{ padding: "18px 0", borderBottom: `1px solid ${t.divider}` }}>
+    <Link to={`/posts/${post.slug}`} className="ptet-headline-link ptet-update-card"
+          style={{ display: "block", textDecoration: "none", color: "inherit", padding: "18px 0", borderBottom: `1px solid ${t.divider}` }}>
       <Dateline t={t} post={post} />
-      <Link to={`/posts/${post.slug}`} className="ptet-headline-link" style={{ textDecoration: "none", display: "block", margin: "6px 0 8px" }}>
-        <span className="ptet-headline" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, lineHeight: 1.3, color: t.text }}>{post.title}</span>
-      </Link>
-      <Prose html={renderMarkdown(post.body)} compact />
-    </div>
+      <div className="ptet-headline" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, lineHeight: 1.3, color: t.text, margin: "6px 0 10px" }}>
+        {post.title}
+      </div>
+      {post.previewImage && (
+        <img src={post.previewImage} alt="" loading="lazy"
+             style={{ display: "block", width: "100%", aspectRatio: "16 / 9", objectFit: "cover", objectPosition: "top",
+                      borderRadius: 4, marginBottom: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.2)" }} />
+      )}
+      {(post.summary || post.excerpt) && (
+        <p style={{ fontFamily: SERIF, fontSize: 15.5, lineHeight: 1.55, color: t.textSecondary, margin: 0,
+                    display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {post.summary || post.excerpt}
+        </p>
+      )}
+      <div style={{ fontFamily: SANS, fontSize: 13, fontWeight: 600, color: t.accent, marginTop: 10 }}>
+        Read the full update →
+      </div>
+    </Link>
   );
 }
 

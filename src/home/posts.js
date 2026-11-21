@@ -10,6 +10,8 @@ import { marked } from "marked";
 //   type:    article | update   (updates show in full in the Home feed).
 //   summary: One line for cards and the feed.
 //   cover:   /posts/some-slug/cover.png   (optional; images go in public/posts/<slug>/).
+//   preview: /posts/some-slug/thumb.png   (optional; the Home thumbnail. Defaults to the
+//            cover, else the post's first image.)
 //   tags:    [mlb, pitch-plus]
 //   pinned:  true   (shown first on Home)
 //   draft:   true   (left off the site)
@@ -43,8 +45,18 @@ export function parsePost(raw, filename) {
   const date = String(meta.date || (dm ? dm[1] : ""));
   const type = meta.type === "update" ? "update" : "article";
   const words = body.split(/\s+/).filter(Boolean).length;
+  // Preview for the home page: the first paragraph as plain text, and the first image.
+  const firstPara = body.split(/\n\s*\n/).map(b => b.trim())
+    .find(b => b && !b.startsWith("<") && !b.startsWith("#") && !b.startsWith("|") && !b.startsWith("!["));
+  const excerpt = (firstPara || "")
+    .replace(/^[-*]\s+/gm, "")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/[*_`>]/g, "")
+    .replace(/\s+/g, " ").trim();
+  const img = body.match(/<img[^>]*\ssrc="([^"]+)"/) || body.match(/!\[[^\]]*\]\(([^)\s]+)/);
   return {
-    slug, date, type, body,
+    slug, date, type, body, excerpt, previewImage: meta.preview || meta.cover || (img ? img[1] : null),
     title: meta.title || slug.replace(/-/g, " "),
     summary: meta.summary || "",
     cover: meta.cover || null,
