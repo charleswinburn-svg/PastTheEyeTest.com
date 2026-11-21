@@ -21969,7 +21969,7 @@
     {
       "player_id": 695391,
       "name": "Brett Harris",
-      "team": "PHI",
+      "team": "- - -",
       "positions": {
         "1B": {
           "innings": 73.0,
@@ -36248,7 +36248,7 @@
     {
       "player_id": 683766,
       "name": "Christian Koss",
-      "team": "SF",
+      "team": "TB",
       "positions": {
         "3B": {
           "innings": 157.1,
@@ -38081,7 +38081,7 @@
     {
       "player_id": 666624,
       "name": "Christopher Morel",
-      "team": "NYM",
+      "team": "- - -",
       "positions": {
         "1B": {
           "innings": 139.0,
@@ -65592,7 +65592,7 @@
     {
       "player_id": 672356,
       "name": "Gabriel Arias",
-      "team": "CHC",
+      "team": "- - -",
       "positions": {
         "3B": {
           "innings": 207.2,
@@ -92740,7 +92740,7 @@
     {
       "player_id": 663698,
       "name": "Joey Bart",
-      "team": "CWS",
+      "team": "CHC",
       "positions": {
         "C": {
           "innings": 288.1,
@@ -106908,7 +106908,7 @@
     {
       "player_id": 664728,
       "name": "Kyle Isbel",
-      "team": "KC",
+      "team": "KCR",
       "positions": {
         "CF": {
           "innings": 786.2,
@@ -142124,7 +142124,7 @@
     {
       "player_id": 668904,
       "name": "Royce Lewis",
-      "team": "MIN",
+      "team": "LAD",
       "positions": {
         "1B": {
           "innings": 684.0,
@@ -163416,7 +163416,7 @@
     {
       "player_id": 682674,
       "name": "Victor Bericoto",
-      "team": "SF",
+      "team": "SFG",
       "positions": {
         "LF": {
           "innings": 143.0,
@@ -175959,6 +175959,6 @@
       "FanGraphs",
       "BP"
     ],
-    "generated_at": "2026-11-20 14:02:17 UTC"
+    "generated_at": "2026-11-21 14:02:39 UTC"
   }
 }
