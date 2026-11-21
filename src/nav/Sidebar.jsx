@@ -64,7 +64,12 @@ export default function Sidebar({ path, query, search, onNavigate, onHide, drawe
   useEffect(() => { if (active?.sectionKey) setOpenKey(active.sectionKey); }, [active?.sectionKey]);
 
   const mlbHref = p => (season !== DEFAULT_MLB_SEASON ? `${p}?season=${season}` : p);
-  const nhlHref = p => (path.startsWith("/nhl") ? `${p}${search}` : p);
+  // NHL links keep the season / 3-year-1-year / team, but not the picked player.
+  const nhlHref = p => {
+    if (!path.startsWith("/nhl")) return p;
+    const q = new URLSearchParams(search); q.delete("id"); q.delete("kind");
+    return q.toString() ? `${p}?${q}` : p;
+  };
   const go = to => { navigate(to); onNavigate?.(); };
 
   const vars = {

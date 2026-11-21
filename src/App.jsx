@@ -7,7 +7,7 @@ import HomePage from "./home/HomePage.jsx";
 import PostPage from "./home/PostPage.jsx";
 import Sidebar from "./nav/Sidebar.jsx";
 import { ToolbarSlotProvider } from "./nav/Toolbar.jsx";
-import { mlbLeafForPath, nhlLeafForPath, titleForPath, MLB_DEFAULT_PATH, NHL_DEFAULT_PATH } from "./nav/navConfig.js";
+import { mlbLeafForPath, nhlLeafForPath, titleForPath, nhlLegacyRedirect, MLB_DEFAULT_PATH, NHL_DEFAULT_PATH } from "./nav/navConfig.js";
 
 // Dev-only color scale preview at /palette (not linked from the nav).
 const PalettePreview = lazy(() => import("./ui/PalettePreview.jsx"));
@@ -55,7 +55,9 @@ function Shell() {
   // Old / partial addresses → the section's default (keeping any query, e.g. ?season=).
   useEffect(() => {
     if ((path === "/mlb" || path.startsWith("/mlb/")) && !mlbLeaf) navigate(MLB_DEFAULT_PATH + search, { replace: true, scroll: false });
-    else if ((path === "/nhl" || path.startsWith("/nhl/")) && !nhlLeaf) navigate(NHL_DEFAULT_PATH + search, { replace: true, scroll: false });
+    else if ((path === "/nhl" || path.startsWith("/nhl/")) && !nhlLeaf) {
+      navigate(nhlLegacyRedirect(path, query) || NHL_DEFAULT_PATH + search, { replace: true, scroll: false });
+    }
   }, [path]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Remember the last MLB / NHL page (the bottom bar's MLB / NHL buttons reopen it).

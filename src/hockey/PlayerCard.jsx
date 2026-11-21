@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
-import { NUM_FONT, BubblePercentileBar, saveCardAsPng } from "../baseball/SharedComponents.jsx";
+import { NUM_FONT, saveCardAsPng } from "../baseball/SharedComponents.jsx";
 import FitToWidth from "../FitToWidth.jsx";
 import { BoxStrip } from "../ui/PercentileBoxes.jsx";
 import ImpactChart from "./ImpactChart.jsx";
@@ -114,12 +114,7 @@ function SpectrumRow({ pct, isDark, t, k }) {
   return <BoxStrip pct={pct} isDark={isDark} t={t} row={k.row} box={k.box} num={k.num} num3={k.num3} />;
 }
 
-function PercentileRows({ p, rows, style, isDark, t, k }) {
-  if (style === "bars") {
-    return <div>{rows.map(([label, col, tip]) => (
-      <div key={col} title={tip}><BubblePercentileBar label={label} pctile={p[col]} display={rawValue(p, col) || "–"} labelWidth={k.labelW} /></div>
-    ))}</div>;
-  }
+function PercentileRows({ p, rows, isDark, t, k }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: `${k.labelW}px 1fr ${k.valueW}px`, rowGap: k.rowGap, columnGap: 10, alignItems: "center" }}>
       {rows.map(([label, col, tip]) => {
@@ -191,7 +186,7 @@ export function Segmented({ value, options, onChange, t, small }) {
 // ═══════════════════════════════════════════════════════════
 // THE CARD
 // ═══════════════════════════════════════════════════════════
-export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, history, seasons, inProgressSeason, wide, pctStyle }) {
+export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, history, seasons, inProgressSeason, wide }) {
   const { theme: t, isDark } = useTheme();
   const cardRef = useRef(null), captureRef = useRef(null);
   const [measure, setMeasure] = useState("WAR");
@@ -247,7 +242,7 @@ export default function PlayerCard({ p, kind, v, season, seasonDone, zRef, histo
   const COL_GAP = 40, inner = width - 2 * k.pad, leftW = wide ? Math.round((inner - COL_GAP) * 0.62) : inner;
   const percentiles = (
     <Section t={t} k={k} title={`Percentiles among ${group}`}>
-      <PercentileRows p={p} rows={rows} style={pctStyle} isDark={isDark} t={t} k={k} />
+      <PercentileRows p={p} rows={rows} isDark={isDark} t={t} k={k} />
     </Section>
   );
   const breakdown = (

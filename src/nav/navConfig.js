@@ -54,19 +54,34 @@ export const MLB_NAV = [
   { key: "evla", label: "EV/LA fan", id: "evla", path: "/mlb/ev-la" },
 ];
 
+// NHL: `view` is the HockeyApp view, `kind` skaters / goalies (from the path, not a toggle).
 export const NHL_NAV = [
-  { key: "player", label: "Player card", id: "player", path: "/nhl/player" },
-  { key: "leaderboard", label: "Leaderboard", id: "leaderboard", path: "/nhl/leaderboard" },
-  { key: "about", label: "About the numbers", id: "about", path: "/nhl/about" },
+  { key: "nhl-skaters", label: "Skater cards", id: "skaters", path: "/nhl/skaters", view: "player", kind: "skaters" },
+  { key: "nhl-goalies", label: "Goalie cards", id: "goalies", path: "/nhl/goalies", view: "player", kind: "goalies" },
+  { key: "nhl-leaderboards", label: "Leaderboards", items: [
+    { id: "lb_skaters", label: "Skaters", path: "/nhl/leaderboards/skaters", view: "leaderboard", kind: "skaters" },
+    { id: "lb_goalies", label: "Goalies", path: "/nhl/leaderboards/goalies", view: "leaderboard", kind: "goalies" },
+  ] },
+  { key: "nhl-about", label: "About the numbers", id: "about", path: "/nhl/about", view: "about" },
 ];
 
 export const MLB_DEFAULT_PATH = "/mlb/hitters";
-export const NHL_DEFAULT_PATH = "/nhl/player";
+export const NHL_DEFAULT_PATH = "/nhl/skaters";
 
-// Flat leaf list: { id, path, label, section, sectionKey, isNew }
+// Older NHL addresses (?kind= toggle era) → the new paths, keeping the rest of the query.
+export function nhlLegacyRedirect(path, query) {
+  const goalies = query?.kind === "goalies";
+  const rest = new URLSearchParams(Object.entries(query || {}).filter(([k]) => k !== "kind"));
+  const qs = rest.toString() ? `?${rest}` : "";
+  if (path === "/nhl/player") return (goalies ? "/nhl/goalies" : "/nhl/skaters") + qs;
+  if (path === "/nhl/leaderboard" || path === "/nhl/leaderboards") return (goalies ? "/nhl/leaderboards/goalies" : "/nhl/leaderboards/skaters") + qs;
+  return null;
+}
+
+// Flat leaf list: { id, path, label, section, sectionKey, isNew, view?, kind? }
 const leaves = nav => nav.flatMap(s => (s.items
   ? s.items.map(i => ({ ...i, section: s.label, sectionKey: s.key }))
-  : [{ id: s.id, path: s.path, label: s.label, section: s.label, sectionKey: s.key, isNew: s.isNew }]));
+  : [{ ...s, section: s.label, sectionKey: s.key }]));
 export const MLB_LEAVES = leaves(MLB_NAV);
 export const NHL_LEAVES = leaves(NHL_NAV);
 
@@ -79,6 +94,6 @@ export function titleForPath(path) {
   const m = mlbLeafForPath(path);
   if (m) return { sport: "MLB", title: m.section === m.label ? m.label : `${m.section} · ${m.label}` };
   const n = nhlLeafForPath(path);
-  if (n) return { sport: "NHL", title: n.label };
+  if (n) return { sport: "NHL", title: n.section === n.label ? n.label : `${n.section} · ${n.label}` };
   return null;
 }

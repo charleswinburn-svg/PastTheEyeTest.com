@@ -44,7 +44,8 @@ Comprehensive reference for the project across both repos. Use this when startin
   `navConfig.js` is the one list of sections, paths and labels; the left sidebar (a drawer plus a bottom
   bar on phones) and the page titles read it. State is in the query string, so views can be linked:
   `/mlb/pitchers?player=694973&season=2026`, `/mlb/summaries/pitcher-season?player=694973&type=R`,
-  `/nhl/player?kind=goalies&id=…`. Page controls render into the top bar via `<Toolbar>` (`src/nav/Toolbar.jsx`).
+  `/nhl/goalies?id=…&season=…&v=1y`, `/nhl/leaderboards/skaters`. Page controls render into the top bar via
+  `<Toolbar>` (`src/nav/Toolbar.jsx`), styled from `src/nav/toolbarStyles.js` so MLB and NHL match.
   Sections without a 2027-projection version open in the latest real season. One `ThemeProvider` in `App.jsx`.
 - **One color scale** (`src/ui/colorScale.js`): every value color (percentiles, Plus stats,
   stat-vs-average cells, heatmaps, NHL tiers) comes from `ACTIVE_PALETTE` (Ice → Fire: glacier ice

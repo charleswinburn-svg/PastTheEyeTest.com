@@ -15,6 +15,7 @@ import { fuzzyLookup, binColor, textOnBin, BIN_COLORS, pctToBin, SearchableSelec
 import { useTheme } from "./ThemeContext.jsx";
 import { useLocation, navigate, setQuery } from "../router.jsx";
 import { Toolbar } from "../nav/Toolbar.jsx";
+import { seasonSelectStyle, seasonOptionStyle, searchStyle, searchPanelProps } from "../nav/toolbarStyles.js";
 import {
   MLB_SEASONS, PROJ_SEASON, PROJ_TABS, DEFAULT_MLB_SEASON, LATEST_MLB_SEASON, mlbLeafForPath, mlbLeafForTab, mlbSeasonFrom,
 } from "../nav/navConfig.js";
@@ -390,22 +391,11 @@ function BaseballApp() {
           <select
             value={season}
             onChange={e => setSeason(e.target.value)}
-            style={{
-              padding: "8px 16px", 
-              background: `linear-gradient(135deg, ${t.accentSecondary || t.accent} 0%, ${t.accent} 100%)`,
-              color: inkOnColor(t.accent),
-              border: "none", 
-              borderRadius: 8, 
-              fontSize: 13, 
-              fontWeight: 700,
-              cursor: "pointer", 
-              outline: "none", 
-              fontFamily: "inherit",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-            }}
+            style={seasonSelectStyle(t)}
+            aria-label="Season"
           >
             {SEASONS.map(s => (
-              <option key={s} value={s} style={{ background: t.inputBg, color: t.text }}>
+              <option key={s} value={s} style={seasonOptionStyle(t)}>
                 {String(s).endsWith("P") ? `${String(s).slice(0, 4)} Projected` : s}
               </option>
             ))}
@@ -426,21 +416,8 @@ function BaseballApp() {
                 else setSelectedHitter(name);
               }}
               placeholder="Search player…"
-              panelMinWidth={isMobile ? 0 : 340}
-              panelAlign="right"
-              style={{
-                flex: isMobile ? "1 1 100%" : "0 1 280px",
-                padding: "6px 12px",
-                background: t.inputBg,
-                border: `1px solid ${t.inputBorder}`,
-                borderRadius: 6,
-                color: t.text,
-                fontSize: 12,
-                minWidth: isMobile ? 0 : 200,
-                maxWidth: isMobile ? "100%" : 280,
-                width: isMobile ? "100%" : "auto",
-                flexShrink: 1,
-              }}
+              {...searchPanelProps(isMobile)}
+              style={searchStyle(t, isMobile)}
             />
           )}
       </Toolbar>

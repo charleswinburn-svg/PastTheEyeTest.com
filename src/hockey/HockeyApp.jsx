@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "../baseball/ThemeContext.jsx";
 import { useLocation, navigate, setQuery } from "../router.jsx";
 import { Toolbar } from "../nav/Toolbar.jsx";
-import { nhlLeafForPath, NHL_DEFAULT_PATH } from "../nav/navConfig.js";
+import { nhlLeafForPath } from "../nav/navConfig.js";
+import { seasonSelectStyle, seasonOptionStyle, searchStyle, searchPanelProps, plainSelectStyle } from "../nav/toolbarStyles.js";
 import { SearchableSelect, NUM_FONT } from "../baseball/SharedComponents.jsx";
-import PlayerCard, { Segmented } from "./PlayerCard.jsx";
+import PlayerCard from "./PlayerCard.jsx";
 import Leaderboard from "./Leaderboard.jsx";
 import { useNhl, toObjects, seasonLabel, periodLabel, logoUrl, headshotUrl } from "./nhlData.js";
 import { VERSIONS } from "./rows.js";
@@ -32,22 +33,22 @@ function Hockey() {
   const winW = useWindowWidth();
   const mobile = winW < 700, wide = winW >= 1100;
 
-  // View (path) and filters / player (query) come from the URL, so every card and
-  // leaderboard state can be linked: /nhl/player?kind=goalies&id=8478048&season=2025&v=1y
+  // View and skaters/goalies come from the path (sidebar: Skater cards, Goalie cards,
+  // Leaderboards › Skaters / Goalies, About); filters and the player from the query, so
+  // every card and leaderboard can be linked: /nhl/goalies?id=8478048&season=2025&v=1y
   const loc = useLocation();
   const q = loc.query;
-  const view = nhlLeafForPath(loc.path)?.id || "player";
-  const kind = q.kind === "goalies" ? "goalies" : "skaters";
+  const leaf = nhlLeafForPath(loc.path);
+  const view = leaf?.view || "player";
+  const kind = leaf?.kind === "goalies" ? "goalies" : "skaters";
   const season = q.season && /^\d+$/.test(q.season) ? +q.season : null;
   const v = VERSIONS.some(x => x.id === q.v) ? q.v : "3y";
   const team = q.team || "";
   const pickedId = q.id && /^\d+$/.test(q.id) ? +q.id : null;
-  const setKind = k => setQuery({ kind: k === "skaters" ? null : k, id: null, team: null });
   const setSeason = n => setQuery({ season: n });
   const setV = x => setQuery({ v: x === "3y" ? null : x });
   const setTeam = x => setQuery({ team: x || null });
   const pick = id => setQuery({ id });
-  const [pctStyle, setPctStyle] = useState("boxes");
 
   const meta = useNhl("meta.json");
   const y = season ?? meta.data?.latest_season ?? null;
@@ -67,8 +68,6 @@ function Hockey() {
   useEffect(() => { if (team && teams.length && !teams.includes(team)) setTeam(""); }, [teams, team]);
 
   const error = meta.error || file.error;
-  const input = { padding: "7px 10px", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 6,
-                  color: t.text, fontSize: 12, outline: "none", fontFamily: "inherit", fontWeight: 600 };
 
   return (
     <div style={{ background: t.bg, color: t.text, fontFamily: NUM_FONT }}>
@@ -77,25 +76,27 @@ function Hockey() {
         const filters = (
           <>
             {meta.data && !mobile && <span style={{ fontSize: 10.5, color: t.textFaint, fontWeight: 600, whiteSpace: "nowrap" }}>Updated {meta.data.updated.slice(0, 10)}</span>}
-          <Segmented t={t} value={kind} onChange={setKind} options={[["skaters", "Skaters"], ["goalies", "Goalies"]]} />
-          <select value={y ?? ""} onChange={e => setSeason(+e.target.value)} style={input} aria-label="Season">
-            {[...(meta.data?.seasons || [])].reverse().map(s => (
-              <option key={s.season} value={s.season}>{periodLabel(s.season, v, inProgressSeason)}</option>
-            ))}
-          </select>
-          <Segmented t={t} value={v} onChange={setV} options={VERSIONS.map(x => [x.id, x.label])} />
-          {view === "player" && (
-            <>
-              <select value={team} onChange={e => setTeam(e.target.value)} style={input} aria-label="Team">
-                <option value="">All teams</option>{teams.map(x => <option key={x} value={x}>{x}</option>)}
-              </select>
-              <SearchableSelect value={current?.player_id ?? ""} options={options}
-                onChange={id => pick(id)}
-                placeholder={`Search ${kind === "goalies" ? "goalie" : "skater"}…`}
-                style={{ ...input, flex: mobile ? "1 1 100%" : "1 1 240px", minWidth: mobile ? 0 : 220, maxWidth: mobile ? "100%" : 380 }} />
-              <Segmented t={t} value={pctStyle} onChange={setPctStyle} options={[["boxes", "Boxes"], ["bars", "Bars"]]} />
-            </>
-          )}
+            {/* Season and search look exactly like MLB's (src/nav/toolbarStyles.js). */}
+            <select value={y ?? ""} onChange={e => setSeason(+e.target.value)} style={seasonSelectStyle(t)} aria-label="Season">
+              {[...(meta.data?.seasons || [])].reverse().map(s => (
+                <option key={s.season} value={s.season} style={seasonOptionStyle(t)}>{periodLabel(s.season, v, inProgressSeason)}</option>
+              ))}
+            </select>
+            <select value={v} onChange={e => setV(e.target.value)} style={plainSelectStyle(t)} aria-label="3-year or 1-year">
+              {VERSIONS.map(x => <option key={x.id} value={x.id}>{x.label}</option>)}
+            </select>
+            {view === "player" && (
+              <>
+                <select value={team} onChange={e => setTeam(e.target.value)} style={plainSelectStyle(t)} aria-label="Team">
+                  <option value="">All teams</option>{teams.map(x => <option key={x} value={x}>{x}</option>)}
+                </select>
+                <SearchableSelect value={current?.player_id ?? ""} options={options}
+                  onChange={id => pick(id)}
+                  placeholder={`Search ${kind === "goalies" ? "goalie" : "skater"}…`}
+                  {...searchPanelProps(mobile)}
+                  style={searchStyle(t, mobile)} />
+              </>
+            )}
           </>
         );
         return mobile
@@ -116,7 +117,7 @@ function Hockey() {
       ) : view === "player" ? (
         <div style={{ padding: mobile ? "14px 10px 40px" : "24px 24px 60px" }}>
           <PlayerCard p={current} kind={kind} v={v} season={y} seasonDone={file.data.season_done} zRef={file.data.z_ref}
-            history={history.data} seasons={seasons} inProgressSeason={inProgressSeason} wide={wide} pctStyle={pctStyle} />
+            history={history.data} seasons={seasons} inProgressSeason={inProgressSeason} wide={wide} />
         </div>
       ) : (
         <div style={{ padding: mobile ? "14px 10px 40px" : "20px 24px 60px", maxWidth: 1560, margin: "0 auto" }}>
@@ -126,7 +127,7 @@ function Hockey() {
           <Leaderboard key={kind} players={pool} kind={kind} v={v} teams={teams} team={team} onTeam={setTeam}
             onPick={id => {
               const u = new URLSearchParams(loc.search); u.set("id", id);
-              navigate(`${NHL_DEFAULT_PATH}?${u}`);
+              navigate(`/nhl/${kind}?${u}`);
             }} />
         </div>
       )}
