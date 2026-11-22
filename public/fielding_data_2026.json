@@ -1693,9 +1693,9 @@
               "value": 5.7
             },
             "framing": {
-              "display": "6.4",
+              "display": "6.5",
               "pctile": 92,
-              "value": 6.4
+              "value": 6.5
             },
             "shadow_strike": {
               "display": "46.7",
@@ -4335,9 +4335,9 @@
               "value": 4.7
             },
             "framing": {
-              "display": "7.1",
+              "display": "7.0",
               "pctile": 96,
-              "value": 7.1
+              "value": 7.0
             },
             "shadow_strike": {
               "display": "48.7",
@@ -11301,9 +11301,9 @@
               "value": 0.8
             },
             "framing": {
-              "display": "2.0",
-              "pctile": 63,
-              "value": 2.0
+              "display": "1.5",
+              "pctile": 56,
+              "value": 1.5
             },
             "shadow_strike": {
               "display": "48.9",
@@ -12388,7 +12388,7 @@
               "rate": 27.4,
               "lg": 24.5,
               "pctile": 68,
-              "rv": 1.0
+              "rv": 0.0
             },
             "14": {
               "rate": 56.1,
@@ -12418,7 +12418,7 @@
               "rate": 28.2,
               "lg": 23.9,
               "pctile": 79,
-              "rv": 0.0
+              "rv": -1.0
             }
           }
         }
@@ -12899,9 +12899,9 @@
               "value": 7.5
             },
             "framing": {
-              "display": "6.7",
+              "display": "6.9",
               "pctile": 94,
-              "value": 6.7
+              "value": 6.9
             },
             "shadow_strike": {
               "display": "49.0",
@@ -19427,9 +19427,9 @@
               "value": 6.6
             },
             "framing": {
-              "display": "8.3",
-              "pctile": 97,
-              "value": 8.3
+              "display": "8.7",
+              "pctile": 99,
+              "value": 8.7
             },
             "shadow_strike": {
               "display": "49.2",
@@ -20429,7 +20429,7 @@
               "rate": 48.6,
               "lg": 51.5,
               "pctile": 28,
-              "rv": 0.0
+              "rv": 1.0
             },
             "16": {
               "rate": 63.6,
@@ -22112,9 +22112,9 @@
               "value": -5.0
             },
             "framing": {
-              "display": "-4.3",
-              "pctile": 21,
-              "value": -4.3
+              "display": "-4.6",
+              "pctile": 17,
+              "value": -4.6
             },
             "shadow_strike": {
               "display": "43.6",
@@ -27280,9 +27280,9 @@
               "value": 2.1
             },
             "framing": {
-              "display": "-4.3",
-              "pctile": 19,
-              "value": -4.3
+              "display": "-4.6",
+              "pctile": 15,
+              "value": -4.6
             },
             "shadow_strike": {
               "display": "45.4",
@@ -28568,7 +28568,7 @@
               "rate": 54.3,
               "lg": 51.5,
               "pctile": 74,
-              "rv": 1.0
+              "rv": 0.0
             },
             "16": {
               "rate": 54.3,
@@ -29664,9 +29664,9 @@
               "value": -4.9
             },
             "framing": {
-              "display": "2.0",
+              "display": "2.1",
               "pctile": 62,
-              "value": 2.0
+              "value": 2.1
             },
             "shadow_strike": {
               "display": "46.2",
@@ -30862,7 +30862,7 @@
               "rate": 62.8,
               "lg": 59.4,
               "pctile": 72,
-              "rv": 0.0
+              "rv": 1.0
             },
             "13": {
               "rate": 29.6,
@@ -30898,7 +30898,7 @@
               "rate": 25.0,
               "lg": 23.9,
               "pctile": 64,
-              "rv": 1.0
+              "rv": 0.0
             }
           }
         }
@@ -31343,9 +31343,9 @@
               "value": -2.2
             },
             "framing": {
-              "display": "1.0",
-              "pctile": 53,
-              "value": 1.0
+              "display": "0.3",
+              "pctile": 49,
+              "value": 0.3
             },
             "shadow_strike": {
               "display": "45.7",
@@ -32702,7 +32702,7 @@
               "rate": 58.7,
               "lg": 60.3,
               "pctile": 35,
-              "rv": 0.0
+              "rv": -1.0
             },
             "17": {
               "rate": 21.7,
@@ -32862,9 +32862,9 @@
               "value": 0.4
             },
             "framing": {
-              "display": "3.1",
+              "display": "3.2",
               "pctile": 72,
-              "value": 3.1
+              "value": 3.2
             },
             "shadow_strike": {
               "display": "47.9",
@@ -36643,9 +36643,9 @@
               "value": 0.1
             },
             "framing": {
-              "display": "5.9",
+              "display": "6.0",
               "pctile": 90,
-              "value": 5.9
+              "value": 6.0
             },
             "shadow_strike": {
               "display": "47.6",
@@ -42995,9 +42995,9 @@
               "value": -3.7
             },
             "framing": {
-              "display": "-2.7",
+              "display": "-3.1",
               "pctile": 28,
-              "value": -2.7
+              "value": -3.1
             },
             "shadow_strike": {
               "display": "44.7",
@@ -44168,9 +44168,9 @@
               "value": -0.3
             },
             "framing": {
-              "display": "5.6",
-              "pctile": 87,
-              "value": 5.6
+              "display": "5.2",
+              "pctile": 83,
+              "value": 5.2
             },
             "shadow_strike": {
               "display": "50.4",
@@ -44961,9 +44961,9 @@
               "value": -4.3
             },
             "framing": {
-              "display": "-5.2",
-              "pctile": 13,
-              "value": -5.2
+              "display": "-5.4",
+              "pctile": 12,
+              "value": -5.4
             },
             "shadow_strike": {
               "display": "44.5",
@@ -45521,7 +45521,7 @@
               "rate": 55.1,
               "lg": 51.5,
               "pctile": 81,
-              "rv": 1.0
+              "rv": 0.0
             },
             "16": {
               "rate": 55.0,
@@ -47716,9 +47716,9 @@
               "value": 12.4
             },
             "framing": {
-              "display": "8.9",
-              "pctile": 99,
-              "value": 8.9
+              "display": "8.5",
+              "pctile": 97,
+              "value": 8.5
             },
             "shadow_strike": {
               "display": "48.2",
@@ -49264,7 +49264,7 @@
               "rate": 53.6,
               "lg": 51.5,
               "pctile": 67,
-              "rv": 1.0
+              "rv": 2.0
             },
             "16": {
               "rate": 60.1,
@@ -49778,9 +49778,9 @@
               "value": -3.9
             },
             "framing": {
-              "display": "2.0",
-              "pctile": 60,
-              "value": 2.0
+              "display": "2.4",
+              "pctile": 65,
+              "value": 2.4
             },
             "shadow_strike": {
               "display": "46.9",
@@ -50740,9 +50740,9 @@
               "value": -5.0
             },
             "framing": {
-              "display": "-3.6",
+              "display": "-3.4",
               "pctile": 26,
-              "value": -3.6
+              "value": -3.4
             },
             "shadow_strike": {
               "display": "43.1",
@@ -51808,9 +51808,9 @@
               "value": 0.5
             },
             "framing": {
-              "display": "4.1",
-              "pctile": 76,
-              "value": 4.1
+              "display": "4.6",
+              "pctile": 78,
+              "value": 4.6
             },
             "shadow_strike": {
               "display": "50.5",
@@ -52621,7 +52621,7 @@
               "rate": 64.2,
               "lg": 60.3,
               "pctile": 83,
-              "rv": 0.0
+              "rv": 1.0
             },
             "17": {
               "rate": 32.6,
@@ -52639,7 +52639,7 @@
               "rate": 32.5,
               "lg": 23.9,
               "pctile": 99,
-              "rv": 1.0
+              "rv": 2.0
             }
           }
         }
@@ -52679,9 +52679,9 @@
               "value": 1.1
             },
             "framing": {
-              "display": "0.5",
-              "pctile": 51,
-              "value": 0.5
+              "display": "0.9",
+              "pctile": 53,
+              "value": 0.9
             },
             "shadow_strike": {
               "display": "45.6",
@@ -54011,7 +54011,7 @@
               "rate": 60.1,
               "lg": 54.4,
               "pctile": 92,
-              "rv": 1.0
+              "rv": 2.0
             },
             "19": {
               "rate": 29.6,
@@ -54804,9 +54804,9 @@
               "value": -3.5
             },
             "framing": {
-              "display": "-3.9",
+              "display": "-4.1",
               "pctile": 24,
-              "value": -3.9
+              "value": -4.1
             },
             "shadow_strike": {
               "display": "45.3",
@@ -57511,9 +57511,9 @@
               "value": -1.9
             },
             "framing": {
-              "display": "0.4",
-              "pctile": 49,
-              "value": 0.4
+              "display": "0.1",
+              "pctile": 46,
+              "value": 0.1
             },
             "shadow_strike": {
               "display": "45.8",
@@ -62690,9 +62690,9 @@
               "value": 2.7
             },
             "framing": {
-              "display": "2.3",
-              "pctile": 65,
-              "value": 2.3
+              "display": "2.6",
+              "pctile": 67,
+              "value": 2.6
             },
             "shadow_strike": {
               "display": "46.8",
@@ -64297,9 +64297,9 @@
               "value": 3.5
             },
             "framing": {
-              "display": "3.0",
-              "pctile": 71,
-              "value": 3.0
+              "display": "2.7",
+              "pctile": 69,
+              "value": 2.7
             },
             "shadow_strike": {
               "display": "47.0",
@@ -65559,7 +65559,7 @@
               "rate": 55.9,
               "lg": 51.5,
               "pctile": 87,
-              "rv": 2.0
+              "rv": 1.0
             },
             "16": {
               "rate": 65.0,
@@ -65875,9 +65875,9 @@
               "value": 3.3
             },
             "framing": {
-              "display": "5.1",
-              "pctile": 81,
-              "value": 5.1
+              "display": "5.3",
+              "pctile": 85,
+              "value": 5.3
             },
             "shadow_strike": {
               "display": "46.9",
@@ -67096,7 +67096,7 @@
               "rate": 23.6,
               "lg": 23.9,
               "pctile": 49,
-              "rv": 1.0
+              "rv": 0.0
             }
           }
         }
@@ -67858,9 +67858,9 @@
               "value": 0.7
             },
             "framing": {
-              "display": "-1.7",
-              "pctile": 33,
-              "value": -1.7
+              "display": "-2.1",
+              "pctile": 29,
+              "value": -2.1
             },
             "shadow_strike": {
               "display": "45.8",
@@ -71867,9 +71867,9 @@
               "value": 4.1
             },
             "framing": {
-              "display": "0.2",
-              "pctile": 47,
-              "value": 0.2
+              "display": "0.4",
+              "pctile": 51,
+              "value": 0.4
             },
             "shadow_strike": {
               "display": "47.6",
@@ -73521,9 +73521,9 @@
               "value": 3.1
             },
             "framing": {
-              "display": "4.6",
-              "pctile": 79,
-              "value": 4.6
+              "display": "5.0",
+              "pctile": 81,
+              "value": 5.0
             },
             "shadow_strike": {
               "display": "47.2",
@@ -74569,7 +74569,7 @@
               "rate": 22.7,
               "lg": 24.5,
               "pctile": 31,
-              "rv": 0.0
+              "rv": -1.0
             },
             "14": {
               "rate": 57.4,
@@ -74593,7 +74593,7 @@
               "rate": 51.2,
               "lg": 54.4,
               "pctile": 26,
-              "rv": 0.0
+              "rv": 1.0
             },
             "19": {
               "rate": 21.3,
@@ -74639,9 +74639,9 @@
               "value": -0.4
             },
             "framing": {
-              "display": "-0.8",
-              "pctile": 42,
-              "value": -0.8
+              "display": "-1.3",
+              "pctile": 37,
+              "value": -1.3
             },
             "shadow_strike": {
               "display": "45.8",
@@ -76270,7 +76270,7 @@
               "rate": 50.7,
               "lg": 54.4,
               "pctile": 22,
-              "rv": -1.0
+              "rv": -2.0
             },
             "19": {
               "rate": 22.6,
@@ -77695,9 +77695,9 @@
               "value": -3.3
             },
             "framing": {
-              "display": "-1.0",
-              "pctile": 40,
-              "value": -1.0
+              "display": "-0.9",
+              "pctile": 42,
+              "value": -0.9
             },
             "shadow_strike": {
               "display": "46.9",
@@ -79353,9 +79353,9 @@
               "value": -0.5
             },
             "framing": {
-              "display": "0.0",
-              "pctile": 46,
-              "value": 0.0
+              "display": "0.1",
+              "pctile": 47,
+              "value": 0.1
             },
             "shadow_strike": {
               "display": "47.0",
@@ -83965,9 +83965,9 @@
               "value": 1.0
             },
             "framing": {
-              "display": "-0.2",
+              "display": "-0.1",
               "pctile": 44,
-              "value": -0.2
+              "value": -0.1
             },
             "shadow_strike": {
               "display": "47.4",
@@ -84787,9 +84787,9 @@
               "value": -2.0
             },
             "framing": {
-              "display": "-5.4",
-              "pctile": 12,
-              "value": -5.4
+              "display": "-5.2",
+              "pctile": 13,
+              "value": -5.2
             },
             "shadow_strike": {
               "display": "42.8",
@@ -85821,7 +85821,7 @@
               "rate": 53.7,
               "lg": 60.3,
               "pctile": 4,
-              "rv": -1.0
+              "rv": -2.0
             },
             "17": {
               "rate": 30.1,
@@ -91029,9 +91029,9 @@
               "value": 6.6
             },
             "framing": {
-              "display": "5.1",
-              "pctile": 83,
-              "value": 5.1
+              "display": "5.0",
+              "pctile": 79,
+              "value": 5.0
             },
             "shadow_strike": {
               "display": "48.8",
@@ -94489,7 +94489,7 @@
             },
             "framing": {
               "display": "-1.6",
-              "pctile": 35,
+              "pctile": 33,
               "value": -1.6
             },
             "shadow_strike": {
@@ -98595,9 +98595,9 @@
               "value": 0.5
             },
             "framing": {
-              "display": "1.6",
+              "display": "1.7",
               "pctile": 58,
-              "value": 1.6
+              "value": 1.7
             },
             "shadow_strike": {
               "display": "46.3",
@@ -99337,7 +99337,7 @@
               "rate": 51.9,
               "lg": 51.5,
               "pctile": 51,
-              "rv": 0.0
+              "rv": -1.0
             },
             "16": {
               "rate": 60.9,
@@ -103436,9 +103436,9 @@
               "value": 2.2
             },
             "framing": {
-              "display": "2.9",
-              "pctile": 69,
-              "value": 2.9
+              "display": "2.3",
+              "pctile": 63,
+              "value": 2.3
             },
             "shadow_strike": {
               "display": "48.8",
@@ -105107,13 +105107,13 @@
               "rate": 66.7,
               "lg": 60.3,
               "pctile": 94,
-              "rv": 3.0
+              "rv": 4.0
             },
             "17": {
               "rate": 27.4,
               "lg": 26.8,
               "pctile": 49,
-              "rv": 0.0
+              "rv": -1.0
             },
             "18": {
               "rate": 57.7,
@@ -106172,9 +106172,9 @@
               "value": -2.6
             },
             "framing": {
-              "display": "-1.7",
-              "pctile": 31,
-              "value": -1.7
+              "display": "-1.4",
+              "pctile": 35,
+              "value": -1.4
             },
             "shadow_strike": {
               "display": "45.1",
@@ -106875,7 +106875,7 @@
               "rate": 53.4,
               "lg": 51.5,
               "pctile": 63,
-              "rv": 0.0
+              "rv": 1.0
             },
             "16": {
               "rate": 59.5,
@@ -111382,9 +111382,9 @@
               "value": 2.1
             },
             "framing": {
-              "display": "1.4",
-              "pctile": 56,
-              "value": 1.4
+              "display": "1.1",
+              "pctile": 54,
+              "value": 1.1
             },
             "shadow_strike": {
               "display": "47.8",
@@ -112856,9 +112856,9 @@
               "value": -0.9
             },
             "framing": {
-              "display": "-10.7",
+              "display": "-10.9",
               "pctile": 1,
-              "value": -10.7
+              "value": -10.9
             },
             "shadow_strike": {
               "display": "42.9",
@@ -114130,7 +114130,7 @@
               "rate": 27.0,
               "lg": 26.8,
               "pctile": 46,
-              "rv": 1.0
+              "rv": 0.0
             },
             "18": {
               "rate": 54.0,
@@ -114595,9 +114595,9 @@
               "value": -1.4
             },
             "framing": {
-              "display": "-4.4",
-              "pctile": 17,
-              "value": -4.4
+              "display": "-4.3",
+              "pctile": 21,
+              "value": -4.3
             },
             "shadow_strike": {
               "display": "44.3",
@@ -116747,9 +116747,9 @@
               "value": 7.0
             },
             "framing": {
-              "display": "5.4",
-              "pctile": 85,
-              "value": 5.4
+              "display": "5.7",
+              "pctile": 88,
+              "value": 5.7
             },
             "shadow_strike": {
               "display": "47.3",
@@ -123688,9 +123688,9 @@
               "value": 2.9
             },
             "framing": {
-              "display": "1.3",
-              "pctile": 54,
-              "value": 1.3
+              "display": "1.7",
+              "pctile": 60,
+              "value": 1.7
             },
             "shadow_strike": {
               "display": "48.0",
@@ -124826,7 +124826,7 @@
               "rate": 63.3,
               "lg": 60.3,
               "pctile": 72,
-              "rv": 1.0
+              "rv": 0.0
             },
             "17": {
               "rate": 27.8,
@@ -129268,9 +129268,9 @@
               "value": -2.4
             },
             "framing": {
-              "display": "-1.8",
-              "pctile": 29,
-              "value": -1.8
+              "display": "-1.7",
+              "pctile": 31,
+              "value": -1.7
             },
             "shadow_strike": {
               "display": "47.3",
@@ -130827,7 +130827,7 @@
               "rate": 25.5,
               "lg": 23.9,
               "pctile": 72,
-              "rv": 1.0
+              "rv": 0.0
             }
           }
         }
@@ -134642,9 +134642,9 @@
               "value": 4.4
             },
             "framing": {
-              "display": "4.6",
-              "pctile": 78,
-              "value": 4.6
+              "display": "4.1",
+              "pctile": 76,
+              "value": 4.1
             },
             "shadow_strike": {
               "display": "47.5",
@@ -136559,7 +136559,7 @@
               "rate": 54.3,
               "lg": 54.4,
               "pctile": 51,
-              "rv": 0.0
+              "rv": -1.0
             },
             "19": {
               "rate": 25.0,
@@ -137730,7 +137730,7 @@
               "rate": 15.2,
               "lg": 19.5,
               "pctile": 13,
-              "rv": 0.0
+              "rv": -1.0
             },
             "12": {
               "rate": 54.0,
@@ -137772,7 +137772,7 @@
               "rate": 24.7,
               "lg": 23.9,
               "pctile": 60,
-              "rv": 0.0
+              "rv": 1.0
             }
           }
         }
@@ -142528,9 +142528,9 @@
               "value": 0.7
             },
             "framing": {
-              "display": "-1.3",
+              "display": "-1.2",
               "pctile": 38,
-              "value": -1.3
+              "value": -1.2
             },
             "shadow_strike": {
               "display": "45.6",
@@ -145974,9 +145974,9 @@
               "value": -1.9
             },
             "framing": {
-              "display": "-6.4",
-              "pctile": 8,
-              "value": -6.4
+              "display": "-6.5",
+              "pctile": 6,
+              "value": -6.5
             },
             "shadow_strike": {
               "display": "42.3",
@@ -146957,7 +146957,7 @@
               "rate": 16.8,
               "lg": 24.5,
               "pctile": 8,
-              "rv": 0.0
+              "rv": -1.0
             },
             "14": {
               "rate": 55.2,
@@ -146969,7 +146969,7 @@
               "rate": 55.2,
               "lg": 60.3,
               "pctile": 17,
-              "rv": 0.0
+              "rv": -1.0
             },
             "17": {
               "rate": 16.1,
@@ -146987,7 +146987,7 @@
               "rate": 22.0,
               "lg": 23.9,
               "pctile": 28,
-              "rv": -1.0
+              "rv": 0.0
             }
           }
         },
@@ -147775,9 +147775,9 @@
               "value": -3.1
             },
             "framing": {
-              "display": "-5.7",
-              "pctile": 10,
-              "value": -5.7
+              "display": "-5.8",
+              "pctile": 8,
+              "value": -5.8
             },
             "shadow_strike": {
               "display": "44.1",
@@ -148723,7 +148723,7 @@
               "rate": 20.7,
               "lg": 23.9,
               "pctile": 22,
-              "rv": 0.0
+              "rv": -1.0
             }
           }
         },
@@ -150985,9 +150985,9 @@
               "value": -5.4
             },
             "framing": {
-              "display": "-4.8",
-              "pctile": 15,
-              "value": -4.8
+              "display": "-4.4",
+              "pctile": 19,
+              "value": -4.4
             },
             "shadow_strike": {
               "display": "43.7",
@@ -152247,7 +152247,7 @@
               "rate": 42.9,
               "lg": 51.5,
               "pctile": 3,
-              "rv": -4.0
+              "rv": -3.0
             },
             "16": {
               "rate": 59.9,
@@ -159107,9 +159107,9 @@
               "value": 3.9
             },
             "framing": {
-              "display": "5.9",
-              "pctile": 88,
-              "value": 5.9
+              "display": "5.7",
+              "pctile": 87,
+              "value": 5.7
             },
             "shadow_strike": {
               "display": "48.7",
@@ -160013,7 +160013,7 @@
               "rate": 16.3,
               "lg": 19.5,
               "pctile": 26,
-              "rv": 0.0
+              "rv": -1.0
             },
             "12": {
               "rate": 64.0,
@@ -160421,9 +160421,9 @@
               "value": -4.4
             },
             "framing": {
-              "display": "-9.7",
+              "display": "-9.5",
               "pctile": 3,
-              "value": -9.7
+              "value": -9.5
             },
             "shadow_strike": {
               "display": "43.5",
@@ -162327,7 +162327,7 @@
               "rate": 22.6,
               "lg": 24.5,
               "pctile": 28,
-              "rv": -1.0
+              "rv": 0.0
             },
             "14": {
               "rate": 47.5,
@@ -163659,9 +163659,9 @@
               "value": 4.0
             },
             "framing": {
-              "display": "2.7",
-              "pctile": 67,
-              "value": 2.7
+              "display": "2.9",
+              "pctile": 71,
+              "value": 2.9
             },
             "shadow_strike": {
               "display": "47.7",
@@ -165448,7 +165448,7 @@
               "rate": 27.4,
               "lg": 24.5,
               "pctile": 68,
-              "rv": 0.0
+              "rv": 1.0
             },
             "14": {
               "rate": 47.2,
@@ -167432,9 +167432,9 @@
               "value": 0.7
             },
             "framing": {
-              "display": "-1.3",
-              "pctile": 37,
-              "value": -1.3
+              "display": "-1.2",
+              "pctile": 40,
+              "value": -1.2
             },
             "shadow_strike": {
               "display": "48.2",
@@ -168361,7 +168361,7 @@
               "rate": 57.7,
               "lg": 54.4,
               "pctile": 72,
-              "rv": 0.0
+              "rv": -1.0
             },
             "19": {
               "rate": 25.3,
@@ -168861,9 +168861,9 @@
               "value": -0.1
             },
             "framing": {
-              "display": "-6.5",
-              "pctile": 6,
-              "value": -6.5
+              "display": "-5.6",
+              "pctile": 10,
+              "value": -5.6
             },
             "shadow_strike": {
               "display": "46.2",
@@ -171421,7 +171421,7 @@
               "rate": 23.5,
               "lg": 23.9,
               "pctile": 46,
-              "rv": -1.0
+              "rv": 0.0
             }
           }
         }
@@ -172238,9 +172238,9 @@
               "value": -6.5
             },
             "framing": {
-              "display": "-4.2",
+              "display": "-4.1",
               "pctile": 22,
-              "value": -4.2
+              "value": -4.1
             },
             "shadow_strike": {
               "display": "43.5",
@@ -175959,6 +175959,6 @@
       "FanGraphs",
       "BP"
     ],
-    "generated_at": "2026-11-21 14:02:39 UTC"
+    "generated_at": "2026-11-22 14:02:36 UTC"
   }
 }
