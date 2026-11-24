@@ -1587,7 +1587,7 @@
     {
       "player_id": 663436,
       "name": "Davis Martin",
-      "team": "CWS",
+      "team": "COL",
       "ip": 145.4,
       "gs": 28,
       "g": 29,
@@ -1657,7 +1657,7 @@
     {
       "player_id": 622491,
       "name": "Luis Castillo",
-      "team": "CWS",
+      "team": "COL",
       "ip": 132.0,
       "gs": 23,
       "g": 29,
@@ -2961,7 +2961,7 @@
     {
       "player_id": 681402,
       "name": "Gus Varland",
-      "team": "WSH",
+      "team": "NYM",
       "ip": 33.4,
       "gs": 0,
       "g": 34,
@@ -2975,7 +2975,7 @@
     {
       "player_id": 670103,
       "name": "Raymond Burgos",
-      "team": "BOS",
+      "team": "ATH",
       "ip": 22.0,
       "gs": 0,
       "g": 9,
@@ -3087,7 +3087,7 @@
     {
       "player_id": 623465,
       "name": "Evan Phillips",
-      "team": "LAD",
+      "team": "ATL",
       "ip": 26.0,
       "gs": 0,
       "g": 31,
@@ -3325,7 +3325,7 @@
     {
       "player_id": 573204,
       "name": "Caleb Thielbar",
-      "team": "CHC",
+      "team": "KC",
       "ip": 49.4,
       "gs": 0,
       "g": 58,
@@ -4277,7 +4277,7 @@
     {
       "player_id": 680730,
       "name": "Mitchell Parker",
-      "team": "WSH",
+      "team": "ATL",
       "ip": 40.9,
       "gs": 0,
       "g": 22,
@@ -5033,7 +5033,7 @@
     {
       "player_id": 676755,
       "name": "Isaac Mattson",
-      "team": "PIT",
+      "team": "SEA",
       "ip": 38.0,
       "gs": 0,
       "g": 38,
@@ -5047,7 +5047,7 @@
     {
       "player_id": 679358,
       "name": "Eric Orze",
-      "team": "MIN",
+      "team": "CHC",
       "ip": 42.4,
       "gs": 0,
       "g": 36,
@@ -5061,7 +5061,7 @@
     {
       "player_id": 687606,
       "name": "Paxton Schultz",
-      "team": "WSH",
+      "team": "CIN",
       "ip": 32.9,
       "gs": 1,
       "g": 27,
@@ -5537,7 +5537,7 @@
     {
       "player_id": 666808,
       "name": "Camilo Doval",
-      "team": "PIT",
+      "team": "SF",
       "ip": 61.0,
       "gs": 0,
       "g": 66,
@@ -6307,7 +6307,7 @@
     {
       "player_id": 680802,
       "name": "Ryan Weiss",
-      "team": "HOU",
+      "team": "SD",
       "ip": 26.0,
       "gs": 2,
       "g": 9,
@@ -6349,7 +6349,7 @@
     {
       "player_id": 665665,
       "name": "Reiver Sanmartin",
-      "team": "SF",
+      "team": "WSH",
       "ip": 22.0,
       "gs": 0,
       "g": 24,
@@ -7119,7 +7119,7 @@
     {
       "player_id": 676254,
       "name": "Ryan Walker",
-      "team": "SF",
+      "team": "MIL",
       "ip": 32.9,
       "gs": 0,
       "g": 33,
@@ -7527,6 +7527,6 @@
     "min_ip": 20,
     "role_method": "starter_pct_gt_50",
     "total_pitches_analyzed": 716792,
-    "generated_at": "2026-11-23 15:01:39 UTC"
+    "generated_at": "2026-11-24 14:59:44 UTC"
   }
 }
