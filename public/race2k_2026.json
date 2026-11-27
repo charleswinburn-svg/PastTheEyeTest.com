@@ -173,7 +173,7 @@
     {
       "player_id": 663460,
       "name": "Kris Bubic",
-      "team": "CLE",
+      "team": "LAD",
       "ip": 54.4,
       "gs": 9,
       "g": 14,
@@ -215,7 +215,7 @@
     {
       "player_id": 807743,
       "name": "Sean Sullivan",
-      "team": "CWS",
+      "team": "COL",
       "ip": 22.0,
       "gs": 5,
       "g": 5,
@@ -537,7 +537,7 @@
     {
       "player_id": 682243,
       "name": "Bryce Miller",
-      "team": "KC",
+      "team": "SEA",
       "ip": 117.4,
       "gs": 21,
       "g": 22,
@@ -1167,7 +1167,7 @@
     {
       "player_id": 543243,
       "name": "Sonny Gray",
-      "team": "MIN",
+      "team": "BOS",
       "ip": 167.4,
       "gs": 29,
       "g": 29,
@@ -1363,7 +1363,7 @@
     {
       "player_id": 669160,
       "name": "Dustin May",
-      "team": "CWS",
+      "team": "MIL",
       "ip": 144.4,
       "gs": 30,
       "g": 31,
@@ -2539,7 +2539,7 @@
     {
       "player_id": 642547,
       "name": "Freddy Peralta",
-      "team": "BAL",
+      "team": "TB",
       "ip": 168.9,
       "gs": 32,
       "g": 32,
@@ -2975,7 +2975,7 @@
     {
       "player_id": 670103,
       "name": "Raymond Burgos",
-      "team": "ATH",
+      "team": "BOS",
       "ip": 22.0,
       "gs": 0,
       "g": 9,
@@ -3087,7 +3087,7 @@
     {
       "player_id": 623465,
       "name": "Evan Phillips",
-      "team": "ATL",
+      "team": "LAD",
       "ip": 26.0,
       "gs": 0,
       "g": 31,
@@ -3325,7 +3325,7 @@
     {
       "player_id": 573204,
       "name": "Caleb Thielbar",
-      "team": "KC",
+      "team": "CHC",
       "ip": 49.4,
       "gs": 0,
       "g": 58,
@@ -3717,7 +3717,7 @@
     {
       "player_id": 608718,
       "name": "Brent Suter",
-      "team": "NYY",
+      "team": "ATL",
       "ip": 90.4,
       "gs": 4,
       "g": 54,
@@ -4067,7 +4067,7 @@
     {
       "player_id": 641941,
       "name": "Emilio Pag\u00e1n",
-      "team": "DET",
+      "team": "CIN",
       "ip": 42.4,
       "gs": 0,
       "g": 45,
@@ -4165,7 +4165,7 @@
     {
       "player_id": 678606,
       "name": "Jos\u00e9 A. Ferrer",
-      "team": "KC",
+      "team": "SEA",
       "ip": 66.9,
       "gs": 0,
       "g": 73,
@@ -4277,7 +4277,7 @@
     {
       "player_id": 680730,
       "name": "Mitchell Parker",
-      "team": "ATL",
+      "team": "WSH",
       "ip": 40.9,
       "gs": 0,
       "g": 22,
@@ -5033,7 +5033,7 @@
     {
       "player_id": 676755,
       "name": "Isaac Mattson",
-      "team": "SEA",
+      "team": "PIT",
       "ip": 38.0,
       "gs": 0,
       "g": 38,
@@ -6349,7 +6349,7 @@
     {
       "player_id": 665665,
       "name": "Reiver Sanmartin",
-      "team": "WSH",
+      "team": "SF",
       "ip": 22.0,
       "gs": 0,
       "g": 24,
@@ -6391,7 +6391,7 @@
     {
       "player_id": 642528,
       "name": "Jonathan Lo\u00e1isiga",
-      "team": "NYY",
+      "team": "AZ",
       "ip": 67.0,
       "gs": 0,
       "g": 67,
@@ -7527,6 +7527,6 @@
     "min_ip": 20,
     "role_method": "starter_pct_gt_50",
     "total_pitches_analyzed": 716792,
-    "generated_at": "2026-11-26 14:58:25 UTC"
+    "generated_at": "2026-11-27 14:59:04 UTC"
   }
 }
